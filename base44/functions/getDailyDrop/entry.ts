@@ -253,25 +253,31 @@ Deno.serve(async (req) => {
     // ── 2. Generate a fresh daily drop ────────────────────────────────────
     console.log(`[getDailyDrop] Generating fresh drop for ${user.email} on ${dropDate}`);
 
-    // Track ALL jobs shown to user in last 7 days for deduplication
+    // Track ALL jobs shown to user in last 14 days for deduplication (extended from 7)
     const seenJobs = new Map(); // companyKey -> Set of role keys
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const seenCompanies = new Map(); // companyKey -> last seen timestamp
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
     
     try {
-      const recentDrops = await base44.entities.UserDailyDrop.filter({ user_id: user.id }, '-created_date', 50);
+      const recentDrops = await base44.entities.UserDailyDrop.filter({ user_id: user.id }, '-created_date', 100);
       for (const d of recentDrops || []) {
         const dropDate = new Date(d.drop_date);
-        if (dropDate < sevenDaysAgo) continue; // Skip drops older than 7 days
+        if (dropDate < fourteenDaysAgo) continue; // Skip drops older than 14 days
         
         for (const s of d.slots || []) {
           const companyKey = (s.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           const roleKey = (s.role || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           if (!seenJobs.has(companyKey)) seenJobs.set(companyKey, new Set());
           seenJobs.get(companyKey).add(roleKey);
+          
+          // Track company-level cooldown (14 days)
+          if (!seenCompanies.has(companyKey)) {
+            seenCompanies.set(companyKey, dropDate.getTime());
+          }
         }
       }
-      console.log('[getDailyDrop] Dedup: %d companies seen in last 7 days', seenJobs.size);
+      console.log('[getDailyDrop] Dedup: %d companies seen in last 14 days', seenJobs.size);
     } catch (e) {
       console.warn('[getDailyDrop] Could not load recent drops for dedup:', e.message);
     }
@@ -281,6 +287,12 @@ Deno.serve(async (req) => {
       const roleKey = (role || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const roles = seenJobs.get(companyKey);
       return roles ? roles.has(roleKey) : false;
+    };
+    
+    // Check if company is in cooldown (seen in last 14 days)
+    const isCompanyInCooldown = (company) => {
+      const companyKey = (company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return seenCompanies.has(companyKey);
     };
 
     // Clear any stale drops for today (force refresh / duplicates) so the cache stays clean
@@ -309,6 +321,8 @@ Deno.serve(async (req) => {
     console.log(`[getDailyDrop] Fetching FRESH jobs (24h only): role=${role}, location=${location}, seeking=${seeking}`);
     
     let freshJobs = [];
+    
+    // Primary: Fantastic Jobs API
     if (!fantasticApiKey) {
       console.warn('[getDailyDrop] No Fantastic API key');
     } else {
@@ -324,6 +338,36 @@ Deno.serve(async (req) => {
         console.log('[getDailyDrop] Fresh jobs result: %d companies', freshJobs?.length || 0);
       } catch (e) {
         console.error('[getDailyDrop] Fantastic Jobs fetch failed:', e.message);
+      }
+    }
+    
+    // Secondary: Coresignal if Fantastic returns low results (< 50% of daily limit)
+    if ((freshJobs?.length || 0) < dailyLimit * 0.5) {
+      console.log('[getDailyDrop] Fantastic returned low results (%d), fetching from Coresignal...', freshJobs?.length || 0);
+      const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
+      if (coresignalApiKey) {
+        try {
+          const coresignalJobs = await fetchCoresignalJobs({ 
+            role, 
+            location, 
+            seeking, 
+            apiKey: coresignalApiKey, 
+            maxResults: dailyLimit 
+          });
+          console.log('[getDailyDrop] Coresignal returned %d jobs', coresignalJobs?.length || 0);
+          // Merge and dedupe by company+role
+          const existingKeys = new Set((freshJobs || []).map(j => `${j.name}||${j.job_title}`));
+          for (const job of coresignalJobs || []) {
+            const key = `${job.name}||${job.job_title}`;
+            if (!existingKeys.has(key)) {
+              freshJobs.push(job);
+              existingKeys.add(key);
+            }
+          }
+          console.log('[getDailyDrop] Merged total: %d jobs', freshJobs?.length || 0);
+        } catch (e) {
+          console.error('[getDailyDrop] Coresignal fetch failed:', e.message);
+        }
       }
     }
 
@@ -393,9 +437,13 @@ Deno.serve(async (req) => {
     // Assemble final slots — merged results from both sources
     const slots = allLiveSlots.slice(0, dailyLimit).map(enrichWithAlumni);
 
+    // Add 10% exploration slots (jobs outside exact filters for variety)
+    const explorationCount = Math.floor(dailyLimit * 0.1);
+    const hasExploration = explorationCount > 0 && slots.length >= explorationCount;
+    
     // Ensure at least 10 slots — pad from fallback if needed
     if (slots.length < Math.min(dailyLimit, 10)) {
-      // Expanded fallback pool with 40+ companies to reduce repeats
+      // MASSIVELY expanded fallback pool with 150+ companies across industries
       const internFallbackSlots = [
         { company: 'Deloitte', role: 'Summer Scholar Intern', jobDescription: 'Consulting and advisory internship program across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Google', role: 'STEP Intern', jobDescription: 'Summer internship program for first and second-year students.', jobSource: 'careers.google.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
@@ -417,38 +465,143 @@ Deno.serve(async (req) => {
         { company: 'L\'Oréal', role: 'Marketing Intern', jobDescription: 'Beauty and cosmetics marketing internship.', jobSource: 'loreal.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Unilever', role: 'Supply Chain Intern', jobDescription: 'Operations and supply chain internship.', jobSource: 'unilever.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Coca-Cola', role: 'Finance Intern', jobDescription: 'Corporate finance internship.', jobSource: 'coca-colacompany.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Tech startups & mid-size
+        { company: 'Ramp', role: 'Finance Intern', jobDescription: 'Fintech finance internship.', jobSource: 'ramp.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Plaid', role: 'Engineering Intern', jobDescription: 'Financial API engineering internship.', jobSource: 'plaid.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Robinhood', role: 'Product Intern', jobDescription: 'Investment app product internship.', jobSource: 'robinhood.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Coinbase', role: 'Crypto Intern', jobDescription: 'Cryptocurrency platform internship.', jobSource: 'coinbase.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Instacart', role: 'Operations Intern', jobDescription: 'Grocery delivery operations internship.', jobSource: 'instacart.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'DoorDash', role: 'Logistics Intern', jobDescription: 'Food delivery logistics internship.', jobSource: 'doordash.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Shopify', role: 'Commerce Intern', jobDescription: 'E-commerce platform internship.', jobSource: 'shopify.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Square', role: 'Payments Intern', jobDescription: 'Payment processing internship.', jobSource: 'squareup.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Affirm', role: 'Data Intern', jobDescription: 'Buy-now-pay-later data internship.', jobSource: 'affirm.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Chime', role: 'Banking Intern', jobDescription: 'Digital banking internship.', jobSource: 'chime.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Notion', role: 'Product Design Intern', jobDescription: 'Productivity app design internship.', jobSource: 'notion.so/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Figma', role: 'Design Intern', jobDescription: 'Design tool product internship.', jobSource: 'figma.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Canva', role: 'Marketing Intern', jobDescription: 'Design platform marketing internship.', jobSource: 'canva.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Dropbox', role: 'Cloud Intern', jobDescription: 'Cloud storage engineering internship.', jobSource: 'dropbox.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Box', role: 'Enterprise Intern', jobDescription: 'Enterprise cloud internship.', jobSource: 'box.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Slack', role: 'Communications Intern', jobDescription: 'Workplace communications internship.', jobSource: 'slack.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Zoom', role: 'Video Engineering Intern', jobDescription: 'Video communications engineering internship.', jobSource: 'zoom.us/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Twilio', role: 'API Intern', jobDescription: 'Communications API internship.', jobSource: 'twilio.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'MongoDB', role: 'Database Intern', jobDescription: 'Database technology internship.', jobSource: 'mongodb.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Snowflake', role: 'Data Engineering Intern', jobDescription: 'Cloud data platform internship.', jobSource: 'snowflake.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Databricks', role: 'Analytics Intern', jobDescription: 'Data analytics platform internship.', jobSource: 'databricks.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Palantir', role: 'Software Intern', jobDescription: 'Big data software internship.', jobSource: 'palantir.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Additional finance
+        { company: 'Charles Schwab', role: 'Investment Intern', jobDescription: 'Brokerage services internship.', jobSource: 'careers.schwab.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Fidelity Investments', role: 'Wealth Intern', jobDescription: 'Wealth management internship.', jobSource: 'fidelity.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'T. Rowe Price', role: 'Asset Management Intern', jobDescription: 'Asset management internship.', jobSource: 'troweprice.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Capital One', role: 'Tech Intern', jobDescription: 'Banking technology internship.', jobSource: 'capitalone.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'American Express', role: 'Finance Intern', jobDescription: 'Financial services internship.', jobSource: 'americanexpress.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Visa', role: 'Payments Intern', jobDescription: 'Payment technology internship.', jobSource: 'visa.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Mastercard', role: 'Product Intern', jobDescription: 'Payment solutions product internship.', jobSource: 'mastercard.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Additional healthcare
+        { company: 'UnitedHealth Group', role: 'Healthcare Intern', jobDescription: 'Health insurance internship.', jobSource: 'unitedhealthgroup.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Anthem', role: 'Data Intern', jobDescription: 'Healthcare data internship.', jobSource: 'anthem.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Cigna', role: 'Operations Intern', jobDescription: 'Health services operations internship.', jobSource: 'cigna.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Humana', role: 'Marketing Intern', jobDescription: 'Healthcare marketing internship.', jobSource: 'humana.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'CVS Health', role: 'Retail Intern', jobDescription: 'Healthcare retail internship.', jobSource: 'jobs.cvshealth.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Walgreens', role: 'Pharmacy Intern', jobDescription: 'Pharmacy operations internship.', jobSource: 'walgreens.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Additional retail
+        { company: 'Home Depot', role: 'Supply Chain Intern', jobDescription: 'Home improvement retail internship.', jobSource: 'homedepot.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Lowe\'s', role: 'Merchandising Intern', jobDescription: 'Home improvement merchandising internship.', jobSource: 'lowes.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Best Buy', role: 'Technology Intern', jobDescription: 'Electronics retail technology internship.', jobSource: 'bestbuy.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Macy\'s', role: 'Fashion Intern', jobDescription: 'Department store fashion internship.', jobSource: 'macysinc.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Nordstrom', role: 'Retail Intern', jobDescription: 'Luxury retail internship.', jobSource: 'nordstrom.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Additional industrial
+        { company: 'Caterpillar', role: 'Engineering Intern', jobDescription: 'Heavy machinery engineering internship.', jobSource: 'caterpillar.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Deere & Company', role: 'Agriculture Intern', jobDescription: 'Agricultural equipment internship.', jobSource: 'deere.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Ford', role: 'Automotive Intern', jobDescription: 'Automotive engineering internship.', jobSource: 'corporate.ford.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'General Motors', role: 'Manufacturing Intern', jobDescription: 'Automotive manufacturing internship.', jobSource: 'careers.gm.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Rivian', role: 'EV Intern', jobDescription: 'Electric vehicle engineering internship.', jobSource: 'rivian.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Lucid Motors', role: 'Design Intern', jobDescription: 'Luxury EV design internship.', jobSource: 'lucidmotors.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
       ];
       const fulltimeFallbackSlots = [
-        { company: 'Deloitte', role: 'Business Analyst', jobDescription: 'Strategy and advisory associates across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Tech
         { company: 'Google', role: 'Associate Product Manager', jobDescription: 'APM program for new graduates across product and engineering.', jobSource: 'careers.google.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Ramp', role: 'Finance & Strategy Analyst', jobDescription: 'Series D fintech — real ownership from day one.', jobSource: 'ramp.com/careers', jobSourceCategory: 'B', companyTier: 3, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'JPMorgan Chase', role: 'Analyst Development Program', jobDescription: 'Rotational analyst program across banking, markets, and operations.', jobSource: 'careers.jpmorgan.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Salesforce', role: 'Associate Solution Engineer', jobDescription: 'New grad program blending tech, business, and customer strategy.', jobSource: 'salesforce.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Nike', role: 'Marketing Associate', jobDescription: 'Brand and digital marketing roles for early-career talent.', jobSource: 'jobs.nike.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Accenture', role: 'Consulting Analyst', jobDescription: 'Entry-level consulting across strategy, tech, and operations.', jobSource: 'accenture.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Spotify', role: 'Associate, Strategy & Operations', jobDescription: 'Early-career roles in music-tech strategy and analytics.', jobSource: 'lifeatspotify.com', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Stripe', role: 'Business Operations Analyst', jobDescription: 'High-growth fintech — analytical roles for new grads.', jobSource: 'stripe.com/jobs', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Procter & Gamble', role: 'Brand Management Associate', jobDescription: 'Classic CPG brand-building track with real P&L ownership.', jobSource: 'pgcareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Microsoft', role: 'Software Engineer', jobDescription: 'Full-time software engineering roles for new graduates.', jobSource: 'careers.microsoft.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Amazon', role: 'Area Manager', jobDescription: 'Operations leadership program for new graduates.', jobSource: 'amazon.jobs', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Meta', role: 'Data Analyst', jobDescription: 'Entry-level data analytics roles.', jobSource: 'metacareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Apple', role: 'Hardware Engineer', jobDescription: 'Hardware engineering roles for new graduates.', jobSource: 'apple.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'Goldman Sachs', role: 'Investment Banking Analyst', jobDescription: 'Full-time analyst program in investment banking.', jobSource: 'goldmansachs.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Meta', role: 'Data Analyst', jobDescription: 'Entry-level data analytics roles.', jobSource: 'metacareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Amazon', role: 'Area Manager', jobDescription: 'Operations leadership program for new graduates.', jobSource: 'amazon.jobs', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Salesforce', role: 'Associate Solution Engineer', jobDescription: 'New grad program blending tech, business, and customer strategy.', jobSource: 'salesforce.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Adobe', role: 'Product Manager', jobDescription: 'Product management role for tech-savvy graduates.', jobSource: 'adobe.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Oracle', role: 'Cloud Engineer', jobDescription: 'Cloud infrastructure engineering role.', jobSource: 'oracle.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'IBM', role: 'Research Scientist', jobDescription: 'AI and research position.', jobSource: 'ibm.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Intel', role: 'Hardware Engineer', jobDescription: 'Semiconductor and hardware engineering role.', jobSource: 'intel.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Nvidia', role: 'GPU Engineer', jobDescription: 'GPU and AI computing role.', jobSource: 'nvidia.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Cisco', role: 'Network Engineer', jobDescription: 'Networking and infrastructure role.', jobSource: 'cisco.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Dell', role: 'Technology Analyst', jobDescription: 'Technology and business role.', jobSource: 'dell.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'HP', role: 'Product Designer', jobDescription: 'Product design and engineering role.', jobSource: 'hp.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Snap Inc', role: 'Software Engineer', jobDescription: 'Social media tech role.', jobSource: 'snap.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Pinterest', role: 'Data Scientist', jobDescription: 'Data and analytics role.', jobSource: 'pinterest.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'LinkedIn', role: 'Product Manager', jobDescription: 'Professional network product role.', jobSource: 'linkedin.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Uber', role: 'Operations Manager', jobDescription: 'Ride-sharing operations role.', jobSource: 'uber.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Lyft', role: 'Marketing Manager', jobDescription: 'Transportation marketing role.', jobSource: 'lyft.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Airbnb', role: 'Community Manager', jobDescription: 'Hospitality and community role.', jobSource: 'airbnb.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Stripe', role: 'Business Operations Analyst', jobDescription: 'High-growth fintech — analytical roles for new grads.', jobSource: 'stripe.com/jobs', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Square', role: 'Product Manager', jobDescription: 'Payments product role.', jobSource: 'squareup.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'PayPal', role: 'Engineer', jobDescription: 'Digital payments engineering role.', jobSource: 'paypal.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Zoom', role: 'Software Engineer', jobDescription: 'Video communications software role.', jobSource: 'zoom.us/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Consulting
+        { company: 'Deloitte', role: 'Business Analyst', jobDescription: 'Strategy and advisory associates across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'McKinsey', role: 'Business Analyst', jobDescription: 'Entry-level consulting position.', jobSource: 'mckinsey.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Boston Consulting Group', role: 'Associate', jobDescription: 'Strategy consulting associate role.', jobSource: 'bcg.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Bain', role: 'Associate Consultant', jobDescription: 'Entry-level consulting position.', jobSource: 'bain.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Accenture', role: 'Consulting Analyst', jobDescription: 'Entry-level consulting across strategy, tech, and operations.', jobSource: 'accenture.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'PwC', role: 'Associate', jobDescription: 'Audit and assurance associate role.', jobSource: 'pwc.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'EY', role: 'Staff Consultant', jobDescription: 'Business consulting entry-level role.', jobSource: 'ey.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'KPMG', role: 'Associate Auditor', jobDescription: 'Audit and tax associate position.', jobSource: 'kpmg.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
-        { company: 'L\'Oréal', role: 'Brand Manager', jobDescription: 'Marketing and brand management role.', jobSource: 'loreal.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Oliver Wyman', role: 'Consultant', jobDescription: 'Strategy consulting role.', jobSource: 'oliverwyman.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'A.T. Kearney', role: 'Business Analyst', jobDescription: 'Management consulting role.', jobSource: 'kearney.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Finance
+        { company: 'Goldman Sachs', role: 'Investment Banking Analyst', jobDescription: 'Full-time analyst program in investment banking.', jobSource: 'goldmansachs.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'JPMorgan Chase', role: 'Analyst Development Program', jobDescription: 'Rotational analyst program across banking, markets, and operations.', jobSource: 'careers.jpmorgan.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Morgan Stanley', role: 'Wealth Management Analyst', jobDescription: 'Wealth management analyst role.', jobSource: 'morganstanley.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Bank of America', role: 'Investment Banking Analyst', jobDescription: 'Investment banking analyst role.', jobSource: 'bankofamerica.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Citigroup', role: 'Markets Analyst', jobDescription: 'Capital markets analyst role.', jobSource: 'citi.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Wells Fargo', role: 'Finance Analyst', jobDescription: 'Corporate finance analyst role.', jobSource: 'wellsfargo.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'BlackRock', role: 'Investment Management Analyst', jobDescription: 'Asset management analyst role.', jobSource: 'blackrock.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Vanguard', role: 'Investment Analyst', jobDescription: 'Investment analyst role.', jobSource: 'vanguard.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Fidelity', role: 'Financial Analyst', jobDescription: 'Financial services analyst role.', jobSource: 'fidelity.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'State Street', role: 'Investment Analyst', jobDescription: 'Investment services analyst role.', jobSource: 'statestreet.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // CPG/Retail
+        { company: 'Procter & Gamble', role: 'Brand Management Associate', jobDescription: 'Classic CPG brand-building track with real P&L ownership.', jobSource: 'pgcareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Unilever', role: 'Supply Chain Manager', jobDescription: 'Operations and supply chain management.', jobSource: 'unilever.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Coca-Cola', role: 'Finance Analyst', jobDescription: 'Corporate finance analyst role.', jobSource: 'coca-colacompany.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'PepsiCo', role: 'Marketing Manager', jobDescription: 'Brand marketing and strategy role.', jobSource: 'pepsico.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Nestlé', role: 'Management Trainee', jobDescription: 'Rotational leadership development program.', jobSource: 'nestle.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Johnson & Johnson', role: 'R&D Scientist', jobDescription: 'Research and development scientist role.', jobSource: 'careers.jnj.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'L\'Oréal', role: 'Brand Manager', jobDescription: 'Marketing and brand management role.', jobSource: 'loreal.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Nike', role: 'Marketing Associate', jobDescription: 'Brand and digital marketing roles for early-career talent.', jobSource: 'jobs.nike.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Adidas', role: 'Product Manager', jobDescription: 'Sportswear product role.', jobSource: 'adidas.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Target', role: 'Merchandising Manager', jobDescription: 'Retail merchandising role.', jobSource: 'target.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Walmart', role: 'Operations Manager', jobDescription: 'Retail operations role.', jobSource: 'walmart.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Costco', role: 'Business Manager', jobDescription: 'Warehouse retail business role.', jobSource: 'costco.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Healthcare/Pharma
         { company: 'Pfizer', role: 'Sales Representative', jobDescription: 'Pharmaceutical sales role.', jobSource: 'pfizer.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Merck', role: 'Clinical Researcher', jobDescription: 'Clinical research role.', jobSource: 'merck.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'AbbVie', role: 'Marketing Manager', jobDescription: 'Pharma marketing role.', jobSource: 'abbvie.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Roche', role: 'Diagnostics Manager', jobDescription: 'Medical diagnostics role.', jobSource: 'roche.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Novartis', role: 'Data Scientist', jobDescription: 'Healthcare data science role.', jobSource: 'novartis.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Media/Entertainment
+        { company: 'Disney', role: 'Marketing Manager', jobDescription: 'Entertainment marketing role.', jobSource: 'jobs.disneycareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Netflix', role: 'Content Manager', jobDescription: 'Streaming content role.', jobSource: 'jobs.netflix.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Warner Bros', role: 'Production Manager', jobDescription: 'Film production role.', jobSource: 'warnerbros.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'NBCUniversal', role: 'Media Manager', jobDescription: 'Broadcasting media role.', jobSource: 'nbcunicareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Spotify', role: 'Associate, Strategy & Operations', jobDescription: 'Early-career roles in music-tech strategy and analytics.', jobSource: 'lifeatspotify.com', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        // Energy/Industrial
         { company: 'Tesla', role: 'Production Engineer', jobDescription: 'Manufacturing engineering role.', jobSource: 'tesla.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'SpaceX', role: 'Avionics Engineer', jobDescription: 'Aerospace engineering role.', jobSource: 'spacex.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Boeing', role: 'Engineer', jobDescription: 'Aerospace engineering role.', jobSource: 'boeing.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Lockheed Martin', role: 'Systems Engineer', jobDescription: 'Defense systems engineering role.', jobSource: 'lockheedmartin.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'General Electric', role: 'Technology Analyst', jobDescription: 'Industrial technology role.', jobSource: 'ge.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Siemens', role: 'Automation Engineer', jobDescription: 'Industrial automation role.', jobSource: 'siemens.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: '3M', role: 'Innovation Manager', jobDescription: 'Product innovation role.', jobSource: '3m.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Honeywell', role: 'Engineer', jobDescription: 'Aerospace and building tech role.', jobSource: 'honeywell.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Ramp', role: 'Finance & Strategy Analyst', jobDescription: 'Series D fintech — real ownership from day one.', jobSource: 'ramp.com/careers', jobSourceCategory: 'B', companyTier: 3, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Rivian', role: 'EV Engineer', jobDescription: 'Electric vehicle engineering role.', jobSource: 'rivian.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Lucid Motors', role: 'Designer', jobDescription: 'Luxury EV design role.', jobSource: 'lucidmotors.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
       ];
       // Match the student's seeking intent — internship seekers must NEVER see full-time fallbacks
       const fallbackSlots = seeking === 'internship' ? internFallbackSlots
