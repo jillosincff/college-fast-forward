@@ -14,6 +14,9 @@ import PipelineKanbanModal from './PipelineKanbanModal';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import EditGoalsModal from './EditGoalsModal';
+import DashboardBottomNav from './DashboardBottomNav';
+import ToolsTab from './ToolsTab';
+import ProgressTab from './ProgressTab';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -189,6 +192,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const [warmCompanyNames, setWarmCompanyNames] = useState([]);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [showKanbanModal, setShowKanbanModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
   const navRef = useRef(null);
 
   // Listen for goals modal open event from child components
@@ -263,6 +267,23 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
       <PremiumNav user={user} onEditGoals={() => setShowGoalsModal(true)} navRef={navRef} />
 
+      {/* Tab Navigation */}
+      <DashboardBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Tools Tab */}
+      {activeTab === 'tools' && (
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }}>
+          <ToolsTab user={user} onUpgrade={() => {}} />
+        </div>
+      )}
+
+      {/* Progress Tab */}
+      {activeTab === 'progress' && (
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }}>
+          <ProgressTab user={user} onUpgrade={() => {}} />
+        </div>
+      )}
+
       {/* Mobile-first responsive container */}
       <style>{`
         @media (max-width: 768px) {
@@ -286,6 +307,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         }
       `}</style>
 
+      {/* ── Dashboard Tab Content ── */}
+      {activeTab === 'dashboard' && (
+      <>
       {/* ── Premium Welcome Banner ── */}
       <div style={{
         background: `linear-gradient(135deg, #0A0A0A 0%, #0d1a3a 50%, ${t.primary}33 100%)`,
@@ -388,6 +412,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav user={user} onOpenPipeline={() => setShowKanbanModal(true)} />
+
+      </>
+      )}
 
       {/* Pipeline Kanban Modal */}
       {showKanbanModal && (
