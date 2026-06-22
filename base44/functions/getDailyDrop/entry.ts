@@ -31,6 +31,22 @@ function buildLocationQuery(location) {
   return null;
 }
 
+function checkIsFastIQ(user) {
+  if (!user) return false;
+  if (
+    user.subscription_status === 'active' ||
+    user.membership_tier === 'fastiq' ||
+    user.is_founding_member === true
+  ) return true;
+  if (
+    user.trial_status === 'active' ||
+    user.fastiq_trial_active === true ||
+    user.membership_tier === 'fastiq_trial'
+  ) return true;
+  if (user.fastiq_setup_complete && user.trial_status !== 'expired') return true;
+  return false;
+}
+
 function buildTitleQuery(role, seeking) {
   const INTERN_TERMS = `intern | internship | co-op`;
   const ENTRY_TERMS = `junior | coordinator | 'entry level' | graduate | trainee | 'new grad' | analyst | assistant`;
@@ -55,7 +71,7 @@ function jobMatchesLocation(job, city, stateName) {
   return false;
 }
 
-async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey }) {
+async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, maxCompanies = 15 }) {
   const NORMALIZE_SIZE = { startup:'startup', mid:'mid', midmarket:'mid', large:'large', enterprise:'large' };
   const sizeList = (Array.isArray(companySizes) ? companySizes : (companySizes ? [companySizes] : []))
     .map(s => NORMALIZE_SIZE[String(s).toLowerCase()]).filter(Boolean);
@@ -112,7 +128,7 @@ async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey }) 
       salary_range: null,
       posted_date: job.date_posted || null,
     });
-    if (companies.length >= 5) break;
+    if (companies.length >= maxCompanies) break;
   }
   return companies;
 }
@@ -152,6 +168,10 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const dropDate = getDailyDropDate();
 
+    // ── Daily limit: free = 15, premium = 30 ──────────────────────────────
+    const isPremium = checkIsFastIQ(user);
+    const dailyLimit = isPremium ? 30 : 15;
+
     // Force refresh if requested via query param
     const forceRefresh = body.force_refresh === true;
 
@@ -172,6 +192,8 @@ Deno.serve(async (req) => {
           drop_date: dropDate,
           drop_id: drop.id,
           from_cache: true,
+          is_premium: isPremium,
+          daily_limit: dailyLimit,
         });
       }
     } else {
@@ -227,7 +249,7 @@ Deno.serve(async (req) => {
       try {
         const role = targetRole || `${targetIndustries[0]} analyst`;
         const companies = await Promise.race([
-          fetchLiveJobs({ role, location, companySizes: sizeArray, seeking, apiKey }),
+          fetchLiveJobs({ role, location, companySizes: sizeArray, seeking, apiKey, maxCompanies: dailyLimit }),
           new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 25000)),
         ]);
         const freshFirst = [...companies.filter(c => !isSeen(c.name)), ...companies.filter(c => isSeen(c.name))];
@@ -279,11 +301,11 @@ Deno.serve(async (req) => {
       return { ...slot, alumniCount: count, hasAlumni: count > 0 };
     };
 
-    // Assemble final 5 slots — live results first, no curated sub-function needed
-    const slots = liveSlots.slice(0, 15).map(enrichWithAlumni);
+    // Assemble final slots — live results first, no curated sub-function needed
+    const slots = liveSlots.slice(0, dailyLimit).map(enrichWithAlumni);
 
-    // Ensure at least 3 slots — pad from fallback if needed
-    if (slots.length < 10) {
+    // Ensure at least 10 slots — pad from fallback if needed
+    if (slots.length < Math.min(dailyLimit, 10)) {
       const internFallbackSlots = [
         { company: 'Deloitte', role: 'Summer Scholar Intern', jobDescription: 'Consulting and advisory internship program across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Google', role: 'STEP Intern', jobDescription: 'Summer internship program for first and second-year students.', jobSource: 'careers.google.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
@@ -316,7 +338,7 @@ Deno.serve(async (req) => {
           slots.push(fb);
           existing_companies.add(fb.company.toLowerCase());
         }
-        if (slots.length >= 15) break;
+        if (slots.length >= dailyLimit) break;
       }
       // Enrich fallback slots with alumni counts too
       for (let i = 0; i < slots.length; i++) {
@@ -334,7 +356,7 @@ Deno.serve(async (req) => {
       expires_at: getNextResetTime(),
     });
 
-    console.log(`[getDailyDrop] Created drop for ${user.email}: ${slots.length} slots`);
+    console.log(`[getDailyDrop] Created drop for ${user.email}: ${slots.length} slots (limit: ${dailyLimit}, premium: ${isPremium})`);
     return Response.json({
       success: true,
       slots,
@@ -342,6 +364,8 @@ Deno.serve(async (req) => {
       drop_date: dropDate,
       drop_id: newDrop.id,
       from_cache: false,
+      is_premium: isPremium,
+      daily_limit: dailyLimit,
     });
 
   } catch (error) {
