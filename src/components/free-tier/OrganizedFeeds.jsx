@@ -123,6 +123,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const { data: feedsData, isLoading, isFetching, error } = useQuery({
     queryKey: ['liveJobMatches', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation, refreshKey],
     queryFn: async () => {
+      // FORCE cache bust on every call for fresh data
+      try { await clearJobLeadsCache({}); } catch {}
       const result = await getLiveJobMatchesFn({
         career_goals: {
           role: effectiveRole,
@@ -130,14 +132,14 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           locations: effectiveLocation ? [effectiveLocation] : [],
           company_size_preference: effectiveSize && effectiveSize !== 'all' ? [effectiveSize] : [],
         },
-        force_refresh: forceRefresh,
+        force_refresh: true, // Always force refresh
       });
       console.log('🔍 [OrganizedFeeds] getLiveJobMatchesFn result:', JSON.stringify(result, null, 2));
       return result;
     },
     enabled: true,
     staleTime: 0,
-    gcTime: 5 * 60 * 1000,
+    gcTime: 0, // Don't cache
   });
   
   // Debug: Log query state

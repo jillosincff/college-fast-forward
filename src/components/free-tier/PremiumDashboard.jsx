@@ -394,7 +394,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           </div>
 
           {/* Right Column (Desktop Only) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="premium-ftd-sidebar desktop-only">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxHeight: 'none' }} className="premium-ftd-sidebar desktop-only">
             {/* Active Profile Status Pill */}
             <PremiumActiveProfilePill user={user} onPillClick={() => navRef.current?.openDropdown()} />
 
@@ -412,6 +412,17 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav user={user} onOpenPipeline={() => setShowKanbanModal(true)} />
+
+      {/* Fix sidebar overflow */}
+      <style>{`
+        .premium-ftd-sidebar {
+          overflow: visible !important;
+          max-height: none !important;
+        }
+        .premium-dashboard-container {
+          overflow: visible !important;
+        }
+      `}</style>
 
       </>
       )}

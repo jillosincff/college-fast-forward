@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
       if (validatedLeads.length >= 10) break;
     }
 
-    console.log(`[DualConstraint] Returning ${validatedLeads.length} validated leads (filtered from ${rawLeads.length})`);
+    console.log(`[DualConstraint] Returning ${validatedLeads.length} validated leads (filtered from ${companyMap.size})`);
     return Response.json({ success: true, leads: validatedLeads });
 
   } catch (e) {
