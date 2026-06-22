@@ -1,5 +1,6 @@
 import React from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { FileText, CheckCircle2, AlertCircle, Building2, Upload } from 'lucide-react';
 
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
 const INDIGO = '#6d28d9';
@@ -13,11 +14,18 @@ const TEAL_BORDER = 'rgba(6,182,212,0.22)';
 const TEXT = '#0f172a';
 const TEXT2 = '#475569';
 const TEXT3 = '#94a3b8';
-const BG = '#f8f9ff';
 const CARD = '#ffffff';
 const R = 16;
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
-const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
+
+const INDUSTRY_BUCKETS = {
+  tech: { emoji: '💻', label: 'Tech & Engineering' },
+  business: { emoji: '📊', label: 'Business & Finance' },
+  marketing: { emoji: '📣', label: 'Marketing & Media' },
+  healthcare: { emoji: '🏥', label: 'Healthcare & Bio' },
+  law_gov: { emoji: '⚖️', label: 'Law & Government' },
+  creative: { emoji: '🎨', label: 'Creative & Entertainment' },
+};
 
 const SEEKING_LABELS = {
   internship: { emoji: '🎓', label: 'Internship', sub: 'This semester or summer' },
@@ -61,7 +69,7 @@ function frustrationLabel(level) {
   return { emoji: '🆘', text: 'At breaking point', color: '#EF4444' };
 }
 
-export default function ProfileCard({ user, parentCompany, onboardingData, isMyProfile }) {
+export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingData, isMyProfile }) {
   const displayName = formatName(user);
   const initials = getInitials(user);
   const school = user?.school_name || user?.school || user?.university || onboardingData?.college || '';
@@ -76,7 +84,15 @@ export default function ProfileCard({ user, parentCompany, onboardingData, isMyP
   const locationCity = onboardingData?.locationCity || user?.location_city || '';
   const targetRoles = onboardingData?.targetRoles || user?.target_roles || [];
 
-  const locationLabel = locationPref === 'remote' ? 'Remote' : locationPref === 'hybrid' ? 'Hybrid / Flexible' : locationCity || '';
+  const locationLabel = locationPref === 'remote' ? 'Remote' : locationPref === 'hybrid' ? 'Hybrid / Flexible' : locationPref === 'city' ? (locationCity || 'Specific city') : locationCity || '';
+
+  const hasResume = resumeInfo?.hasResume || !!onboardingData?.resumeUrl;
+  const resumeName = resumeInfo?.resumeName || (onboardingData?.resumeUrl ? 'Resume uploaded' : '');
+
+  // Parent info
+  const parentCompany = parentInfo?.company_name;
+  const parentRole = parentInfo?.role_title;
+  const parentName = parentInfo ? [parentInfo.first_name, parentInfo.last_name].filter(Boolean).join(' ') : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -113,16 +129,6 @@ export default function ProfileCard({ user, parentCompany, onboardingData, isMyP
                 <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '4px 0 0' }}>{user.email}</p>
               )}
             </div>
-            {isMyProfile && (
-              <button onClick={() => navigate('ProfileEdit')} style={{
-                fontFamily: FONT, fontSize: 13, fontWeight: 600, color: '#fff',
-                background: GRAD_INDIGO, border: 'none', borderRadius: 8,
-                padding: '9px 18px', cursor: 'pointer', minHeight: 'auto',
-                boxShadow: '0 4px 12px rgba(109,40,217,0.2)',
-              }}>
-                Edit Profile
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -144,10 +150,10 @@ export default function ProfileCard({ user, parentCompany, onboardingData, isMyP
             </div>
           )}
 
-          {/* Location */}
+          {/* Location / Work Type */}
           {locationLabel && (
             <div>
-              <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Target Location</p>
+              <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Work Type</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 18 }}>{locationPref === 'remote' ? '🌐' : locationPref === 'hybrid' ? '🔀' : '📍'}</span>
                 <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT }}>{locationLabel}</span>
@@ -155,24 +161,24 @@ export default function ProfileCard({ user, parentCompany, onboardingData, isMyP
             </div>
           )}
 
-          {/* Parent company */}
-          {parentCompany && (
-            <div>
-              <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Parent Connection</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 18 }}>🏢</span>
-                <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT }}>{parentCompany}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Major (if available) */}
+          {/* Major */}
           {user?.major && (
             <div>
               <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Major</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 18 }}>🎓</span>
                 <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT }}>{user.major}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Grad Year */}
+          {user?.graduation_year && (
+            <div>
+              <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Graduation</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 18 }}>🏛️</span>
+                <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT }}>Class of {user.graduation_year}</span>
               </div>
             </div>
           )}
@@ -206,18 +212,22 @@ export default function ProfileCard({ user, parentCompany, onboardingData, isMyP
       {industries.length > 0 && (
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
           <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 12 }}>
-            Industries of Interest
+            Target Industries
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {industries.map((ind, i) => (
-              <span key={i} style={{
-                fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
-                background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
-                borderRadius: 100, padding: '6px 14px',
-              }}>
-                {typeof ind === 'string' ? ind.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : ind}
-              </span>
-            ))}
+            {industries.map((ind, i) => {
+              const bucket = INDUSTRY_BUCKETS[ind];
+              const label = bucket ? `${bucket.emoji} ${bucket.label}` : (typeof ind === 'string' ? ind.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : String(ind));
+              return (
+                <span key={i} style={{
+                  fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
+                  background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
+                  borderRadius: 100, padding: '6px 14px',
+                }}>
+                  {label}
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
@@ -263,6 +273,110 @@ export default function ProfileCard({ user, parentCompany, onboardingData, isMyP
           </div>
         </div>
       )}
+
+      {/* ── Resume Status Card ── */}
+      <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 16 }}>
+          Resume
+        </p>
+        {hasResume ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <CheckCircle2 size={22} style={{ color: '#10b981' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT, margin: 0 }}>
+                {resumeName || 'Resume on file'}
+              </p>
+              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>
+                Your agent uses this for tailoring and ATS matching.
+              </p>
+            </div>
+            {isMyProfile && (
+              <button onClick={() => navigate('ResumeTailoring')} style={{
+                fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
+                background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
+                borderRadius: 8, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto',
+                whiteSpace: 'nowrap',
+              }}>
+                View
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <AlertCircle size={22} style={{ color: '#F59E0B' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT, margin: 0 }}>
+                No resume uploaded yet
+              </p>
+              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>
+                Upload one so your agent can tailor it for each application.
+              </p>
+            </div>
+            {isMyProfile && (
+              <button onClick={() => navigate('ProfileEdit')} style={{
+                fontFamily: FONT, fontSize: 12, fontWeight: 600, color: '#fff',
+                background: GRAD_INDIGO, border: 'none',
+                borderRadius: 8, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto',
+                display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
+              }}>
+                <Upload size={14} /> Upload
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Parent Network Card ── */}
+      <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 16 }}>
+          Parent Network
+        </p>
+        {parentCompany ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Building2 size={22} style={{ color: INDIGO }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT, margin: 0 }}>
+                {parentName || 'Parent connection'}
+              </p>
+              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>
+                Works at <strong style={{ color: INDIGO }}>{parentCompany}</strong>{parentRole ? ` · ${parentRole}` : ''}
+              </p>
+              <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '4px 0 0' }}>
+                This opens warm intro pathways for fellow students.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Building2 size={22} style={{ color: '#94a3b8' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT, margin: 0 }}>
+                No parent connection added
+              </p>
+              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>
+                Add where your parents work to unlock the Inside Track network.
+              </p>
+              {isMyProfile && (
+                <button onClick={() => navigate('ProfileEdit')} style={{
+                  marginTop: 8, fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
+                  background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
+                  borderRadius: 8, padding: '6px 14px', cursor: 'pointer', minHeight: 'auto',
+                }}>
+                  + Add Parent Info
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       <style>{`@media(max-width:600px){div[style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr !important}}`}</style>
     </div>

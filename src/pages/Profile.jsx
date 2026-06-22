@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
-import { User } from '@/entities/User';
 import { navigate, useParams } from '@/components/utils/navigation';
-import DashboardNav from '@/components/dashboard-v2/DashboardNav';
+import ProfileHeader from '@/components/profile/ProfileHeader';
+import ProfileFooter from '@/components/profile/ProfileFooter';
 import ProfileCard from '@/components/profile/ProfileCard';
-import DarkFooter from '@/components/common/DarkFooter';
 import { base44 } from '@/api/base44Client';
-
-const dmSans = "'DM Sans', system-ui, sans-serif";
 
 function readOnboardingData() {
   try {
@@ -19,9 +16,10 @@ function readOnboardingData() {
     const locationPref = localStorage.getItem('cff_location_pref') || '';
     const locationCity = localStorage.getItem('cff_location_city') || '';
     const college = localStorage.getItem('cff_college') || '';
-    return { seeking, frustration, blockers, industries, targetRoles, locationPref, locationCity, college };
+    const resumeUrl = localStorage.getItem('cff_resume_url') || '';
+    return { seeking, frustration, blockers, industries, targetRoles, locationPref, locationCity, college, resumeUrl };
   } catch {
-    return { seeking: '', frustration: null, blockers: [], industries: [], targetRoles: [], locationPref: '', locationCity: '', college: '' };
+    return { seeking: '', frustration: null, blockers: [], industries: [], targetRoles: [], locationPref: '', locationCity: '', college: '', resumeUrl: '' };
   }
 }
 
@@ -30,7 +28,8 @@ export default function Profile() {
   const { id } = useParams();
 
   const [profileUser, setProfileUser] = useState(null);
-  const [parentCompany, setParentCompany] = useState(null);
+  const [parentInfo, setParentInfo] = useState(null);
+  const [resumeInfo, setResumeInfo] = useState(null);
   const [onboardingData, setOnboardingData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,15 +48,25 @@ export default function Profile() {
     const fetchProfile = async () => {
       setIsLoading(true);
       setError(null);
-      setParentCompany(null);
+      setParentInfo(null);
+      setResumeInfo(null);
       setOnboardingData(readOnboardingData());
 
       if (!id && currentUser) {
         setProfileUser(currentUser);
         try {
           const records = await base44.entities.ParentNetworkProfile.filter({ created_by_id: currentUser.id });
-          if (records?.length > 0) setParentCompany(records[0].company_name);
+          if (records?.length > 0) setParentInfo(records[0]);
         } catch (e) { /* non-blocking */ }
+        try {
+          const resumes = await base44.entities.Resume.filter({ student_email: currentUser.email });
+          if (resumes?.length > 0) {
+            const active = resumes.find(r => r.is_active) || resumes[0];
+            setResumeInfo({ hasResume: true, resumeName: active.name || active.original_file_name || 'Resume on file' });
+          } else {
+            setResumeInfo({ hasResume: false, resumeName: '' });
+          }
+        } catch (e) { setResumeInfo({ hasResume: false, resumeName: '' }); }
         setIsLoading(false);
         return;
       }
@@ -70,12 +79,24 @@ export default function Profile() {
       }
 
       try {
-        const userToDisplay = await User.get(profileId);
+        const userToDisplay = id ? await base44.entities.User.get(profileId) : await base44.auth.me();
         setProfileUser(userToDisplay);
         try {
           const records = await base44.entities.ParentNetworkProfile.filter({ created_by_id: profileId });
-          if (records?.length > 0) setParentCompany(records[0].company_name);
+          if (records?.length > 0) setParentInfo(records[0]);
         } catch (e) { /* non-blocking */ }
+        try {
+          const userEmail = userToDisplay?.email || currentUser?.email;
+          if (userEmail) {
+            const resumes = await base44.entities.Resume.filter({ student_email: userEmail });
+            if (resumes?.length > 0) {
+              const active = resumes.find(r => r.is_active) || resumes[0];
+              setResumeInfo({ hasResume: true, resumeName: active.name || active.original_file_name || 'Resume on file' });
+            } else {
+              setResumeInfo({ hasResume: false, resumeName: '' });
+            }
+          }
+        } catch (e) { setResumeInfo({ hasResume: false, resumeName: '' }); }
       } catch (err) {
         console.error('Failed to fetch profile:', err);
         if (currentUser && currentUser.id === profileId) {
@@ -94,7 +115,6 @@ export default function Profile() {
   if ((authIsLoading && !currentUser) || isLoading) {
     return (
       <div style={{ minHeight: '100vh', background: '#f8f9ff', display: 'flex', flexDirection: 'column' }}>
-        <DashboardNav user={currentUser} currentPage="Profile" />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: 32, height: 32, border: '3px solid #6d28d9', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -106,12 +126,11 @@ export default function Profile() {
   if (error || !profileUser) {
     return (
       <div style={{ minHeight: '100vh', background: '#f8f9ff', display: 'flex', flexDirection: 'column' }}>
-        <DashboardNav user={currentUser} currentPage="Profile" />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', padding: 32 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 15, color: '#475569' }}>{error || 'Please log in to see your profile.'}</p>
-            <button onClick={() => navigate('Dashboard')} style={{
-              marginTop: 16, fontFamily: dmSans, fontSize: 13, fontWeight: 600,
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: '#475569' }}>{error || 'Please log in to see your profile.'}</p>
+            <button onClick={() => navigate('FreeTierDashboard')} style={{
+              marginTop: 16, fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 600,
               color: '#fff', background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)', border: 'none', borderRadius: 8,
               padding: '10px 24px', cursor: 'pointer', minHeight: 'auto',
             }}>Go to Dashboard</button>
@@ -125,18 +144,19 @@ export default function Profile() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9ff', display: 'flex', flexDirection: 'column' }}>
-      <DashboardNav user={currentUser} currentPage="Profile" />
+      <ProfileHeader user={currentUser} isMyProfile={isMyProfile} />
 
       <main style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '32px 20px 60px' }}>
         <ProfileCard
           user={profileUser}
-          parentCompany={parentCompany}
+          parentInfo={parentInfo}
+          resumeInfo={resumeInfo}
           onboardingData={onboardingData}
           isMyProfile={isMyProfile}
         />
       </main>
 
-      <DarkFooter />
+      <ProfileFooter />
     </div>
   );
 }
