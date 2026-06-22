@@ -16,6 +16,9 @@ import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
 import PipelineImpactBar from '@/components/free-tier/PipelineImpactBar';
 import ApplicationPipeline from '@/components/free-tier/ApplicationPipeline';
 import PendingTailoringWidget from '@/components/free-tier/PendingTailoringWidget';
+import ToolsTab from '@/components/free-tier/ToolsTab';
+import ProgressTab from '@/components/free-tier/ProgressTab';
+import DashboardBottomNav from '@/components/free-tier/DashboardBottomNav';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
@@ -157,6 +160,7 @@ export default function FreeTierDashboard() {
   const [showOutreachToast, setShowOutreachToast] = useState(false);
   const [showEmailSyncModal, setShowEmailSyncModal] = useState(false);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
   const navRef = useRef(null);
 
   // Listen for goals modal open event from child components
@@ -343,274 +347,29 @@ export default function FreeTierDashboard() {
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} navRef={navRef} />
 
-      {/* Mobile-first responsive container */}
+      {/* Tab Navigation (desktop top tabs + mobile bottom nav) */}
+      <DashboardBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Tools Tab */}
+      {activeTab === 'tools' && (
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }}>
+          <ToolsTab user={user} onUpgrade={triggerUpgrade} />
+        </div>
+      )}
+
+      {/* Progress Tab */}
+      {activeTab === 'progress' && (
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }}>
+          <ProgressTab user={user} onUpgrade={triggerUpgrade} />
+        </div>
+      )}
+
+      {/* Dashboard Tab (default) */}
+      {activeTab === 'dashboard' && (
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }} className="main-dashboard-container">
-        <style>{`
-          @media (max-width: 768px) {
-            .main-dashboard-container {
-              padding: 12px 12px 100px !important;
-            }
-            .ftd-grid {
-              grid-template-columns: 1fr !important;
-            }
-            .ftd-sidebar {
-              display: none !important;
-            }
-            .mobile-bottom-nav {
-              display: flex !important;
-            }
-            .desktop-only {
-              display: none !important;
-            }
-            .hero-header-card {
-              padding: 16px !important;
-              border-radius: 16px !important;
-            }
-            .hero-title {
-              font-size: 16px !important;
-            }
-            .hero-subtitle {
-              font-size: 12px !important;
-              margin-bottom: 14px !important;
-            }
-            .hero-cta-btn {
-              width: 100% !important;
-              text-align: center !important;
-              font-size: 13px !important;
-              padding: 13px 16px !important;
-            }
-            .school-anchor {
-              padding: 10px 14px !important;
-              font-size: 12px !important;
-            }
-          }
-        `}</style>
-
-        {/* ── Header: post-expiry paywall OR new-user psychological pitch ── */}
-        {isTrialExpired ? (
-          <TrialEndedHeader
-            firstName={firstName}
-            theme={campusTheme}
-            onReactivate={() => triggerUpgrade('Premium Reactivation')}
-          />
-        ) : (
-        <div className="hero-header-card" style={{ background: 'linear-gradient(135deg, #0f172a, #1e1b4b)', border: '1px solid #1e293b', borderRadius: 20, padding: '24px 28px', marginBottom: 20, boxShadow: '0 4px 24px rgba(15,23,42,0.15)' }}>
-          {/* Badge Row */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 100, padding: '4px 12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              {painConfig.badge}
-            </span>
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#94a3b8', background: 'rgba(148,163,184,0.1)', border: '1px solid rgba(148,163,184,0.2)', borderRadius: 100, padding: '4px 12px' }}>
-              🔒 Premium Sprint Active
-            </span>
-          </div>
-
-          {/* Dynamic Mirror Header */}
-          <h2 className="hero-title" style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 10px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
-            {formattedTitle}
-          </h2>
-          <p className="hero-subtitle" style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: '0 0 18px', lineHeight: 1.65, fontWeight: 500 }}>
-            {painConfig.subtitle}
-          </p>
-
-          {/* CTA Button */}
-          {!isCareerUnsure && (
-            <button
-              className="hero-cta-btn"
-              onClick={() => triggerUpgrade(painConfig.feature)}
-              style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, transition: 'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 8px 20px ${campusTheme.primary}55`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 14px ${campusTheme.primary}44`; }}
-            >
-              {painConfig.cta}
-            </button>
-          )}
-        </div>
-        )}
-
-        {/* CLiFF Rescue Hook — shown when student selected "not sure" during onboarding */}
-        {isCareerUnsure && (
-          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '24px 28px', marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 18 }}>📎</span>
-              <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>
-                Hey {firstName}, <span style={{ color: '#4F46E5' }}>CLiFF</span> here.
-              </p>
-            </div>
-            <p style={{ fontFamily: dm, fontSize: 13, color: '#4B5563', margin: '0 0 16px', lineHeight: 1.7 }}>
-              You mentioned during setup that you're not quite sure what you want to do yet. <strong>No sweat at all.</strong> Most college students are in the exact same boat. We're going to help you figure it out step-by-step.
-            </p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', width: '100%' }}>
-              <button
-                onClick={() => triggerUpgrade('Career Archetype Assessment')}
-                style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: '#4F46E5', border: 'none', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s', boxShadow: '0 2px 8px rgba(79,70,229,0.25)', flex: '1 1 auto' }}
-                onMouseEnter={e => e.currentTarget.style.background = '#4338CA'}
-                onMouseLeave={e => e.currentTarget.style.background = '#4F46E5'}
-              >
-                🎯 Find My Career Archetype
-              </button>
-              <button
-                onClick={() => navigate('Directory')}
-                style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#374151', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.background = '#F9FAFB'}
-                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
-              >
-                Browse {schoolAbbr} Inside Tracks
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Email Sync Banner ── */}
-        {!user?.is_email_synced && (
-          <EmailSyncBanner 
-            user={user} 
-            onSyncClick={handleEmailSync}
-            onDismiss={() => {}}
-          />
-        )}
-
-        {/* ── Pipeline Impact Bar — 3 simple metrics ── */}
-        <PipelineImpactBar user={user} theme={campusTheme} />
-
-        {/* ── Pending Tailoring Widget — latency-as-a-feature ── */}
-        {!isPremium && (
-          <PendingTailoringWidget user={user} onUpgrade={(feature) => triggerUpgrade(feature)} />
-        )}
-
-        {/* ── Main Grid ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="ftd-grid">
-
-          {/* ── Left Column ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* ── Application Pipeline — the primary view ── */}
-            <ApplicationPipeline
-              userSchool={user?.school_name || college}
-              alumniCount={0}
-              isPremium={isPremium}
-              onUpgrade={(feature) => triggerUpgrade(feature)}
-            />
-
-            {/* Zeigarnik close — unfinished outreach draft from onboarding */}
-            <FirstDraftReadyCard
-              theme={campusTheme}
-              onOpen={() => triggerUpgrade('Your First Outreach Draft')}
-            />
-
-            {/* Network Pulse — real outcome stats from the alumni database */}
-            <NetworkPulseStrip user={user} theme={campusTheme} />
-
-            {/* Locked warm-connection teaser — real alumni match, name hidden */}
-            <LockedAlumniTeaser
-              user={user}
-              theme={campusTheme}
-              onUnlock={() => triggerUpgrade('Warm Alumni Connection')}
-            />
-
-            {/* ── Discovery Feed — secondary: find more jobs to add to pipeline ── */}
-            <div id="cliff-feed-section">
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                marginBottom: 12, marginTop: 4,
-              }}>
-                <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
-                <span style={{
-                  fontFamily: dm, fontSize: 11, fontWeight: 700,
-                  color: '#6b7280', textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                }}>
-                  🚀 Find More Opportunities
-                </span>
-                <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
-              </div>
-              <CliffPrioritizedFeed user={user} onUpgrade={(feature) => triggerUpgrade(feature)} />
-            </div>
-            
-            <TeaserSignalsCard onUnlock={() => triggerUpgrade('Inside Track Signals')} college={college} theme={campusTheme} />
-          </div>
-
-          {/* ── Right Column (Desktop Only) ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar desktop-only">
-
-            {/* ── Active Profile Status Pill ── */}
-            <ActiveProfilePill user={user} onPillClick={() => navRef.current?.openDropdown()} />
-
-            {/* Alumni Outreach Generator — campus-themed */}
-            <div
-              onClick={() => triggerUpgrade('AI Outreach Generator')}
-              style={{ background: '#fff', border: `1px solid ${campusTheme.primary}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.boxShadow = `0 6px 20px ${campusTheme.primary}22`}
-              onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'}
-            >
-              <div style={{ background: `linear-gradient(135deg, ${campusTheme.bgTint}, rgba(255,255,255,0.8))`, padding: '16px 20px', borderBottom: `1px solid ${campusTheme.primary}33` }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 18 }}>✉️</span>
-                    <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 700, color: '#111827', margin: 0 }}>Alumni Outreach Generator</p>
-                  </div>
-                  <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 10, fontWeight: 700, color: campusTheme.primary, background: campusTheme.bgTint, border: `1px solid ${campusTheme.primary}44`, borderRadius: 100, padding: '3px 10px' }}>PREMIUM</span>
-                </div>
-              </div>
-              <div style={{ padding: '16px 20px', opacity: 0.7, position: 'relative' }}>
-                <div style={{ background: campusTheme.bgTint, borderRadius: 10, padding: '12px 14px', marginBottom: 10, border: `1px solid ${campusTheme.primary}22` }}>
-                  <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, fontWeight: 600, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>
-                    Hi Sarah, I noticed you graduated from <strong style={{ color: campusTheme.primary }}>{college}</strong> and currently work as a Product Manager at <span style={{ background: '#e5e7eb', borderRadius: 3, padding: '0 6px', filter: 'blur(4px)', userSelect: 'none' }}>████████ Co</span>. I'm a senior at <strong style={{ color: campusTheme.primary }}>{college}</strong> studying...
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    {[1, 2, 3].map((_, i) => (
-                      <div key={i} style={{ height: 8, background: `${campusTheme.primary}22`, borderRadius: 4, width: i === 2 ? '60%' : '100%' }} />
-                    ))}
-                  </div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, color: campusTheme.secondary, fontWeight: 700, margin: 0 }}>Click to unlock personalized scripts →</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Parent Network Widget — only shown when ≥20 parents from this exact school */}
-            {parentCount >= 20 && (
-              <ParentNetworkWidget
-                onUnlock={() => triggerUpgrade('Parent Network Introductions')}
-                college={college}
-                theme={campusTheme}
-                user={user}
-              />
-            )}
-
-            {/* Hiring Experts Chat */}
-            <div
-              onClick={() => triggerUpgrade('Hiring Expert Chat')}
-              style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', cursor: 'pointer' }}
-            >
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 18 }}>💬</span>
-                  <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 700, color: '#111827', margin: 0 }}>Hiring Experts Chat</p>
-                </div>
-                <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 10, fontWeight: 700, color: '#fff', background: '#6b7280', borderRadius: 100, padding: '3px 10px' }}>PREMIUM ONLY</span>
-              </div>
-              <div style={{ padding: '16px 20px', opacity: 0.5 }}>
-                {[
-                  { from: 'Agent', msg: 'I found 3 hiring managers at your target company active this week.' },
-                  { from: 'You', msg: 'Can you draft an intro message for me?' },
-                  { from: 'Agent', msg: "Absolutely — here's a personalized script based on your background..." },
-                ].map((m, i) => (
-                  <div key={i} style={{ marginBottom: 8, textAlign: m.from === 'You' ? 'right' : 'left' }}>
-                    <div style={{ display: 'inline-block', background: m.from === 'You' ? '#eff6ff' : '#f9fafb', border: `1px solid ${m.from === 'You' ? '#bfdbfe' : '#e5e7eb'}`, borderRadius: 10, padding: '8px 12px', maxWidth: '80%' }}>
-                      <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.5 }}>{m.msg}</p>
-                    </div>
-                  </div>
-                ))}
-                <div style={{ textAlign: 'center', marginTop: 8 }}>
-                  <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, color: '#2563eb', fontWeight: 600, margin: 0 }}>Unlock to chat with your Agent →</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
+...
       </div>
+      )}
 
       {showWelcomeToast && (
         <FirstVisitToast firstName={firstName} onDismiss={() => setShowWelcomeToast(false)} />
@@ -677,21 +436,6 @@ export default function FreeTierDashboard() {
         />
       )}
 
-      {/* Mobile Bottom Navigation */}
-      <div className="mobile-bottom-nav" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e5e7eb', padding: '8px 8px', paddingBottom: 'max(8px, env(safe-area-inset-bottom))', gap: 4, boxShadow: '0 -2px 12px rgba(0,0,0,0.06)', zIndex: 999 }}>
-        <button onClick={() => document.getElementById('cliff-feed-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
-          <span style={{ fontSize: 22 }}>🚀</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Leads</span>
-        </button>
-        <button onClick={() => triggerUpgrade('Premium Sprint')} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
-          <span style={{ fontSize: 22 }}>⚡</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Upgrade</span>
-        </button>
-        <button onClick={() => navigate('Profile')} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
-          <span style={{ fontSize: 22 }}>👤</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Profile</span>
-        </button>
-      </div>
     </div>
   );
 }
