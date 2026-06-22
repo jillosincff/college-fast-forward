@@ -10,6 +10,7 @@ import ResumeBuilderStep from '@/components/fast-track-pro/ResumeBuilderStep';
 import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
 import TailoringResults from '@/components/resume-tailor/TailoringResults';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
+import { getFastTrackVariant, trackQueuedView, trackQueuedUpgradeClick, trackQueuedBackOut } from '@/utils/tailoringLatency';
 
 
 export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
@@ -39,6 +40,16 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [queuedAvailableAt, setQueuedAvailableAt] = useState(null);
   const [analysisError, setAnalysisError] = useState(false);
+
+  // Churn tracking — lifted above conditional render to satisfy rules-of-hooks
+  const queuedViewTracked = useRef(false);
+  useEffect(() => {
+    if (phase === 'queued' && user?.email && !queuedViewTracked.current) {
+      queuedViewTracked.current = true;
+      const variantId = getFastTrackVariant(user.email).id;
+      trackQueuedView(user.email, variantId);
+    }
+  }, [phase, user?.email]);
 
   // Auto-activate trial when user first lands on this page
   useEffect(() => {
@@ -99,6 +110,28 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     };
     if (user?.email) loadResumes();
   }, [user?.email]);
+
+  // Handle deep-link from batch completion email: ?resume_id=xxx
+  useEffect(() => {
+    if (phase !== 'hub' || tailoredResumes.length === 0) return;
+    const hashQuery = window.location.hash.split('?')[1] || '';
+    const hashParams = new URLSearchParams(hashQuery);
+    const deepLinkId = hashParams.get('resume_id');
+    if (!deepLinkId) return;
+    const found = tailoredResumes.find(t => t.id === deepLinkId && t.status === 'completed');
+    if (found && found.tailored_content) {
+      setResult({
+        tailoredResume: found,
+        success: true,
+      });
+      setPhase('results');
+      // Clean the URL so it doesn't re-trigger on refresh
+      try {
+        const cleanHash = window.location.hash.split('?')[0];
+        window.history.replaceState(null, '', cleanHash);
+      } catch {}
+    }
+  }, [phase, tailoredResumes]);
 
   useEffect(() => {
     if (analyzing || analysis || resumes.length === 0 || phase !== 'hub') return;
@@ -297,6 +330,16 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     const timeRemaining = availableAt.getTime() - Date.now();
     const hoursLeft = Math.max(0, Math.floor(timeRemaining / (1000 * 60 * 60)));
     const minsLeft = Math.max(0, Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)));
+    const ftVariant = getFastTrackVariant(user?.email);
+
+    const handleQueuedUpgrade = () => {
+      trackQueuedUpgradeClick(user?.email, ftVariant.id);
+      onOpenUpgrade();
+    };
+    const handleQueuedBack = () => {
+      trackQueuedBackOut(user?.email, ftVariant.id);
+      setPhase('hub');
+    };
 
     return (
       <div style={{ maxWidth: 520, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
@@ -323,7 +366,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         </h1>
 
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', margin: '0 0 28px', lineHeight: 1.6 }}>
-          We batch-process free requests to keep CLIFF available for all students. Your tailored resume will be ready in:
+        We batch-process free requests to keep CLIFF available for all students. Your tailored resume will be ready in <strong>usually 12–24 hours</strong>:
         </p>
 
         {/* Countdown */}
@@ -364,7 +407,8 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
             Premium users get instant AI resume tailoring — results in under 60 seconds.
           </p>
           <button
-            onClick={() => onOpenUpgrade()}
+            onClick={handleQueuedUpgrade}
+            data-variant={ftVariant.id}
             style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700,
               color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
@@ -373,13 +417,13 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               boxShadow: '0 4px 12px rgba(124,58,237,0.3)',
             }}
           >
-            Fast-Track This Resume →
+            {ftVariant.label}
           </button>
         </div>
 
         {/* Back to hub */}
         <button
-          onClick={() => setPhase('hub')}
+          onClick={handleQueuedBack}
           style={{
             background: 'none', border: 'none',
             fontFamily: "'DM Sans', sans-serif", fontSize: 13,

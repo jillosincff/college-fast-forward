@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { getFastTrackVariant, trackQueuedView, trackQueuedUpgradeClick } from '@/utils/tailoringLatency';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -65,6 +66,23 @@ export default function PendingTailoringWidget({ user, onUpgrade }) {
       }, 5000);
     }
   }, [now, pending, user?.email]);
+
+  // A/B test button copy — deterministic per user
+  const variant = getFastTrackVariant(user?.email);
+
+  // Track view once on first render
+  const viewTrackedRef = useRef(false);
+  useEffect(() => {
+    if (user?.email && pending.length > 0 && !viewTrackedRef.current) {
+      viewTrackedRef.current = true;
+      trackQueuedView(user.email, variant.id);
+    }
+  }, [user?.email, pending.length, variant.id]);
+
+  const handleUpgrade = () => {
+    trackQueuedUpgradeClick(user?.email, variant.id);
+    onUpgrade('Instant Resume Tailoring');
+  };
 
   if (loading || pending.length === 0) return null;
 
@@ -156,8 +174,11 @@ export default function PendingTailoringWidget({ user, onUpgrade }) {
         </div>
 
         {/* Batch queue feel */}
-        <p style={{ fontFamily: dm, fontSize: 10, color: '#a16207', margin: 0 }}>
+        <p style={{ fontFamily: dm, fontSize: 10, color: '#a16207', margin: '0 0 4px' }}>
           Batch processing {batchSize} other requests right now
+        </p>
+        <p style={{ fontFamily: dm, fontSize: 10, color: '#a16207', margin: 0 }}>
+          Usual completion: 12–24 hours
         </p>
       </div>
 
@@ -169,9 +190,10 @@ export default function PendingTailoringWidget({ user, onUpgrade }) {
         We batch-process free requests to keep CLIFF available for all students. Premium users get instant results.
       </p>
 
-      {/* Fast-Track button — prominent */}
+      {/* Fast-Track button — A/B tested copy */}
       <button
-        onClick={() => onUpgrade('Instant Resume Tailoring')}
+        onClick={handleUpgrade}
+        data-variant={variant.id}
         style={{
           fontFamily: dm, fontSize: 14, fontWeight: 700,
           color: '#fff',
@@ -187,14 +209,14 @@ export default function PendingTailoringWidget({ user, onUpgrade }) {
         onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
       >
-        ⚡ Fast-Track This Resume →
+        {variant.label}
       </button>
 
       <p style={{
         fontFamily: dm, fontSize: 10, color: '#a16207',
         margin: '8px 0 0', textAlign: 'center',
       }}>
-        Get instant AI tailoring with Premium
+        {variant.sub}
       </p>
     </div>
   );

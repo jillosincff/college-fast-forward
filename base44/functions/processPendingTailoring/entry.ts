@@ -142,7 +142,18 @@ Return as JSON.`;
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: record.user_email,
               subject: `Your tailored resume for ${companyName || jobTitle || 'your role'} is ready!`,
-              body: `<p>Hi ${user[0].full_name?.split(' ')[0] || 'there'},</p><p>Your batch-processed resume tailoring is now complete!</p><p><strong>Role:</strong> ${jobTitle}<br><strong>Company:</strong> ${companyName}<br><strong>Match Score:</strong> ${result.original_score || 0}% → ${result.tailored_score || 0}%</p><p><a href="${Deno.env.get('APP_BASE_URL') || ''}/#ResumeTailoring">View your tailored resume →</a></p><p>— The CFF Team</p>`,
+              body: `<div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+                <p style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #92400e; margin: 0 0 8px;">✅ Tailoring Complete</p>
+                <h1 style="font-size: 22px; font-weight: 700; color: #1a1a1a; margin: 0 0 12px; line-height: 1.3;">Your tailored resume is ready${companyName ? ` for ${companyName}` : ''}!</h1>
+                <p style="font-size: 14px; color: #555; margin: 0 0 20px; line-height: 1.6;">Hi ${user[0].full_name?.split(' ')[0] || 'there'}, your batch-processed resume tailoring just finished. Here are your results:</p>
+                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin: 0 0 24px;">
+                  <p style="font-size: 13px; color: #555; margin: 0 0 6px;"><strong>Role:</strong> ${jobTitle || '—'}</p>
+                  <p style="font-size: 13px; color: #555; margin: 0 0 6px;"><strong>Company:</strong> ${companyName || '—'}</p>
+                  <p style="font-size: 13px; color: #555; margin: 0;"><strong>Match Score:</strong> <span style="color: #d97706;">${result.original_score || 0}%</span> → <span style="color: #059669; font-weight: 700;">${result.tailored_score || 0}%</span></p>
+                </div>
+                <a href="${Deno.env.get('APP_BASE_URL') || ''}/#ResumeTailoring?resume_id=${record.id}" style="display: inline-block; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 12px rgba(124,58,237,0.3);">View My Tailored Resume →</a>
+                <p style="font-size: 12px; color: #999; margin: 20px 0 0;">— The CFF Team</p>
+              </div>`,
             });
           }
         } catch (e) {
