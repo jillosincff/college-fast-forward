@@ -20,11 +20,16 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const queryClient = useQueryClient();
 
   const { data: dropData, isLoading, error, refetch } = useQuery({
-    queryKey: ['dailyDrop', user?.id, JSON.stringify(user?.career_goals), Date.now()],
-    queryFn: () => getDailyDrop({ force_refresh: true }),
+    queryKey: ['dailyDrop', user?.id, Date.now()],
+    queryFn: async () => {
+      // Always force refresh from backend
+      const result = await getDailyDrop({ force_refresh: true });
+      return result;
+    },
     staleTime: 0,
     gcTime: 0,
     retry: 0,
+    refetchOnMount: 'always',
     enabled: !!user?.id,
   });
 
@@ -100,13 +105,12 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      // Clear today's cached drop first, then refetch to generate a fresh one
-      await refreshDailyDrop({});
-      queryClient.removeQueries({ queryKey: ['dailyDrop', user?.id] });
-      await refetch();
+      // Clear React Query cache completely
+      queryClient.clear();
+      // Force hard reload to bust browser cache
+      window.location.href = window.location.origin + '/#FreeTierDashboard?refresh=' + Date.now();
     } catch (err) {
       console.error('Failed to refresh:', err);
-    } finally {
       setRefreshing(false);
     }
   };
