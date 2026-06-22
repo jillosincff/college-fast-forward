@@ -7,6 +7,7 @@ import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import ApplicationPipeline from './ApplicationPipeline';
 import PipelineKanbanModal from './PipelineKanbanModal';
+import EmptyMatchesState from './EmptyMatchesState';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
@@ -584,9 +585,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                 )}
               </>
             ) : (
-              <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
-                No matching opportunities found today. Adjust your career goals to broaden the search.
-              </div>
+              <EmptyMatchesState hasGoals={!noGoals} onSetGoals={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))} />
             )}
           </section>
         </div>
@@ -595,26 +594,29 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         <div className="lg:col-span-3">
           <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-theme(spacing.24))] overflow-y-auto space-y-4">
 
-            {/* Parent Network Card */}
-            <div className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center gap-3 mb-3">
+            {/* Parent Network Card — collapsible on mobile */}
+            <details className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm group" open>
+              <summary className="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-lg flex-shrink-0">🤝</div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-emerald-900 uppercase tracking-wide">Parent Network</p>
                   <p className="text-[11px] text-emerald-600 font-medium">Connected · check for warm paths</p>
                 </div>
+                <span className="lg:hidden text-emerald-400 text-xs font-bold transition-transform group-open:rotate-180">▾</span>
+              </summary>
+              <div className="mt-3">
+                <p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
+                  Parents in your network may work at your target companies. Tap to find warm introductions.
+                </p>
+                <button
+                  onClick={() => window.location.hash = '#FreeTierDashboard?tab=network'}
+                  className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
+                  style={{ minHeight: 'auto', cursor: 'pointer' }}
+                >
+                  Explore Parent Network →
+                </button>
               </div>
-              <p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
-                Parents in your network may work at your target companies. Tap to find warm introductions.
-              </p>
-              <button
-                onClick={() => window.location.hash = '#FreeTierDashboard?tab=network'}
-                className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
-                style={{ minHeight: 'auto', cursor: 'pointer' }}
-              >
-                Explore Parent Network →
-              </button>
-            </div>
+            </details>
 
             <ApplicationPipeline
               userSchool={user?.school_name || 'University of Florida'}

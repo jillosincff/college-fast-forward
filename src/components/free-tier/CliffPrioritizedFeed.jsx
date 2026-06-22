@@ -4,6 +4,7 @@ import { refreshDailyDrop } from '@/functions/refreshDailyDrop';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import AllCaughtUpCard from './AllCaughtUpCard';
+import EmptyMatchesState from './EmptyMatchesState';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { RefreshCw } from 'lucide-react';
@@ -283,9 +284,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
             )}
           </>
         ) : (
-          <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
-            No opportunities in today's drop yet. Set your career goals to get a personalized daily feed.
-          </div>
+          <EmptyMatchesState hasGoals={!noGoals} onSetGoals={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))} />
         )}
       </section>
 
