@@ -19,10 +19,11 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const effectiveRole = target_role || target_roles?.[0] || '';
   const queryClient = useQueryClient();
 
+  const queryKey = ['dailyDrop', user?.id];
+  
   const { data: dropData, isLoading, error, refetch } = useQuery({
-    queryKey: ['dailyDrop', user?.id, Date.now()],
+    queryKey,
     queryFn: async () => {
-      // Always force refresh from backend
       const result = await getDailyDrop({ force_refresh: true });
       return result;
     },
@@ -105,12 +106,12 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      // Clear React Query cache completely
-      queryClient.clear();
-      // Force hard reload to bust browser cache
-      window.location.href = window.location.origin + '/#FreeTierDashboard?refresh=' + Date.now();
+      // Properly invalidate just the daily drop query
+      await queryClient.invalidateQueries({ queryKey });
+      await refetch();
     } catch (err) {
       console.error('Failed to refresh:', err);
+    } finally {
       setRefreshing(false);
     }
   };

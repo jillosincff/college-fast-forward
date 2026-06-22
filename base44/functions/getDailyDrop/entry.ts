@@ -253,19 +253,35 @@ Deno.serve(async (req) => {
     // ── 2. Generate a fresh daily drop ────────────────────────────────────
     console.log(`[getDailyDrop] Generating fresh drop for ${user.email} on ${dropDate}`);
 
-    // Companies shown in the user's last 3 drops — exclude so jobs feel new each day
-    const seenCompanies = new Set();
+    // Track ALL jobs shown to user in last 7 days for deduplication
+    const seenJobs = new Map(); // companyKey -> Set of role keys
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
     try {
-      const recentDrops = await base44.entities.UserDailyDrop.filter({ user_id: user.id }, '-created_date', 3);
+      const recentDrops = await base44.entities.UserDailyDrop.filter({ user_id: user.id }, '-created_date', 50);
       for (const d of recentDrops || []) {
+        const dropDate = new Date(d.drop_date);
+        if (dropDate < sevenDaysAgo) continue; // Skip drops older than 7 days
+        
         for (const s of d.slots || []) {
-          if (s.company) seenCompanies.add(s.company.toLowerCase().replace(/[^a-z0-9]/g, ''));
+          const companyKey = (s.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const roleKey = (s.role || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (!seenJobs.has(companyKey)) seenJobs.set(companyKey, new Set());
+          seenJobs.get(companyKey).add(roleKey);
         }
       }
+      console.log('[getDailyDrop] Dedup: %d companies seen in last 7 days', seenJobs.size);
     } catch (e) {
-      console.warn('[getDailyDrop] Could not load recent drops:', e.message);
+      console.warn('[getDailyDrop] Could not load recent drops for dedup:', e.message);
     }
-    const isSeen = (name) => seenCompanies.has((name || '').toLowerCase().replace(/[^a-z0-9]/g, ''));
+    
+    const isSeen = (company, role) => {
+      const companyKey = (company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const roleKey = (role || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const roles = seenJobs.get(companyKey);
+      return roles ? roles.has(roleKey) : false;
+    };
 
     // Clear any stale drops for today (force refresh / duplicates) so the cache stays clean
     try {
@@ -315,15 +331,17 @@ Deno.serve(async (req) => {
     const mergedCompanies = new Set();
     const mergedJobs = [];
     
-    // Prioritize unseen companies from fresh jobs
+    // Prioritize unseen company+role combinations from fresh jobs
     const allJobs = freshJobs || [];
-    const freshFirst = allJobs.filter(j => !isSeen(j.name));
-    const seenFirst = allJobs.filter(j => isSeen(j.name));
+    const unseenJobsList = allJobs.filter(j => !isSeen(j.name, j.job_title));
+    const seenJobsList = allJobs.filter(j => isSeen(j.name, j.job_title));
     
-    for (const job of [...freshFirst, ...seenFirst]) {
+    for (const job of [...unseenJobsList, ...seenJobsList]) {
       const companyKey = job.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (mergedCompanies.has(companyKey)) continue;
-      mergedCompanies.add(companyKey);
+      const roleKey = job.job_title.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const fullKey = `${companyKey}||${roleKey}`;
+      if (mergedCompanies.has(fullKey)) continue;
+      mergedCompanies.add(fullKey);
       
       mergedJobs.push({
         company: job.name,
@@ -443,13 +461,17 @@ Deno.serve(async (req) => {
         [fallbackSlots[i], fallbackSlots[j]] = [fallbackSlots[j], fallbackSlots[i]];
       }
       
-      const existing_companies = new Set(slots.map(s => s.company.toLowerCase()));
-      // Try unseen fallbacks first, then allow repeats if we still need slots
-      const orderedFallbacks = [...fallbackSlots.filter(f => !isSeen(f.company)), ...fallbackSlots.filter(f => isSeen(f.company))];
+      const existingKeys = new Set(slots.map(s => `${s.company.toLowerCase()}||${s.role.toLowerCase()}`));
+      // Try unseen fallbacks first (company+role combo), then allow repeats if we still need slots
+      const orderedFallbacks = [
+        ...fallbackSlots.filter(f => !isSeen(f.company, f.role)),
+        ...fallbackSlots.filter(f => isSeen(f.company, f.role))
+      ];
       for (const fb of orderedFallbacks) {
-        if (!existing_companies.has(fb.company.toLowerCase())) {
+        const fbKey = `${fb.company.toLowerCase()}||${fb.role.toLowerCase()}`;
+        if (!existingKeys.has(fbKey)) {
           slots.push(fb);
-          existing_companies.add(fb.company.toLowerCase());
+          existingKeys.add(fbKey);
         }
         if (slots.length >= dailyLimit) break;
       }
