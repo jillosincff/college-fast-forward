@@ -601,9 +601,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           </section>
         </div>
 
-        {/* ── RIGHT COLUMN (30%): Sticky Sidebar Pipeline ── */}
+        {/* ── RIGHT COLUMN (30%): Sticky Sidebar - Parent Network only ── */}
         <div className="lg:col-span-3">
-          <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-theme(spacing.24))] overflow-y-auto space-y-4">
+          <div className="lg:sticky lg:top-6 space-y-4">
 
             {/* Parent Network Card — collapsible on mobile */}
             <details className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm group" open>
@@ -629,14 +629,6 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
               </div>
             </details>
 
-            <ApplicationPipeline
-              userSchool={user?.school_name || 'University of Florida'}
-              alumniCount={verifiedAlumniCount || 0}
-              isPremium={isPremium}
-              onUpgrade={(feature) => {
-                console.log('Upgrade clicked:', feature);
-              }}
-            />
           </div>
         </div>
       </div>

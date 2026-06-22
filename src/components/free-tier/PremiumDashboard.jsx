@@ -18,6 +18,84 @@ import DashboardBottomNav from './DashboardBottomNav';
 import ToolsTab from './ToolsTab';
 import ProgressTab from './ProgressTab';
 
+// Compact Application Summary Card Component
+function ApplicationSummaryCard({ user, onUpgrade }) {
+  const dm = "'DM Sans', system-ui, sans-serif";
+  const [stats, setStats] = useState({ applied: 0, interviewing: 0, offers: 0, total: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.NetworkingPipeline.list(null, 200)
+      .then(records => {
+        const applied = (records || []).filter(r => r.status === 'reached_out').length;
+        const interviewing = (records || []).filter(r => r.status === 'interviewing').length;
+        const offers = (records || []).filter(r => r.status === 'offer').length;
+        setStats({ applied, interviewing, offers, total: (records || []).length });
+      })
+      .catch(() => setStats({ applied: 0, interviewing: 0, offers: 0, total: 0 }))
+      .finally(() => setLoading(false));
+  }, [user?.email]);
+
+  return (
+    <div style={{
+      background: '#fff',
+      border: '1px solid #e5e7eb',
+      borderRadius: 14,
+      padding: '14px 16px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>
+          📊 My Applications
+        </p>
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('cff:open-pipeline-modal'))}
+          style={{
+            fontFamily: dm, fontSize: 11, fontWeight: 700,
+            color: '#7c3aed', background: '#f5f3ff',
+            border: '1px solid #ddd6fe',
+            borderRadius: 6, padding: '4px 10px',
+            cursor: 'pointer', minHeight: 'auto',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#ede9fe'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#f5f3ff'; }}
+        >
+          View All →
+        </button>
+      </div>
+      
+      {loading ? (
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} style={{ flex: 1, background: '#f3f4f6', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+              <div style={{ width: 16, height: 16, border: '2px solid #e5e7eb', borderTop: '2px solid #9ca3af', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 4px' }} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+          <div style={{ flex: 1, background: '#eff6ff', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#2563eb', margin: 0 }}>{stats.applied}</p>
+            <p style={{ fontFamily: dm, fontSize: 9, color: '#6b7280', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Applied</p>
+          </div>
+          <div style={{ flex: 1, background: '#f5f3ff', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#7c3aed', margin: 0 }}>{stats.interviewing}</p>
+            <p style={{ fontFamily: dm, fontSize: 9, color: '#6b7280', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Interview</p>
+          </div>
+          <div style={{ flex: 1, background: '#f0fdf4', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
+            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#16a34a', margin: 0 }}>{stats.offers}</p>
+            <p style={{ fontFamily: dm, fontSize: 9, color: '#6b7280', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Offers</p>
+          </div>
+        </div>
+      )}
+      
+      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+}
+
 const dm = "'DM Sans', system-ui, sans-serif";
 
 function PremiumNav({ user, onEditGoals, navRef }) {
@@ -401,10 +479,13 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             {/* Pipeline removed — accessible via Kanban modal only */}
           </div>
 
-          {/* Right Column (Desktop Only) - NO height constraints */}
-          <aside style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '340px', flexShrink: 0 }} className="desktop-only">
+          {/* Right Column (Desktop Only) - Compact sidebar */}
+          <aside style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '340px', flexShrink: 0 }} className="desktop-only">
             {/* Active Profile Status Pill */}
             <PremiumActiveProfilePill user={user} onPillClick={() => navRef.current?.openDropdown()} />
+
+            {/* Compact Application Summary Card */}
+            <ApplicationSummaryCard user={user} onUpgrade={() => {}} />
 
             {/* Parent Network — unlocked if ≥20 parents */}
             {(parentCount === null || parentCount >= 20) && (

@@ -49,6 +49,26 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
   const jobUrl = lead.job_url || lead.jobSource || '';
   const location = lead.location || lead.location_text || '';
   const salary = lead.salary_range || lead.salary || '';
+  
+  // Calculate freshness from posted_date
+  const getFreshnessBadge = () => {
+    if (!lead.posted_date) return null;
+    const posted = new Date(lead.posted_date);
+    const now = new Date();
+    const daysAgo = Math.floor((now - posted) / (1000 * 60 * 60 * 24));
+    
+    if (daysAgo <= 2) {
+      return { label: '🆕 New Today', color: 'bg-green-50 text-green-700 border-green-200', text: `Posted ${daysAgo === 0 ? 'today' : daysAgo === 1 ? 'yesterday' : '2 days ago'}` };
+    } else if (daysAgo <= 5) {
+      return { label: 'This Week', color: 'bg-blue-50 text-blue-700 border-blue-200', text: `Posted ${daysAgo} days ago` };
+    } else if (daysAgo <= 10) {
+      return { label: 'Recent', color: 'bg-amber-50 text-amber-700 border-amber-200', text: `Posted ${daysAgo}d ago` };
+    } else {
+      return { label: 'Older', color: 'bg-gray-50 text-gray-500 border-gray-200', text: `Posted ${daysAgo}d ago` };
+    }
+  };
+  
+  const freshnessBadge = getFreshnessBadge();
 
   const handleTrackOnly = (path = 'cold_apply') => {
     if (onTrackOnly) onTrackOnly(lead, path);
@@ -156,6 +176,11 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
             <div className="flex flex-wrap gap-1 mt-1">
               {tierBadge && (
                 <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>{tierBadge.label}</span>
+              )}
+              {freshnessBadge && (
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${freshnessBadge.color}`} title={freshnessBadge.text}>
+                  {freshnessBadge.label}
+                </span>
               )}
               {isPinned && (
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">📌 Saved</span>
