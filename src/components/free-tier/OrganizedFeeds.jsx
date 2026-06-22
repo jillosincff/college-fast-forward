@@ -105,6 +105,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const dailyLimit = isPremium ? Infinity : (isFirstDay ? FIRST_DAY_BONUS : FREE_DAILY_LIMIT);
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
 
   const seenForExclusionRef = useRef((() => {
     try {
@@ -478,29 +479,76 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             </div>
 
             {anyLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
-                {[1, 2, 3, 4].map(n => (
-                  <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
-                ))}
-              </div>
-            ) : targetOpportunities.length > 0 ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
-                  {targetOpportunities.slice(0, cappedVisibleCount).map((lead, idx) => (
-                    <DiscoveryJobCard
-                      key={lead.company || lead.companyName || idx}
-                      lead={lead}
-                      user={user}
-                      onAddToPipeline={handleAddToPipeline}
-                      onColdInroad={handleColdInroad}
-                      onSelect={setSelectedLead}
-                      schoolAbbr={schoolAbbr}
-                      isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
-                      onDismiss={() => {}}
-                      insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
-                    />
+              viewMode === 'list' ? (
+                <div className="space-y-3 max-w-2xl">
+                  {[1, 2, 3, 4].map(n => (
+                    <div key={n} className="h-40 bg-gray-100 rounded-2xl animate-pulse" />
                   ))}
                 </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+                  {[1, 2, 3, 4].map(n => (
+                    <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
+                  ))}
+                </div>
+              )
+            ) : targetOpportunities.length > 0 ? (
+              <>
+                {/* View toggle */}
+                <div className="flex items-center justify-end mb-1">
+                  <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      style={{ minHeight: 'auto', minWidth: 'auto' }}
+                      className={`px-3 py-1 rounded-md text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'}`}
+                    >
+                      ☰ List
+                    </button>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      style={{ minHeight: 'auto', minWidth: 'auto' }}
+                      className={`px-3 py-1 rounded-md text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'}`}
+                    >
+                      ▦ Grid
+                    </button>
+                  </div>
+                </div>
+                {viewMode === 'list' ? (
+                  <div className="space-y-3 max-w-2xl">
+                    {targetOpportunities.slice(0, cappedVisibleCount).map((lead, idx) => (
+                      <DiscoveryJobCard
+                        key={lead.company || lead.companyName || idx}
+                        lead={lead}
+                        user={user}
+                        onAddToPipeline={handleAddToPipeline}
+                        onColdInroad={handleColdInroad}
+                        onSelect={setSelectedLead}
+                        schoolAbbr={schoolAbbr}
+                        isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
+                        onDismiss={() => {}}
+                        insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
+                        compact
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+                    {targetOpportunities.slice(0, cappedVisibleCount).map((lead, idx) => (
+                      <DiscoveryJobCard
+                        key={lead.company || lead.companyName || idx}
+                        lead={lead}
+                        user={user}
+                        onAddToPipeline={handleAddToPipeline}
+                        onColdInroad={handleColdInroad}
+                        onSelect={setSelectedLead}
+                        schoolAbbr={schoolAbbr}
+                        isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
+                        onDismiss={() => {}}
+                        insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
+                      />
+                    ))}
+                  </div>
+                )}
                 {limitReached ? (
                   <div className="flex flex-col items-center mt-6 p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl text-center">
                     <span className="text-2xl mb-2">🔒</span>
