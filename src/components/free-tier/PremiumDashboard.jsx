@@ -18,84 +18,6 @@ import DashboardBottomNav from './DashboardBottomNav';
 import ToolsTab from './ToolsTab';
 import ProgressTab from './ProgressTab';
 
-// Compact Application Summary Card Component
-function ApplicationSummaryCard({ user, onUpgrade }) {
-  const dm = "'DM Sans', system-ui, sans-serif";
-  const [stats, setStats] = useState({ applied: 0, interviewing: 0, offers: 0, total: 0 });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user?.email) return;
-    base44.entities.NetworkingPipeline.list(null, 200)
-      .then(records => {
-        const applied = (records || []).filter(r => r.status === 'reached_out').length;
-        const interviewing = (records || []).filter(r => r.status === 'interviewing').length;
-        const offers = (records || []).filter(r => r.status === 'offer').length;
-        setStats({ applied, interviewing, offers, total: (records || []).length });
-      })
-      .catch(() => setStats({ applied: 0, interviewing: 0, offers: 0, total: 0 }))
-      .finally(() => setLoading(false));
-  }, [user?.email]);
-
-  return (
-    <div style={{
-      background: '#fff',
-      border: '1px solid #e5e7eb',
-      borderRadius: 14,
-      padding: '14px 16px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>
-          📊 My Applications
-        </p>
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent('cff:open-pipeline-modal'))}
-          style={{
-            fontFamily: dm, fontSize: 11, fontWeight: 700,
-            color: '#7c3aed', background: '#f5f3ff',
-            border: '1px solid #ddd6fe',
-            borderRadius: 6, padding: '4px 10px',
-            cursor: 'pointer', minHeight: 'auto',
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = '#ede9fe'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = '#f5f3ff'; }}
-        >
-          View All →
-        </button>
-      </div>
-      
-      {loading ? (
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-          {[1, 2, 3].map(i => (
-            <div key={i} style={{ flex: 1, background: '#f3f4f6', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-              <div style={{ width: 16, height: 16, border: '2px solid #e5e7eb', borderTop: '2px solid #9ca3af', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 4px' }} />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-          <div style={{ flex: 1, background: '#eff6ff', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#2563eb', margin: 0 }}>{stats.applied}</p>
-            <p style={{ fontFamily: dm, fontSize: 9, color: '#6b7280', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Applied</p>
-          </div>
-          <div style={{ flex: 1, background: '#f5f3ff', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#7c3aed', margin: 0 }}>{stats.interviewing}</p>
-            <p style={{ fontFamily: dm, fontSize: 9, color: '#6b7280', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Interview</p>
-          </div>
-          <div style={{ flex: 1, background: '#f0fdf4', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
-            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#16a34a', margin: 0 }}>{stats.offers}</p>
-            <p style={{ fontFamily: dm, fontSize: 9, color: '#6b7280', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Offers</p>
-          </div>
-        </div>
-      )}
-      
-      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-    </div>
-  );
-}
-
 const dm = "'DM Sans', system-ui, sans-serif";
 
 function PremiumNav({ user, onEditGoals, navRef }) {
@@ -362,6 +284,40 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         </div>
       )}
 
+      {/* Floating CLIFF Chat Button (Dashboard only) */}
+      {activeTab === 'dashboard' && (
+        <button
+          onClick={() => document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'end' })}
+          style={{
+            position: 'fixed',
+            bottom: isMobile ? 90 : 40,
+            right: isMobile ? 20 : 40,
+            background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+            border: 'none',
+            borderRadius: 100,
+            padding: '14px 20px',
+            boxShadow: '0 8px 24px rgba(124,58,237,0.4)',
+            cursor: 'pointer',
+            zIndex: 999,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 12px 32px rgba(124,58,237,0.5)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(124,58,237,0.4)';
+          }}
+        >
+          <span style={{ fontSize: 18 }}>💬</span>
+          <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff' }}>Ask CLIFF</span>
+        </button>
+      )}
+
       {/* Mobile-first responsive container */}
       <style>{`
         @media (max-width: 768px) {
@@ -451,32 +407,19 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         </div>
       )}
 
-      {/* ── Three-Tier Organized Feeds ── */}
-      <div style={{ background: '#f8f9fc', paddingTop: isMobile ? 8 : 16, paddingBottom: 16 }}>
-        <OrganizedFeeds 
-          key={`${JSON.stringify(user?.career_goals?.target_roles)}-${JSON.stringify(user?.career_goals?.target_industries)}-${user?.career_goals?.company_size_preference}`} 
-          user={user} 
-          verifiedAlumniCount={alumniCount} 
-          verifiedParentsCount={parentsCount} 
-          isPremium={true}
-        />
-      </div>
-
       {/* ── Main Content ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
-          {/* Hidden debug - remove after testing */}
-          <style>{`
-            .premium-ftd-grid {
-              display: grid !important;
-              grid-template-columns: minmax(0, 1fr) 340px !important;
-              gap: 24px !important;
-            }
-          `}</style>
-
-          {/* Left Column */}
+          {/* Left Column - Job Feed */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* Pipeline removed — accessible via Kanban modal only */}
+            {/* ── Three-Tier Organized Feeds ── */}
+            <OrganizedFeeds 
+              key={`${JSON.stringify(user?.career_goals?.target_roles)}-${JSON.stringify(user?.career_goals?.target_industries)}-${user?.career_goals?.company_size_preference}`} 
+              user={user} 
+              verifiedAlumniCount={alumniCount} 
+              verifiedParentsCount={parentsCount} 
+              isPremium={true}
+            />
           </div>
 
           {/* Right Column (Desktop Only) - Compact sidebar */}
@@ -489,6 +432,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
             )}
 
+            {/* CLIFF Chat Panel - Full interface in sidebar */}
             <div id="cliff-chat-panel" style={{ flex: '0 0 auto' }}>
               <PremiumHiringChat user={user} selectedSignal={selectedSignal} selectedJob={selectedJob} />
             </div>
