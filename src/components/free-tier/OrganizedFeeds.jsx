@@ -120,21 +120,30 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     } catch { return []; }
   })());
 
-  const { data: feedsData, isLoading, isFetching } = useQuery({
+  const { data: feedsData, isLoading, isFetching, error } = useQuery({
     queryKey: ['liveJobMatches', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation, refreshKey],
-    queryFn: () => getLiveJobMatchesFn({
-      career_goals: {
-        role: effectiveRole,
-        industries: target_industries || [],
-        locations: effectiveLocation ? [effectiveLocation] : [],
-        company_size_preference: effectiveSize && effectiveSize !== 'all' ? [effectiveSize] : [],
-      },
-      force_refresh: forceRefresh,
-    }),
+    queryFn: async () => {
+      const result = await getLiveJobMatchesFn({
+        career_goals: {
+          role: effectiveRole,
+          industries: target_industries || [],
+          locations: effectiveLocation ? [effectiveLocation] : [],
+          company_size_preference: effectiveSize && effectiveSize !== 'all' ? [effectiveSize] : [],
+        },
+        force_refresh: forceRefresh,
+      });
+      console.log('🔍 [OrganizedFeeds] getLiveJobMatchesFn result:', JSON.stringify(result, null, 2));
+      return result;
+    },
     enabled: true,
     staleTime: 0,
     gcTime: 5 * 60 * 1000,
   });
+  
+  // Debug: Log query state
+  useEffect(() => {
+    console.log('🔍 [OrganizedFeeds] Query state:', { isLoading, isFetching, hasData: !!feedsData, error, companyCount: feedsData?.data?.companies?.length || 0 });
+  }, [isLoading, isFetching, feedsData, error]);
 
   // Reset forceRefresh flag after the query has fired
   useEffect(() => {
