@@ -1,7 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const ALLOWED_EVENTS = new Set(['open', 'click', 'bounce', 'unsubscribe', 'delivered']);
-const CAMPAIGN = 'parent_blast_june_2026';
+const ALLOWED_EVENTS = new Set(['open', 'click', 'bounce', 'unsubscribe', 'delivered', 'spam_report', 'group_unsubscribe']);
 
 Deno.serve(async (req) => {
   try {
@@ -13,48 +12,45 @@ Deno.serve(async (req) => {
       return Response.json({ received: 0 }, { status: 200 });
     }
 
-    // Filter to only relevant event types
-    const relevant = events.filter(e => ALLOWED_EVENTS.has(e.event));
+    // Filter to only trackable event types
+    const relevant = events.filter(e => e.email && ALLOWED_EVENTS.has(e.event));
     if (relevant.length === 0) {
       return Response.json({ received: 0 }, { status: 200 });
     }
 
-    // Collect unique emails to look up parents in bulk
-    const uniqueEmails = [...new Set(relevant.map(e => (e.email || '').toLowerCase()).filter(Boolean))];
-
-    // Look up all parent users matching these emails
-    const parentMap = {};
+    // Collect unique emails to try to look up parent names (best-effort, not required)
+    const uniqueEmails = [...new Set(relevant.map(e => e.email.toLowerCase()))];
+    const nameMap = {};
     for (const email of uniqueEmails) {
       try {
-        const matches = await db.User.filter({ email, persona: 'parent' });
-        if (matches && matches.length > 0) {
-          parentMap[email] = matches[0].full_name || '';
-        }
-      } catch (_) {
-        // skip lookup errors
-      }
+        const matches = await db.User.filter({ email });
+        if (matches?.length > 0) nameMap[email] = matches[0].full_name || '';
+      } catch (_) {}
     }
 
     let processed = 0;
-
     for (const ev of relevant) {
-      const email = (ev.email || '').toLowerCase();
-      if (!email || !(email in parentMap)) continue;
+      const email = ev.email.toLowerCase();
+
+      // Derive campaign from SendGrid categories or unique_args, fallback to 'unknown'
+      const campaign =
+        (ev.category && (Array.isArray(ev.category) ? ev.category[0] : ev.category)) ||
+        ev.unique_args?.campaign ||
+        ev['marketing_campaign_name'] ||
+        'general';
 
       const record = {
         parent_email: email,
-        parent_name: parentMap[email],
-        event_type: ev.event,
-        email_campaign: CAMPAIGN,
+        parent_name: nameMap[email] || '',
+        event_type: ev.event === 'group_unsubscribe' ? 'unsubscribe' : ev.event,
+        email_campaign: campaign,
         timestamp: ev.timestamp ? new Date(ev.timestamp * 1000).toISOString() : new Date().toISOString(),
         sendgrid_message_id: ev.sg_message_id || '',
         ip_address: ev.ip || '',
         user_agent: ev.useragent || '',
       };
 
-      if (ev.event === 'click' && ev.url) {
-        record.clicked_url = ev.url;
-      }
+      if (ev.event === 'click' && ev.url) record.clicked_url = ev.url;
 
       await db.ParentEngagement.create(record);
       processed++;
@@ -63,7 +59,6 @@ Deno.serve(async (req) => {
     return Response.json({ received: processed }, { status: 200 });
 
   } catch (err) {
-    // Always return 200 to SendGrid so it doesn't retry
     console.error('sendgridWebhook error:', err.message);
     return Response.json({ received: 0, error: err.message }, { status: 200 });
   }
