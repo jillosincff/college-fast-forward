@@ -133,7 +133,7 @@ async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, ma
 
   const roleDesc = role || '';
   const params = new URLSearchParams({
-    time_frame: '30d', limit: '200',
+    time_frame: '6m', limit: '200',
     include_basic_organization_details: 'true',
     title_advanced: buildTitleQuery(roleDesc, seeking),
   });
