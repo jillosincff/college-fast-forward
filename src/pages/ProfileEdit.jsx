@@ -7,7 +7,7 @@ import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
-const ORANGE = '#E85D20';
+const ORANGE = '#7c3aed';
 
 const INDUSTRIES = [
   'Accounting & Finance', 'Advertising & Marketing', 'Architecture & Design',
@@ -126,7 +126,7 @@ export default function ProfileEdit() {
   if (!user) return null;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: '#f8f9ff', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{
         background: '#fff', borderBottom: '1px solid #eee',
@@ -218,7 +218,7 @@ export default function ProfileEdit() {
                     <button key={value} type="button" onClick={() => toggleHelp(value)} style={{
                       width: '100%', padding: '10px 14px', borderRadius: 10, textAlign: 'left',
                       border: `1.5px solid ${selected ? ORANGE : '#e0e0e0'}`,
-                      background: selected ? 'rgba(232,93,32,0.06)' : '#fff',
+                      background: selected ? 'rgba(124,58,237,0.06)' : '#fff',
                       color: selected ? '#1a1a1a' : '#888',
                       fontFamily: dmSans, fontSize: 14, fontWeight: selected ? 600 : 400,
                       cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
