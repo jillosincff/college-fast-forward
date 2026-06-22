@@ -13,6 +13,63 @@ const STATE_NAMES = {
   WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia',
 };
 
+// ── Coresignal Job Data API fetcher ─────────────────────────────────────
+async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults = 50 }) {
+  const INTERN_TERMS = ['intern', 'internship', 'co-op'];
+  const ENTRY_TERMS = ['junior', 'coordinator', 'entry level', 'graduate', 'trainee', 'new grad', 'analyst', 'assistant'];
+  const levelTerms = seeking === 'internship' ? INTERN_TERMS : seeking === 'fulltime' ? ENTRY_TERMS : [...INTERN_TERMS, ...ENTRY_TERMS];
+  
+  const locationQuery = location && !/remote/i.test(location) ? location : 'United States';
+  
+  try {
+    const searchBody = {
+      size: maxResults,
+      query: {
+        bool: {
+          must: [
+            { match: { job_title: role || 'analyst' } },
+            { match: { location: locationQuery } },
+            { terms: { seniority: levelTerms } },
+            { range: { date_posted: { gte: 'now-7d/d' } } }
+          ],
+          must_not: [
+            { regexp: { job_title: '.*senior.*|.*lead.*|.*manager.*|.*director.*|.*vp.*|.*chief.*' } }
+          ]
+        }
+      }
+    };
+
+    const res = await fetch('https://api.coresignal.com/cdapi/v1/linkedin/job/collect/search', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(searchBody),
+    });
+
+    if (!res.ok) {
+      console.warn('[Coresignal] API error:', res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    return (data.results || []).map(job => ({
+      name: job.company_name || job.company,
+      job_title: job.job_title,
+      hiring_description: job.description || `${job.company_name || job.company} is hiring for ${job.job_title}`,
+      job_url: job.job_url || job.apply_url,
+      location: job.location || '',
+      posted_date: job.date_posted || null,
+      salary_range: job.salary ? `${job.salary_min || job.salary}-${job.salary_max || job.salary}` : null,
+      source: 'coresignal',
+    })).filter(j => j.name && j.job_title);
+  } catch (e) {
+    console.warn('[Coresignal] Fetch failed:', e.message);
+    return [];
+  }
+}
+
 function sizeFromHeadcount(n) {
   if (!n || n <= 0) return null;
   if (n <= 50) return 'startup';
@@ -242,43 +299,87 @@ Deno.serve(async (req) => {
     };
     const sizeArray = sizeMap[sizePref] || ['large', 'mid', 'startup'];
 
-    // Slots 1–5: Live results directly from Fantastic Jobs API
-    let liveSlots = [];
-    const apiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
-    if (apiKey && (targetRole || targetIndustries.length > 0)) {
-      try {
-        const role = targetRole || `${targetIndustries[0]} analyst`;
-        const companies = await Promise.race([
-          fetchLiveJobs({ role, location, companySizes: sizeArray, seeking, apiKey, maxCompanies: dailyLimit }),
-          new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 25000)),
-        ]);
-        const freshFirst = [...companies.filter(c => !isSeen(c.name)), ...companies.filter(c => isSeen(c.name))];
-        liveSlots = freshFirst.map(c => ({
-          company: c.name,
-          role: c.job_title || role,
-          jobDescription: c.hiring_description || `${c.name} is actively hiring for ${role} roles.`,
-          jobSource: c.job_url || `${c.name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
-          jobSourceCategory: 'A',
-          companyTier: c.size === 'startup' ? 3 : c.size === 'mid' ? 2 : 1,
-          isLiveResult: true,
-          slotType: 'live',
-          leadTier: 'target',
-          alumniCount: 0,
-          parentCount: 0,
-          salary_range: c.salary_range || null,
-          location: c.location || null,
-          posted_date: c.posted_date || null,
-        }));
-        console.log(`[getDailyDrop] Live slots: ${liveSlots.length}`);
-      } catch (e) {
-        console.warn('[getDailyDrop] Live fetch failed:', e.message);
-      }
+    // Slots from multiple sources: Fantastic Jobs + Coresignal
+    let allLiveSlots = [];
+    const fantasticApiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
+    const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
+    const role = targetRole || (targetIndustries.length > 0 ? `${targetIndustries[0]} analyst` : 'analyst');
+
+    // Fetch from both sources in parallel
+    const [fantasticJobs, coresignalJobs] = await Promise.all([
+      // Fantastic Jobs
+      (async () => {
+        if (!fantasticApiKey) return [];
+        try {
+          const companies = await Promise.race([
+            fetchLiveJobs({ role, location, companySizes: sizeArray, seeking, apiKey: fantasticApiKey, maxCompanies: dailyLimit }),
+            new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 25000)),
+          ]);
+          return companies;
+        } catch (e) {
+          console.warn('[getDailyDrop] Fantastic Jobs fetch failed:', e.message);
+          return [];
+        }
+      })(),
+      // Coresignal
+      (async () => {
+        if (!coresignalApiKey) return [];
+        try {
+          const jobs = await Promise.race([
+            fetchCoresignalJobs({ role, location, seeking, apiKey: coresignalApiKey, maxResults: 30 }),
+            new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000)),
+          ]);
+          return jobs;
+        } catch (e) {
+          console.warn('[getDailyDrop] Coresignal fetch failed:', e.message);
+          return [];
+        }
+      })(),
+    ]);
+
+    console.log(`[getDailyDrop] Fantastic: ${fantasticJobs.length}, Coresignal: ${coresignalJobs.length}`);
+
+    // Merge and deduplicate by company name
+    const mergedCompanies = new Set();
+    const mergedJobs = [];
+    
+    // Prioritize unseen companies, mix sources
+    const allJobs = [...fantasticJobs, ...coresignalJobs];
+    const freshFirst = allJobs.filter(j => !isSeen(j.name));
+    const seenFirst = allJobs.filter(j => isSeen(j.name));
+    
+    for (const job of [...freshFirst, ...seenFirst]) {
+      const companyKey = job.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (mergedCompanies.has(companyKey)) continue;
+      mergedCompanies.add(companyKey);
+      
+      mergedJobs.push({
+        company: job.name,
+        role: job.job_title || role,
+        jobDescription: job.hiring_description || job.description || `${job.name} is actively hiring for ${role} roles.`,
+        jobSource: job.job_url || `${job.name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
+        jobSourceCategory: job.source === 'coresignal' ? 'B' : 'A',
+        companyTier: job.size === 'startup' ? 3 : job.size === 'mid' ? 2 : 1,
+        isLiveResult: true,
+        slotType: 'live',
+        leadTier: 'target',
+        alumniCount: 0,
+        parentCount: 0,
+        salary_range: job.salary_range || null,
+        location: job.location || null,
+        posted_date: job.posted_date || null,
+      });
+
+      if (mergedJobs.length >= dailyLimit * 2) break; // Get extra for filtering
     }
+
+    allLiveSlots = mergedJobs;
+    console.log(`[getDailyDrop] Merged live slots: ${allLiveSlots.length}`);
 
     // ── Pre-compute alumni counts from DiscoveredAlumni cache ──────────────
     const schoolCode = user.school_code || '';
     const alumniCountMap = {};
-    if (liveSlots.length > 0 && schoolCode) {
+    if (allLiveSlots.length > 0 && schoolCode) {
       try {
         const companyNames = liveSlots.map(s => s.company);
         // Fetch alumni records for these companies in one call
@@ -301,8 +402,8 @@ Deno.serve(async (req) => {
       return { ...slot, alumniCount: count, hasAlumni: count > 0 };
     };
 
-    // Assemble final slots — live results first, no curated sub-function needed
-    const slots = liveSlots.slice(0, dailyLimit).map(enrichWithAlumni);
+    // Assemble final slots — merged results from both sources
+    const slots = allLiveSlots.slice(0, dailyLimit).map(enrichWithAlumni);
 
     // Ensure at least 10 slots — pad from fallback if needed
     if (slots.length < Math.min(dailyLimit, 10)) {
