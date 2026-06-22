@@ -372,7 +372,9 @@ export default function FreeTierDashboard() {
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }} className="main-dashboard-container">
         {/* CLIFF Chat Widget - Floating for dashboard */}
         <CliffChatWidget mode="widget" onOpenUpgrade={triggerUpgrade} />
-...
+        
+        {/* 🚀 Daily Drop Feed - Job Opportunities */}
+        <CliffPrioritizedFeed user={user} schoolAbbr={schoolAbbr} onUpgrade={triggerUpgrade} />
       </div>
       )}
 
@@ -440,7 +442,6 @@ export default function FreeTierDashboard() {
           }}
         />
       )}
-
     </div>
   );
 }
