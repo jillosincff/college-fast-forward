@@ -523,7 +523,7 @@ export default function FreeTierDashboard() {
                 </span>
                 <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
               </div>
-              <CliffPrioritizedFeed user={user} />
+              <CliffPrioritizedFeed user={user} onUpgrade={(feature) => triggerUpgrade(feature)} />
             </div>
             
             <TeaserSignalsCard onUnlock={() => triggerUpgrade('Inside Track Signals')} college={college} theme={campusTheme} />

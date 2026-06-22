@@ -9,7 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { RefreshCw } from 'lucide-react';
 
-export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp }) {
+export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp, onUpgrade }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const schoolAbbr = schoolAbbrProp || user?.school_code?.toUpperCase() || 'UF';
@@ -165,7 +165,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
           <div>
             <p className="text-sm font-bold text-blue-900">🎯 Add your career goals to unlock your Daily Drop</p>
-            <p className="text-xs text-blue-700 mt-1">CLiFF will surface 5 curated opportunities every morning based on your target roles and industries.</p>
+            <p className="text-xs text-blue-700 mt-1">CLiFF will surface up to 15 curated opportunities every morning based on your target roles and industries.</p>
           </div>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))}
@@ -183,7 +183,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
             {[1, 2, 3].map(n => <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />)}
           </div>
         ) : allActioned ? (
-          <AllCaughtUpCard dropDate={payload?.drop_date} />
+          <AllCaughtUpCard dropDate={payload?.drop_date} onUpgrade={() => onUpgrade?.('Unlimited Daily Matches')} />
         ) : error ? (
           <div className="border border-dashed border-red-200 rounded-2xl p-8 text-center text-red-400 text-xs">
             Failed to load today's opportunities. Please refresh to try again.

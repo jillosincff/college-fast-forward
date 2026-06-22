@@ -280,10 +280,10 @@ Deno.serve(async (req) => {
     };
 
     // Assemble final 5 slots — live results first, no curated sub-function needed
-    const slots = liveSlots.slice(0, 5).map(enrichWithAlumni);
+    const slots = liveSlots.slice(0, 15).map(enrichWithAlumni);
 
     // Ensure at least 3 slots — pad from fallback if needed
-    if (slots.length < 3) {
+    if (slots.length < 10) {
       const internFallbackSlots = [
         { company: 'Deloitte', role: 'Summer Scholar Intern', jobDescription: 'Consulting and advisory internship program across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Google', role: 'STEP Intern', jobDescription: 'Summer internship program for first and second-year students.', jobSource: 'careers.google.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
@@ -316,7 +316,7 @@ Deno.serve(async (req) => {
           slots.push(fb);
           existing_companies.add(fb.company.toLowerCase());
         }
-        if (slots.length >= 5) break;
+        if (slots.length >= 15) break;
       }
       // Enrich fallback slots with alumni counts too
       for (let i = 0; i < slots.length; i++) {

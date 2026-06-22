@@ -91,9 +91,19 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }, []);
 
   const PAGE_SIZE = 8;
+  const FREE_DAILY_LIMIT = 15;
+  const FIRST_DAY_BONUS = 30;
   const [refreshKey, setRefreshKey] = useState(0);
   const [forceRefresh, setForceRefresh] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(null);
+
+  // Daily view cap — free users see max 15/day (30 on signup day), premium is unlimited
+  const isFirstDay = (() => {
+    if (!user?.created_date) return false;
+    return (Date.now() - new Date(user.created_date).getTime()) / (1000 * 60 * 60) < 24;
+  })();
+  const dailyLimit = isPremium ? Infinity : (isFirstDay ? FIRST_DAY_BONUS : FREE_DAILY_LIMIT);
+
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const seenForExclusionRef = useRef((() => {
@@ -328,6 +338,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   });
 
   const totalCount = targetOpportunities.length;
+  const cappedVisibleCount = isPremium ? visibleCount : Math.min(visibleCount, dailyLimit);
+  const limitReached = !isPremium && targetOpportunities.length > dailyLimit && cappedVisibleCount >= dailyLimit;
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
   const rawNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
   const totalNetworkCount = rawNetworkCount > 0
@@ -403,7 +415,13 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
               Your personalized feed of{' '}
               <span className="font-bold text-purple-600">{anyLoading ? '...' : targetOpportunities.length}</span> hand-picked opportunities
             </p>
-            <p className="text-xs text-blue-500 font-medium mt-1">🔄 New roles posted every 24 hours — check back tomorrow!</p>
+            {isPremium ? (
+              <p className="text-xs text-blue-500 font-medium mt-1">🔄 New roles posted every 24 hours — check back tomorrow!</p>
+            ) : (
+              <p className="text-xs text-blue-500 font-medium mt-1">
+                🔄 {cappedVisibleCount} of {dailyLimit} daily recommendations viewed — {limitReached ? 'limit reached' : 'come back tomorrow for a fresh batch'}
+              </p>
+            )}
           </div>
 
           {/* No goals nudge */}
@@ -468,7 +486,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             ) : targetOpportunities.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
-                  {targetOpportunities.slice(0, visibleCount).map((lead, idx) => (
+                  {targetOpportunities.slice(0, cappedVisibleCount).map((lead, idx) => (
                     <DiscoveryJobCard
                       key={lead.company || lead.companyName || idx}
                       lead={lead}
@@ -483,14 +501,29 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                     />
                   ))}
                 </div>
-                {visibleCount < targetOpportunities.length && (
+                {limitReached ? (
+                  <div className="flex flex-col items-center mt-6 p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl text-center">
+                    <span className="text-2xl mb-2">🔒</span>
+                    <p className="text-sm font-bold text-gray-900">You've reached today's match limit</p>
+                    <p className="text-xs text-gray-500 mt-1 mb-4 max-w-sm">
+                      You've seen all {dailyLimit} of your daily recommendations. Premium unlocks unlimited job matches, deeper insights, and instant resume tailoring.
+                    </p>
+                    <button
+                      onClick={() => window.dispatchEvent(new CustomEvent('cff:open-upgrade-modal', { detail: { source: 'daily_job_limit' } }))}
+                      style={{ minHeight: 'auto', minWidth: 'auto' }}
+                      className="px-6 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md"
+                    >
+                      Unlock Unlimited Matches →
+                    </button>
+                  </div>
+                ) : cappedVisibleCount < targetOpportunities.length && (
                   <div className="flex justify-center mt-4">
                     <button
-                      onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                      onClick={() => setVisibleCount(c => isPremium ? c + PAGE_SIZE : Math.min(c + PAGE_SIZE, dailyLimit))}
                       style={{ minHeight: 'auto', minWidth: 'auto' }}
                       className="px-6 py-2.5 rounded-xl text-sm font-bold border border-purple-300 bg-white text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-all"
                     >
-                      Load More ({targetOpportunities.length - visibleCount} remaining)
+                      Load More ({targetOpportunities.length - cappedVisibleCount} remaining{!isPremium && cappedVisibleCount + PAGE_SIZE > dailyLimit ? ' · daily limit' : ''})
                     </button>
                   </div>
                 )}
