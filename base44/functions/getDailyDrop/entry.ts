@@ -21,7 +21,7 @@ async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults
   const levelTerms = seeking === 'internship' ? INTERN_TERMS : seeking === 'fulltime' ? ENTRY_TERMS : [...INTERN_TERMS, ...ENTRY_TERMS];
   
   try {
-    // Coresignal public job postings API
+    // Coresignal job postings API v2 - simpler GET request with query params
     const params = new URLSearchParams({
       size: maxResults.toString(),
       job_title: role || 'analyst',
@@ -30,8 +30,9 @@ async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults
       date_from: '30',
     });
 
-    console.log('[fetchCoresignalJobs] URL:', `https://api.coresignal.com/cdapi/v1/job/search?${params.toString()}`);
-    const res = await fetch(`https://api.coresignal.com/cdapi/v1/job/search?${params.toString()}`, {
+    const url = `https://api.coresignal.com/cdapi/v2/job/search?${params.toString()}`;
+    console.log('[fetchCoresignalJobs] GET URL:', url);
+    const res = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
@@ -43,11 +44,14 @@ async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults
     if (!res.ok) {
       const errorText = await res.text().catch(() => 'no body');
       console.error('[fetchCoresignalJobs] API error:', res.status, errorText);
-      return [];
+      // Log the actual error for debugging
+      throw new Error(`Coresignal API ${res.status}: ${errorText}`);
     }
 
     const data = await res.json();
-    console.log('[fetchCoresignalJobs] Raw response:', JSON.stringify(data).slice(0, 200));
+    console.log('[fetchCoresignalJobs] Raw response structure:', Object.keys(data).join(', '));
+    console.log('[fetchCoresignalJobs] Raw response:', JSON.stringify(data).slice(0, 300));
+    // Coresignal v2 returns 'results' array
     const results = (data.results || []).map(job => ({
       name: job.company_name || job.company,
       job_title: job.job_title,
@@ -62,6 +66,7 @@ async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults
     return results;
   } catch (e) {
     console.error('[fetchCoresignalJobs] Fetch failed:', e.message);
+    console.error('[fetchCoresignalJobs] Stack:', e.stack);
     return [];
   }
 }
@@ -341,33 +346,40 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Secondary: Coresignal - ALWAYS fetch to diversify (Fantastic Jobs has stale results)
-    const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
-    if (coresignalApiKey) {
-      try {
-        console.log('[getDailyDrop] Fetching from Coresignal to diversify results...');
-        const coresignalJobs = await fetchCoresignalJobs({ 
-          role, 
-          location, 
-          seeking, 
-          apiKey: coresignalApiKey, 
-          maxResults: dailyLimit * 2 
-        });
-        console.log('[getDailyDrop] Coresignal returned %d jobs', coresignalJobs?.length || 0);
-        // Merge and dedupe by company+role
-        const existingKeys = new Set((freshJobs || []).map(j => `${j.name}||${j.job_title}`));
-        for (const job of coresignalJobs || []) {
-          const key = `${job.name}||${job.job_title}`;
-          if (!existingKeys.has(key)) {
-            freshJobs.push(job);
-            existingKeys.add(key);
-          }
-        }
-        console.log('[getDailyDrop] Merged total: %d jobs', freshJobs?.length || 0);
-      } catch (e) {
-        console.error('[getDailyDrop] Coresignal fetch failed:', e.message);
-      }
-    }
+    // Secondary: Coresignal - DISABLED due to API issues, fallback pool expanded instead
+    // const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
+    // console.log('[getDailyDrop] Coresignal API key exists:', !!coresignalApiKey);
+    // if (coresignalApiKey) {
+    //   try {
+    //     console.log('[getDailyDrop] BEFORE Coresignal fetch - Fantastic jobs count:', freshJobs?.length || 0);
+    //     console.log('[getDailyDrop] Fetching from Coresignal to diversify results...');
+    //     const coresignalJobs = await fetchCoresignalJobs({ 
+    //       role, 
+    //       location, 
+    //       seeking, 
+    //       apiKey: coresignalApiKey, 
+    //       maxResults: dailyLimit * 2 
+    //     });
+    //     console.log('[getDailyDrop] AFTER Coresignal fetch - got %d jobs', coresignalJobs?.length || 0);
+    //     // Merge and dedupe by company+role
+    //     const existingKeys = new Set((freshJobs || []).map(j => `${j.name}||${j.job_title}`));
+    //     let addedCount = 0;
+    //     for (const job of coresignalJobs || []) {
+    //       const key = `${job.name}||${job.job_title}`;
+    //       if (!existingKeys.has(key)) {
+    //         freshJobs.push(job);
+    //         existingKeys.add(key);
+    //         addedCount++;
+    //       }
+    //     }
+    //     console.log('[getDailyDrop] Added %d unique Coresignal jobs, new total: %d', addedCount, freshJobs?.length || 0);
+    //   } catch (e) {
+    //     console.error('[getDailyDrop] Coresignal fetch FAILED:', e.message);
+    //   }
+    // } else {
+    //   console.warn('[getDailyDrop] CORESIGNAL_API_KEY not set - skipping Coresignal');
+    // }
+    console.log('[getDailyDrop] Coresignal DISABLED - using Fantastic Jobs + expanded fallback pool');
 
     // Merge and deduplicate by company name
     const mergedCompanies = new Set();
