@@ -15,10 +15,10 @@ export default function DashboardBottomNav({ activeTab, onTabChange }) {
   return (
     <>
       {/* Desktop top tabs */}
-      <div className="hidden lg:flex" style={{
+      <div className="hidden xl:flex" style={{
         gap: 2, borderBottom: '1px solid #e5e7eb', marginBottom: 0,
         background: '#fff', maxWidth: 1100, margin: '0 auto',
-        padding: '0 12px',
+        padding: '0 12px', position: 'sticky', top: 56, zIndex: 90,
       }}>
         {TABS.map(tab => {
           const isActive = activeTab === tab.id;
@@ -44,7 +44,7 @@ export default function DashboardBottomNav({ activeTab, onTabChange }) {
       </div>
 
       {/* Mobile/tablet bottom nav */}
-      <div className="flex lg:hidden" style={{
+      <div className="flex xl:hidden" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         background: '#fff', borderTop: '1px solid #e5e7eb',
         padding: '8px 8px', paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
