@@ -24,7 +24,9 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const { data: dropData, isLoading, error, refetch } = useQuery({
     queryKey,
     queryFn: async () => {
+      console.log('[CliffPrioritizedFeed] Fetching daily drop...');
       const result = await getDailyDrop({ force_refresh: true });
+      console.log('[CliffPrioritizedFeed] Result:', result);
       return result;
     },
     staleTime: 0,
@@ -33,6 +35,11 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
     refetchOnMount: 'always',
     enabled: !!user?.id,
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[CliffPrioritizedFeed] State:', { isLoading, error, slotsCount: slots?.length, dropData });
+  }, [isLoading, error, slots, dropData]);
 
   // Listen for manual refresh requests from parent
   useEffect(() => {
