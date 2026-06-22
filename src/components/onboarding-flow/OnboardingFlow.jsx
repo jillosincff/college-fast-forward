@@ -1295,6 +1295,13 @@ CRITICAL RULES:
                     </div>
                   ))}
                 </div>
+                {/* Latency-as-a-Feature expectation setter */}
+                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #E2E8F0', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                  <span style={{ fontSize: 13, flexShrink: 0 }}>⚡</span>
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.5 }}>
+                    <strong style={{ color: TEXT }}>This first optimization is instant</strong> — on us. Future resume tailoring is batch-processed within 24 hours, or upgrade for <strong style={{ color: INDIGO }}>instant results every time.</strong>
+                  </p>
+                </div>
               </div>
 
               <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '16px 0 0', lineHeight: 1.6, fontStyle: 'italic' }}>
