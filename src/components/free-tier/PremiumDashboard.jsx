@@ -387,14 +387,22 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       {/* ── Main Content ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
+          {/* Hidden debug - remove after testing */}
+          <style>{`
+            .premium-ftd-grid {
+              display: grid !important;
+              grid-template-columns: minmax(0, 1fr) 340px !important;
+              gap: 24px !important;
+            }
+          `}</style>
 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Pipeline removed — accessible via Kanban modal only */}
           </div>
 
-          {/* Right Column (Desktop Only) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxHeight: 'none' }} className="premium-ftd-sidebar desktop-only">
+          {/* Right Column (Desktop Only) - NO height constraints */}
+          <aside style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '340px', flexShrink: 0 }} className="desktop-only">
             {/* Active Profile Status Pill */}
             <PremiumActiveProfilePill user={user} onPillClick={() => navRef.current?.openDropdown()} />
 
@@ -403,24 +411,24 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
             )}
 
-            <div id="cliff-chat-panel">
+            <div id="cliff-chat-panel" style={{ flex: '0 0 auto' }}>
               <PremiumHiringChat user={user} selectedSignal={selectedSignal} selectedJob={selectedJob} />
             </div>
-          </div>
+          </aside>
         </div>
       </div>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav user={user} onOpenPipeline={() => setShowKanbanModal(true)} />
 
-      {/* Fix sidebar overflow */}
+      {/* Fix sidebar overflow - ensure full height */}
       <style>{`
-        .premium-ftd-sidebar {
-          overflow: visible !important;
-          max-height: none !important;
-        }
+        .premium-ftd-sidebar,
+        .premium-ftd-sidebar > *,
         .premium-dashboard-container {
           overflow: visible !important;
+          max-height: none !important;
+          height: auto !important;
         }
       `}</style>
 
