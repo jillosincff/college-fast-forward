@@ -13,6 +13,8 @@ import LockedAlumniTeaser from '@/components/free-tier/LockedAlumniTeaser';
 import NetworkPulseStrip from '@/components/free-tier/NetworkPulseStrip';
 import FirstDraftReadyCard from '@/components/free-tier/FirstDraftReadyCard';
 import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
+import PipelineImpactBar from '@/components/free-tier/PipelineImpactBar';
+import ApplicationPipeline from '@/components/free-tier/ApplicationPipeline';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
@@ -467,12 +469,22 @@ export default function FreeTierDashboard() {
           />
         )}
 
+        {/* ── Pipeline Impact Bar — 3 simple metrics ── */}
+        <PipelineImpactBar user={user} theme={campusTheme} />
 
         {/* ── Main Grid ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="ftd-grid">
 
           {/* ── Left Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* ── Application Pipeline — the primary view ── */}
+            <ApplicationPipeline
+              userSchool={user?.school_name || college}
+              alumniCount={0}
+              isPremium={isPremium}
+              onUpgrade={(feature) => triggerUpgrade(feature)}
+            />
+
             {/* Zeigarnik close — unfinished outreach draft from onboarding */}
             <FirstDraftReadyCard
               theme={campusTheme}
@@ -489,8 +501,22 @@ export default function FreeTierDashboard() {
               onUnlock={() => triggerUpgrade('Warm Alumni Connection')}
             />
 
-            {/* Zero-Waste Prioritized Feed */}
+            {/* ── Discovery Feed — secondary: find more jobs to add to pipeline ── */}
             <div id="cliff-feed-section">
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                marginBottom: 12, marginTop: 4,
+              }}>
+                <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+                <span style={{
+                  fontFamily: dm, fontSize: 11, fontWeight: 700,
+                  color: '#6b7280', textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                }}>
+                  🚀 Find More Opportunities
+                </span>
+                <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+              </div>
               <CliffPrioritizedFeed user={user} />
             </div>
             

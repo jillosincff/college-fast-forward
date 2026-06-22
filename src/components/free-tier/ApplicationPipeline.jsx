@@ -501,23 +501,6 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
       `}</style>
       {/* School Pride Banner - Mobile Optimized */}
       <div style={{ padding: isMobile ? '12px 16px' : '16px 22px', background: '#f8fafc' }}>
-        {/* Back Arrow - Mobile Optimized */}
-        <button
-          onClick={() => window.history.back()}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'none', border: 'none',
-            color: '#6b7280', cursor: 'pointer',
-            marginBottom: 12, padding: 0, minHeight: 'auto',
-            transition: 'color 0.15s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = '#111827'}
-          onMouseLeave={e => e.currentTarget.style.color = '#6b7280'}
-        >
-          <span style={{ fontSize: isMobile ? 18 : 20 }}>←</span>
-          <span style={{ fontFamily: dm, fontSize: isMobile ? 13 : 14, fontWeight: 600 }}>Back</span>
-        </button>
-        
         <ParentNetworkBanner isMobile={isMobile} />
         
         {/* Pipeline Header - Stacks on mobile */}
