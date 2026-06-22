@@ -3,7 +3,6 @@ import { getDailyDrop } from '@/functions/getDailyDrop';
 import { refreshDailyDrop } from '@/functions/refreshDailyDrop';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
-import MobileSwipeStack from './MobileSwipeStack';
 import AllCaughtUpCard from './AllCaughtUpCard';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -12,6 +11,8 @@ import { RefreshCw } from 'lucide-react';
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp, onUpgrade }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
+  const [visibleCount, setVisibleCount] = useState(8); // pagination for infinite scroll
   const schoolAbbr = schoolAbbrProp || user?.school_code?.toUpperCase() || 'UF';
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
@@ -119,6 +120,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const visibleSlots = sortedSlots.filter(s => !actionedKeys.has(`${s.company}||${s.role}`));
   const allActioned = slots.length > 0 && visibleSlots.length === 0;
   const noGoals = !target_industries?.length && !effectiveRole;
+  const paginatedSlots = visibleSlots.slice(0, visibleCount);
+  const hasMore = visibleCount < visibleSlots.length;
+  const isPremium = dropData?.data?.is_premium || dropData?.is_premium;
+  const dailyLimit = dropData?.data?.daily_limit || dropData?.daily_limit || 15;
 
   return (
     <div className="w-full max-w-6xl mx-auto px-0 py-2 space-y-6">
@@ -179,8 +184,8 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
 
       <section className="space-y-3">
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[1, 2, 3].map(n => <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />)}
+          <div className="space-y-3">
+            {[1, 2, 3].map(n => <div key={n} className="h-40 bg-gray-100 rounded-2xl animate-pulse" />)}
           </div>
         ) : allActioned ? (
           <AllCaughtUpCard dropDate={payload?.drop_date} onUpgrade={() => onUpgrade?.('Unlimited Daily Matches')} />
@@ -190,28 +195,86 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
           </div>
         ) : visibleSlots.length > 0 ? (
           <>
-            <div className="flex items-center gap-3 text-[10px] text-gray-400 font-medium uppercase tracking-wider">
-              {visibleSlots.some(s => s.hasAlumni) && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block"></span>Network Opportunity</span>}
-              {visibleSlots.some(s => s.slotType === 'live') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse"></span>Live</span>}
-              {visibleSlots.some(s => s.slotType === 'curated') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block"></span>Curated</span>}
+            {/* View toggle + legend */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-3 text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                {visibleSlots.some(s => s.hasAlumni) && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block"></span>Network Opportunity</span>}
+                {visibleSlots.some(s => s.slotType === 'live') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse"></span>Live</span>}
+                {visibleSlots.some(s => s.slotType === 'curated') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block"></span>Curated</span>}
+              </div>
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'}`}
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                >
+                  ☰ List
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'}`}
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                >
+                  ▦ Grid
+                </button>
+              </div>
             </div>
-            <div className="block md:hidden">
-              <MobileSwipeStack leads={visibleSlots} onAddToPipeline={handleAddToPipeline} schoolAbbr={schoolAbbr} />
-            </div>
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {visibleSlots.map((lead, idx) => (
-                <DiscoveryJobCard
-                  key={`${lead.company}||${lead.role}||${idx}`}
-                  lead={lead}
-                  onAddToPipeline={handleAddToPipeline}
-                  onTrackOnly={handleTrackOnly}
-                  onSelect={setSelectedLead}
-                  schoolAbbr={schoolAbbr}
-                  onDismiss={() => handleDismiss(lead)}
-                  user={user}
-                />
-              ))}
-            </div>
+
+            {/* LinkedIn-style vertical scrollable feed (default) */}
+            {viewMode === 'list' ? (
+              <div className="space-y-3 max-w-2xl mx-auto">
+                {paginatedSlots.map((lead, idx) => (
+                  <DiscoveryJobCard
+                    key={`${lead.company}||${lead.role}||${idx}`}
+                    lead={lead}
+                    onAddToPipeline={handleAddToPipeline}
+                    onTrackOnly={handleTrackOnly}
+                    onSelect={setSelectedLead}
+                    schoolAbbr={schoolAbbr}
+                    onDismiss={() => handleDismiss(lead)}
+                    user={user}
+                    compact
+                  />
+                ))}
+                {hasMore && (
+                  <button
+                    onClick={() => setVisibleCount(c => c + 8)}
+                    className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+                    style={{ minHeight: 'auto' }}
+                  >
+                    Load More ({visibleSlots.length - visibleCount} remaining)
+                  </button>
+                )}
+                {!isPremium && visibleSlots.length >= dailyLimit && (
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 text-center">
+                    <p className="text-sm font-bold text-purple-900">🎯 That's your {dailyLimit} daily opportunities</p>
+                    <p className="text-xs text-purple-700 mt-1">Premium unlocks unlimited matches + instant resume tailoring.</p>
+                    <button
+                      onClick={() => onUpgrade?.('Unlimited Daily Matches')}
+                      className="mt-3 px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer"
+                      style={{ minHeight: 'auto' }}
+                    >
+                      ⚡ Upgrade to Premium
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {paginatedSlots.map((lead, idx) => (
+                  <DiscoveryJobCard
+                    key={`${lead.company}||${lead.role}||${idx}`}
+                    lead={lead}
+                    onAddToPipeline={handleAddToPipeline}
+                    onTrackOnly={handleTrackOnly}
+                    onSelect={setSelectedLead}
+                    schoolAbbr={schoolAbbr}
+                    onDismiss={() => handleDismiss(lead)}
+                    user={user}
+                  />
+                ))}
+              </div>
+            )}
           </>
         ) : (
           <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">

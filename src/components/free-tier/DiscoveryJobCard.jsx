@@ -7,7 +7,7 @@ import InAppApplyModal from './InAppApplyModal';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
-export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill, user }) {
+export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill, user, compact }) {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [appliedExternally, setAppliedExternally] = useState(false);
@@ -144,7 +144,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
         </div>
       )}
 
-      <div className="p-5 flex flex-col gap-3 flex-1" style={{ overflow: 'visible' }}>
+      <div className={`flex flex-col gap-3 flex-1 ${compact ? 'p-4' : 'p-5'}`} style={{ overflow: 'visible' }}>
 
         {/* Header */}
         <div className="flex justify-between items-start">
@@ -157,6 +157,22 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
               )}
               {isPinned && (
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">📌 Saved</span>
+              )}
+              {/* LinkedIn-style badges */}
+              {jobUrl && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 flex items-center gap-0.5">
+                  ⚡ Easy Apply
+                </span>
+              )}
+              {hasAlumniSignal && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-0.5">
+                  👥 Alumni Present
+                </span>
+              )}
+              {(lead.alumniCount >= 3 || lead.leadTier === 'target') && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-0.5">
+                  🎯 High Match
+                </span>
               )}
             </div>
           </div>
