@@ -5,13 +5,7 @@ import { navigate, useParams } from '@/components/utils/navigation';
 import DashboardNav from '@/components/dashboard-v2/DashboardNav';
 import ProfileCard from '@/components/profile/ProfileCard';
 import DarkFooter from '@/components/common/DarkFooter';
-import NotificationSettings from '@/components/notifications/NotificationSettings';
-import ParentProfileNav from '@/components/profile/parent/ParentProfileNav';
-import ParentProfileHeader from '@/components/profile/parent/ParentProfileHeader';
-import ParentVisibilityCard from '@/components/profile/parent/ParentVisibilityCard';
-import ParentIntroCard from '@/components/profile/parent/ParentIntroCard';
-import ParentStudentCard from '@/components/profile/parent/ParentStudentCard';
-import ParentNotificationCard from '@/components/profile/parent/ParentNotificationCard';
+import { base44 } from '@/api/base44Client';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
@@ -20,11 +14,11 @@ export default function Profile() {
   const { id } = useParams();
 
   const [profileUser, setProfileUser] = useState(null);
+  const [parentCompany, setParentCompany] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Inject fonts
     if (!document.getElementById('profile-fonts')) {
       const link = document.createElement('link');
       link.id = 'profile-fonts';
@@ -38,16 +32,23 @@ export default function Profile() {
     const fetchProfile = async () => {
       setIsLoading(true);
       setError(null);
+      setParentCompany(null);
 
       if (!id && currentUser) {
         setProfileUser(currentUser);
+        // Fetch parent company this student contributed during onboarding
+        try {
+          const records = await base44.entities.ParentNetworkProfile.filter({ created_by_id: currentUser.id });
+          if (records?.length > 0) {
+            setParentCompany(records[0].company_name);
+          }
+        } catch (e) { /* non-blocking */ }
         setIsLoading(false);
         return;
       }
 
       const profileId = id || currentUser?.id;
       if (!profileId) {
-        // Still waiting for auth to resolve — don't error yet
         if (authIsLoading) return;
         setIsLoading(false);
         return;
@@ -56,6 +57,13 @@ export default function Profile() {
       try {
         const userToDisplay = await User.get(profileId);
         setProfileUser(userToDisplay);
+        // Fetch parent company for this profile owner
+        try {
+          const records = await base44.entities.ParentNetworkProfile.filter({ created_by_id: profileId });
+          if (records?.length > 0) {
+            setParentCompany(records[0].company_name);
+          }
+        } catch (e) { /* non-blocking */ }
       } catch (err) {
         console.error('Failed to fetch profile:', err);
         if (currentUser && currentUser.id === profileId) {
@@ -71,13 +79,10 @@ export default function Profile() {
     if (!authIsLoading) fetchProfile();
   }, [id, currentUser?.id, authIsLoading]);
 
-  const isParent = currentUser?.persona === 'parent' || currentUser?.roles?.includes('parent');
-
   if ((authIsLoading && !currentUser) || isLoading) {
-    const bg = isParent ? '#0A0A0A' : '#f4f2ee';
     return (
-      <div style={{ minHeight: '100vh', background: bg, display: 'flex', flexDirection: 'column' }}>
-        {isParent ? <ParentProfileNav user={currentUser} /> : <DashboardNav user={currentUser} currentPage="Profile" />}
+      <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
+        <DashboardNav user={currentUser} currentPage="Profile" />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -87,10 +92,9 @@ export default function Profile() {
   }
 
   if (error || !profileUser) {
-    const bg = isParent ? '#0A0A0A' : '#f4f2ee';
     return (
-      <div style={{ minHeight: '100vh', background: bg, display: 'flex', flexDirection: 'column' }}>
-        {isParent ? <ParentProfileNav user={currentUser} /> : <DashboardNav user={currentUser} currentPage="Profile" />}
+      <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
+        <DashboardNav user={currentUser} currentPage="Profile" />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', padding: 32 }}>
             <p style={{ fontFamily: dmSans, fontSize: 15, color: '#888' }}>{error || 'Please log in to see your profile.'}</p>
@@ -106,43 +110,13 @@ export default function Profile() {
   }
 
   const isMyProfile = currentUser && profileUser && currentUser.id === profileUser.id;
-  const showParentProfile = isParent && isMyProfile && !id;
-
-  // Parent-specific dark profile
-  if (showParentProfile) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
-        <ParentProfileNav user={currentUser} currentPage="Profile" />
-        <main style={{ flex: 1, maxWidth: 700, margin: '0 auto', width: '100%', padding: '24px 12px 80px', overflowY: 'auto', boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <ParentProfileHeader user={profileUser} />
-            <ParentVisibilityCard user={profileUser} />
-            <ParentIntroCard user={profileUser} />
-            <ParentStudentCard user={profileUser} />
-            <ParentNotificationCard user={profileUser} />
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // Default profile (students, alumni, etc.)
-  const showNotifSettings = isMyProfile && (
-    profileUser.persona === 'alumni' || profileUser.roles?.includes('alumni')
-  );
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
       <DashboardNav user={currentUser} currentPage="Profile" />
 
       <main style={{ flex: 1, maxWidth: 860, margin: '0 auto', width: '100%', padding: '32px 20px 60px' }}>
-        <ProfileCard user={profileUser} isMyProfile={isMyProfile} />
-
-        {showNotifSettings && (
-          <div style={{ marginTop: 24 }}>
-            <NotificationSettings user={profileUser} />
-          </div>
-        )}
+        <ProfileCard user={profileUser} parentCompany={parentCompany} isMyProfile={isMyProfile} />
       </main>
 
       <DarkFooter />
