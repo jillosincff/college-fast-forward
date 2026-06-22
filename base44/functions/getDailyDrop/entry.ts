@@ -461,9 +461,19 @@ Deno.serve(async (req) => {
     // Slots from Fantastic Jobs (FRESH - last 24 hours ONLY)
     let allLiveSlots = [];
     const fantasticApiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
-    const role = targetRole || (targetIndustries.length > 0 ? `${targetIndustries[0]} analyst` : 'analyst');
+    
+    // ROTATE ROLE QUERIES for variety - alternate between exact role and broader terms
+    const roleVariants = [
+      targetRole || (targetIndustries.length > 0 ? `${targetIndustries[0]} analyst` : 'analyst'),
+      'marketing',
+      'business analyst',
+      'coordinator',
+    ];
+    const today = new Date().getDate();
+    const roleIndex = today % roleVariants.length; // Different role each day
+    const role = roleVariants[roleIndex];
 
-    console.log(`[getDailyDrop] Fetching FRESH jobs (24h only): role=${role}, location=${location}, seeking=${seeking}, TEST_MODE=${TEST_FALLBACK_ONLY}`);
+    console.log(`[getDailyDrop] Fetching jobs: role=${role} (variant ${roleIndex + 1}/4), location=${location}, seeking=${seeking}`);
     
     let freshJobs = [];
     let modifiedJobs = [];
@@ -552,7 +562,14 @@ Deno.serve(async (req) => {
     console.log('[getDailyDrop] All sources: fresh=%d, modified=%d, backfill=%d, total=%d, eligible=%d', 
       freshJobs?.length || 0, modifiedJobs?.length || 0, backfillJobs?.length || 0, allJobs.length, eligibleJobs.length);
     
-    for (const job of eligibleJobs) {
+    // AGGRESSIVE SHUFFLE before dedup - prevents same companies always appearing first
+    const shuffledEligible = [...eligibleJobs];
+    for (let i = shuffledEligible.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledEligible[i], shuffledEligible[j]] = [shuffledEligible[j], shuffledEligible[i]];
+    }
+    
+    for (const job of shuffledEligible) {
       const companyKey = job.name.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (mergedCompanies.has(companyKey)) continue;
       mergedCompanies.add(companyKey);
@@ -609,15 +626,23 @@ Deno.serve(async (req) => {
     // Assemble final slots — merged results from both sources
     let slots = allLiveSlots.slice(0, dailyLimit).map(enrichWithAlumni);
 
-    // FALLBACK-HEAVY: if live results are sparse, aggressively fill from fallback pool
+    // FALLBACK-HEAVY: if live results are sparse OR if we're getting repeats, use more fallback
     const FALLBACK_HEAVY_MODE = needsMoreFromFallback || allLiveSlots.length < dailyLimit;
+    
+    // FORCE VARIETY: If > 50% of slots are from fallback already, go 100% fallback for this drop
+    const liveCount = slots.filter(s => s.isLiveResult).length;
+    const fallbackRatio = (slots.length - liveCount) / slots.length;
+    const FORCE_FULL_FALLBACK = fallbackRatio > 0.5 && slots.length >= 5;
     
     if (FALLBACK_HEAVY_MODE) {
       console.log('[getDailyDrop] FALLBACK-HEAVY MODE: Filling %d slots from %d live results', dailyLimit - slots.length, allLiveSlots.length);
     }
+    if (FORCE_FULL_FALLBACK) {
+      console.log('[getDailyDrop] FORCE FULL FALLBACK: %d%% fallback ratio detected, using curated pool for variety', (fallbackRatio * 100).toFixed(0));
+    }
     
     // Ensure at least 10 slots — pad from fallback if needed
-    if (slots.length < Math.min(dailyLimit, 10)) {
+    if (slots.length < Math.min(dailyLimit, 10) || FORCE_FULL_FALLBACK) {
       // MASSIVELY expanded fallback pool with 150+ companies across industries
       const internFallbackSlots = [
         { company: 'Deloitte', role: 'Summer Scholar Intern', jobDescription: 'Consulting and advisory internship program across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
@@ -791,7 +816,8 @@ Deno.serve(async (req) => {
       }
       
       // FALLBACK-HEAVY MODE: prioritize filling from fallback pool when live results are sparse
-      const targetSlots = FALLBACK_HEAVY_MODE ? dailyLimit : Math.min(dailyLimit, slots.length + Math.ceil((dailyLimit - slots.length) * 0.5));
+      // FORCE FULL FALLBACK: when live results are repetitive, use 100% curated pool
+      const targetSlots = FORCE_FULL_FALLBACK ? dailyLimit : (FALLBACK_HEAVY_MODE ? dailyLimit : Math.min(dailyLimit, slots.length + Math.ceil((dailyLimit - slots.length) * 0.5)));
       
       // Filter out companies already in slots or in 14-day cooldown
       const existingCompanyKeys = new Set(slots.map(s => s.company.toLowerCase().replace(/[^a-z0-9]/g, '')));
