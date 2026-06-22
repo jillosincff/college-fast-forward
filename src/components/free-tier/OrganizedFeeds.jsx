@@ -425,6 +425,13 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             )}
           </div>
 
+          {/* Subtle guidance note */}
+          {!noGoals && !anyLoading && targetOpportunities.length > 0 && (
+            <p className="text-[11px] text-gray-400 font-medium italic mb-3">
+              ✨ These are hand-picked matches based on your profile. Tap any role for more options.
+            </p>
+          )}
+
           {/* No goals nudge */}
           {noGoals && !anyLoading && (
             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">

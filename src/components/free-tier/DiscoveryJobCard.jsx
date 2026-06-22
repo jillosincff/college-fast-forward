@@ -47,6 +47,8 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
   const jobTitle = lead.job_title || lead.role || '';
   const jobDesc = lead.jobDescription || lead.description || lead.hiring_description || '';
   const jobUrl = lead.job_url || lead.jobSource || '';
+  const location = lead.location || lead.location_text || '';
+  const salary = lead.salary_range || lead.salary || '';
 
   const handleTrackOnly = (path = 'cold_apply') => {
     if (onTrackOnly) onTrackOnly(lead, path);
@@ -181,18 +183,31 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
           )}
         </div>
 
-        {/* Job description */}
-        {jobDesc ? (
-          <div className="text-xs text-gray-600 bg-gray-50 rounded-lg p-3 border border-gray-100">
-            <p className="leading-relaxed text-sm line-clamp-2">{jobDesc}</p>
-            {jobDesc.length > 100 && (
-              <div className="mt-1.5">
-                <button onClick={() => setShowFullDesc(true)} className="text-[11px] text-purple-600 font-bold hover:underline cursor-pointer" style={{ minHeight: 'auto', minWidth: 'auto' }}>Read more →</button>
-              </div>
-            )}
+        {/* Standardized metadata row — always shown for consistency */}
+        {(location || salary) && (
+          <div className="flex items-center gap-3 text-[11px] text-gray-400 font-medium">
+            {location && <span className="flex items-center gap-0.5 truncate">📍 {location}</span>}
+            {salary && <span className="flex items-center gap-0.5 truncate">💰 {salary}</span>}
           </div>
-        ) : (
-          <div className="text-xs text-gray-400 italic bg-gray-50 rounded-lg p-3 border border-gray-100">No description available.</div>
+        )}
+
+        {/* Job description — single line in compact mode, boxed in full mode */}
+        {jobDesc && (
+          compact ? (
+            <p className="text-xs text-gray-500 line-clamp-1 leading-relaxed">
+              {jobDesc}
+              {jobDesc.length > 100 && (
+                <button onClick={() => setShowFullDesc(true)} className="text-purple-600 font-bold hover:underline ml-1 cursor-pointer" style={{ minHeight: 'auto', minWidth: 'auto' }}>more</button>
+              )}
+            </p>
+          ) : (
+            <div className="text-xs text-gray-600 bg-gray-50 rounded-lg p-3 border border-gray-100">
+              <p className="leading-relaxed text-sm line-clamp-2">{jobDesc}</p>
+              {jobDesc.length > 100 && (
+                <button onClick={() => setShowFullDesc(true)} className="text-[11px] text-purple-600 font-bold hover:underline mt-1.5 cursor-pointer" style={{ minHeight: 'auto', minWidth: 'auto' }}>Read more →</button>
+              )}
+            </div>
+          )
         )}
 
         {/* ── SMART CONNECTION FLOW ── */}
@@ -283,35 +298,37 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
             </div>
           )}
 
-          {/* Secondary actions — always available once alumni phase is resolved */}
+          {/* Secondary actions — clear hierarchy: solid "Apply & Track" + subtle text links */}
           {(alumniPhase === 'found' || alumniPhase === 'idle') && (
-            <div className="flex gap-2 pt-1">
-              {alumniPhase === 'idle' && (
-                <button
-                  onClick={handleLoadInsight}
-                  className="flex-1 py-2 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-[11px] font-semibold hover:bg-amber-100 transition-colors cursor-pointer"
-                  style={{ minHeight: 'auto' }}
-                >
-                  💡 Stand-Out Tips
-                </button>
-              )}
+            <div className="space-y-2 pt-1">
               <button
                 onClick={() => setShowApplyModal(true)}
-                className="flex-1 py-2 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-[11px] font-semibold hover:bg-indigo-100 transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer active:scale-95"
                 style={{ minHeight: 'auto' }}
               >
-                📋 Apply &amp; Track
+                📋 Apply &amp; Track via CFF
               </button>
-              {jobUrl && (
-                <button
-                  onClick={handleApplyExternal}
-                  className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-400 text-[11px] font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
-                  style={{ minHeight: 'auto', minWidth: 'auto' }}
-                  title="Apply on company site"
-                >
-                  {appliedExternally ? '✅' : '↗'}
-                </button>
-              )}
+              <div className="flex items-center justify-between gap-2">
+                {alumniPhase === 'idle' && (
+                  <button
+                    onClick={handleLoadInsight}
+                    className="text-[11px] text-amber-600 font-semibold hover:underline cursor-pointer"
+                    style={{ minHeight: 'auto', minWidth: 'auto' }}
+                  >
+                    💡 Stand-Out Tips
+                  </button>
+                )}
+                {jobUrl && (
+                  <button
+                    onClick={handleApplyExternal}
+                    className="text-[11px] text-gray-400 font-semibold hover:text-gray-600 cursor-pointer flex items-center gap-0.5"
+                    style={{ minHeight: 'auto', minWidth: 'auto' }}
+                    title="Apply on company site"
+                  >
+                    Apply on site {appliedExternally ? '✅' : '↗'}
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -166,6 +166,12 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
         </div>
       </div>
 
+      {!noGoals && !isLoading && visibleSlots.length > 0 && (
+        <p className="text-[11px] text-gray-400 font-medium italic">
+          ✨ These are hand-picked matches based on your profile. Tap any role for more options.
+        </p>
+      )}
+
       {noGoals && !isLoading && (
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
           <div>
