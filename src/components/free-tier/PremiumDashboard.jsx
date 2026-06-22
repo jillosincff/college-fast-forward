@@ -484,9 +484,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             {/* Active Profile Status Pill */}
             <PremiumActiveProfilePill user={user} onPillClick={() => navRef.current?.openDropdown()} />
 
-            {/* Compact Application Summary Card */}
-            <ApplicationSummaryCard user={user} onUpgrade={() => {}} />
-
             {/* Parent Network — unlocked if ≥20 parents */}
             {(parentCount === null || parentCount >= 20) && (
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
