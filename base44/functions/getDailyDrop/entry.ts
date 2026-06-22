@@ -347,6 +347,9 @@ Deno.serve(async (req) => {
       console.log('[getDailyDrop] TEST MODE: Bypassing APIs, using fallback pool only');
     }
 
+    // FALLBACK-HEAVY MODE: if APIs return < 60% of daily limit, aggressively use fallback pool
+    const MINIMUM_LIVE_RATIO = 0.6; // At least 60% from live APIs, rest from fallback
+    
     // Merge and deduplicate by COMPANY ONLY (stricter dedup)
     const mergedCompanies = new Set();
     const mergedJobs = [];
@@ -383,7 +386,9 @@ Deno.serve(async (req) => {
     }
 
     allLiveSlots = mergedJobs;
-    console.log(`[getDailyDrop] Merged live slots: ${allLiveSlots.length}`);
+    const minLiveNeeded = Math.floor(dailyLimit * MINIMUM_LIVE_RATIO);
+    const needsMoreFromFallback = allLiveSlots.length < minLiveNeeded;
+    console.log('[getDailyDrop] Live slots: %d, dailyLimit: %d, minLiveNeeded: %d, FALLBACK_HEAVY: %s', allLiveSlots.length, dailyLimit, minLiveNeeded, needsMoreFromFallback);
 
     // ── Pre-compute alumni counts from DiscoveredAlumni cache ──────────────
     const schoolCode = user.school_code || '';
@@ -410,11 +415,14 @@ Deno.serve(async (req) => {
     };
 
     // Assemble final slots — merged results from both sources
-    const slots = allLiveSlots.slice(0, dailyLimit).map(enrichWithAlumni);
+    let slots = allLiveSlots.slice(0, dailyLimit).map(enrichWithAlumni);
 
-    // Add 10% exploration slots (jobs outside exact filters for variety)
-    const explorationCount = Math.floor(dailyLimit * 0.1);
-    const hasExploration = explorationCount > 0 && slots.length >= explorationCount;
+    // FALLBACK-HEAVY: if live results are sparse, aggressively fill from fallback pool
+    const FALLBACK_HEAVY_MODE = needsMoreFromFallback || allLiveSlots.length < dailyLimit;
+    
+    if (FALLBACK_HEAVY_MODE) {
+      console.log('[getDailyDrop] FALLBACK-HEAVY MODE: Filling %d slots from %d live results', dailyLimit - slots.length, allLiveSlots.length);
+    }
     
     // Ensure at least 10 slots — pad from fallback if needed
     if (slots.length < Math.min(dailyLimit, 10)) {
@@ -590,6 +598,9 @@ Deno.serve(async (req) => {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
       
+      // FALLBACK-HEAVY MODE: prioritize filling from fallback pool when live results are sparse
+      const targetSlots = FALLBACK_HEAVY_MODE ? dailyLimit : Math.min(dailyLimit, slots.length + Math.ceil((dailyLimit - slots.length) * 0.5));
+      
       // Filter out companies already in slots or in 14-day cooldown
       const existingCompanyKeys = new Set(slots.map(s => s.company.toLowerCase().replace(/[^a-z0-9]/g, '')));
       for (const fb of shuffled) {
@@ -599,10 +610,10 @@ Deno.serve(async (req) => {
         
         slots.push(fb);
         existingCompanyKeys.add(fbCompanyKey);
-        if (slots.length >= dailyLimit) break;
+        if (slots.length >= targetSlots) break;
       }
       
-      console.log('[getDailyDrop] Added %d fallback slots (cooldown-filtered)', slots.length - (slots.filter(s => !s.isLiveResult).length));
+      console.log('[getDailyDrop] Added %d fallback slots (cooldown-filtered, target: %d)', slots.length - (slots.filter(s => !s.isLiveResult).length), targetSlots);
       
       // Enrich fallback slots with alumni counts too
       for (let i = 0; i < slots.length; i++) {
