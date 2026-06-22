@@ -124,115 +124,79 @@ function jobMatchesLocation(job, city, stateName) {
   return false;
 }
 
-async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, maxCompanies = 15 }) {
-  console.log('[fetchLiveJobs] START - role:', role, 'location:', location, 'seeking:', seeking);
-  const NORMALIZE_SIZE = { startup:'startup', mid:'mid', midmarket:'mid', large:'large', enterprise:'large' };
-  const sizeList = (Array.isArray(companySizes) ? companySizes : (companySizes ? [companySizes] : []))
-    .map(s => NORMALIZE_SIZE[String(s).toLowerCase()]).filter(Boolean);
-  const strictSize = sizeList.length === 1 ? sizeList[0] : null;
-
-  const roleDesc = role || '';
-  const params = new URLSearchParams({
-    time_frame: '6m', limit: '200',
-    include_basic_organization_details: 'true',
-    title_advanced: buildTitleQuery(roleDesc, seeking),
-  });
-  const locQuery = buildLocationQuery(location);
-  if (locQuery) params.set('location', locQuery);
-
-  console.log('[fetchLiveJobs] URL params:', params.toString());
-
-  const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
-  const prefCity = locParts[0] || null;
-  const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
-
-  console.log('[fetchLiveJobs] Fetching from Fantastic Jobs API...');
-  const apiRes = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
-    headers: { 'Authorization': `Bearer ${apiKey}` },
-  });
-  console.log('[fetchLiveJobs] API response status:', apiRes.status);
-  if (!apiRes.ok) {
-    const errorText = await apiRes.text().catch(() => 'no body');
-    console.error('[fetchLiveJobs] API error:', apiRes.status, errorText);
-    throw new Error(`Fantastic Jobs API ${apiRes.status}: ${errorText}`);
-  }
-  const jobs = await apiRes.json();
-  console.log('[fetchLiveJobs] Raw response count:', Array.isArray(jobs) ? jobs.length : typeof jobs);
-
-  // Shuffle jobs for randomness
-  const jobList = Array.isArray(jobs) ? [...jobs] : [];
-  for (let i = jobList.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [jobList[i], jobList[j]] = [jobList[j], jobList[i]];
-  }
-
-  const seenOrgs = new Set();
-  const companies = [];
-  let filteredCount = 0;
-  for (const job of jobList) {
-    const org = job.organization;
-    const title = job.title?.trim();
-    if (!org || !title || !job.url) {
-      console.log('[fetchLiveJobs] Skip: missing org/title/url');
-      continue;
-    }
-    const isIntern = INTERN_RE.test(title);
-    if (!isIntern && SENIOR_RE.test(title)) {
-      console.log('[fetchLiveJobs] Skip senior:', title);
-      continue;
-    }
-    if (seeking === 'internship' && !isIntern) {
-      console.log('[fetchLiveJobs] Skip non-intern for internship seeker:', title);
-      continue;
-    }
-    if (seeking === 'fulltime' && isIntern) {
-      console.log('[fetchLiveJobs] Skip intern for fulltime seeker:', title);
-      continue;
-    }
-    const exp = job.ai_experience_level;
-    const entryTitle = isIntern || /junior|coordinator|entry|graduate|trainee|new grad|assistant|analyst/i.test(title);
-    if (exp && exp !== '0-2' && !entryTitle) {
-      console.log('[fetchLiveJobs] Skip wrong experience:', exp, title);
-      continue;
-    }
-    if (!jobMatchesLocation(job, prefCity, prefState)) {
-      console.log('[fetchLiveJobs] Skip location mismatch:', job.locations_derived);
-      continue;
-    }
-    if (job.org_linkedin_recruitment_agency_derived === true) {
-      console.log('[fetchLiveJobs] Skip recruitment agency');
-      continue;
-    }
-    const size = sizeFromHeadcount(job.org_linkedin_headcount);
-    if (strictSize && size && size !== strictSize) {
-      console.log('[fetchLiveJobs] Skip wrong size:', size, 'expected:', strictSize);
-      continue;
-    }
-    if (strictSize && !size) {
-      console.log('[fetchLiveJobs] Skip unknown size with strict filter');
-      continue;
-    }
-    const orgKey = org.toLowerCase();
-    if (seenOrgs.has(orgKey)) {
-      console.log('[fetchLiveJobs] Skip duplicate:', org);
-      continue;
-    }
-    seenOrgs.add(orgKey);
-    console.log('[fetchLiveJobs] ACCEPT:', org, '-', title);
-    companies.push({
-      name: org,
-      job_title: title,
-      hiring_description: job.ai_core_responsibilities || job.ai_requirements_summary || `${org} is hiring for ${title}.`,
-      job_url: job.url,
-      size: size || undefined,
-      location: job.locations_derived?.[0] || location || '',
-      salary_range: null,
-      posted_date: job.date_posted || null,
+// ── Fantastic Jobs with FRESH filter (last 24 hours only) ──────────
+async function fetchFreshJobs({ role, location, seeking, apiKey, maxResults = 30 }) {
+  console.log('[fetchFreshJobs] START - role:', role, 'location:', location, 'seeking:', seeking);
+  
+  try {
+    // Use 24h time frame for FRESH jobs only
+    const params = new URLSearchParams({
+      time_frame: '24h',  // ONLY last 24 hours
+      limit: '100',
+      include_basic_organization_details: 'true',
+      title_advanced: buildTitleQuery(role, seeking),
     });
-    if (companies.length >= maxCompanies) break;
+    
+    const locQuery = buildLocationQuery(location);
+    if (locQuery) params.set('location', locQuery);
+    
+    console.log('[fetchFreshJobs] URL:', `https://data.fantastic.jobs/v1/active-ats?${params.toString()}`);
+    
+    const res = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}` },
+    });
+    
+    console.log('[fetchFreshJobs] API status:', res.status);
+    
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => 'no body');
+      console.error('[fetchFreshJobs] API error:', res.status, errorText);
+      return [];
+    }
+    
+    const jobs = await res.json();
+    console.log('[fetchFreshJobs] Raw count:', Array.isArray(jobs) ? jobs.length : 0);
+    
+    // Filter and normalize
+    const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
+    const prefCity = locParts[0] || null;
+    const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
+    
+    const filtered = (Array.isArray(jobs) ? jobs : [])
+      .filter(job => {
+        const title = job.title?.trim();
+        const org = job.organization;
+        if (!org || !title || !job.url) return false;
+        // Skip senior
+        if (SENIOR_RE.test(title)) return false;
+        // Skip agency
+        if (job.org_linkedin_recruitment_agency_derived === true) return false;
+        // Match internship/fulltime
+        const isIntern = INTERN_RE.test(title);
+        if (seeking === 'internship' && !isIntern) return false;
+        if (seeking === 'fulltime' && isIntern) return false;
+        // Check location
+        if (!jobMatchesLocation(job, prefCity, prefState)) return false;
+        return true;
+      })
+      .slice(0, maxResults)
+      .map(job => ({
+        name: job.organization,
+        job_title: job.title,
+        hiring_description: job.ai_core_responsibilities || job.ai_requirements_summary || `${job.organization} is hiring for ${job.title}`,
+        job_url: job.url,
+        location: job.locations_derived?.[0] || location || '',
+        posted_date: job.date_posted || null,
+        salary_range: null,
+        source: 'fantastic',
+      }));
+    
+    console.log('[fetchFreshJobs] Filtered to %d jobs', filtered.length);
+    return filtered;
+  } catch (e) {
+    console.error('[fetchFreshJobs] Error:', e.message);
+    return [];
   }
-  console.log('[fetchLiveJobs] Filtered %d -> %d companies', jobList.length, companies.length);
-  return companies;
 }
 
 // Reset time: 4AM Eastern
@@ -346,42 +310,38 @@ Deno.serve(async (req) => {
     // Size pref - but allow all sizes to get more results
     const sizeArray = ['large', 'mid', 'startup']; // Ignore size filter to maximize results
 
-    // Slots from multiple sources: Fantastic Jobs + Coresignal
+    // Slots from Fantastic Jobs (FRESH - last 24 hours ONLY)
     let allLiveSlots = [];
     const fantasticApiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
-    const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
     const role = targetRole || (targetIndustries.length > 0 ? `${targetIndustries[0]} analyst` : 'analyst');
 
-    // Fetch from Fantastic Jobs API
-    console.log(`[getDailyDrop] Fetching jobs: role=${role}, location=${location}, seeking=${seeking}, sizes=${sizeArray.join(',')}`);
+    console.log(`[getDailyDrop] Fetching FRESH jobs (24h only): role=${role}, location=${location}, seeking=${seeking}`);
     
-    let fantasticJobs = [];
+    let freshJobs = [];
     if (!fantasticApiKey) {
       console.warn('[getDailyDrop] No Fantastic API key');
     } else {
       try {
-        console.log('[getDailyDrop] Fetching Fantastic Jobs...');
-        fantasticJobs = await Promise.race([
-          fetchLiveJobs({ role, location, companySizes: sizeArray, seeking, apiKey: fantasticApiKey, maxCompanies: dailyLimit }),
+        console.log('[getDailyDrop] Fetching fresh jobs from Fantastic Jobs (24h window)...');
+        freshJobs = await Promise.race([
+          fetchFreshJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 }),
           new Promise((_, r) => setTimeout(() => {
             console.error('[getDailyDrop] Fantastic Jobs TIMEOUT after 25s');
             return [];
           }, 25000)),
         ]);
-        console.log('[getDailyDrop] Fantastic Jobs result: %d companies', fantasticJobs?.length || 0);
+        console.log('[getDailyDrop] Fresh jobs result: %d companies', freshJobs?.length || 0);
       } catch (e) {
         console.error('[getDailyDrop] Fantastic Jobs fetch failed:', e.message);
       }
     }
 
-    const coresignalJobs = []; // Coresignal API endpoint returns 404 - disabled
-
     // Merge and deduplicate by company name
     const mergedCompanies = new Set();
     const mergedJobs = [];
     
-    // Prioritize unseen companies, mix sources
-    const allJobs = [...fantasticJobs, ...coresignalJobs];
+    // Prioritize unseen companies from fresh jobs
+    const allJobs = freshJobs || [];
     const freshFirst = allJobs.filter(j => !isSeen(j.name));
     const seenFirst = allJobs.filter(j => isSeen(j.name));
     
@@ -395,8 +355,8 @@ Deno.serve(async (req) => {
         role: job.job_title || role,
         jobDescription: job.hiring_description || job.description || `${job.name} is actively hiring for ${role} roles.`,
         jobSource: job.job_url || `${job.name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
-        jobSourceCategory: job.source === 'coresignal' ? 'B' : 'A',
-        companyTier: job.size === 'startup' ? 3 : job.size === 'mid' ? 2 : 1,
+        jobSourceCategory: 'A',
+        companyTier: 1,
         isLiveResult: true,
         slotType: 'live',
         leadTier: 'target',
@@ -407,7 +367,7 @@ Deno.serve(async (req) => {
         posted_date: job.posted_date || null,
       });
 
-      if (mergedJobs.length >= dailyLimit * 2) break; // Get extra for filtering
+      if (mergedJobs.length >= dailyLimit * 2) break;
     }
 
     allLiveSlots = mergedJobs;
