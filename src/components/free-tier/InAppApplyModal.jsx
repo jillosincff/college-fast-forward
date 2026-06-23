@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
+import { findParentsAtCompany } from '@/functions/findParentsAtCompany';
 
 export default function InAppApplyModal({ lead, user, onClose, onSuccess, schoolAbbr, standoutTip }) {
   const [step, setStep] = useState('network'); // 'network' | 'resume' | 'submit'
@@ -20,8 +21,24 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
   
   // Network data
   const hasAlumni = lead.alumniCount > 0;
-  const hasParent = lead.parentCount > 0;
-  const networkCount = (lead.alumniCount || 0) + (lead.parentCount || 0);
+
+  // Live parent lookup (student's OWN school only) — runs on apply.
+  const [parents, setParents] = useState([]);
+  const [parentsLoading, setParentsLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    findParentsAtCompany({ companyName })
+      .then((res) => {
+        const data = res?.data || res;
+        if (!cancelled && data?.parents?.length) setParents(data.parents);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setParentsLoading(false); });
+    return () => { cancelled = true; };
+  }, [companyName]);
+
+  const hasParent = parents.length > 0;
+  const networkCount = (lead.alumniCount || 0) + parents.length;
   const alumniName = lead.alumni_name || lead.alumnus?.name || '';
   const alumniRole = lead.alumni_role || lead.alumnus?.title || '';
   const alumniEmail = lead.alumni_email || lead.alumnus?.email || '';
@@ -199,13 +216,29 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   )}
                   
                   {hasParent && (
-                    <div className="bg-white border border-purple-100 rounded-xl p-3 mb-4">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div className="mb-4 space-y-2">
+                      <div className="flex items-center gap-2">
                         <span className="text-lg">🏡</span>
-                        <p className="text-xs font-bold text-purple-800">{lead.parentCount} {lead.parentCount === 1 ? 'Parent' : 'Parents'} in Network</p>
+                        <p className="text-xs font-bold text-purple-800">
+                          {parents.length} {schoolAbbr || ''} {parents.length === 1 ? 'Parent' : 'Parents'} in Your Network Here
+                        </p>
                       </div>
+                      {parents.map((p, i) => (
+                        <div key={i} className="bg-white border border-purple-100 rounded-xl p-3 flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-[11px] font-bold text-purple-700 flex-shrink-0">
+                            {p.name?.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-purple-900 truncate">{p.name}</p>
+                            {p.role_title && <p className="text-[11px] text-purple-600 truncate">{p.role_title}</p>}
+                          </div>
+                          {p.linkedin_url && (
+                            <a href={p.linkedin_url} target="_blank" rel="noopener noreferrer" className="w-7 h-7 rounded-md bg-[#0077b5] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" style={{ minHeight: 'auto', minWidth: 'auto' }}>in</a>
+                          )}
+                        </div>
+                      ))}
                       <p className="text-[11px] text-purple-700 leading-relaxed">
-                        Parents of fellow students have opted in to champion applicants on our platform.
+                        These parents of fellow {schoolAbbr || ''} students have opted in to champion applicants — a warm intro goes a long way.
                       </p>
                     </div>
                   )}
@@ -230,6 +263,13 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   </div>
                 </div>
                 <p className="text-[10px] text-center text-gray-400">Students who network are 5x more likely to land interviews.</p>
+              </div>
+            ) : step === 'network' && parentsLoading ? (
+              <div className="p-5">
+                <div className="bg-purple-50 border border-purple-200 rounded-2xl p-5 text-center">
+                  <span className="inline-block w-5 h-5 border-2 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-2" />
+                  <p className="text-xs font-bold text-purple-900">Checking your network at {companyName}…</p>
+                </div>
               </div>
             ) : step === 'network' ? (
               <div className="p-5" onClick={() => setStep('resume')}>
