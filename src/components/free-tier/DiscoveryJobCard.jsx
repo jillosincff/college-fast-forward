@@ -160,8 +160,8 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
           hasParentSignal ? 'bg-emerald-600 text-white' :
           'bg-indigo-50 text-indigo-700 border-b border-indigo-100'
         }`}>
-          {hasAlumniSignal && <><span>👥</span>{lead.alumniCount ? ` ${lead.alumniCount}` : ''} {school} alumni here — warm path available</>}
-          {!hasAlumniSignal && hasParentSignal && <><span>🤝</span> A parent in your network works here</>}
+          {hasAlumniSignal && <>{lead.alumniCount ? `${lead.alumniCount} ` : ''}{school} alumni here — warm path available</>}
+          {!hasAlumniSignal && hasParentSignal && <>A parent in your network works here</>}
           {!hasAlumniSignal && !hasParentSignal && insiderPill && <>{insiderPill}</>}
         </div>
       )}
@@ -173,32 +173,31 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
           <div className="flex-1 min-w-0 mr-2">
             <h4 className="font-extrabold leading-tight text-base truncate" style={{ color: '#4f46e5' }}>{companyName}</h4>
             {jobTitle && <p className="text-xs text-slate-500 mt-0.5 font-medium truncate">{jobTitle}</p>}
-            <div className="flex flex-wrap gap-1 mt-1">
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
               {tierBadge && (
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>{tierBadge.label}</span>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>{tierBadge.label}</span>
               )}
               {freshnessBadge && (
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${freshnessBadge.color}`} title={freshnessBadge.text}>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${freshnessBadge.color}`} title={freshnessBadge.text}>
                   {freshnessBadge.label}
                 </span>
               )}
               {isPinned && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">📌 Saved</span>
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">Saved</span>
               )}
-              {/* LinkedIn-style badges */}
               {jobUrl && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 flex items-center gap-0.5">
-                  ⚡ Easy Apply
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                  Easy Apply
                 </span>
               )}
               {hasAlumniSignal && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-0.5">
-                  👥 Alumni Present
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                  Alumni Network
                 </span>
               )}
               {(lead.alumniCount >= 3 || lead.leadTier === 'target') && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-0.5">
-                  🎯 High Match
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  High Match
                 </span>
               )}
             </div>
@@ -249,14 +248,14 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
         {/* ── SMART CONNECTION FLOW ── */}
         <div className="space-y-2">
 
-          {/* Phase: idle — secondary CTA */}
+          {/* Phase: idle — secondary CTA (downstyled to ghost/outline) */}
           {alumniPhase === 'idle' && (
             <button
               onClick={handleFindConnection}
-              className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95 text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100`}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95 text-purple-700 border-2 border-purple-200 bg-transparent hover:bg-purple-50"
               style={{ minHeight: 'auto' }}
             >
-              {mascot} Find {school} Network Connection
+              {mascot} Find {school} Network
             </button>
           )}
 
