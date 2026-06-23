@@ -427,6 +427,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       background: '#f8f9fc',
       overflow: 'hidden',
     }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       {/* Split-View Container */}
       <div style={{
         display: 'grid',
@@ -444,12 +445,28 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           <div style={{ maxWidth: '100%', padding: '16px 20px' }}>
             {/* Feed Header */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <svg className="w-5 h-5" style={{ width: 20, height: 20, color: '#7c3aed' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                <h2 style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: 0 }}>Target Matches</h2>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <svg className="w-5 h-5" style={{ width: 20, height: 20, color: '#7c3aed' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                  <h2 style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: 0 }}>Target Matches</h2>
+                </div>
+                <button
+                  onClick={handleManualRefresh}
+                  disabled={isFetching}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6, fontFamily: dm, fontSize: 12, fontWeight: 700,
+                    color: isFetching ? '#9ca3af' : '#7c3aed', background: isFetching ? '#f3f4f6' : 'rgba(124,58,237,0.08)',
+                    border: `1px solid ${isFetching ? '#e5e7eb' : 'rgba(124,58,237,0.20)'}`, borderRadius: 8,
+                    padding: '6px 12px', cursor: isFetching ? 'default' : 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+                  }}
+                >
+                  <svg style={{ width: 14, height: 14, animation: isFetching ? 'spin 1s linear infinite' : 'none' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  {isFetching ? 'Refreshing…' : 'Refresh'}
+                </button>
               </div>
               <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
                 {anyLoading ? 'Loading...' : targetOpportunities.length} opportunities
+                {lastRefreshed && !anyLoading && ` · Updated ${lastRefreshed.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`}
               </p>
             </div>
 
