@@ -223,16 +223,6 @@ export default function StudentLandingPage({ onParentClick }) {
     navigate('ParentLandingPage');
   };
 
-  const alumni = () => {
-    if (!isLoadingAuth && user) { navigate('AlumniHome'); return; }
-    try {
-      localStorage.setItem('pending_invite_role', 'alumni');
-      sessionStorage.setItem('pending_invite_role', 'alumni');
-      sessionStorage.setItem('cff_onboarding_type', 'alumni');
-    } catch (e) {}
-    base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
-  };
-
   const SectionLabel = ({ text, color = INDIGO }) => (
     <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
@@ -311,8 +301,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </span></span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <button onClick={parent} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>For Parents</button>
-          <button onClick={alumni} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>For Alumni</button>
+          <button onClick={parent} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Parents &amp; Alumni</button>
           <button onClick={go} className="nav-cta-btn" style={{
             fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
             background: GRAD_INDIGO, border: 'none', borderRadius: 10,
@@ -732,7 +721,7 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── FOOTER ── */}
       <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', textAlign: 'center', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
-          {[['For Parents', null, parent], ['For Alumni', null, alumni], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href, handler]) => (
+          {[['Parents & Alumni', null, parent], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href, handler]) => (
             <a key={label} href={href || undefined} onClick={!href ? (e) => { e.preventDefault(); handler && handler(); } : undefined} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s', cursor: 'pointer' }}
               onMouseEnter={e => e.currentTarget.style.color = TEXT}
               onMouseLeave={e => e.currentTarget.style.color = TEXT3}
