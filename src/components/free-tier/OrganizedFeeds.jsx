@@ -178,8 +178,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       return result;
     },
     enabled: !!(effectiveRole || target_industries?.length),
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const dualLeads = Array.isArray(dualData?.data?.leads) ? dualData.data.leads

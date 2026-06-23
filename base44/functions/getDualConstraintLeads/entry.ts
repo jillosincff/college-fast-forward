@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
   if (!EXA_API_KEY) return Response.json({ success: false, error: 'EXA_API_KEY not set' }, { status: 500 });
 
-  const JOB_BOARD_PATTERN = /indeed|linkedin|glassdoor|ziprecruiter|builtin|jobsearcher|jobright|monster|simplyhired|careerbuilder|snagajob|handshake|wayup|internships\.com|jobot|talentcom|joblist|jobcase/i;
+  const JOB_BOARD_PATTERN = /indeed|linkedin|glassdoor|ziprecruiter|builtin|jobsearcher|jobright|monster|simplyhired|careerbuilder|snagajob|handshake|wayup|internships\.com|jobot|talentcom|joblist|jobcase|digitalhire|remotepulse|internexxus|lever\.co|ashbyhq|greenhouse|workable|smartrecruiters|breezy|rippling|workday|myworkdayjobs|adzuna|themuse|dice|getro|paylocity|bamboohr|jazzhr|recruitee|teamtailor|jobvite|icims|taleo|hire|jobs\.|careers\.|apply\.|recruiting/i;
 
   try {
     const base44 = createClientFromRequest(req);
@@ -73,19 +73,23 @@ Deno.serve(async (req) => {
 
     // Extract unique companies from job results
     const companyMap = new Map(); // companyName → job
+    // Junk tokens that are never real company names (job-board / ATS artifacts)
+    const JUNK_COMPANY = /^(jobs?|careers?|apply|hiring|remote|work|talent|recruiting|opening|opportunit)/i;
+
     for (const r of jobResults) {
+      // Only trust company names parsed from the job TITLE — never the URL hostname,
+      // which produces phantom companies like "Jobs", "Remotepulse", "Veeva" from job boards.
       const atMatch = r.title?.match(/\bat\s+([A-Z][A-Za-z0-9\s&.,'\-]{2,40}?)(?:\s*[|·\-]|\s*$)/);
       const dashMatch = r.title?.match(/^([A-Z][A-Za-z0-9\s&.,'\-]{2,40}?)\s*[-–|]/);
-      let hostCompany = null;
-      try {
-        const host = new URL(r.url).hostname.replace(/^www\./, '').split('.')[0];
-        if (host && host.length > 2 && !JOB_BOARD_PATTERN.test(host)) {
-          hostCompany = host.charAt(0).toUpperCase() + host.slice(1);
-        }
-      } catch {}
 
-      const company = atMatch?.[1]?.trim() || dashMatch?.[1]?.trim() || hostCompany;
-      if (company && company.length > 1 && !companyMap.has(company) && !JOB_BOARD_PATTERN.test(company)) {
+      const company = atMatch?.[1]?.trim() || dashMatch?.[1]?.trim();
+      if (
+        company &&
+        company.length > 2 &&
+        !companyMap.has(company) &&
+        !JOB_BOARD_PATTERN.test(company) &&
+        !JUNK_COMPANY.test(company)
+      ) {
         companyMap.set(company, {
           title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
           url: r.url,
