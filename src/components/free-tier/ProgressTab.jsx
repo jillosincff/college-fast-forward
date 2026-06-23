@@ -86,10 +86,10 @@ export default function ProgressTab({ user, onUpgrade }) {
       {/* Header */}
       <div>
         <h2 style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
-          📊 Your Progress
+          📋 Application Tracker
         </h2>
         <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0, lineHeight: 1.5 }}>
-          Track your momentum and celebrate wins. Every outreach counts.
+          Track every application, outreach, and interview. Your pipeline to hired.
         </p>
       </div>
 

@@ -6,7 +6,7 @@ const dm = "'DM Sans', system-ui, sans-serif";
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', Icon: Home },
   { id: 'tools', label: 'Tools', Icon: Wrench },
-  { id: 'progress', label: 'Progress', Icon: TrendingUp },
+  { id: 'progress', label: 'Application Tracker', Icon: TrendingUp },
 ];
 
 const ALL_TABS = [...TABS, { id: 'profile', label: 'Profile', Icon: User }];
