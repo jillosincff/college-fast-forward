@@ -244,6 +244,19 @@ export default function StudentLandingPage({ onParentClick }) {
     >{label}</button>
   );
 
+  // While auth is resolving, or when a logged-in user is about to be redirected
+  // to their dashboard, don't paint the marketing page — otherwise it flashes
+  // for a beat before the redirect effect fires.
+  const willRedirect = !isLoadingAuth && user && (user.persona || user.roles?.length > 0);
+  if (isLoadingAuth || willRedirect) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG }}>
+        <div style={{ width: 32, height: 32, border: `3px solid ${INDIGO_BORDER}`, borderTopColor: INDIGO, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
   return (
     <div style={{ background: BG, fontFamily: SF, color: TEXT, overflowX: 'hidden' }}>
       {showFunnel && <OnboardingFlow onClose={() => { setShowFunnel(false); setFunnelStartScreen(null); }} resumeAtScreen={funnelStartScreen} />}

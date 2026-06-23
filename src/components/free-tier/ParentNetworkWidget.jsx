@@ -8,9 +8,10 @@ const SAMPLE_PARENTS = [
   { role: 'VP of Operations', grad: "'25" },
 ];
 
-// Simple overlapping avatar cluster
-function AvatarCluster() {
-  const colors = ['#0021A5', '#FA4616', '#16a34a'];
+// Simple overlapping avatar cluster — colored from the active school theme
+function AvatarCluster({ theme }) {
+  const t = theme || {};
+  const colors = [t.primary || '#1E293B', t.secondary || t.primary || '#475569', '#16a34a'];
   const initials = ['J', 'M', 'R'];
   return (
     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -96,7 +97,7 @@ export default function ParentNetworkWidget({ onUnlock, college, theme, user }) 
           <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: 0 }}>
             The <span style={{ color: t.primary }}>{shortName}</span> Parent Network
           </p>
-          <AvatarCluster />
+          <AvatarCluster theme={t} />
         </div>
       </div>
 
