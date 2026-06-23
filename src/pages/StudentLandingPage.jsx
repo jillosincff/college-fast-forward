@@ -325,8 +325,8 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Main headline */}
             {mounted && (
               <div className="hero-animate-2">
-                <h1 style={{ fontFamily: SF, fontSize: 'clamp(42px, 9vw, 72px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#0f172a', margin: '0 0 20px' }}>
-                  Skip the black hole.
+                <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#030712', margin: '0 0 8px' }}>
+                  Mass applying doesn’t work.
                 </h1>
               </div>
             )}
@@ -334,8 +334,8 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Sub-headline */}
             {mounted && (
               <div className="hero-animate-3">
-                <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6vw, 48px)', fontWeight: 600, color: VIOLET, margin: '0 0 24px', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-                  Land the interview.
+                <h2 style={{ fontFamily: SF, fontSize: 'clamp(20px, 5vw, 30px)', fontWeight: 600, color: INDIGO, margin: '0 0 16px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+                  Land the interview through a network built for you.
                 </h2>
               </div>
             )}
@@ -343,8 +343,8 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Body */}
             {mounted && (
               <div className="hero-animate-4">
-                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#334155', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
-                 Hidden jobs, warm alumni &amp; parent intros, and outreach that gets replies — all in one place. Because once a person sees your resume, the algorithm stops mattering.
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#4b5563', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
+                  Match with curated roles, auto-tailor your resume, and unlock warm alumni and parent referrals.
                 </p>
               </div>
             )}
