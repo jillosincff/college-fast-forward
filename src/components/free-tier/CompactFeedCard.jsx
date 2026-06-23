@@ -14,13 +14,15 @@ export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr 
     <div
       onClick={onClick}
       style={{
-        background: isSelected ? '#f5f3ff' : '#fff',
-        border: isSelected ? '2px solid #7c3aed' : '1px solid #e5e7eb',
+        background: isSelected ? '#faf5ff' : '#fff',
+        border: '1px solid #e5e7eb',
+        borderLeft: isSelected ? '4px solid #7c3aed' : '4px solid transparent',
         borderRadius: 12,
         padding: '12px 14px',
         cursor: 'pointer',
         transition: 'all 0.15s ease',
         marginBottom: 8,
+        boxShadow: isSelected ? '0 2px 8px rgba(124,58,237,0.15)' : '0 1px 3px rgba(0,0,0,0.05)',
       }}
       onMouseEnter={e => {
         if (!isSelected) {
@@ -35,37 +37,14 @@ export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr 
         }
       }}
     >
-      {/* Network Badge - Top */}
-      {(hasAlumni || hasParent) && (
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 4,
-          background: hasAlumni ? 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)' : 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
-          borderRadius: 6,
-          padding: '3px 8px',
-          marginBottom: 8,
-        }}>
-          <span style={{ fontSize: 10 }}>{hasAlumni ? '🎓' : '🤝'}</span>
-          <span style={{
-            fontFamily: dm,
-            fontSize: 10,
-            fontWeight: 700,
-            color: hasAlumni ? '#6d28d9' : '#059669',
-          }}>
-            {networkCount} {hasAlumni ? 'Alumni' : 'Parent'}{networkCount > 1 ? 's' : ''}
-          </span>
-        </div>
-      )}
-
       {/* Company & Title */}
-      <div style={{ marginBottom: 6 }}>
+      <div style={{ marginBottom: 8 }}>
         <h4 style={{
           fontFamily: dm,
           fontSize: 13,
           fontWeight: 800,
-          color: '#111827',
-          margin: '0 0 2px',
+          color: isSelected ? '#111827' : '#374151',
+          margin: '0 0 3px',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -82,7 +61,7 @@ export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr 
       </div>
 
       {/* Metadata Row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 10, color: '#9ca3af' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 10, color: '#9ca3af', marginBottom: 8 }}>
         {location && (
           <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             📍 {location.length > 20 ? location.substring(0, 20) + '…' : location}
@@ -101,6 +80,50 @@ export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr 
           </span>
         )}
       </div>
+
+      {/* Network Pills - Bottom Right */}
+      {(hasAlumni || hasParent) && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {hasAlumni && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)',
+              borderRadius: 100,
+              padding: '3px 8px',
+            }}>
+              <span style={{
+                fontFamily: dm,
+                fontSize: 9,
+                fontWeight: 700,
+                color: '#6d28d9',
+              }}>
+                🎓 {lead.alumniCount} Alumni
+              </span>
+            </div>
+          )}
+          {hasParent && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+              borderRadius: 100,
+              padding: '3px 8px',
+            }}>
+              <span style={{
+                fontFamily: dm,
+                fontSize: 9,
+                fontWeight: 700,
+                color: '#059669',
+              }}>
+                🤝 Parent
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

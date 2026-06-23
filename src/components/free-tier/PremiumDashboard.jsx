@@ -140,41 +140,55 @@ function PremiumNav({ user, onEditGoals, navRef }) {
   );
 }
 
-function StatPill({ emoji, label, value, theme, isLoading }) {
+function StatPill({ emoji, label, value, theme, isLoading, warning }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '12px 18px', flex: '1 1 0', minWidth: 0 }}>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      background: warning ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.08)',
+      border: warning ? '1px solid rgba(251,191,36,0.4)' : '1px solid rgba(255,255,255,0.12)',
+      borderRadius: 14,
+      padding: '12px 18px',
+      flex: '1 1 0',
+      minWidth: 0,
+      position: 'relative',
+    }}>
       <span style={{ fontSize: 22, flexShrink: 0 }}>{emoji}</span>
-      <div style={{ minWidth: 0 }}>
-        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', margin: '0 0 3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
           {isLoading ? (
             <>
               <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spinStat 0.8s linear infinite' }} />
               <style>{`@keyframes spinStat{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
               <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>Scouting...</span>
             </>
-          ) : value}
+          ) : (
+            <>
+              {value}
+              {warning && (
+                <span style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: '#fbbf24',
+                  background: 'rgba(251,191,36,0.2)',
+                  borderRadius: 100,
+                  padding: '2px 6px',
+                  marginLeft: 4,
+                }}>
+                  ⚠ Upload
+                </span>
+              )}
+            </>
+          )}
         </p>
-        <p style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.55)', margin: 0, whiteSpace: 'nowrap' }}>{label}</p>
+        <p style={{ fontFamily: dm, fontSize: 10, color: warning ? 'rgba(251,191,36,0.8)' : 'rgba(255,255,255,0.55)', margin: 0, whiteSpace: 'nowrap' }}>{label}</p>
       </div>
     </div>
   );
 }
 
-function PremiumActiveProfilePill({ user, onPillClick }) {
-  const filename = user?.resume_filename;
 
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: filename ? '#f0fdf4' : '#fffbeb', border: `1px solid ${filename ? '#bbf7d0' : '#fde68a'}`, borderRadius: 12, padding: '9px 14px' }}>
-      <span style={{ fontSize: 14, flexShrink: 0 }}>📄</span>
-      <button onClick={onPillClick} title="Click to manage resume in profile menu" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: filename ? '#15803d' : '#92400e', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: 0, textAlign: 'left', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'underline dotted' }}>
-        {filename ? `Active Profile: ${filename}` : 'No resume uploaded yet'}
-      </button>
-      <button onClick={() => navigate('ResumeTailoring')} style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#fff', background: filename ? '#15803d' : '#d97706', border: 'none', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }}>
-        {filename ? '⚡ Tailor Resume' : '⬆️ Upload Resume'}
-      </button>
-    </div>
-  );
-}
 
 export default function PremiumDashboard({ user: userProp, parentCount, college, theme }) {
   const [user, setUser] = useState(userProp);
@@ -257,9 +271,10 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const parentsCount = networkStats?.parents || 0;
   const companiesCount = networkStats?.companies || 0;
   const networkCount = alumniCount + parentsCount;
+  const hasResume = !!user?.resume_filename;
   const stats = [
     { emoji: '🤖', label: 'Agent Status', value: 'ACTIVE' },
-    { emoji: '📄', label: 'Resume', value: user?.resume_filename ? 'On File' : 'Not Uploaded' },
+    { emoji: '📄', label: 'Resume', value: hasResume ? 'On File' : 'Not Uploaded', warning: !hasResume },
     { emoji: '🐊', label: 'Synced Network', value: `${networkCount}` },
   ];
 
@@ -434,9 +449,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             maxHeight: 'calc(100vh - 48px)',
             overflowY: 'auto',
           }} className="desktop-only">
-            {/* Active Profile Status Pill */}
-            <PremiumActiveProfilePill user={user} onPillClick={() => navRef.current?.openDropdown()} />
-
             {/* Parent Network — unlocked if ≥20 parents */}
             {(parentCount === null || parentCount >= 20) && (
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
