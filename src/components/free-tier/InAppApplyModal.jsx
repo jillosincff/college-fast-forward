@@ -61,27 +61,26 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
     else setResumeLoading(false);
   }, [user?.email]);
 
+  // Redirect straight to ResumeTailoring with this job's context
+  const goToTailoring = () => {
+    const params = new URLSearchParams({
+      company: companyName,
+      role: jobTitle,
+      jd: lead.jobDescription || lead.description || '',
+      job_url: lead.job_url || lead.jobSource || lead.url || '',
+      location: lead.location || '',
+      from: 'apply_modal',
+    });
+    onClose();
+    window.location.hash = `#/ResumeTailoring?${params.toString()}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError('');
 
     try {
-      // If tailoring — redirect to ResumeTailoring with context
-      if (resumeChoice === 'tailor') {
-        const params = new URLSearchParams({
-          company: companyName,
-          role: jobTitle,
-          jd: lead.jobDescription || lead.description || '',
-          job_url: lead.job_url || lead.jobSource || lead.url || '',
-          location: lead.location || '',
-          from: 'apply_modal',
-        });
-        onClose();
-        window.location.hash = `#/ResumeTailoring?${params.toString()}`;
-        return;
-      }
-
       // Upload resume if manually provided
       if (resumeFile) {
         await base44.integrations.Core.UploadFile({ file: resumeFile });
@@ -317,12 +316,8 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => setResumeChoice('tailor')}
-                      className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                        resumeChoice === 'tailor'
-                          ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
-                          : 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50'
-                      }`}
+                      onClick={goToTailoring}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-white text-purple-700 border-purple-300 hover:bg-purple-50"
                       style={{ minHeight: 'auto' }}
                     >
                       ✨ Yes, tailor it first
@@ -345,11 +340,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                       ✓ We'll attach <strong>{resumeName}</strong> to your application.
                     </p>
                   )}
-                  {resumeChoice === 'tailor' && (
-                    <p className="text-[10px] text-purple-700 bg-purple-50 rounded-lg px-2 py-1.5">
-                      ✓ You'll be taken to Resume Tailoring — come back to submit once done!
-                    </p>
-                  )}
+
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -389,14 +380,14 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                 <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
               )}
 
-              {(!hasResume || resumeChoice === 'submit_current' || resumeChoice === 'tailor') && (
+              {(!hasResume || resumeChoice === 'submit_current') && (
                 <button
                   type="submit"
                   disabled={submitting}
                   className="w-full py-3 rounded-xl font-bold text-sm text-white transition cursor-pointer disabled:opacity-60"
-                  style={{ background: resumeChoice === 'tailor' ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' : 'linear-gradient(135deg, #1e293b, #334155)', minHeight: 'auto' }}
+                  style={{ background: 'linear-gradient(135deg, #1e293b, #334155)', minHeight: 'auto' }}
                 >
-                  {submitting ? 'Submitting…' : resumeChoice === 'tailor' ? '✨ Go to Resume Tailoring →' : '⚡ Submit Application via CFF'}
+                  {submitting ? 'Submitting…' : '⚡ Submit Application via CFF'}
                 </button>
               )}
 
