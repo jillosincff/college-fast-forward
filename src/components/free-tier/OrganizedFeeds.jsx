@@ -1,19 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import { getDualConstraintLeads } from '@/functions/getDualConstraintLeads';
 import { getLiveJobMatchesFn } from '@/functions/getLiveJobMatchesFn';
 import { clearJobLeadsCache } from '@/functions/clearJobLeadsCache';
-import MatchDeepDiveModal from './MatchDeepDiveModal';
-import DiscoveryJobCard from './DiscoveryJobCard';
-import ApplicationPipeline from './ApplicationPipeline';
+import CompactFeedCard from './CompactFeedCard';
+import JobDetailPane from './JobDetailPane';
 import PipelineKanbanModal from './PipelineKanbanModal';
 import EmptyMatchesState from './EmptyMatchesState';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
+const dm = "'DM Sans', system-ui, sans-serif";
+
 export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount, isPremium = false }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [isKanbanOpen, setIsKanbanOpen] = useState(false);
+  const [showDetailPane, setShowDetailPane] = useState(false);
   const queryClient = useQueryClient();
 
   const [savedCompanyKeys, setSavedCompanyKeys] = useState(() => {
@@ -369,7 +370,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     });
   };
 
-  const handleAddToPipeline = async (lead) => {
+  const handleAddToPipeline = async (lead, path = 'cold_apply') => {
     const company = lead.company || lead.companyName || 'Unknown';
     const jobTitle = lead.job_title || lead.role || lead.title || '';
     const jobDescription = lead.hiring_description || lead.description || lead.jobDescription || '';
@@ -393,6 +394,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         status: 'identified',
         status_date: new Date().toISOString(),
         alumni_source: alumniName ? 'top_match' : 'manual',
+        application_path: path,
       });
       window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
     } catch (error) {
@@ -407,246 +409,94 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`;
   };
 
+  const handleSelectLead = (lead) => {
+    setSelectedLead(lead);
+    setShowDetailPane(true);
+  };
+
   const noGoals = !target_industries?.length && !effectiveRole;
   const anyLoading = isLoading || dualLoading;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6">
-      {/* ── 70/30 Split Layout ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-        
-        {/* ── LEFT COLUMN (70%): Feed ── */}
-        <div className="lg:col-span-7 space-y-6">
-          
-          {/* Header */}
-          <div>
-            <div className="flex items-center gap-2">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-              <h2 className="text-xl font-bold text-gray-900 tracking-tight">CLiFF's Live Target Matches</h2>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Your personalized feed of{' '}
-              <span className="font-bold text-purple-600">{anyLoading ? '...' : targetOpportunities.length}</span> hand-picked opportunities
-            </p>
-            {isPremium ? (
-              <p className="text-xs text-blue-500 font-medium mt-1">🔄 New roles posted every 24 hours — check back tomorrow!</p>
-            ) : (
-              <p className="text-xs text-blue-500 font-medium mt-1">
-                🔄 {cappedVisibleCount} of {dailyLimit} daily recommendations viewed — {limitReached ? 'limit reached' : 'come back tomorrow for a fresh batch'}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: 'calc(100vh - 200px)',
+      maxHeight: '900px',
+      background: '#f8f9fc',
+      overflow: 'hidden',
+    }}>
+      {/* Split-View Container */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: showDetailPane ? '5fr 7fr' : '1fr',
+        gap: 0,
+        flex: 1,
+        overflow: 'hidden',
+      }}>
+        {/* LEFT COLUMN: Condensed Feed */}
+        <div style={{
+          overflowY: 'auto',
+          borderRight: showDetailPane ? '1px solid #e5e7eb' : 'none',
+          scrollBehavior: 'smooth',
+        }}>
+          <div style={{ maxWidth: '100%', padding: '16px 20px' }}>
+            {/* Feed Header */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <svg className="w-5 h-5" style={{ width: 20, height: 20, color: '#7c3aed' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <h2 style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: 0 }}>Target Matches</h2>
+              </div>
+              <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
+                {anyLoading ? 'Loading...' : targetOpportunities.length} opportunities
               </p>
-            )}
-          </div>
-
-          {/* Subtle guidance note */}
-          {!noGoals && !anyLoading && targetOpportunities.length > 0 && (
-            <p className="text-[11px] text-gray-400 font-medium italic mb-3">
-              ✨ These are hand-picked matches based on your profile. Tap any role for more options.
-            </p>
-          )}
-
-          {/* No goals nudge */}
-          {noGoals && !anyLoading && (
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
-              <div>
-                <p className="text-sm font-bold text-blue-900">🎯 Add your career goals for a personalized feed</p>
-                <p className="text-xs text-blue-700 mt-1">CLiFF will surface Company Insiders and Targeted Hidden Leads based on your target roles and industries.</p>
-              </div>
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2 rounded-xl transition-colors shrink-0"
-                style={{ minHeight: 'auto', cursor: 'pointer' }}
-              >
-                Set Goals →
-              </button>
-            </div>
-          )}
-
-          {/* ── Target-Matched Opportunities Grid ── */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <h3 className="text-base font-bold text-gray-900 tracking-tight">
-                  Target-Matched Opportunities ({anyLoading ? '…' : totalCount})
-                </h3>
-              </div>
-              <div className="flex items-center gap-2">
-                {lastRefreshed && (
-                  <span className="text-[11px] text-gray-400 hidden sm:block">
-                    Refreshed {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                )}
-                {!lastRefreshed && (
-                  <span className="text-[11px] text-blue-500 hidden sm:block font-medium">
-                    🔄 New roles posted every 24 hours
-                  </span>
-                )}
-                <button
-                  onClick={handleManualRefresh}
-                  disabled={isFetching}
-                  style={{ minHeight: 'auto', minWidth: 'auto' }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                    isFetching
-                      ? 'border-blue-200 bg-blue-50 text-blue-400 cursor-not-allowed'
-                      : 'border-blue-300 bg-white text-blue-600 hover:bg-blue-50 hover:border-blue-400'
-                  }`}
-                >
-                  <span className={isFetching ? 'animate-spin inline-block' : 'inline-block'}>↻</span>
-                  {isFetching ? 'Loading...' : 'New Batch'}
-                </button>
-              </div>
             </div>
 
+            {/* Compact Feed Cards */}
             {anyLoading ? (
-              viewMode === 'list' ? (
-                <div className="space-y-3 max-w-2xl">
-                  {[1, 2, 3, 4].map(n => (
-                    <div key={n} className="h-40 bg-gray-100 rounded-2xl animate-pulse" />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
-                  {[1, 2, 3, 4].map(n => (
-                    <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
-                  ))}
-                </div>
-              )
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[1, 2, 3, 4, 5].map(n => (
+                  <div key={n} style={{ height: 72, background: '#e5e7eb', borderRadius: 10, animation: 'pulse 1.5s infinite' }} />
+                ))}
+              </div>
             ) : targetOpportunities.length > 0 ? (
-              <>
-                {/* View toggle */}
-                <div className="flex items-center justify-end mb-1">
-                  <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
-                    <button
-                      onClick={() => setViewMode('list')}
-                      style={{ minHeight: 'auto', minWidth: 'auto' }}
-                      className={`px-3 py-1 rounded-md text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'}`}
-                    >
-                      ☰ List
-                    </button>
-                    <button
-                      onClick={() => setViewMode('grid')}
-                      style={{ minHeight: 'auto', minWidth: 'auto' }}
-                      className={`px-3 py-1 rounded-md text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'}`}
-                    >
-                      ▦ Grid
-                    </button>
-                  </div>
-                </div>
-                {viewMode === 'list' ? (
-                  <div className="space-y-3 max-w-2xl">
-                    {targetOpportunities.slice(0, cappedVisibleCount).map((lead, idx) => (
-                      <DiscoveryJobCard
-                        key={lead.company || lead.companyName || idx}
-                        lead={lead}
-                        user={user}
-                        onAddToPipeline={handleAddToPipeline}
-                        onColdInroad={handleColdInroad}
-                        onSelect={setSelectedLead}
-                        schoolAbbr={schoolAbbr}
-                        isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
-                        onDismiss={() => {}}
-                        insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
-                        compact
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
-                    {targetOpportunities.slice(0, cappedVisibleCount).map((lead, idx) => (
-                      <DiscoveryJobCard
-                        key={lead.company || lead.companyName || idx}
-                        lead={lead}
-                        user={user}
-                        onAddToPipeline={handleAddToPipeline}
-                        onColdInroad={handleColdInroad}
-                        onSelect={setSelectedLead}
-                        schoolAbbr={schoolAbbr}
-                        isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
-                        onDismiss={() => {}}
-                        insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
-                      />
-                    ))}
-                  </div>
-                )}
-                {limitReached ? (
-                  <div className="flex flex-col items-center mt-6 p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl text-center">
-                    <span className="text-2xl mb-2">🔒</span>
-                    <p className="text-sm font-bold text-gray-900">You've reached today's match limit</p>
-                    <p className="text-xs text-gray-500 mt-1 mb-4 max-w-sm">
-                      You've seen all {dailyLimit} of your daily recommendations. Premium unlocks unlimited job matches, deeper insights, and instant resume tailoring.
-                    </p>
-                    <button
-                      onClick={() => window.dispatchEvent(new CustomEvent('cff:open-upgrade-modal', { detail: { source: 'daily_job_limit' } }))}
-                      style={{ minHeight: 'auto', minWidth: 'auto' }}
-                      className="px-6 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md"
-                    >
-                      Unlock Unlimited Matches →
-                    </button>
-                  </div>
-                ) : cappedVisibleCount < targetOpportunities.length && (
-                  <div className="flex justify-center mt-4">
-                    <button
-                      onClick={() => setVisibleCount(c => isPremium ? c + PAGE_SIZE : Math.min(c + PAGE_SIZE, dailyLimit))}
-                      style={{ minHeight: 'auto', minWidth: 'auto' }}
-                      className="px-6 py-2.5 rounded-xl text-sm font-bold border border-purple-300 bg-white text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-all"
-                    >
-                      Load More ({targetOpportunities.length - cappedVisibleCount} remaining{!isPremium && cappedVisibleCount + PAGE_SIZE > dailyLimit ? ' · daily limit' : ''})
-                    </button>
-                  </div>
-                )}
-              </>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {targetOpportunities.slice(0, cappedVisibleCount).map((lead, idx) => (
+                  <CompactFeedCard
+                    key={lead.company || lead.companyName || idx}
+                    lead={lead}
+                    user={user}
+                    schoolAbbr={schoolAbbr}
+                    isSelected={selectedLead && (selectedLead.company || selectedLead.companyName) === (lead.company || lead.companyName)}
+                    onClick={() => handleSelectLead(lead)}
+                  />
+                ))}
+              </div>
             ) : (
               <EmptyMatchesState hasGoals={!noGoals} onSetGoals={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))} />
             )}
-          </section>
-        </div>
-
-        {/* ── RIGHT COLUMN (30%): Sticky Sidebar - Parent Network only ── */}
-        <div className="lg:col-span-3">
-          <div className="lg:sticky lg:top-6 space-y-4">
-
-            {/* Parent Network Card — collapsible on mobile */}
-            <details className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm group" open>
-              <summary className="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-lg flex-shrink-0">🤝</div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-emerald-900 uppercase tracking-wide">Parent Network</p>
-                  <p className="text-[11px] text-emerald-600 font-medium">Connected · check for warm paths</p>
-                </div>
-                <span className="lg:hidden text-emerald-400 text-xs font-bold transition-transform group-open:rotate-180">▾</span>
-              </summary>
-              <div className="mt-3">
-                <p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
-                  Parents in your network may work at your target companies. Tap to find warm introductions.
-                </p>
-                <button
-                  onClick={() => window.location.hash = '#FreeTierDashboard?tab=network'}
-                  className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
-                  style={{ minHeight: 'auto', cursor: 'pointer' }}
-                >
-                  Explore Parent Network →
-                </button>
-              </div>
-            </details>
-
           </div>
         </div>
+
+        {/* RIGHT COLUMN: Detail Pane */}
+        {showDetailPane && selectedLead && (
+          <div style={{
+            overflowY: 'auto',
+            background: '#faf5ff',
+          }}>
+            <JobDetailPane
+              lead={selectedLead}
+              user={user}
+              schoolAbbr={schoolAbbr}
+              onClose={() => setShowDetailPane(false)}
+              onAddToPipeline={handleAddToPipeline}
+              onColdInroad={handleColdInroad}
+            />
+          </div>
+        )}
       </div>
 
-      {selectedLead && (
-        <MatchDeepDiveModal
-          match={selectedLead}
-          shortName={schoolAbbr}
-          onClose={() => setSelectedLead(null)}
-          onGenerateOutreach={(data) => { console.log('Generating outreach:', data); }}
-          onInitiateOutreach={({ contact, company, role, tab }) => {
-            window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}&contact=${encodeURIComponent(contact.name)}&tab=${tab}`;
-          }}
-          user={user}
-        />
-      )}
-
-      {/* Kanban Modal - Only opens on explicit trigger */}
+      {/* Kanban Modal */}
       <PipelineKanbanModal
         isOpen={isKanbanOpen}
         onClose={() => setIsKanbanOpen(false)}
