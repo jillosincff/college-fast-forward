@@ -9,7 +9,7 @@ const TOOLS = [
     title: 'CLIFF AI Chat',
     desc: 'Your AI hiring companion. Get instant answers on resumes, interviews, networking, and job search strategy.',
     cta: 'Start Chatting',
-    route: 'CliffChat',
+    route: 'cliff-chat',
     accent: '#7c3aed',
     bg: '#f5f3ff',
     border: '#ddd6fe',
