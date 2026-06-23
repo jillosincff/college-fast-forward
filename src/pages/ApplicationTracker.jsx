@@ -14,14 +14,42 @@ import EmailParserTestPanel from '@/components/tracker/EmailParserTestPanel';
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
 
-// Fake data for now
-const SAMPLE_APPS = [
-  { id: 1, company: 'Disney', logo: '🏰', jobTitle: 'Marketing Intern', dateApplied: '2025-03-12', resumeVersion: 'v2.1', status: 'interviewing', nextAction: 'Prepare for Interview', notes: 'Interview invite received via email on March 20th.', interview: { scheduledAt: 'March 25, 2025 at 2:00 PM', type: 'Zoom', interviewer: 'Sarah Chen (Marketing Manager)', joinLink: 'https://zoom.us/j/example', autoImported: true } },
-  { id: 2, company: 'Google', logo: '🔵', jobTitle: 'Software Engineer Intern', dateApplied: '2025-03-10', resumeVersion: 'v3.0', status: 'applied', nextAction: '—' },
-  { id: 3, company: 'JPMorgan', logo: '💼', jobTitle: 'Finance Analyst', dateApplied: '2025-03-05', resumeVersion: 'v1.8', status: 'rejected', nextAction: '—' },
-  { id: 4, company: 'Microsoft', logo: '⚪', jobTitle: 'Product Manager Intern', dateApplied: '2025-03-01', resumeVersion: 'v2.1', status: 'in_review', nextAction: 'Follow up' },
-  { id: 5, company: 'Amazon', logo: '🔶', jobTitle: 'Data Scientist Intern', dateApplied: '2025-02-28', resumeVersion: 'v3.0', status: 'offered', nextAction: 'Decide by April 1' },
-];
+// Map NetworkingPipeline statuses → tracker statuses
+const PIPELINE_STATUS_MAP = {
+  identified: 'applied',
+  matched: 'applied',
+  reached_out: 'in_review',
+  messaged: 'in_review',
+  replied: 'in_review',
+  coffee_chat: 'interviewing',
+  intro_made: 'in_review',
+  interview: 'interviewing',
+  offer: 'offered',
+  no_response: 'rejected',
+};
+
+// Pull "Resume submitted: X" out of the notes field
+function extractResumeVersion(notes) {
+  if (!notes) return '—';
+  const m = notes.match(/Resume submitted:\s*(.+)/i);
+  return m ? m[1].trim() : '—';
+}
+
+function pipelineToApp(record) {
+  return {
+    id: record.id,
+    company: record.company || '—',
+    logo: (record.company?.[0] || '?').toUpperCase(),
+    jobTitle: record.job_title || '—',
+    dateApplied: record.created_date,
+    resumeVersion: extractResumeVersion(record.notes),
+    status: PIPELINE_STATUS_MAP[record.status] || 'applied',
+    nextAction: '—',
+    notes: record.notes || '',
+    location: record.location || '',
+    jobUrl: record.job_url || '',
+  };
+}
 
 const STATUS_COLORS = {
   applied: '#9CA3AF',
@@ -42,7 +70,8 @@ const STATUS_LABELS = {
 export default function ApplicationTracker() {
   const { user } = useAuth();
   // v2.0
-  const [applications, setApplications] = useState(SAMPLE_APPS);
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('date');
@@ -53,7 +82,7 @@ export default function ApplicationTracker() {
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [showParserTest, setShowParserTest] = useState(false);
-  const [importToast, setImportToast] = useState({ company: 'Disney', jobTitle: 'Marketing Intern', change: 'Status changed to Interviewing' });
+  const [importToast, setImportToast] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const importNotification = {
     company: 'Disney', jobTitle: 'Marketing Intern',
@@ -68,6 +97,26 @@ export default function ApplicationTracker() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Load the user's real tracked applications from their pipeline
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      if (!user?.email) { setLoading(false); return; }
+      try {
+        const records = await base44.entities.NetworkingPipeline.filter(
+          { user_email: user.email }, '-created_date', 200
+        );
+        if (!cancelled) setApplications(records.map(pipelineToApp));
+      } catch {
+        if (!cancelled) setApplications([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [user?.email]);
 
   // Filter & search
   let filtered = applications.filter(app => {
@@ -221,8 +270,15 @@ export default function ApplicationTracker() {
           </select>
         </div>
 
-        {/* Empty State */}
-        {applications.length === 0 ? (
+        {/* Loading State */}
+        {loading ? (
+          <div style={{ background: '#fff', borderRadius: 12, padding: '60px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
+            <span style={{ display: 'inline-block', width: 28, height: 28, border: '3px solid #F0E5DE', borderTopColor: '#E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <p style={{ fontSize: 14, color: '#888', marginTop: 16 }}>Loading your applications…</p>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        ) : /* Empty State */
+        applications.length === 0 ? (
           <div style={{ background: '#fff', borderRadius: 12, padding: '60px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
             <h3 style={{ fontFamily: pf, fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>

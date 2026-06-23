@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
+import { addPipelineEntry } from '@/functions/addPipelineEntry';
 
 const pf = "'Playfair Display', serif";
 const dm = "'DM Sans', sans-serif";
+
+// Tracker status label → NetworkingPipeline status
+const LABEL_TO_PIPELINE = {
+  'Applied': 'identified',
+  'In Review': 'reached_out',
+  'Interviewing': 'interview',
+  'Offer Received': 'offer',
+  'Rejected': 'no_response',
+};
 
 export default function AddApplicationModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -52,14 +62,29 @@ export default function AddApplicationModal({ isOpen, onClose, onSuccess }) {
     setLoading(true);
     try {
       const resumeVersion = formData.resumeVersion === 'Other' ? formData.resumeOther : formData.resumeVersion;
-      const newApp = {
-        id: `app-${Date.now()}`,
+
+      // Persist to the user's pipeline so it survives refresh and shows in the tracker
+      const noteParts = [formData.notes, `Resume submitted: ${resumeVersion}`].filter(Boolean);
+      const res = await addPipelineEntry({
         company: formData.companyName,
+        job_title: formData.jobTitle,
+        job_url: formData.jobLink || '',
+        application_path: 'cold_apply',
+        status: LABEL_TO_PIPELINE[formData.status] || 'identified',
+        notes: noteParts.join('\n'),
+      });
+      const savedId = res?.data?.record?.id || res?.record?.id || `app-${Date.now()}`;
+
+      const statusKey = { 'Applied': 'applied', 'In Review': 'in_review', 'Interviewing': 'interviewing', 'Offer Received': 'offered', 'Rejected': 'rejected' }[formData.status] || 'applied';
+      const newApp = {
+        id: savedId,
+        company: formData.companyName,
+        logo: (formData.companyName?.[0] || '?').toUpperCase(),
         jobTitle: formData.jobTitle,
         jobLink: formData.jobLink || null,
         dateApplied: formData.dateApplied,
         resumeVersion,
-        status: formData.status,
+        status: statusKey,
         notes: formData.notes,
         nextAction: formData.status === 'Interviewing' ? 'Prepare for Interview' : '—',
       };
