@@ -102,28 +102,23 @@ export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr 
               display: 'inline-flex',
               alignItems: 'center',
               gap: 5,
-              background: hasAlumni 
-                ? 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)' 
-                : 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+              background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)',
               borderRadius: 100,
-              padding: '3px 9px',
+              padding: '4px 10px',
               flexShrink: 0,
-              border: hasAlumni 
-                ? '1px solid rgba(124,58,237,0.2)' 
-                : '1px solid rgba(5,150,105,0.2)',
+              border: '1px solid rgba(124,58,237,0.25)',
+              boxShadow: '0 2px 6px rgba(124,58,237,0.15)',
             }}>
               <span style={{ fontSize: 10 }}>
-                {hasAlumni ? (lead.alumniCount > 1 ? '👥' : '🎓') : '🏡'}
+                {hasAlumni && hasParent ? '👥' : hasAlumni ? '🎓' : '🏡'}
               </span>
               <span style={{
                 fontFamily: dm,
                 fontSize: 9,
                 fontWeight: 700,
-                color: hasAlumni ? '#6d28d9' : '#059669',
+                color: '#6d28d9',
               }}>
-                {hasAlumni 
-                  ? `${lead.alumniCount} Alumni` 
-                  : `${lead.parentCount} Parent${lead.parentCount > 1 ? 's' : ''}`}
+                {networkCount} {networkCount === 1 ? (hasAlumni ? 'Alumni' : 'Parent') : 'Parent/Alum Matches'}
               </span>
             </div>
           )}

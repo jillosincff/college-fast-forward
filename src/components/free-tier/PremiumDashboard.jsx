@@ -140,7 +140,7 @@ function PremiumNav({ user, onEditGoals, navRef }) {
   );
 }
 
-function StatPill({ emoji, label, value, theme, isLoading, warning }) {
+function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning }) {
   return (
     <div style={{
       display: 'flex',
@@ -156,7 +156,7 @@ function StatPill({ emoji, label, value, theme, isLoading, warning }) {
     }}>
       <span style={{ fontSize: 22, flexShrink: 0 }}>{emoji}</span>
       <div style={{ minWidth: 0, flex: 1 }}>
-        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', margin: '0 0 3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
           {isLoading ? (
             <>
               <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spinStat 0.8s linear infinite' }} />
@@ -183,6 +183,9 @@ function StatPill({ emoji, label, value, theme, isLoading, warning }) {
           )}
         </p>
         <p style={{ fontFamily: dm, fontSize: 10, color: warning ? 'rgba(251,191,36,0.8)' : 'rgba(255,255,255,0.55)', margin: 0, whiteSpace: 'nowrap' }}>{label}</p>
+        {sublabel && (
+          <p style={{ fontFamily: dm, fontSize: 9, color: 'rgba(255,255,255,0.7)', margin: '3px 0 0', whiteSpace: 'nowrap' }}>{sublabel}</p>
+        )}
       </div>
     </div>
   );
@@ -275,7 +278,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const stats = [
     { emoji: '🤖', label: 'Agent Status', value: 'ACTIVE' },
     { emoji: '📄', label: 'Resume', value: hasResume ? 'On File' : 'Not Uploaded', warning: !hasResume },
-    { emoji: '🐊', label: 'Synced Network', value: `${networkCount}` },
+    { emoji: '🐊', label: 'Active Connections', value: `${networkCount}`, sublabel: `${alumniCount} Alumni • ${parentsCount} Parents` },
   ];
 
   return (

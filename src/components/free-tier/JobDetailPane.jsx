@@ -375,6 +375,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
         <InAppApplyModal
           lead={lead}
           user={user}
+          schoolAbbr={schoolAbbr}
           onClose={() => setShowApplyModal(false)}
           onSuccess={() => {
             setShowApplyModal(false);

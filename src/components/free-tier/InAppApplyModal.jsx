@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
 
-export default function InAppApplyModal({ lead, user, onClose, onSuccess }) {
+export default function InAppApplyModal({ lead, user, onClose, onSuccess, schoolAbbr }) {
+  const [step, setStep] = useState('network'); // 'network' | 'resume' | 'submit'
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -16,6 +17,15 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess }) {
 
   const companyName = lead.company || lead.companyName || '';
   const jobTitle = lead.job_title || lead.role || '';
+  
+  // Network data
+  const hasAlumni = lead.alumniCount > 0;
+  const hasParent = lead.parentCount > 0;
+  const networkCount = (lead.alumniCount || 0) + (lead.parentCount || 0);
+  const alumniName = lead.alumni_name || lead.alumnus?.name || '';
+  const alumniRole = lead.alumni_role || lead.alumnus?.title || '';
+  const alumniEmail = lead.alumni_email || lead.alumnus?.email || '';
+  const alumniLinkedin = lead.alumni_linkedin || lead.alumnus?.linkedinUrl || '';
 
   // Load active resume on mount
   useEffect(() => {
@@ -109,12 +119,98 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess }) {
             {/* Header */}
             <div className="flex items-start justify-between p-5 border-b border-gray-100">
               <div>
-                <h3 className="font-extrabold text-gray-900 text-base">Apply via College Fast Forward</h3>
+                <h3 className="font-extrabold text-gray-900 text-base">
+                  {step === 'network' ? '🔥 Maximize Your Hiring Chance' : 'Apply via College Fast Forward'}
+                </h3>
                 <p className="text-xs text-gray-500 mt-0.5">{jobTitle} · {companyName}</p>
               </div>
               <button onClick={onClose} className="text-gray-400 hover:text-gray-600 font-bold text-sm p-1 cursor-pointer" style={{ minHeight: 'auto', minWidth: 'auto' }}>✕</button>
             </div>
 
+            {/* Network Interstitial - Step 1 */}
+            {step === 'network' && (hasAlumni || hasParent) ? (
+              <div className="p-5 space-y-4">
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-2xl p-5">
+                  <div className="flex items-start gap-3 mb-4">
+                    <span className="text-2xl">🔥</span>
+                    <div>
+                      <p className="text-sm font-bold text-purple-900">Maximize Your Hiring Chance at {companyName}!</p>
+                      <p className="text-xs text-purple-700 mt-1">
+                        We found <strong>{networkCount} warm connection{networkCount > 1 ? 's' : ''}</strong> who can champion your application.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {hasAlumni && alumniName && (
+                    <div className="bg-white border border-purple-100 rounded-xl p-3 mb-3">
+                      <div className="flex items-start gap-2 mb-2">
+                        <span className="text-lg">🎓</span>
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-purple-800">{alumniName}</p>
+                          {alumniRole && <p className="text-[11px] text-purple-700 mt-0.5">{alumniRole}</p>}
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-purple-700 leading-relaxed">
+                        {schoolAbbr || 'Fellow'} {alumniName.split(' ')[0]} is a {alumniRole || 'professional'} at {companyName} and has opted in to champion students on our platform.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {hasAlumni && !alumniName && (
+                    <div className="bg-white border border-purple-100 rounded-xl p-3 mb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">🎓</span>
+                        <p className="text-xs font-bold text-purple-800">{lead.alumniCount} {lead.alumniCount === 1 ? 'Alumni' : 'Alumni'} Working Here</p>
+                      </div>
+                      <p className="text-[11px] text-purple-700 leading-relaxed">
+                        {schoolAbbr || 'Fellow'} graduates at {companyName} are 3x more likely to respond to outreach. CLiFF can help you find the right contact.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {hasParent && (
+                    <div className="bg-white border border-purple-100 rounded-xl p-3 mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">🏡</span>
+                        <p className="text-xs font-bold text-purple-800">{lead.parentCount} {lead.parentCount === 1 ? 'Parent' : 'Parents'} in Network</p>
+                      </div>
+                      <p className="text-[11px] text-purple-700 leading-relaxed">
+                        Parents of fellow students have opted in to champion applicants on our platform.
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setStep('resume')}
+                      className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer shadow-lg shadow-purple-200"
+                      style={{ minHeight: 'auto' }}
+                    >
+                      💬 Let CLIFF Draft a Warm Intro (Recommended)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStep('resume')}
+                      className="w-full py-3 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl text-sm border border-gray-300 transition cursor-pointer"
+                      style={{ minHeight: 'auto' }}
+                    >
+                      📄 Skip Networking, Optimize Resume First
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[10px] text-center text-gray-400">Students who network are 5x more likely to land interviews.</p>
+              </div>
+            ) : step === 'network' ? (
+              <div className="p-5" onClick={() => setStep('resume')}>
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-center cursor-pointer hover:bg-blue-100 transition">
+                  <span className="text-3xl mb-2 block">🚀</span>
+                  <p className="text-sm font-bold text-blue-900 mb-1">No Warm Connections Found</p>
+                  <p className="text-xs text-blue-700">Let's make your application stand out with a tailored resume.</p>
+                  <p className="text-[10px] text-blue-500 mt-3">Click to continue →</p>
+                </div>
+              </div>
+            ) : (
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               {/* Applicant info */}
               {(user?.full_name || user?.email) && (
@@ -240,6 +336,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess }) {
                 Your application will be tracked in your CFF pipeline.
               </p>
             </form>
+            )}
           </>
         )}
       </div>
