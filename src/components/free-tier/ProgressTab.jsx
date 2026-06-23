@@ -5,8 +5,7 @@ import { X } from 'lucide-react';
 const dm = "'DM Sans', system-ui, sans-serif";
 
 const STATUS_CONFIG = {
-  identified: { label: 'Identified', color: '#6b7280', bg: '#f3f4f6' },
-  matched: { label: 'Matched', color: '#6b7280', bg: '#f3f4f6' },
+  applied: { label: 'Applied', color: '#2563eb', bg: '#eff6ff' },
   reached_out: { label: 'Reached Out', color: '#2563eb', bg: '#eff6ff' },
   messaged: { label: 'Messaged', color: '#2563eb', bg: '#eff6ff' },
   replied: { label: 'Replied', color: '#7c3aed', bg: '#f5f3ff' },
@@ -14,8 +13,9 @@ const STATUS_CONFIG = {
   intro_made: { label: 'Intro Made', color: '#7c3aed', bg: '#f5f3ff' },
   interview: { label: 'Interview', color: '#ea580c', bg: '#fff7ed' },
   offer: { label: 'Offer', color: '#16a34a', bg: '#f0fdf4' },
-  no_response: { label: 'No Response', color: '#9ca3af', bg: '#f9fafb' },
 };
+
+const ACTIONABLE_STATUSES = ['applied', 'reached_out', 'messaged', 'replied', 'coffee_chat', 'intro_made', 'interview', 'offer'];
 
 export default function ProgressTab({ user, onUpgrade }) {
   const [pipeline, setPipeline] = useState([]);
@@ -34,7 +34,9 @@ export default function ProgressTab({ user, onUpgrade }) {
           base44.entities.NetworkingPipeline.list('-created_date', 200),
           base44.entities.TailoredResume.filter({ user_email: user.email }, '-created_date', 100),
         ]);
-        setPipeline(pipelineRecords || []);
+        // Filter to only actionable statuses (exclude identified/matched)
+        const actionable = (pipelineRecords || []).filter(r => ACTIONABLE_STATUSES.includes(r.status));
+        setPipeline(actionable);
         setTailoredResumes(tailored || []);
         setTailoredCount((tailored || []).filter(t => t.status === 'completed').length);
       } catch (e) {
@@ -51,8 +53,8 @@ export default function ProgressTab({ user, onUpgrade }) {
   }, [user?.email]);
 
   const all = pipeline;
-  const appsSent = all.length;
-  const reachedOut = all.filter(r => r.status === 'reached_out' || r.status === 'messaged').length;
+  const applied = all.filter(r => r.status === 'applied').length;
+  const directMessages = all.filter(r => r.status === 'reached_out' || r.status === 'messaged').length;
   const replies = all.filter(r => ['replied', 'coffee_chat', 'intro_made'].includes(r.status)).length;
   const interviews = all.filter(r => r.status === 'interview').length;
   const offers = all.filter(r => r.status === 'offer').length;
@@ -92,14 +94,14 @@ export default function ProgressTab({ user, onUpgrade }) {
 
   // Funnel stages
   const funnel = [
-    { label: 'Applications', value: appsSent, icon: '📋', color: '#2563eb', bg: '#eff6ff' },
-    { label: 'Outreach Sent', value: reachedOut, icon: '🤝', color: '#7c3aed', bg: '#f5f3ff' },
+    { label: 'Applied', value: applied, icon: '📋', color: '#2563eb', bg: '#eff6ff' },
+    { label: 'Direct Messages', value: directMessages, icon: '💬', color: '#7c3aed', bg: '#f5f3ff' },
     { label: 'Replies', value: replies, icon: '💬', color: '#0891b2', bg: '#ecfeff' },
     { label: 'Interviews', value: interviews, icon: '🎤', color: '#ea580c', bg: '#fff7ed' },
     { label: 'Offers', value: offers, icon: '🎉', color: '#16a34a', bg: '#f0fdf4' },
   ];
 
-  const responseRate = appsSent > 0 ? Math.round((replies / appsSent) * 100) : 0;
+  const responseRate = applied > 0 ? Math.round((replies / applied) * 100) : 0;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -214,8 +216,10 @@ export default function ProgressTab({ user, onUpgrade }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {recent.map(r => {
-              const cfg = STATUS_CONFIG[r.status] || STATUS_CONFIG.matched;
+              const cfg = STATUS_CONFIG[r.status] || STATUS_CONFIG.applied;
               const tailoredResume = findTailoredResume(r.company, r.job_title);
+              const isOutreach = r.status === 'reached_out' || r.status === 'messaged';
+              const isReply = ['replied', 'coffee_chat', 'intro_made'].includes(r.status);
               return (
                 <div
                   key={r.id}
@@ -234,7 +238,7 @@ export default function ProgressTab({ user, onUpgrade }) {
                     background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 14, flexShrink: 0,
                   }}>
-                    📌
+                    {isOutreach ? '💬' : r.status === 'interview' ? '🎤' : r.status === 'offer' ? '🎉' : '📋'}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -242,7 +246,8 @@ export default function ProgressTab({ user, onUpgrade }) {
                     </p>
                     <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '2px 0 0' }}>
                       {r.created_date ? new Date(r.created_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
-                      {tailoredResume && <span style={{ marginLeft: 8, color: '#7c3aed' }}>• Resume tailored</span>}
+                      {tailoredResume && r.status === 'applied' && <span style={{ marginLeft: 8, color: '#7c3aed' }}>• {tailoredResume.ats_score ? `ATS ${tailoredResume.ats_score}` : 'Tailored'}</span>}
+                      {isOutreach && r.alumni_name && <span style={{ marginLeft: 8, color: '#7c3aed' }}>• {r.alumni_name}</span>}
                     </p>
                   </div>
                   <span style={{
@@ -281,7 +286,7 @@ export default function ProgressTab({ user, onUpgrade }) {
         }}>
           <div style={{ fontSize: 20, marginBottom: 4 }}>⚡</div>
           <p style={{ fontFamily: dm, fontSize: 22, fontWeight: 800, color: '#16a34a', margin: 0 }}>
-            {loading ? '–' : Math.round((reachedOut / Math.max(appsSent, 1)) * 100)}%
+            {loading ? '–' : Math.round((directMessages / Math.max(applied, 1)) * 100)}%
           </p>
           <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#6b7280', margin: '4px 0 0', textTransform: 'uppercase' }}>
             Outreach Rate
@@ -390,106 +395,99 @@ export default function ProgressTab({ user, onUpgrade }) {
               </div>
             )}
 
-            {/* Resume Section */}
-            <div style={{ marginBottom: 20 }}>
-              <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>
-                📄 Resume Submitted
-              </h4>
-              {(() => {
-                const tailoredResume = findTailoredResume(selectedEntry.company, selectedEntry.job_title);
-                if (tailoredResume) {
-                  return (
-                    <div style={{
-                      background: '#f5f3ff',
-                      border: '1px solid #e9d5ff',
-                      borderRadius: 12,
-                      padding: '14px 16px',
-                    }}>
-                      <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '0 0 6px' }}>
-                        ✨ Tailored Resume
-                      </p>
-                      <p style={{ fontFamily: dm, fontSize: 11, color: '#5b21b6', margin: '0 0 8px', lineHeight: 1.5 }}>
-                        Customized for {tailoredResume.company_name} • {tailoredResume.role_title}
-                      </p>
-                      {tailoredResume.changes_summary && (
-                        <div style={{
-                          background: '#fff',
-                          borderRadius: 8,
-                          padding: '10px 12px',
-                          marginBottom: 8,
-                        }}>
-                          <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#6b7280', margin: '0 0 4px' }}>
-                            KEY CHANGES:
-                          </p>
-                          <p style={{ fontFamily: dm, fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>
-                            {tailoredResume.changes_summary}
-                          </p>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                        <span style={{
-                          fontFamily: dm,
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: '#16a34a',
-                          background: '#f0fdf4',
-                          borderRadius: 100,
-                          padding: '4px 10px',
-                        }}>
-                          ATS Score: {tailoredResume.ats_score || tailoredResume.original_score || 'N/A'}/100
-                        </span>
-                        {tailoredResume.keywords_matched !== undefined && (
-                          <span style={{
-                            fontFamily: dm,
-                            fontSize: 10,
-                            fontWeight: 700,
-                            color: '#2563eb',
-                            background: '#eff6ff',
-                            borderRadius: 100,
-                            padding: '4px 10px',
-                          }}>
-                            {tailoredResume.keywords_matched}/{tailoredResume.keywords_total} keywords
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                } else {
-                  return (
-                    <div style={{
-                      background: '#f9fafb',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: 12,
-                      padding: '14px 16px',
-                    }}>
-                      <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6b7280', margin: '0 0 4px' }}>
-                        Standard Resume
-                      </p>
-                      <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: 0 }}>
-                        No tailored resume found for this application
-                      </p>
-                    </div>
-                  );
-                }
-              })()}
-            </div>
-
-            {/* Additional Details */}
-            {selectedEntry.application_path && (
+            {/* Resume Section - Only show for Applied status */}
+            {selectedEntry.status === 'applied' && (
               <div style={{ marginBottom: 20 }}>
-                <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
-                  Application Path
+                <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>
+                  📄 Resume Submitted
                 </h4>
-                <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0, textTransform: 'capitalize' }}>
-                  {selectedEntry.application_path.replace('_', ' ')}
-                </p>
+                {(() => {
+                  const tailoredResume = findTailoredResume(selectedEntry.company, selectedEntry.job_title);
+                  if (tailoredResume) {
+                    return (
+                      <div style={{
+                        background: '#f5f3ff',
+                        border: '1px solid #e9d5ff',
+                        borderRadius: 12,
+                        padding: '14px 16px',
+                      }}>
+                        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '0 0 6px' }}>
+                          ✨ Tailored Resume
+                        </p>
+                        <p style={{ fontFamily: dm, fontSize: 11, color: '#5b21b6', margin: '0 0 8px', lineHeight: 1.5 }}>
+                          Customized for {tailoredResume.company_name} • {tailoredResume.role_title}
+                        </p>
+                        {tailoredResume.changes_summary && (
+                          <div style={{
+                            background: '#fff',
+                            borderRadius: 8,
+                            padding: '10px 12px',
+                            marginBottom: 8,
+                          }}>
+                            <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#6b7280', margin: '0 0 4px' }}>
+                              KEY CHANGES:
+                            </p>
+                            <p style={{ fontFamily: dm, fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>
+                              {tailoredResume.changes_summary}
+                            </p>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+                          {tailoredResume.ats_score && (
+                            <span style={{
+                              fontFamily: dm,
+                              fontSize: 10,
+                              fontWeight: 700,
+                              color: '#16a34a',
+                              background: '#f0fdf4',
+                              borderRadius: 100,
+                              padding: '4px 10px',
+                            }}>
+                              ATS Score: {tailoredResume.ats_score}/100
+                            </span>
+                          )}
+                          {tailoredResume.keywords_matched !== undefined && (
+                            <span style={{
+                              fontFamily: dm,
+                              fontSize: 10,
+                              fontWeight: 700,
+                              color: '#2563eb',
+                              background: '#eff6ff',
+                              borderRadius: 100,
+                              padding: '4px 10px',
+                            }}>
+                              {tailoredResume.keywords_matched}/{tailoredResume.keywords_total} keywords
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div style={{
+                        background: '#f9fafb',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        padding: '14px 16px',
+                      }}>
+                        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6b7280', margin: '0 0 4px' }}>
+                          Standard Resume
+                        </p>
+                        <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: 0 }}>
+                          No tailored resume found for this application
+                        </p>
+                      </div>
+                    );
+                  }
+                })()}
               </div>
             )}
 
-            {selectedEntry.alumni_name && (
+            {/* Additional Details - Direct Messages */}
+            {(selectedEntry.status === 'reached_out' || selectedEntry.status === 'messaged' || selectedEntry.status === 'replied') && selectedEntry.alumni_name && (
               <div style={{ marginBottom: 20 }}>
                 <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
-                  🤝 Alumni Contact
+                  🤝 Contact
                 </h4>
                 <p style={{ fontFamily: dm, fontSize: 12, color: '#111827', margin: '0 0 2px' }}>
                   {selectedEntry.alumni_name}
@@ -506,12 +504,11 @@ export default function ProgressTab({ user, onUpgrade }) {
             {selectedEntry.created_date && (
               <div>
                 <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
-                  📅 Application Date
+                  📅 Date
                 </h4>
                 <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>
                   {new Date(selectedEntry.created_date).toLocaleDateString('en-US', {
                     weekday: 'short',
-                    year: 'numeric',
                     month: 'short',
                     day: 'numeric',
                   })}
