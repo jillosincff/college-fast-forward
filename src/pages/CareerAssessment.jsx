@@ -189,7 +189,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <AssessmentSidebar />
-        <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
+        <div style={{ flex: 1, height: '100vh', overflowY: 'auto', maxWidth: 640, margin: '0 auto', padding: '48px 24px', boxSizing: 'border-box' }}>
           <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#64748b', marginBottom: 16, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
             ← Back to Dashboard
           </button>
