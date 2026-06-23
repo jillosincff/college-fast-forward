@@ -116,7 +116,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100">
+      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto overscroll-contain">
         {submitted ? (
           <div className="p-8">
             <div className="text-center">
