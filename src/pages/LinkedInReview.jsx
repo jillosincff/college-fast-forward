@@ -103,7 +103,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#E8F4FD', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 24px' }}>🔗</div>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>LinkedIn Profile Review</h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Paste your LinkedIn URL and FastIQ will score every section of your profile against your target role — with specific rewrites for your headline, about section, and more.
+          Paste your LinkedIn URL and CLIFF will score every section of your profile against your target role — with specific rewrites for your headline, about section, and more.
         </p>
         <button onClick={() => onOpenUpgrade()} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
           Unlock CLIFF →
@@ -126,7 +126,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
           Let's optimize your LinkedIn.
         </h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
-          FastIQ will score every section against your target role and tell you exactly what to fix.
+          CLIFF will score every section against your target role and tell you exactly what to fix.
         </p>
       </div>
 
