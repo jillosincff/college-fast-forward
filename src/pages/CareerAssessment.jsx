@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import AssessmentSidebar from '@/components/AssessmentSidebar';
+import ExitConfirmModal from '@/components/assessment/ExitConfirmModal';
 
 const QUESTIONS = [
   { id: 1, dimension: 'thinking', text: "I prefer to analyze data and facts before making decisions." },
@@ -50,6 +51,55 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [responses, setResponses] = useState({});
   const [archetype, setArchetype] = useState(null);
   const [error, setError] = useState('');
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [restored, setRestored] = useState(false);
+
+  const userKey = user?.id || user?.email || 'guest';
+  const PROGRESS_KEY = `cff_archetype_progress_${userKey}`;
+  const RESULT_KEY = `cff_archetype_result_${userKey}`;
+
+  // On mount: restore a saved archetype (show results) or in-progress answers.
+  useEffect(() => {
+    if (restored || !user) return;
+    try {
+      const savedResult = localStorage.getItem(RESULT_KEY);
+      if (savedResult) {
+        setArchetype(JSON.parse(savedResult));
+        setPhase('results');
+        setRestored(true);
+        return;
+      }
+      const savedProgress = localStorage.getItem(PROGRESS_KEY);
+      if (savedProgress) {
+        const { responses: savedResponses, currentQ: savedQ } = JSON.parse(savedProgress);
+        if (savedResponses && Object.keys(savedResponses).length > 0) {
+          setResponses(savedResponses);
+          setCurrentQ(savedQ || 0);
+          setPhase('resume_prompt');
+        }
+      }
+    } catch {}
+    setRestored(true);
+  }, [user, restored, RESULT_KEY, PROGRESS_KEY]);
+
+  const saveProgressLocally = () => {
+    try {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify({ responses, currentQ }));
+    } catch {}
+  };
+
+  const clearProgress = () => {
+    try { localStorage.removeItem(PROGRESS_KEY); } catch {}
+  };
+
+  const handleDashboardClick = () => {
+    // Mid-assessment with answers → confirm. Otherwise leave directly.
+    if (phase === 'assessment' && Object.keys(responses).length > 0) {
+      setShowExitConfirm(true);
+    } else {
+      navigate('FreeTierDashboard');
+    }
+  };
   const [expandedSections, setExpandedSections] = useState({
     dimensions: true,
     superpowers: true,
@@ -148,6 +198,10 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
         if (res?.data?.success && res?.data?.archetype) {
           console.log('Archetype data:', res.data.archetype);
           setArchetype(res.data.archetype);
+          // Persist the full result locally so the student can refer back to it anytime,
+          // and clear the in-progress answers since the assessment is now complete.
+          try { localStorage.setItem(RESULT_KEY, JSON.stringify(res.data.archetype)); } catch {}
+          clearProgress();
           base44.auth.updateMe({ career_archetype: res.data.archetype?.archetype_name, archetype_completed: true }).catch(() => {}); 
           setPhase('results');
         } else {
@@ -233,14 +287,49 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
     );
   }
 
+  // Resume prompt — shown when the user returns with saved in-progress answers
+  if (phase === 'resume_prompt') {
+    const answeredCount = Object.keys(responses).length;
+    return (
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <AssessmentSidebar />
+        <div style={{ flex: 1, height: '100vh', overflowY: 'auto', maxWidth: 560, margin: '0 auto', padding: '80px 24px', boxSizing: 'border-box', textAlign: 'center' }}>
+          <div style={{ fontSize: 44, marginBottom: 16 }}>📌</div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Welcome back!</h1>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
+            You saved your progress last time — you've answered {answeredCount} of {QUESTIONS.length} questions. Pick up right where you left off, or start over from scratch.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 360, margin: '0 auto' }}>
+            <button onClick={() => setPhase('assessment')} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%' }}>
+              Continue where I left off →
+            </button>
+            <button onClick={() => { clearProgress(); setResponses({}); setCurrentQ(0); setSelectedScore(null); setPhase('intro'); }} style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%' }}>
+              Start over
+            </button>
+            <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'none', border: 'none', fontSize: 13, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", padding: '8px', minHeight: 'auto' }}>
+              ← Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Assessment
   if (phase === 'assessment') {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <AssessmentSidebar />
+        {showExitConfirm && (
+          <ExitConfirmModal
+            onSaveQuit={() => { saveProgressLocally(); navigate('FreeTierDashboard'); }}
+            onDiscardQuit={() => { clearProgress(); navigate('FreeTierDashboard'); }}
+            onCancel={() => setShowExitConfirm(false)}
+          />
+        )}
         <div style={{ flex: 1, height: '100vh', overflowY: 'auto', maxWidth: 640, margin: '0 auto', padding: '40px 24px', boxSizing: 'border-box' }}>
           {/* Back to dashboard */}
-          <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#64748b', marginBottom: 24, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <button onClick={handleDashboardClick} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#64748b', marginBottom: 24, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
             ← Back to Dashboard
           </button>
 
@@ -474,13 +563,21 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             </div>
             </CollapsibleSection>
 
+            {/* Saved confirmation */}
+            <div style={{ background: '#F0FFF4', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 12, padding: '14px 18px', marginTop: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18 }}>✅</span>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#166534', margin: 0, lineHeight: 1.5 }}>
+                Your archetype is saved — come back to this page anytime to view it again, or download a PDF copy to keep.
+              </p>
+            </div>
+
             {/* CTAs */}
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 32 }}>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 24 }}>
             <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '14px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", flex: 1 }}>
               Back to Dashboard →
             </button>
             <button onClick={generatePDF} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 24px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-              📥 Download PDF
+              📥 Save as PDF
             </button>
             <button onClick={() => { setPhase('intro'); setCurrentQ(0); setResponses({}); setArchetype(null); }}
               style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 24px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
