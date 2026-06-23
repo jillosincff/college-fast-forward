@@ -20,6 +20,18 @@
       "default": [],
       "description": "User roles"
     },
+    "resume_url": {
+      "type": "string",
+      "description": "URL to user's uploaded resume file"
+    },
+    "resume_filename": {
+      "type": "string",
+      "description": "Original filename of uploaded resume"
+    },
+    "resume_score": {
+      "type": "number",
+      "description": "ATS resume score from analysis (0-100)"
+    },
     "linkedin_optimization": {
       "type": "object",
       "properties": {
