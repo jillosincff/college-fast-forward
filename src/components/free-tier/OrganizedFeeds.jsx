@@ -416,10 +416,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       overflow: 'hidden',
     }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      {/* Split-View Container */}
+      {/* Split-View Container — left list always fixed ~32%, right workspace fills the rest */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: showDetailPane ? 'minmax(260px, 28%) minmax(0, 1fr)' : '1fr',
+        gridTemplateColumns: 'minmax(280px, 32%) minmax(0, 1fr)',
         gap: 0,
         flex: 1,
         overflow: 'hidden',
@@ -427,7 +427,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         {/* LEFT COLUMN: Condensed Feed */}
         <div style={{
           overflowY: 'auto',
-          borderRight: showDetailPane ? '1px solid #e5e7eb' : 'none',
+          borderRight: '1px solid #e5e7eb',
           scrollBehavior: 'smooth',
         }}>
           <div style={{ maxWidth: '100%', padding: '16px 20px' }}>
@@ -506,23 +506,33 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Detail Pane (Expanded to 70%) */}
-        {showDetailPane && selectedLead && (
-          <div style={{
-            overflowY: 'auto',
-            background: '#fff',
-            paddingTop: 16,
-          }}>
+        {/* RIGHT COLUMN: Workspace — always present, fills remaining 65-70% */}
+        <div style={{
+          overflowY: 'auto',
+          background: '#fff',
+          paddingTop: 16,
+        }}>
+          {selectedLead ? (
             <JobDetailPane
               lead={selectedLead}
               user={user}
               schoolAbbr={schoolAbbr}
-              onClose={() => setShowDetailPane(false)}
+              onClose={() => { setShowDetailPane(false); setSelectedLead(null); }}
               onAddToPipeline={handleAddToPipeline}
               onColdInroad={handleColdInroad}
             />
-          </div>
-        )}
+          ) : (
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 32px' }}>
+              <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(124,58,237,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                <svg style={{ width: 28, height: 28, color: '#7c3aed' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              </div>
+              <h3 style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>Select an opportunity</h3>
+              <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0, maxWidth: 320, lineHeight: 1.6 }}>
+                Click any match on the left to load its full description, your apply action, and the networking funnel here.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Kanban Modal */}
