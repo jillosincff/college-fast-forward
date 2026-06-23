@@ -2,13 +2,13 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
  * Returns personalized job leads for a student.
- * Source of truth: Apify Indeed Jobs Scraper (misceres/indeed-scraper) —
- * real, live Indeed postings. No LLM-generated listings.
+ * Source of truth: OpenWeb Ninja JSearch API —
+ * real, live job postings aggregated from Google for Jobs. No LLM-generated listings.
  * Cached 24h per user, busted when goals change.
  */
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-const APIFY_ACTOR = 'misceres~indeed-scraper';
+const JSEARCH_BASE = 'https://api.openwebninja.com/jsearch';
 
 // Hard seniority blocklist — these NEVER belong in a student feed
 const SENIOR_TITLE_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive)\b|\b(ii|iii|iv|v)\b/i;
@@ -40,8 +40,8 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const token = Deno.env.get('APIFY_API_KEY');
-    if (!token) return Response.json({ error: 'APIFY_API_KEY not set' }, { status: 500 });
+    const token = Deno.env.get('OPENWEB_NINJA_API_KEY');
+    if (!token) return Response.json({ error: 'OPENWEB_NINJA_API_KEY not set' }, { status: 500 });
 
     const { career_goals = {}, force_refresh = false } = await req.json().catch(() => ({}));
 
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     }
 
     // Cache key: hash of goals so stale cache is busted when goals change
-    const goalKey = `v4-apify|${seeking}|${role}|${industries.join(',')}|${location}`;
+    const goalKey = `v5-ninja|${seeking}|${role}|${industries.join(',')}|${location}`;
     const cached = user.job_leads_cache;
     const cachedAt = user.job_leads_cached_at;
     const cachedKey = user.job_leads_cache_key;
@@ -80,32 +80,33 @@ Deno.serve(async (req) => {
     const prefCity = locParts[0] || null;
     const prefState = locParts[1]?.toUpperCase().slice(0, 2) || null;
 
-    console.log(`[getLiveJobMatchesFn] Fetching REAL Indeed jobs for: ${searchTerm} in ${location || 'anywhere'}`);
+    console.log(`[getLiveJobMatchesFn] Fetching REAL jobs for: ${searchTerm} in ${location || 'anywhere'}`);
 
-    const input = {
-      position: searchTerm,
-      country: 'US',
-      location: isRemote ? 'Remote' : (prefCity || ''),
-      maxItems: 100,
-      parseCompanyDetails: false,
-      followApplyRedirects: false,
-    };
+    // JSearch: free-text query combining role + location, recent postings only
+    const queryStr = `${searchTerm}${isRemote ? ' remote' : (prefCity ? ` in ${prefCity}` : '')}`.trim();
+    const params = new URLSearchParams({
+      query: queryStr,
+      country: 'us',
+      date_posted: 'week',
+      num_pages: '3',
+    });
+    if (isRemote) params.set('work_from_home', 'true');
 
-    const apiRes = await fetch(`https://api.apify.com/v2/acts/${APIFY_ACTOR}/run-sync-get-dataset-items?token=${token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
+    const apiRes = await fetch(`${JSEARCH_BASE}/search?${params.toString()}`, {
+      method: 'GET',
+      headers: { 'x-api-key': token },
     });
     if (!apiRes.ok) {
       const errText = await apiRes.text();
-      console.error(`[getLiveJobMatchesFn] Apify error ${apiRes.status}: ${errText.slice(0, 300)}`);
+      console.error(`[getLiveJobMatchesFn] Jobs API error ${apiRes.status}: ${errText.slice(0, 300)}`);
       throw new Error(`Jobs API returned ${apiRes.status}`);
     }
-    const jobs = await apiRes.json();
-    console.log(`[getLiveJobMatchesFn] Apify returned ${Array.isArray(jobs) ? jobs.length : 0} real postings`);
+    const payload = await apiRes.json();
+    const jobs = Array.isArray(payload?.data) ? payload.data : [];
+    console.log(`[getLiveJobMatchesFn] Jobs API returned ${jobs.length} real postings`);
 
     // Shuffle so each refresh returns a different subset
-    const jobList = Array.isArray(jobs) ? [...jobs] : [];
+    const jobList = [...jobs];
     for (let i = jobList.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [jobList[i], jobList[j]] = [jobList[j], jobList[i]];
@@ -116,11 +117,16 @@ Deno.serve(async (req) => {
     const allCompanies = [];
 
     for (const job of jobList) {
-      const org = job.company?.trim();
-      const title = job.positionName?.trim();
-      const url = job.url || job.externalApplyLink;
+      const org = job.employer_name?.trim();
+      const title = job.job_title?.trim();
+      const url = job.job_apply_link || job.apply_options?.[0]?.apply_link;
       if (!org || !title || !url) continue;
-      if (job.isExpired === true) continue;
+      // Skip junk employer names that are actually domains/URLs (e.g. "foo.up.railway.app")
+      if (/\.(com|net|org|io|app|co|dev|xyz)\b/i.test(org) || /https?:\/\//i.test(org)) continue;
+
+      const locText = [job.job_city, job.job_state].filter(Boolean).join(', ')
+        || (job.job_is_remote ? 'Remote' : (job.job_country || ''));
+      const postedDate = job.job_posted_at_datetime_utc || null;
 
       const isInternTitle = INTERN_TITLE_RE.test(title);
 
@@ -133,25 +139,28 @@ Deno.serve(async (req) => {
       // ENTRY_TITLE_RE retained only to rescue titles that also contain a senior word.
       if (!isInternTitle && SENIOR_TITLE_RE.test(title) && !ENTRY_TITLE_RE.test(title)) continue;
 
-      if (!jobMatchesLocation(job.location, prefCity, prefState)) continue;
+      if (!jobMatchesLocation(locText, prefCity, prefState)) continue;
 
       const orgKey = org.toLowerCase();
       if (seenOrgs.has(orgKey)) continue;
       seenOrgs.add(orgKey);
 
-      const description = job.description?.trim() || `${org} is hiring for ${title}.`;
+      const description = job.job_description?.trim() || `${org} is hiring for ${title}.`;
+      const salary = (job.job_min_salary || job.job_max_salary)
+        ? `$${job.job_min_salary || '?'} - $${job.job_max_salary || '?'} ${job.job_salary_period || ''}`.trim()
+        : null;
 
       allCompanies.push({
         name: org,
         job_title: title,
         hiring_description: description,
-        hiring_signal: hiringSignalFromDate(job.postingDateParsed),
+        hiring_signal: hiringSignalFromDate(postedDate),
         job_url: url,
         industry: industries[0] || '',
-        location: job.location || location || '',
-        salary_range: job.salary || null,
-        posted_date: job.postingDateParsed || null,
-        logo_url: null,
+        location: locText || location || '',
+        salary_range: salary,
+        posted_date: postedDate,
+        logo_url: job.employer_logo || null,
         has_web_result: true,
         verified_posting: true,
       });
