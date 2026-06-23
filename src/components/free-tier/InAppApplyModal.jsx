@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
 
-export default function InAppApplyModal({ lead, user, onClose, onSuccess, schoolAbbr }) {
+export default function InAppApplyModal({ lead, user, onClose, onSuccess, schoolAbbr, standoutTip }) {
   const [step, setStep] = useState('network'); // 'network' | 'resume' | 'submit'
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -99,20 +99,50 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100">
         {submitted ? (
-          <div className="p-8 text-center">
-            <div className="text-4xl mb-3">🎉</div>
-            <h3 className="text-lg font-extrabold text-gray-900 mb-1">Application Submitted!</h3>
-            <p className="text-sm text-gray-500 mb-2">
-              Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> has been tracked in your CFF pipeline.
-            </p>
-            <p className="text-xs text-gray-400 mb-6">We'll help you follow up at the right time.</p>
-            <button
-              onClick={onClose}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer"
-              style={{ minHeight: 'auto' }}
-            >
-              View My Pipeline →
-            </button>
+          <div className="p-8">
+            <div className="text-center">
+              <div className="text-4xl mb-3">🎉</div>
+              <h3 className="text-lg font-extrabold text-gray-900 mb-1">Application Tracked!</h3>
+              <p className="text-sm text-gray-500 mb-2">
+                Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> has been tracked in your CFF pipeline.
+              </p>
+            </div>
+
+            {/* CLIFF Standout Tip — moved here as the grand finale */}
+            {standoutTip && (
+              <div className="mt-5 rounded-xl p-4 text-left" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '1px solid #fbbf24' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">✨</span>
+                  <h4 className="text-xs font-extrabold uppercase tracking-wide" style={{ color: '#92400e', margin: 0 }}>
+                    Your CLIFF Standout Tip
+                  </h4>
+                </div>
+                <p className="text-[13px] leading-relaxed" style={{ color: '#78350f', margin: 0 }}>
+                  {standoutTip}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-6 space-y-2">
+              {(lead.job_url || lead.url) && (
+                <a
+                  href={lead.job_url || lead.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer text-center"
+                  style={{ minHeight: 'auto' }}
+                >
+                  🌐 Open Application Website
+                </a>
+              )}
+              <button
+                onClick={onClose}
+                className="w-full py-3 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl text-sm border border-gray-300 transition cursor-pointer"
+                style={{ minHeight: 'auto' }}
+              >
+                View My Pipeline →
+              </button>
+            </div>
           </div>
         ) : (
           <>

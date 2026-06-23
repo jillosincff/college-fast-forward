@@ -269,54 +269,6 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
               </div>
             </div>
 
-            {/* CLIFF Standout Tip - Prominent Banner */}
-            {loadingInsight ? (
-              <div style={{
-                background: '#fff',
-                borderRadius: 12,
-                padding: '16px 20px',
-                border: '1px solid #e5e7eb',
-                marginBottom: 24,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 18 }}>✨</span>
-                  <h4 style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
-                    CLIFF Standout Tip
-                  </h4>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#9ca3af', fontSize: 11 }}>
-                  <span style={{ width: 12, height: 12, border: '2px solid #e5e7eb', borderTop: '2px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-                  Generating insight…
-                </div>
-              </div>
-            ) : insight?.standout_tip ? (
-              <div style={{
-                background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-                borderRadius: 12,
-                padding: '18px 20px',
-                border: '1px solid #fbbf24',
-                marginBottom: 24,
-                boxShadow: '0 2px 8px rgba(251,191,36,0.15)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <span style={{ fontSize: 18 }}>✨</span>
-                  <h4 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
-                    CLIFF Standout Tip
-                  </h4>
-                </div>
-                <p style={{
-                  fontFamily: dm,
-                  fontSize: 13,
-                  color: '#78350f',
-                  lineHeight: 1.7,
-                  margin: 0,
-                }}>
-                  {insight.standout_tip}
-                </p>
-              </div>
-            ) : null}
-
             {/* Job Description - Full Width, Premium Readability */}
             {jobDesc && (
               <div style={{ marginBottom: 24 }}>
@@ -376,6 +328,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
           lead={lead}
           user={user}
           schoolAbbr={schoolAbbr}
+          standoutTip={insight?.standout_tip || ''}
           onClose={() => setShowApplyModal(false)}
           onSuccess={() => {
             setShowApplyModal(false);
