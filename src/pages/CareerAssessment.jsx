@@ -237,7 +237,12 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <AssessmentSidebar />
-        <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
+        <div style={{ flex: 1, height: '100vh', overflowY: 'auto', maxWidth: 640, margin: '0 auto', padding: '40px 24px', boxSizing: 'border-box' }}>
+          {/* Back to dashboard */}
+          <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#64748b', marginBottom: 24, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+            ← Back to Dashboard
+          </button>
+
           {/* Progress */}
           <div style={{ marginBottom: 40 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -298,6 +303,16 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           </div>
 
           {error && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#EF4444', textAlign: 'center', margin: '0 0 16px' }}>{error}</p>}
+
+          {/* Continue button — appears once the current question is answered */}
+          {responses[currentQuestion.id]?.score && (
+            <button
+              onClick={() => handleAnswer(responses[currentQuestion.id].score)}
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', marginBottom: 16 }}
+            >
+              {currentQ < QUESTIONS.length - 1 ? 'Continue →' : 'See My Results →'}
+            </button>
+          )}
 
           {currentQ > 0 && (
             <button onClick={() => setCurrentQ(prev => prev - 1)} style={{ background: 'none', border: 'none', fontSize: 13, color: '#AAAAAA', cursor: 'pointer', display: 'block', margin: '0 auto', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', minWidth: 'auto' }}>
