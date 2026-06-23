@@ -152,29 +152,35 @@ function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning, is
 export default function PremiumDashboard({ user: userProp, parentCount, college, theme }) {
   const [user, setUser] = useState(userProp);
   const t = theme || getThemeForSchool(college || 'UF');
-  
+  const lastUserFetchRef = useRef(0);
+
   // Fetch fresh user data on mount and when page regains focus
   useEffect(() => {
+    // Throttle: refetch the user at most once every 30s to avoid hammering the API
     const loadFreshUser = async () => {
+      const now = Date.now();
+      if (now - lastUserFetchRef.current < 30000) return;
+      lastUserFetchRef.current = now;
       const fresh = await base44.auth.me().catch(() => null);
       if (fresh) setUser(fresh);
     };
     loadFreshUser();
-    
-    // Refresh when returning to this tab/window
+
+    // Refresh when returning to this tab/window (still throttled)
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         loadFreshUser();
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    
-    // Also listen for custom user update event from Resume Studio
+
+    // Listen for custom user update event from Resume Studio — use the
+    // pushed payload directly, no extra API call needed
     const handleUserUpdate = (e) => {
       if (e.detail) setUser(e.detail);
     };
     window.addEventListener('cff:user-updated', handleUserUpdate);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('cff:user-updated', handleUserUpdate);
@@ -221,21 +227,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         setNetworkStats({ companies: 0, alumni: 0, parents: 0 });
       });
   }, [user?.career_goals?.target_industries]);
-
-  // Listen for user updates from Resume Studio
-  useEffect(() => {
-    const handleUserUpdate = async (e) => {
-      if (e.detail) {
-        setUser(e.detail);
-      } else {
-        // Fallback: fetch fresh data
-        const fresh = await base44.auth.me().catch(() => null);
-        if (fresh) setUser(fresh);
-      }
-    };
-    window.addEventListener('cff:user-updated', handleUserUpdate);
-    return () => window.removeEventListener('cff:user-updated', handleUserUpdate);
-  }, []);
 
   const handleBackdoorClick = (job) => {
     setSelectedJob(job);
