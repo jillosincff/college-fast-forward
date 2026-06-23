@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
       query: queryStr,
       country: 'us',
       date_posted: 'week',
-      num_pages: '10',
+      num_pages: '4',
     });
     if (isRemote) params.set('work_from_home', 'true');
 

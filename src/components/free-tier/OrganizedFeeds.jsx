@@ -124,8 +124,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const { data: feedsData, isLoading, isFetching, error } = useQuery({
     queryKey: ['liveJobMatches', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation, refreshKey],
     queryFn: async () => {
-      // FORCE cache bust on every call for fresh data
-      try { await clearJobLeadsCache({}); } catch {}
+      // Use the 24h server-side cache for instant loads. Only force a fresh
+      // (slow) API fetch when the user explicitly hits Refresh.
       const result = await getLiveJobMatchesFn({
         career_goals: {
           role: effectiveRole,
@@ -133,14 +133,14 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           locations: effectiveLocation ? [effectiveLocation] : [],
           company_size_preference: effectiveSize && effectiveSize !== 'all' ? [effectiveSize] : [],
         },
-        force_refresh: true, // Always force refresh
+        force_refresh: forceRefresh,
       });
-      console.log('🔍 [OrganizedFeeds] getLiveJobMatchesFn result:', JSON.stringify(result, null, 2));
       return result;
     },
     enabled: true,
-    staleTime: 0,
-    gcTime: 0, // Don't cache
+    staleTime: 5 * 60 * 1000,     // treat data as fresh for 5 min — no refetch on remount
+    gcTime: 30 * 60 * 1000,       // keep results cached for 30 min during the session
+    refetchOnWindowFocus: false,
   });
   
   // Debug: Log query state
@@ -153,33 +153,19 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     if (forceRefresh && !isLoading) setForceRefresh(false);
   }, [isLoading, forceRefresh]);
 
-  const { data: dualData, isLoading: dualLoading } = useQuery({
+  const { data: dualData } = useQuery({
     queryKey: ['dualConstraintLeads', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation],
     queryFn: async () => {
-      const result = await getDualConstraintLeads({
+      return await getDualConstraintLeads({
         explicit_target_role: effectiveRole,
         explicit_target_industries: target_industries || [],
         target_location: effectiveLocation,
       });
-      
-      // 🔍 DEBUG: Log raw payload structure from backend
-      console.log('🔍 [OrganizedFeeds] Raw Dual Constraint Payload:', JSON.stringify(result, null, 2));
-      const leads = result?.leads || [];
-      leads.forEach((lead, idx) => {
-        console.log(`🔍 [OrganizedFeeds] Dual Lead #${idx}:`, {
-          company: lead.company,
-          job_title: lead.job_title,
-          role: lead.role,
-          signalTier: lead.signalTier,
-          all_keys: Object.keys(lead),
-        });
-      });
-      
-      return result;
     },
     enabled: !!(effectiveRole || target_industries?.length),
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const dualLeads = Array.isArray(dualData?.data?.leads) ? dualData.data.leads
@@ -416,7 +402,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   };
 
   const noGoals = !target_industries?.length && !effectiveRole;
-  const anyLoading = isLoading || dualLoading;
+  // Only block the feed on the primary (fast, cached) job source. The slower
+  // alumni-verified Exa leads merge in as they arrive without holding up the list.
+  const anyLoading = isLoading;
 
   return (
     <div style={{
