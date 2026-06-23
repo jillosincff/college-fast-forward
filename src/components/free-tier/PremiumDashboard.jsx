@@ -93,7 +93,10 @@ function PremiumNav({ user, onEditGoals, navRef }) {
   );
 }
 
-function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning }) {
+function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning, isMobile }) {
+  // On mobile, a pill with a sublabel (the wide "Active Connections" one) takes a
+  // full row so its value + sublabel never get crushed/clipped off the edge.
+  const flexBasis = isMobile ? (sublabel ? '100%' : 'calc(50% - 6px)') : '1 1 0';
   return (
     <div style={{
       display: 'flex',
@@ -102,8 +105,8 @@ function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning }) 
       background: warning ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.08)',
       border: warning ? '1px solid rgba(251,191,36,0.4)' : '1px solid rgba(255,255,255,0.12)',
       borderRadius: 14,
-      padding: '12px 18px',
-      flex: '1 1 0',
+      padding: isMobile ? '11px 14px' : '12px 18px',
+      flex: isMobile ? `1 1 ${flexBasis}` : '1 1 0',
       minWidth: 0,
       position: 'relative',
     }}>
@@ -137,7 +140,7 @@ function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning }) 
         </p>
         <p style={{ fontFamily: dm, fontSize: 10, color: warning ? 'rgba(251,191,36,0.8)' : 'rgba(255,255,255,0.55)', margin: 0, whiteSpace: 'nowrap' }}>{label}</p>
         {sublabel && (
-          <p style={{ fontFamily: dm, fontSize: 9, color: 'rgba(255,255,255,0.7)', margin: '3px 0 0', whiteSpace: 'nowrap' }}>{sublabel}</p>
+          <p style={{ fontFamily: dm, fontSize: 9, color: 'rgba(255,255,255,0.7)', margin: '3px 0 0' }}>{sublabel}</p>
         )}
       </div>
     </div>
@@ -303,12 +306,12 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           onClick={() => document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'end' })}
           style={{
             position: 'fixed',
-            bottom: isMobile ? 90 : 40,
-            right: isMobile ? 20 : 40,
+            bottom: isMobile ? 84 : 40,
+            right: isMobile ? 16 : 40,
             background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
             border: 'none',
             borderRadius: 100,
-            padding: '14px 20px',
+            padding: isMobile ? '12px 16px' : '14px 20px',
             boxShadow: '0 8px 24px rgba(124,58,237,0.4)',
             cursor: 'pointer',
             zIndex: 999,
@@ -386,7 +389,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           {/* Stats row */}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {stats.map((s, i) => (
-              <StatPill key={i} {...s} theme={t} />
+              <StatPill key={i} {...s} theme={t} isMobile={isMobile} />
             ))}
           </div>
         </div>
