@@ -74,8 +74,8 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
     <div style={{ fontFamily: dmSans, background: '#F8FAFC', minHeight: '100vh' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-        .rt-grid { display: grid; grid-template-columns: 260px 1fr 300px; gap: 20px; }
-        @media (max-width: 900px) { .rt-grid { grid-template-columns: 1fr !important; } }
+        .rt-grid { display: grid; grid-template-columns: 260px minmax(0, 1fr) 300px; gap: 20px; }
+        @media (max-width: 1100px) { .rt-grid { grid-template-columns: minmax(0, 1fr) !important; } }
       `}</style>
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px 100px' }}>
