@@ -2,76 +2,18 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
  * Returns personalized job leads for a student.
- * Source of truth: Fantastic.jobs ATS API (real, live job postings scraped
- * hourly from 200k+ company career pages). No LLM-generated listings.
+ * Source of truth: Apify Indeed Jobs Scraper (misceres/indeed-scraper) —
+ * real, live Indeed postings. No LLM-generated listings.
  * Cached 24h per user, busted when goals change.
  */
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-const STATE_NAMES = {
-  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado',
-  CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho',
-  IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana',
-  ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi',
-  MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
-  NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma',
-  OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota',
-  TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington',
-  WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming', DC: 'District of Columbia',
-};
-
-// Map LinkedIn headcount to our size tiers
-function sizeFromHeadcount(headcount) {
-  if (!headcount || headcount <= 0) return null;
-  if (headcount <= 50) return 'startup';
-  if (headcount <= 500) return 'mid';
-  return 'large';
-}
-
-// "New York, NY" → location query the API understands (city OR full-name state)
-function buildLocationQuery(location) {
-  if (!location) return null;
-  if (/remote/i.test(location)) return null;
-  const parts = location.split(',').map(p => p.trim()).filter(Boolean);
-  const city = parts[0];
-  const stateAbbr = parts[1]?.toUpperCase().slice(0, 2);
-  const stateName = STATE_NAMES[stateAbbr];
-  if (city && stateName) return `"${city}" OR "${stateName}, United States"`;
-  if (city) return `"${city}"`;
-  return null;
-}
-
-// Boolean title query: role keyword AND (level terms matching what the student is seeking)
-function buildTitleQuery(role, seeking) {
-  // "associate" intentionally excluded — it matches "Associate Director" / "Senior Associate"
-  const INTERN_TERMS = `intern | internship | co-op`;
-  const ENTRY_TERMS = `junior | coordinator | 'entry level' | graduate | trainee | 'new grad' | analyst | assistant`;
-  const levelTerms = seeking === 'internship' ? INTERN_TERMS
-    : seeking === 'fulltime' ? ENTRY_TERMS
-    : `${INTERN_TERMS} | ${ENTRY_TERMS}`;
-  const words = (role || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2);
-  if (words.length === 0) return `(${levelTerms})`;
-  const primary = words[0];
-  const rest = words.slice(1);
-  const restClause = rest.length > 0 ? ` | ${rest.join(' | ')}` : '';
-  return `${primary} & (${levelTerms}${restClause})`;
-}
+const APIFY_ACTOR = 'misceres~indeed-scraper';
 
 // Hard seniority blocklist — these NEVER belong in a student feed
 const SENIOR_TITLE_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive)\b|\b(ii|iii|iv|v)\b/i;
 const INTERN_TITLE_RE = /\b(intern|internship|co-?op)\b/i;
-
-// Does the job's location actually match the student's preference?
-function jobMatchesLocation(job, city, stateName) {
-  if (!city && !stateName) return true;
-  if (job.remote_derived === true) return true;
-  const locs = (job.locations_derived || []).join(' | ').toLowerCase();
-  if (!locs) return false;
-  if (city && locs.includes(city.toLowerCase())) return true;
-  if (stateName && locs.includes(stateName.toLowerCase())) return true;
-  return false;
-}
+const ENTRY_TITLE_RE = /\b(junior|jr\.?|coordinator|entry|graduate|trainee|new grad|assistant|analyst|associate)\b/i;
 
 function hiringSignalFromDate(datePosted) {
   if (!datePosted) return 'warm';
@@ -81,15 +23,15 @@ function hiringSignalFromDate(datePosted) {
   return 'cool';
 }
 
-function formatSalary(job) {
-  const min = job.ai_salary_min_value;
-  const max = job.ai_salary_max_value;
-  const single = job.ai_salary_value;
-  const unit = job.ai_salary_unit_text;
-  const fmt = (v) => unit === 'HOUR' ? `$${v}/hr` : `$${Math.round(v / 1000)}K`;
-  if (min && max) return `${fmt(min)}-${fmt(max)}`;
-  if (single) return fmt(single);
-  return null;
+// Does the Indeed location string match the student's preference?
+function jobMatchesLocation(locText, city, stateAbbr) {
+  if (!city && !stateAbbr) return true;
+  if (!locText) return false;
+  const l = locText.toLowerCase();
+  if (/remote/.test(l)) return true;
+  if (city && l.includes(city.toLowerCase())) return true;
+  if (stateAbbr && new RegExp(`\\b${stateAbbr.toLowerCase()}\\b`).test(l)) return true;
+  return false;
 }
 
 Deno.serve(async (req) => {
@@ -98,39 +40,22 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const apiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
-    if (!apiKey) return Response.json({ error: 'FANTASTIC_JOBS_API_KEY not set' }, { status: 500 });
+    const token = Deno.env.get('APIFY_API_KEY');
+    if (!token) return Response.json({ error: 'APIFY_API_KEY not set' }, { status: 500 });
 
     const { career_goals = {}, force_refresh = false } = await req.json().catch(() => ({}));
 
-    const role = career_goals.role
-      || user.career_goals?.target_roles?.[0]
-      || '';
-    const industries = career_goals.industries
-      || user.career_goals?.target_industries
-      || [];
-    const location = career_goals.locations?.[0]
-      || user.career_goals?.location_preference
-      || '';
-    const companySizes = career_goals.company_size_preference
-      || user.career_goals?.company_size_preference
-      || [];
+    const role = career_goals.role || user.career_goals?.target_roles?.[0] || '';
+    const industries = career_goals.industries || user.career_goals?.target_industries || [];
+    const location = career_goals.locations?.[0] || user.career_goals?.location_preference || '';
+    const seeking = career_goals.seeking || user.career_goals?.seeking || 'both';
 
     if (!role && industries.length === 0) {
       return Response.json({ companies: [] });
     }
 
-    // Normalize caller terminology (enterprise/large, midmarket/mid) and accept string or array
-    const NORMALIZE_SIZE = { startup: 'startup', mid: 'mid', midmarket: 'mid', large: 'large', enterprise: 'large' };
-    const sizeList = (Array.isArray(companySizes) ? companySizes : (companySizes ? [companySizes] : []))
-      .map(s => NORMALIZE_SIZE[String(s).toLowerCase()])
-      .filter(Boolean);
-    const strictSize = sizeList.length === 1 ? sizeList[0] : null;
-
-    const seeking = career_goals.seeking || user.career_goals?.seeking || 'both';
-
     // Cache key: hash of goals so stale cache is busted when goals change
-    const goalKey = `v3|${seeking}|${role}|${industries.join(',')}|${location}|${companySizes}`;
+    const goalKey = `v4-apify|${seeking}|${role}|${industries.join(',')}|${location}`;
     const cached = user.job_leads_cache;
     const cachedAt = user.job_leads_cached_at;
     const cachedKey = user.job_leads_cache_key;
@@ -142,94 +67,83 @@ Deno.serve(async (req) => {
       return Response.json({ companies: cached, from_cache: true });
     }
 
-    const roleDesc = role || industries[0] || '';
-    console.log(`[getLiveJobMatchesFn] Fetching REAL jobs for: ${roleDesc} in ${location || 'anywhere'}`);
-
-    // Build Fantastic.jobs query — real ATS postings from the last 7 days
-    const params = new URLSearchParams({
-      time_frame: '7d',
-      limit: '200',
-      include_basic_organization_details: 'true',
-      title_advanced: buildTitleQuery(roleDesc, seeking),
-    });
-    const locQuery = buildLocationQuery(location);
-    if (locQuery) params.set('location', locQuery);
-
-    // Parsed location pieces for strict post-filtering
-    const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
+    const searchTerm = role || industries[0] || '';
+    const isRemote = /remote/i.test(location);
+    const locParts = (location && !isRemote) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
     const prefCity = locParts[0] || null;
-    const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
+    const prefState = locParts[1]?.toUpperCase().slice(0, 2) || null;
 
-    const apiRes = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
-      headers: { 'Authorization': `Bearer ${apiKey}` },
+    console.log(`[getLiveJobMatchesFn] Fetching REAL Indeed jobs for: ${searchTerm} in ${location || 'anywhere'}`);
+
+    const input = {
+      position: searchTerm,
+      country: 'US',
+      location: isRemote ? 'Remote' : (prefCity || ''),
+      maxItems: 100,
+      parseCompanyDetails: false,
+      followApplyRedirects: false,
+    };
+
+    const apiRes = await fetch(`https://api.apify.com/v2/acts/${APIFY_ACTOR}/run-sync-get-dataset-items?token=${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
     });
     if (!apiRes.ok) {
       const errText = await apiRes.text();
-      console.error(`[getLiveJobMatchesFn] Jobs API error ${apiRes.status}: ${errText.slice(0, 300)}`);
+      console.error(`[getLiveJobMatchesFn] Apify error ${apiRes.status}: ${errText.slice(0, 300)}`);
       throw new Error(`Jobs API returned ${apiRes.status}`);
     }
     const jobs = await apiRes.json();
-    console.log(`[getLiveJobMatchesFn] API returned ${Array.isArray(jobs) ? jobs.length : 0} real postings`);
+    console.log(`[getLiveJobMatchesFn] Apify returned ${Array.isArray(jobs) ? jobs.length : 0} real postings`);
 
-    // Shuffle jobs array so each refresh returns a different subset
+    // Shuffle so each refresh returns a different subset
     const jobList = Array.isArray(jobs) ? [...jobs] : [];
     for (let i = jobList.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [jobList[i], jobList[j]] = [jobList[j], jobList[i]];
     }
 
-    // Filter + normalize all valid jobs into a pool (one per company)
+    // Filter + normalize into a pool (one per company)
     const seenOrgs = new Set();
     const allCompanies = [];
 
     for (const job of jobList) {
-      const org = job.organization;
-      const title = job.title?.trim();
-      if (!org || !title || !job.url) continue;
+      const org = job.company?.trim();
+      const title = job.positionName?.trim();
+      const url = job.url || job.externalApplyLink;
+      if (!org || !title || !url) continue;
+      if (job.isExpired === true) continue;
 
       const isInternTitle = INTERN_TITLE_RE.test(title);
 
+      // Seniority gate (interns always allowed)
       if (!isInternTitle && SENIOR_TITLE_RE.test(title)) continue;
       if (seeking === 'internship' && !isInternTitle) continue;
       if (seeking === 'fulltime' && isInternTitle) continue;
 
-      const exp = job.ai_experience_level;
-      const entryTitle = isInternTitle || /junior|coordinator|entry|graduate|trainee|new grad|assistant|analyst/i.test(title);
-      if (exp && exp !== '0-2' && !entryTitle) continue;
+      // Entry-level gate — must look junior/entry OR be an internship
+      if (!isInternTitle && !ENTRY_TITLE_RE.test(title)) continue;
 
-      if (!jobMatchesLocation(job, prefCity, prefState)) continue;
-      if (job.org_linkedin_recruitment_agency_derived === true) continue;
-
-      const size = sizeFromHeadcount(job.org_linkedin_headcount);
-      if (strictSize && size && size !== strictSize) continue;
-      if (strictSize && !size) continue;
+      if (!jobMatchesLocation(job.location, prefCity, prefState)) continue;
 
       const orgKey = org.toLowerCase();
       if (seenOrgs.has(orgKey)) continue;
       seenOrgs.add(orgKey);
 
-      const descParts = [
-        job.ai_core_responsibilities,
-        job.ai_requirements_summary,
-        job.ai_benefits_summary,
-        job.description,
-      ].filter(Boolean);
-      const description = descParts.length > 0
-        ? descParts.join('\n\n')
-        : `${org} is hiring for ${title}.`;
+      const description = job.description?.trim() || `${org} is hiring for ${title}.`;
 
       allCompanies.push({
         name: org,
         job_title: title,
         hiring_description: description,
-        hiring_signal: hiringSignalFromDate(job.date_posted),
-        job_url: job.url,
-        industry: job.org_linkedin_industry || job.ai_taxonomies_a?.[0] || industries[0] || '',
-        size: size || undefined,
-        location: job.locations_derived?.[0] || location || '',
-        salary_range: formatSalary(job),
-        posted_date: job.date_posted || null,
-        logo_url: job.org_logo_permalink || null,
+        hiring_signal: hiringSignalFromDate(job.postingDateParsed),
+        job_url: url,
+        industry: industries[0] || '',
+        location: job.location || location || '',
+        salary_range: job.salary || null,
+        posted_date: job.postingDateParsed || null,
+        logo_url: null,
         has_web_result: true,
         verified_posting: true,
       });
