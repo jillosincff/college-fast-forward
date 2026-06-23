@@ -135,9 +135,23 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
 
       {/* ── Career Coordinates Card ── */}
       <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 16 }}>
-          Career Coordinates
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12 }}>
+          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, margin: 0 }}>
+            Career Coordinates
+          </p>
+          {isMyProfile && (
+            <button
+              onClick={() => { navigate('FreeTierDashboard'); setTimeout(() => window.dispatchEvent(new Event('cff:open-goals-modal')), 400); }}
+              style={{
+                fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
+                background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
+                borderRadius: 8, padding: '6px 14px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+              }}
+            >
+              Edit Goals
+            </button>
+          )}
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           {/* Seeking */}
           {seekingInfo && (

@@ -65,14 +65,6 @@ function PremiumNav({ user, onEditGoals, navRef }) {
             </button>
             {dropdownOpen && (
               <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 6px)', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', minWidth: 220, zIndex: 200, overflow: 'hidden' }}>
-                <button
-                  onClick={() => { setDropdownOpen(false); onEditGoals(); }}
-                  style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                >
-                  🎯 Update Career Goals
-                </button>
                 {(user?.role === 'admin' || user?.roles?.includes('admin')) && (
                   <button
                     onClick={() => { setDropdownOpen(false); navigate('admin'); }}
