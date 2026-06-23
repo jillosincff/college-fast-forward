@@ -14,6 +14,15 @@ import EmailParserTestPanel from '@/components/tracker/EmailParserTestPanel';
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
 
+// Tracker status key → NetworkingPipeline status (for saving edits back)
+const TRACKER_STATUS_TO_PIPELINE = {
+  applied: 'identified',
+  in_review: 'reached_out',
+  interviewing: 'interview',
+  offered: 'offer',
+  rejected: 'no_response',
+};
+
 // Map NetworkingPipeline statuses → tracker statuses
 const PIPELINE_STATUS_MAP = {
   identified: 'applied',
@@ -28,11 +37,13 @@ const PIPELINE_STATUS_MAP = {
   no_response: 'rejected',
 };
 
-// Pull "Resume submitted: X" out of the notes field
+// Pull the resume version/label out of the notes field
 function extractResumeVersion(notes) {
   if (!notes) return '—';
-  const m = notes.match(/Resume submitted:\s*(.+)/i);
-  return m ? m[1].trim() : '—';
+  const submitted = notes.match(/Resume submitted:\s*(.+)/i);
+  if (submitted) return submitted[1].trim().split('\n')[0];
+  if (/Resume tailored via CLiFF/i.test(notes)) return 'Tailored via CLiFF';
+  return '—';
 }
 
 function pipelineToApp(record) {
@@ -411,6 +422,13 @@ export default function ApplicationTracker() {
           onUpdate={(updatedApp) => {
             setSelectedApp(updatedApp);
             setApplications(prev => prev.map(a => a.id === updatedApp.id ? updatedApp : a));
+            // Persist status & notes edits to the database (skip non-DB sample ids)
+            if (updatedApp.id && !String(updatedApp.id).startsWith('app-')) {
+              base44.entities.NetworkingPipeline.update(updatedApp.id, {
+                status: TRACKER_STATUS_TO_PIPELINE[updatedApp.status] || 'identified',
+                notes: updatedApp.notes || '',
+              }).catch(() => {});
+            }
           }}
           onFollowUp={() => setShowFollowUpModal(true)}
           onReminder={() => setShowReminderModal(true)}
