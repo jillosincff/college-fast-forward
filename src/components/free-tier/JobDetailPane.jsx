@@ -36,9 +36,14 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
       .finally(() => setLoadingInsight(false));
   }, [lead]);
 
-  // Load alumni on mount
+  // Run the network search on EVERY role so the result is real (searched),
+  // not assumed. Without this, leads from the live feed (alumniCount=0) would
+  // silently show "no connections" without ever searching.
+  const [searchedAlumni, setSearchedAlumni] = useState(false);
   useEffect(() => {
-    if (!lead || !hasAlumni) return;
+    if (!lead || !companyName) return;
+    setSearchedAlumni(false);
+    setAlumni([]);
     setLoadingAlumni(true);
     scoutCompanyBackdoor({ jobId: companyName, companyName })
       .then(res => {
@@ -46,15 +51,18 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
         if (data?.alumni) setAlumni(data.alumni.slice(0, 5));
       })
       .catch(() => {})
-      .finally(() => setLoadingAlumni(false));
-  }, [lead, hasAlumni]);
+      .finally(() => {
+        setLoadingAlumni(false);
+        setSearchedAlumni(true);
+      });
+  }, [lead, companyName]);
 
   const handleApply = () => {
     setShowApplyModal(true);
   };
 
   const handleFindConnection = () => {
-    if (hasAlumni && alumni.length > 0) {
+    if (alumni.length > 0) {
       const firstAlumni = alumni[0];
       window.location.hash = `#OutreachDrafts?context=alumni_search&company=${encodeURIComponent(companyName)}&jobTitle=${encodeURIComponent(jobTitle)}&alumniName=${encodeURIComponent(firstAlumni.name || '')}&alumniRole=${encodeURIComponent(firstAlumni.role_title || '')}&alumniLinkedin=${encodeURIComponent(firstAlumni.linkedin_url || '')}&skipForm=1`;
     } else {
@@ -144,9 +152,8 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
         </button>
       </div>
 
-      {/* Zone B: Network Advantage */}
-      {(hasAlumni || hasParent) && (
-        <div style={{
+      {/* Zone B: Network Advantage — always shown so the search is visible */}
+      <div style={{
           padding: '16px 24px',
           background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)',
           borderBottom: '1px solid #e9d5ff',
@@ -159,24 +166,25 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                   Network Advantage
                 </h4>
               </div>
-              <p style={{
-                fontFamily: dm,
-                fontSize: 12,
-                color: '#5b21b6',
-                margin: '0 0 12px',
-                lineHeight: 1.5,
-              }}>
-                There {networkCount === 1 ? 'is' : 'are'} <strong>{networkCount}</strong> {hasAlumni && hasParent ? 'alumni & parents' : hasAlumni ? 'alumni' : 'parents'} available to champion your application at {companyName}.
-              </p>
+              <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
-              {/* Alumni List */}
               {loadingAlumni ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#9ca3af', fontSize: 11 }}>
-                  <span style={{ width: 12, height: 12, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-                  Loading connections…
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontSize: 12 }}>
+                  <span style={{ width: 13, height: 13, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  Searching {schoolAbbr || 'your'} network for connections at {companyName}…
                 </div>
               ) : alumni.length > 0 ? (
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
+                  We found <strong>{alumni.length}</strong> {alumni.length === 1 ? 'connection' : 'connections'} who can champion your application at {companyName}.
+                </p>
+              ) : searchedAlumni ? (
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: 0, lineHeight: 1.5 }}>
+                  No verified {schoolAbbr || 'network'} connections at {companyName} yet — CLIFF can still help you find a backdoor in. Use <strong>Find Connection</strong> below to scout cold contacts.
+                </p>
+              ) : null}
+
+              {/* Alumni List */}
+              {!loadingAlumni && alumni.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {alumni.map((a, i) => (
                     <div key={i} style={{
@@ -241,7 +249,6 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                 </div>
               ) : null}
       </div>
-      )}
 
       {/* Zone C: Job Details */}
       <div style={{
@@ -268,6 +275,34 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                 )}
               </div>
             </div>
+
+            {/* About the Company */}
+            {(loadingInsight || insight?.about_company) && (
+              <div style={{ marginBottom: 24 }}>
+                <h4 style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px' }}>
+                  About {companyName.charAt(0).toUpperCase() + companyName.slice(1).toLowerCase()}
+                </h4>
+                <div style={{
+                  fontFamily: dm,
+                  fontSize: 13,
+                  color: '#1f2937',
+                  lineHeight: 1.7,
+                  background: '#fff',
+                  borderRadius: 12,
+                  padding: '16px 20px',
+                  border: '1px solid #e9d5ff',
+                }}>
+                  {loadingInsight ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#9ca3af', fontSize: 12 }}>
+                      <span style={{ width: 12, height: 12, border: '2px solid #e5e7eb', borderTop: '2px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                      Loading company overview…
+                    </div>
+                  ) : (
+                    <p style={{ margin: 0 }}>{insight.about_company}</p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Job Description - Full Width, Premium Readability */}
             {jobDesc && (

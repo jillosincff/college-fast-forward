@@ -72,6 +72,7 @@ Respond ONLY with valid JSON in this exact format:
 {
   "competitiveness_score": <integer 0-100, where 100 = most competitive/hardest>,
   "competitiveness_label": "<one of: Low, Moderate, High, Very High>",
+  "about_company": "<2-3 sentences describing what ${company} does — their industry, products/services, and what makes them notable as a workplace. Factual and concise. If you are unsure about the company, infer from the job description.>",
   "standout_tip": "<2-3 sentences. Specific, actionable advice on how this student can differentiate themselves for THIS role. Reference the job description details if provided. Mention the alumni network advantage if alumni exist.>",
   "estimated_applicants": "<human-readable estimate e.g. '200-400 applicants' or 'Highly competitive'>",
   "best_path": "<one of: cold_apply, alumni_outreach, hiring_manager>"
@@ -95,6 +96,7 @@ Respond ONLY with valid JSON in this exact format:
           properties: {
             competitiveness_score: { type: 'number' },
             competitiveness_label: { type: 'string' },
+            about_company: { type: 'string' },
             standout_tip: { type: 'string' },
             estimated_applicants: { type: 'string' },
             best_path: { type: 'string' },
