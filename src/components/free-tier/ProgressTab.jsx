@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { X } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -18,8 +19,11 @@ const STATUS_CONFIG = {
 
 export default function ProgressTab({ user, onUpgrade }) {
   const [pipeline, setPipeline] = useState([]);
+  const [tailoredResumes, setTailoredResumes] = useState([]);
   const [tailoredCount, setTailoredCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (!user?.email) { setLoading(false); return; }
@@ -28,9 +32,10 @@ export default function ProgressTab({ user, onUpgrade }) {
       try {
         const [pipelineRecords, tailored] = await Promise.all([
           base44.entities.NetworkingPipeline.list('-created_date', 200),
-          base44.entities.TailoredResume.filter({ user_email: user.email }),
+          base44.entities.TailoredResume.filter({ user_email: user.email }, '-created_date', 100),
         ]);
         setPipeline(pipelineRecords || []);
+        setTailoredResumes(tailored || []);
         setTailoredCount((tailored || []).filter(t => t.status === 'completed').length);
       } catch (e) {
         console.error('ProgressTab load error:', e);
@@ -69,6 +74,21 @@ export default function ProgressTab({ user, onUpgrade }) {
 
   // Recent activity (last 5)
   const recent = all.slice(0, 5);
+
+  // Find tailored resume for a given company/role
+  const findTailoredResume = (company, role) => {
+    if (!tailoredResumes.length) return null;
+    const match = tailoredResumes.find(t => 
+      t.company_name?.toLowerCase() === company?.toLowerCase() && 
+      t.role_title?.toLowerCase() === role?.toLowerCase()
+    );
+    return match || tailoredResumes.find(t => t.company_name?.toLowerCase() === company?.toLowerCase());
+  };
+
+  const handleEntryClick = (entry) => {
+    setSelectedEntry(entry);
+    setShowModal(true);
+  };
 
   // Funnel stages
   const funnel = [
@@ -117,30 +137,50 @@ export default function ProgressTab({ user, onUpgrade }) {
         )}
       </div>
 
-      {/* Funnel stats */}
+      {/* Funnel stats - Clickable */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(5, 1fr)',
         gap: 8,
       }} className="progress-funnel">
-        {funnel.map(stage => (
-          <div key={stage.label} style={{
-            background: '#fff',
-            border: `1px solid ${stage.bg}`,
-            borderRadius: 12,
-            padding: '12px 8px',
-            textAlign: 'center',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          }}>
-            <div style={{ fontSize: 16, marginBottom: 4 }}>{stage.icon}</div>
-            <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: stage.color, margin: 0, lineHeight: 1 }}>
-              {loading ? '–' : stage.value}
-            </p>
-            <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#6b7280', margin: '4px 0 0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {stage.label}
-            </p>
-          </div>
-        ))}
+        {funnel.map((stage, idx) => {
+          const isClickable = stage.value > 0;
+          return (
+            <div
+              key={stage.label}
+              onClick={() => isClickable && handleEntryClick({ funnelStage: stage.label })}
+              style={{
+                background: '#fff',
+                border: `1px solid ${stage.bg}`,
+                borderRadius: 12,
+                padding: '12px 8px',
+                textAlign: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                cursor: isClickable ? 'pointer' : 'default',
+                transition: 'transform 0.1s, box-shadow 0.1s',
+                opacity: loading ? 0.6 : 1,
+              }}
+              onMouseEnter={e => {
+                if (isClickable && !loading) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+                }
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+              }}
+            >
+              <div style={{ fontSize: 16, marginBottom: 4 }}>{stage.icon}</div>
+              <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: stage.color, margin: 0, lineHeight: 1 }}>
+                {loading ? '–' : stage.value}
+              </p>
+              <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#6b7280', margin: '4px 0 0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {stage.label}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       <style>{`
@@ -175,11 +215,20 @@ export default function ProgressTab({ user, onUpgrade }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {recent.map(r => {
               const cfg = STATUS_CONFIG[r.status] || STATUS_CONFIG.matched;
+              const tailoredResume = findTailoredResume(r.company, r.job_title);
               return (
-                <div key={r.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  background: '#f9fafb', borderRadius: 10, padding: '10px 14px',
-                }}>
+                <div
+                  key={r.id}
+                  onClick={() => handleEntryClick(r)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    background: '#f9fafb', borderRadius: 10, padding: '10px 14px',
+                    cursor: 'pointer',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#f9fafb'}
+                >
                   <div style={{
                     width: 32, height: 32, borderRadius: 8,
                     background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -193,6 +242,7 @@ export default function ProgressTab({ user, onUpgrade }) {
                     </p>
                     <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '2px 0 0' }}>
                       {r.created_date ? new Date(r.created_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
+                      {tailoredResume && <span style={{ marginLeft: 8, color: '#7c3aed' }}>• Resume tailored</span>}
                     </p>
                   </div>
                   <span style={{
@@ -262,6 +312,215 @@ export default function ProgressTab({ user, onUpgrade }) {
           Unlock →
         </span>
       </div>
+
+      {/* Application Detail Modal */}
+      {showModal && selectedEntry && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 20,
+        }} onClick={() => setShowModal(false)}>
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 16,
+              padding: 24,
+              maxWidth: 500,
+              width: '100%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              position: 'relative',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowModal(false)}
+              style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 4,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <X size={20} color="#6b7280" />
+            </button>
+
+            {/* Modal Header */}
+            <div style={{ marginBottom: 20 }}>
+              <h3 style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>
+                {selectedEntry.company}
+              </h3>
+              {selectedEntry.job_title && (
+                <p style={{ fontFamily: dm, fontSize: 14, color: '#6b7280', margin: 0 }}>
+                  {selectedEntry.job_title}
+                </p>
+              )}
+            </div>
+
+            {/* Status */}
+            {selectedEntry.status && (
+              <div style={{
+                background: STATUS_CONFIG[selectedEntry.status]?.bg || '#f3f4f6',
+                borderRadius: 8,
+                padding: '10px 14px',
+                marginBottom: 20,
+              }}>
+                <p style={{
+                  fontFamily: dm,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: STATUS_CONFIG[selectedEntry.status]?.color || '#6b7280',
+                  margin: 0,
+                  textTransform: 'uppercase',
+                }}>
+                  Status: {STATUS_CONFIG[selectedEntry.status]?.label || selectedEntry.status}
+                </p>
+              </div>
+            )}
+
+            {/* Resume Section */}
+            <div style={{ marginBottom: 20 }}>
+              <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>
+                📄 Resume Submitted
+              </h4>
+              {(() => {
+                const tailoredResume = findTailoredResume(selectedEntry.company, selectedEntry.job_title);
+                if (tailoredResume) {
+                  return (
+                    <div style={{
+                      background: '#f5f3ff',
+                      border: '1px solid #e9d5ff',
+                      borderRadius: 12,
+                      padding: '14px 16px',
+                    }}>
+                      <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '0 0 6px' }}>
+                        ✨ Tailored Resume
+                      </p>
+                      <p style={{ fontFamily: dm, fontSize: 11, color: '#5b21b6', margin: '0 0 8px', lineHeight: 1.5 }}>
+                        Customized for {tailoredResume.company_name} • {tailoredResume.role_title}
+                      </p>
+                      {tailoredResume.changes_summary && (
+                        <div style={{
+                          background: '#fff',
+                          borderRadius: 8,
+                          padding: '10px 12px',
+                          marginBottom: 8,
+                        }}>
+                          <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#6b7280', margin: '0 0 4px' }}>
+                            KEY CHANGES:
+                          </p>
+                          <p style={{ fontFamily: dm, fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>
+                            {tailoredResume.changes_summary}
+                          </p>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                        <span style={{
+                          fontFamily: dm,
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: '#16a34a',
+                          background: '#f0fdf4',
+                          borderRadius: 100,
+                          padding: '4px 10px',
+                        }}>
+                          ATS Score: {tailoredResume.ats_score || tailoredResume.original_score || 'N/A'}/100
+                        </span>
+                        {tailoredResume.keywords_matched !== undefined && (
+                          <span style={{
+                            fontFamily: dm,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: '#2563eb',
+                            background: '#eff6ff',
+                            borderRadius: 100,
+                            padding: '4px 10px',
+                          }}>
+                            {tailoredResume.keywords_matched}/{tailoredResume.keywords_total} keywords
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div style={{
+                      background: '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: 12,
+                      padding: '14px 16px',
+                    }}>
+                      <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6b7280', margin: '0 0 4px' }}>
+                        Standard Resume
+                      </p>
+                      <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: 0 }}>
+                        No tailored resume found for this application
+                      </p>
+                    </div>
+                  );
+                }
+              })()}
+            </div>
+
+            {/* Additional Details */}
+            {selectedEntry.application_path && (
+              <div style={{ marginBottom: 20 }}>
+                <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
+                  Application Path
+                </h4>
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0, textTransform: 'capitalize' }}>
+                  {selectedEntry.application_path.replace('_', ' ')}
+                </p>
+              </div>
+            )}
+
+            {selectedEntry.alumni_name && (
+              <div style={{ marginBottom: 20 }}>
+                <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
+                  🤝 Alumni Contact
+                </h4>
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#111827', margin: '0 0 2px' }}>
+                  {selectedEntry.alumni_name}
+                </p>
+                {selectedEntry.alumni_role && (
+                  <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
+                    {selectedEntry.alumni_role}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Date Info */}
+            {selectedEntry.created_date && (
+              <div>
+                <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
+                  📅 Application Date
+                </h4>
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>
+                  {new Date(selectedEntry.created_date).toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
