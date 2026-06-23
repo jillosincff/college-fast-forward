@@ -208,9 +208,15 @@ Deno.serve(async (req) => {
       if (seenOrgs.has(orgKey)) continue;
       seenOrgs.add(orgKey);
 
-      const description = job.ai_core_responsibilities
-        || job.ai_requirements_summary
-        || `${org} is hiring for ${title}.`;
+      const descParts = [
+        job.ai_core_responsibilities,
+        job.ai_requirements_summary,
+        job.ai_benefits_summary,
+        job.description,
+      ].filter(Boolean);
+      const description = descParts.length > 0
+        ? descParts.join('\n\n')
+        : `${org} is hiring for ${title}.`;
 
       allCompanies.push({
         name: org,

@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
         type: 'neural',
         numResults: 20,
         startPublishedDate: fourteenDaysAgo,
-        contents: { text: { maxCharacters: 400 } },
+        contents: { text: { maxCharacters: 5000 } },
       }),
     });
     if (!res.ok) throw new Error(`Exa search failed: ${res.status}`);
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
         companyMap.set(company, {
           title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
           url: r.url,
-          description: (r.text || '').slice(0, 300),
+          description: (r.text || '').trim(),
         });
       }
     }
@@ -137,6 +137,7 @@ Deno.serve(async (req) => {
 
       validatedLeads.push({
         ...lead,
+        description: job.description || '',
         hasActiveJobs: true,
         activeJobs: [job],
         signalTier: 'silver',
