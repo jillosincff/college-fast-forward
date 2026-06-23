@@ -78,7 +78,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
           from: 'apply_modal',
         });
         onClose();
-        window.location.hash = `#ResumeTailoring?${params.toString()}`;
+        window.location.hash = `#/ResumeTailoring?${params.toString()}`;
         return;
       }
 

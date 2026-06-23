@@ -88,7 +88,8 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         const tailoredList = tailored || [];
         setResumes(resList);
         setTailoredResumes(tailoredList);
-        // Did we arrive from the apply-modal handoff? If so, keep that phase.
+        // Did we arrive from the apply-modal handoff? If so, keep the focused
+        // tailoring phase — never fall back to the resume hub.
         const fromApply = new URLSearchParams(window.location.hash.split('?')[1] || window.location.search).get('from') === 'apply_modal';
         if (resList.length > 0) {
           const active = resList.find(r => r.is_active) || resList[0];
@@ -104,9 +105,11 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               try { setAnalysis(JSON.parse(cached)); } catch (e) {}
             }
           }
-          if (!fromApply) setPhase('hub');
+          // Only show the hub if we are NOT mid apply-handoff. The applyContext
+          // effect owns the phase when arriving from the job-apply modal.
+          setPhase(prev => (fromApply || prev === 'applyTailor') ? 'applyTailor' : 'hub');
         } else {
-          setPhase('entry');
+          setPhase(prev => fromApply ? prev : 'entry');
         }
       } catch (e) {
         console.error('Failed to load resumes:', e);
@@ -121,27 +124,34 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   // Reads ?company=&role=&jd=&from=apply_modal, pre-fills the job, and jumps
   // straight to the focused tailoring screen — skipping the resume hub.
   useEffect(() => {
-    if (applyContext) return; // only run once
-    const hashQuery = window.location.hash.split('?')[1] || '';
-    const params = new URLSearchParams(hashQuery || window.location.search);
-    if (params.get('from') !== 'apply_modal') return;
-    const ctx = {
-      company: params.get('company') || '',
-      role: params.get('role') || '',
-      jd: params.get('jd') || '',
-      jobUrl: params.get('job_url') || '',
-      location: params.get('location') || '',
+    if (applyContext) return; // already captured
+    const detectApplyHandoff = () => {
+      const hashQuery = window.location.hash.split('?')[1] || '';
+      const params = new URLSearchParams(hashQuery || window.location.search);
+      if (params.get('from') !== 'apply_modal') return;
+      const ctx = {
+        company: params.get('company') || '',
+        role: params.get('role') || '',
+        jd: params.get('jd') || '',
+        jobUrl: params.get('job_url') || '',
+        location: params.get('location') || '',
+      };
+      setApplyContext(ctx);
+      setCompanyName(ctx.company);
+      setJobTitle(ctx.role);
+      setJobDescription(ctx.jd);
+      setPhase('applyTailor');
+      // Clean params so a refresh doesn't re-trigger
+      try {
+        const cleanHash = window.location.hash.split('?')[0];
+        window.history.replaceState(null, '', cleanHash);
+      } catch {}
     };
-    setApplyContext(ctx);
-    setCompanyName(ctx.company);
-    setJobTitle(ctx.role);
-    setJobDescription(ctx.jd);
-    setPhase('applyTailor');
-    // Clean params so a refresh doesn't re-trigger
-    try {
-      const cleanHash = window.location.hash.split('?')[0];
-      window.history.replaceState(null, '', cleanHash);
-    } catch {}
+    // Run on mount AND on hashchange — the modal sets the hash right before
+    // navigation, which can land just after this component mounts.
+    detectApplyHandoff();
+    window.addEventListener('hashchange', detectApplyHandoff);
+    return () => window.removeEventListener('hashchange', detectApplyHandoff);
   }, [applyContext]);
 
   // Handle deep-link from batch completion email: ?resume_id=xxx
