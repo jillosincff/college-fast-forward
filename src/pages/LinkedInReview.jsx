@@ -90,7 +90,9 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
         setError(res?.data?.error || 'Something went wrong. Please try again.');
       }
     } catch (e) {
-      setError('Could not analyze profile. Please check the URL and try again.');
+      // Surface the server's specific message when available (e.g. provider unavailable, profile not public)
+      const serverMsg = e?.response?.data?.error;
+      setError(serverMsg || "CLIFF couldn't read that profile. Make sure your LinkedIn is set to public and the URL looks like linkedin.com/in/yourname, then try again.");
     }
     setLoading(false);
   };
@@ -103,8 +105,8 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
           Paste your LinkedIn URL and FastIQ will score every section of your profile against your target role — with specific rewrites for your headline, about section, and more.
         </p>
-        <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-          Unlock FastIQ →
+        <button onClick={() => onOpenUpgrade()} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+          Unlock CLIFF →
         </button>
       </div>
     );
@@ -157,10 +159,11 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
       )}
 
       {loading && (
-        <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '40px', textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', border: '4px solid rgba(232,93,32,0.2)', borderTop: '4px solid #E85D20', margin: '0 auto 20px', animation: 'spin 1s linear infinite' }} />
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Analyzing your LinkedIn profile...</p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+        <div style={{ background: 'linear-gradient(135deg, #faf5ff, #f5f3ff)', border: '1px solid #ddd6fe', borderRadius: 16, padding: '40px', textAlign: 'center', marginBottom: 24 }}>
+          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', border: '4px solid rgba(124,58,237,0.2)', borderTop: '4px solid #7c3aed', margin: '0 auto 20px', animation: 'spin 1s linear infinite' }} />
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 800, color: '#1A1A1A', margin: '0 0 8px' }}>CLIFF is analyzing your LinkedIn...</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#7c3aed', margin: 0 }}>
             Scoring against your {user?.career_goals?.target_roles?.[0] || 'target'} goals. Takes about 15 seconds.
           </p>
         </div>
@@ -187,8 +190,8 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             </div>
           )}
 
-          <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px', marginBottom: 24 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #2e1065, #4c1d95)', borderRadius: 16, padding: '28px 32px', marginBottom: 24 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#a78bfa', margin: '0 0 20px' }}>
               LINKEDIN ANALYSIS · MATCHED TO YOUR GOALS
             </p>
             <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
@@ -203,10 +206,10 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
               </div>
               <div style={{ flex: 1, minWidth: 200 }}>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#fff', margin: '0 0 16px', lineHeight: 1.6 }}>{analysis.summary}</p>
-                <div style={{ background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 10, padding: '14px 16px' }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>⚡ TOP 3 FIXES</p>
+                <div style={{ background: 'rgba(167,139,250,0.18)', border: '1px solid rgba(167,139,250,0.35)', borderRadius: 10, padding: '14px 16px' }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#c4b5fd', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>⚡ TOP 3 FIXES</p>
                   {analysis.top_3_fixes?.map((fix, i) => (
-                    <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: i < 2 ? '0 0 8px' : 0, lineHeight: 1.5, paddingLeft: 8, borderLeft: '2px solid rgba(232,93,32,0.4)' }}>
+                    <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: i < 2 ? '0 0 8px' : 0, lineHeight: 1.5, paddingLeft: 8, borderLeft: '2px solid rgba(167,139,250,0.5)' }}>
                       {i + 1}. {fix}
                     </p>
                   ))}
@@ -234,8 +237,8 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             <SectionCard title="💼 Experience" score={analysis.sections?.experience?.score}>
               <p style={feedbackStyle}>{analysis.sections?.experience?.feedback}</p>
               {analysis.sections?.experience?.top_fix && (
-                <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 8, padding: '10px 14px' }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>⚡ TOP FIX</p>
+                <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '10px 14px' }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#7c3aed', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>⚡ TOP FIX</p>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0 }}>{analysis.sections?.experience?.top_fix}</p>
                 </div>
               )}
@@ -270,8 +273,8 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             </SectionCard>
 
             {analysis.keywords_to_add?.length > 0 && (
-              <div style={{ background: '#0A0A0A', borderRadius: 14, padding: '20px 24px' }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>
+              <div style={{ background: 'linear-gradient(135deg, #2e1065, #4c1d95)', borderRadius: 14, padding: '20px 24px' }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#a78bfa', margin: '0 0 12px' }}>
                   🔑 KEYWORDS TO ADD FOR {(user?.career_goals?.target_roles?.[0] || 'YOUR ROLE').toUpperCase()}
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -283,20 +286,12 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 10, flexDirection: 'column' }}>
-            <button
-              onClick={() => { setAnalysis(null); setProfile(null); setError(''); }}
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '12px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', width: '100%', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
-            >
-              ← Analyze a Different Profile
-            </button>
-            <button
-              onClick={() => { setAnalysis(null); setProfile(null); setError(''); }}
-              style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '12px', fontSize: 13, color: '#888', cursor: 'pointer', width: '100%', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
-            >
-              ← Analyze a Different Profile
-            </button>
-          </div>
+          <button
+            onClick={() => { setAnalysis(null); setProfile(null); setError(''); }}
+            style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '12px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', width: '100%', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+          >
+            ← Analyze a Different Profile
+          </button>
         </div>
       )}
       </div>

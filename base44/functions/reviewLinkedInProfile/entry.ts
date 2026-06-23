@@ -28,16 +28,23 @@ Deno.serve(async (req) => {
     );
     const profileResponse = await px.json();
     console.log('Scrapingdog response:', JSON.stringify(profileResponse).slice(0, 500));
-    const profile = profileResponse;
+    // Scrapingdog can return either an object or a single-item array
+    const profile = Array.isArray(profileResponse) ? profileResponse[0] : profileResponse;
+
+    // Provider quota / plan limit reached — surface clearly so it can be acted on
+    if (profileResponse?.success === false && /pack allows|upgrade|quota|limit/i.test(profileResponse?.message || '')) {
+      console.log('Scrapingdog quota error:', profileResponse?.message);
+      return Response.json({ success: false, error: 'The LinkedIn analysis service is temporarily unavailable. Our team has been notified — please try again later.' }, { status: 503 });
+    }
 
     if (!profile || profile.code === 404 || px.status === 404) {
       return Response.json({ success: false, error: 'LinkedIn profile not found. Make sure the URL is correct and your profile is public.' }, { status: 404 });
     }
 
-    if (px.status !== 200) {
-      console.log('Proxycurl response status:', px.status);
-      console.log('Proxycurl response:', profile);
-      return Response.json({ success: false, error: 'Could not fetch LinkedIn profile. Make sure your profile is public.' }, { status: 400 });
+    if (px.status !== 200 || !profile.fullName) {
+      console.log('Scrapingdog response status:', px.status);
+      console.log('Scrapingdog response:', profile);
+      return Response.json({ success: false, error: 'Could not fetch your LinkedIn profile. Make sure your profile is set to public, then try again.' }, { status: 400 });
     }
 
     // Step 2 — Build profile summary
