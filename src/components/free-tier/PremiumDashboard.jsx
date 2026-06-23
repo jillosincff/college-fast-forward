@@ -374,7 +374,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Premium Account</span>
           </div>
 
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: isMobile ? 24 : 28, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: isMobile ? 20 : 28, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: isMobile ? 1.25 : 1.2, letterSpacing: '-0.01em' }}>
             Let's get locked in and get you hired, {firstName} 🚀
           </h1>
           <p style={{ fontFamily: dm, fontSize: isMobile ? 13 : 14, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: 680 }}>
