@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getStandoutInsight } from '@/functions/getStandoutInsight';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
+import InAppApplyModal from './InAppApplyModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -10,6 +11,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [alumni, setAlumni] = useState([]);
   const [loadingAlumni, setLoadingAlumni] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
 
   const companyName = lead.company || lead.companyName || '';
   const jobTitle = lead.job_title || lead.role || '';
@@ -48,10 +50,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
   }, [lead, hasAlumni]);
 
   const handleApply = () => {
-    if (jobUrl) {
-      window.open(jobUrl, '_blank', 'noopener,noreferrer');
-    }
-    onAddToPipeline?.(lead);
+    setShowApplyModal(true);
   };
 
   const handleFindConnection = () => {
@@ -370,6 +369,19 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
               </div>
             )}
       </div>
+
+      {/* In-App Application Modal */}
+      {showApplyModal && (
+        <InAppApplyModal
+          lead={lead}
+          user={user}
+          onClose={() => setShowApplyModal(false)}
+          onSuccess={() => {
+            setShowApplyModal(false);
+            onAddToPipeline?.(lead);
+          }}
+        />
+      )}
     </div>
   );
 }
