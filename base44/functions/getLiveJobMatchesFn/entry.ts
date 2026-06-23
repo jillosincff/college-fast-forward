@@ -67,7 +67,14 @@ Deno.serve(async (req) => {
       return Response.json({ companies: cached, from_cache: true });
     }
 
-    const searchTerm = role || industries[0] || '';
+    // Clean the search term: strip qualifiers like "paid", "internship", "entry level"
+    // that hurt Indeed keyword matching. The seniority gate below handles level filtering.
+    const rawTerm = role || industries[0] || '';
+    const searchTerm = rawTerm
+      .replace(/\b(paid|unpaid|part[\s-]?time|full[\s-]?time|entry[\s-]?level|junior|jr)\b/gi, '')
+      .replace(/\binternships?\b/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim() || rawTerm;
     const isRemote = /remote/i.test(location);
     const locParts = (location && !isRemote) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
     const prefCity = locParts[0] || null;
@@ -117,13 +124,14 @@ Deno.serve(async (req) => {
 
       const isInternTitle = INTERN_TITLE_RE.test(title);
 
-      // Seniority gate (interns always allowed)
-      if (!isInternTitle && SENIOR_TITLE_RE.test(title)) continue;
       if (seeking === 'internship' && !isInternTitle) continue;
       if (seeking === 'fulltime' && isInternTitle) continue;
 
-      // Entry-level gate — must look junior/entry OR be an internship
-      if (!isInternTitle && !ENTRY_TITLE_RE.test(title)) continue;
+      // Level gate: block clearly-senior titles only. Everything that isn't
+      // explicitly senior is student-appropriate (avoids over-filtering valid roles
+      // like "Marketing Specialist", "Account Executive", "Recruiter").
+      // ENTRY_TITLE_RE retained only to rescue titles that also contain a senior word.
+      if (!isInternTitle && SENIOR_TITLE_RE.test(title) && !ENTRY_TITLE_RE.test(title)) continue;
 
       if (!jobMatchesLocation(job.location, prefCity, prefState)) continue;
 
