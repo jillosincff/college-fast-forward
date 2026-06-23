@@ -195,8 +195,25 @@ function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning }) 
 
 export default function PremiumDashboard({ user: userProp, parentCount, college, theme }) {
   const [user, setUser] = useState(userProp);
-  
   const t = theme || getThemeForSchool(college || 'UF');
+  
+  // Fetch fresh user data on mount and when page regains focus
+  useEffect(() => {
+    const loadFreshUser = async () => {
+      const fresh = await base44.auth.me().catch(() => null);
+      if (fresh) setUser(fresh);
+    };
+    loadFreshUser();
+    
+    // Refresh when returning to this tab/window
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadFreshUser();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const shortName = t.shortName || college || 'your university';
   const [selectedSignal, setSelectedSignal] = useState(null);
@@ -240,8 +257,14 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
   // Listen for user updates from Resume Studio
   useEffect(() => {
-    const handleUserUpdate = (e) => {
-      if (e.detail) setUser(e.detail);
+    const handleUserUpdate = async (e) => {
+      if (e.detail) {
+        setUser(e.detail);
+      } else {
+        // Fallback: fetch fresh data
+        const fresh = await base44.auth.me().catch(() => null);
+        if (fresh) setUser(fresh);
+      }
     };
     window.addEventListener('cff:user-updated', handleUserUpdate);
     return () => window.removeEventListener('cff:user-updated', handleUserUpdate);
