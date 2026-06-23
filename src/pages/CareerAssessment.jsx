@@ -271,7 +271,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           {/* Scale — full-width labeled options so taps are unmistakable */}
           <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {SCALE_LABELS.map(({ value, label }) => {
-              const isSelected = responses[currentQuestion.id]?.score === value;
+              const isSelected = (selectedScore ?? responses[currentQuestion.id]?.score) === value;
               return (
                 <button
                   key={value}
