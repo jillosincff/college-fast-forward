@@ -238,6 +238,15 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       });
   }, [user?.career_goals?.target_industries]);
 
+  // Listen for user updates from Resume Studio
+  useEffect(() => {
+    const handleUserUpdate = (e) => {
+      if (e.detail) setUser(e.detail);
+    };
+    window.addEventListener('cff:user-updated', handleUserUpdate);
+    return () => window.removeEventListener('cff:user-updated', handleUserUpdate);
+  }, []);
+
   const handleBackdoorClick = (job) => {
     setSelectedJob(job);
     setSelectedSignal(null); // clear any signal selection

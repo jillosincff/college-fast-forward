@@ -188,7 +188,8 @@ export default function FreeTierDashboard() {
   }, []);
 
   useEffect(() => {
-    base44.auth.me().then(u => {
+    const loadUser = async () => {
+      const u = await base44.auth.me();
       setUser(u);
       // Show first-visit toast once per session
       const key = 'cff_ftd_welcomed';
@@ -209,7 +210,15 @@ export default function FreeTierDashboard() {
       } else {
         setParentCount(0);
       }
-    }).catch(() => {});
+    };
+    loadUser();
+    
+    // Listen for user updates from Resume Studio
+    const handleUserUpdate = (e) => {
+      if (e.detail) setUser(e.detail);
+    };
+    window.addEventListener('cff:user-updated', handleUserUpdate);
+    return () => window.removeEventListener('cff:user-updated', handleUserUpdate);
   }, []);
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';

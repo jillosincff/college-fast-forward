@@ -185,7 +185,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     try {
       // Upload file
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.auth.updateMe({ resume_url: file_url }).catch(() => {});
+      const updatedUser = await base44.auth.updateMe({ resume_url: file_url, resume_filename: file.name }).catch(() => {});
       
       // Create resume record immediately (don't wait for text extraction)
       const newResume = await base44.entities.Resume.create({
@@ -202,6 +202,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       setAnalysis(null);
       setAnalysisError(false);
       setPhase('hub');
+      
+      // Refresh user data and notify dashboard
+      const freshUser = updatedUser || await base44.auth.me();
+      window.dispatchEvent(new CustomEvent('cff:user-updated', { detail: freshUser }));
       
       // Extract text asynchronously in background
       base44.integrations.Core.InvokeLLM({
