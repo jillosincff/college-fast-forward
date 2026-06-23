@@ -92,7 +92,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     return () => window.removeEventListener('cff:open-pipeline-modal', openKanbanHandler);
   }, []);
 
-  const PAGE_SIZE = 8;
+  const PAGE_SIZE = 20;
   const FREE_DAILY_LIMIT = 15;
   const FIRST_DAY_BONUS = 30;
   const [refreshKey, setRefreshKey] = useState(0);
@@ -489,6 +489,28 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                     onClick={() => handleSelectLead(lead)}
                   />
                 ))}
+
+                {/* Load More / daily-limit prompt */}
+                {cappedVisibleCount < totalCount && !limitReached && (
+                  <button
+                    onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                    style={{
+                      fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#7c3aed',
+                      background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.20)',
+                      borderRadius: 10, padding: '12px', cursor: 'pointer', marginTop: 4,
+                    }}
+                  >
+                    Show more opportunities ({totalCount - cappedVisibleCount} more)
+                  </button>
+                )}
+                {limitReached && !isPremium && (
+                  <div style={{
+                    fontFamily: dm, fontSize: 12, color: '#6b7280', textAlign: 'center',
+                    background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '14px', marginTop: 4,
+                  }}>
+                    You've reached today's free limit of {dailyLimit} opportunities. Check back tomorrow for more.
+                  </div>
+                )}
               </div>
             ) : (
               <EmptyMatchesState hasGoals={!noGoals} onSetGoals={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))} />

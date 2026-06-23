@@ -11,9 +11,26 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const JSEARCH_BASE = 'https://api.openwebninja.com/jsearch';
 
 // Hard seniority blocklist — these NEVER belong in a student feed
-const SENIOR_TITLE_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive)\b|\b(ii|iii|iv|v)\b/i;
+const SENIOR_TITLE_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive|expert|experienced)\b|\b(ii|iii|iv|v)\b/i;
 const INTERN_TITLE_RE = /\b(intern|internship|co-?op)\b/i;
-const ENTRY_TITLE_RE = /\b(junior|jr\.?|coordinator|entry|graduate|trainee|new grad|assistant|analyst|associate)\b/i;
+const ENTRY_TITLE_RE = /\b(junior|jr\.?|coordinator|entry|graduate|trainee|new grad|associate)\b/i;
+
+// Max roles surfaced per company so a single big employer can't flood the feed
+const MAX_PER_COMPANY = 2;
+
+// Is this posting genuinely entry-level? Uses JSearch's structured experience data
+// (most reliable), falling back to title keywords.
+function isEntryLevel(job, title) {
+  const exp = job.job_required_experience;
+  if (exp) {
+    if (exp.no_experience_required === true) return true;
+    const months = exp.required_experience_in_months;
+    if (typeof months === 'number') return months <= 24; // <= 2 years = entry
+  }
+  // No structured data: trust the title — block clearly-senior, allow the rest
+  if (SENIOR_TITLE_RE.test(title) && !ENTRY_TITLE_RE.test(title)) return false;
+  return true;
+}
 
 function hiringSignalFromDate(datePosted) {
   if (!datePosted) return 'warm';
@@ -88,7 +105,7 @@ Deno.serve(async (req) => {
       query: queryStr,
       country: 'us',
       date_posted: 'week',
-      num_pages: '3',
+      num_pages: '10',
     });
     if (isRemote) params.set('work_from_home', 'true');
 
@@ -112,8 +129,8 @@ Deno.serve(async (req) => {
       [jobList[i], jobList[j]] = [jobList[j], jobList[i]];
     }
 
-    // Filter + normalize into a pool (one per company)
-    const seenOrgs = new Set();
+    // Filter + normalize into a pool (allow a few roles per company)
+    const orgCounts = new Map();
     const allCompanies = [];
 
     for (const job of jobList) {
@@ -123,6 +140,11 @@ Deno.serve(async (req) => {
       if (!org || !title || !url) continue;
       // Skip junk employer names that are actually domains/URLs (e.g. "foo.up.railway.app")
       if (/\.(com|net|org|io|app|co|dev|xyz)\b/i.test(org) || /https?:\/\//i.test(org)) continue;
+      // Skip content-farm aggregators: single lowercase mashed-together names
+      // like "careersprint", "wfhforgeon" that repost other companies' jobs.
+      if (/^[a-z]+$/.test(org) && org.length > 7) continue;
+      // Skip spammy aggregated titles like "Marketing Jobs Southwest Airlines" / "... | Apply Today"
+      if (/\bjobs\b/i.test(title) || /\|/.test(title) || /apply (today|now)/i.test(title)) continue;
 
       const locText = [job.job_city, job.job_state].filter(Boolean).join(', ')
         || (job.job_is_remote ? 'Remote' : (job.job_country || ''));
@@ -133,17 +155,18 @@ Deno.serve(async (req) => {
       if (seeking === 'internship' && !isInternTitle) continue;
       if (seeking === 'fulltime' && isInternTitle) continue;
 
-      // Level gate: block clearly-senior titles only. Everything that isn't
-      // explicitly senior is student-appropriate (avoids over-filtering valid roles
-      // like "Marketing Specialist", "Account Executive", "Recruiter").
-      // ENTRY_TITLE_RE retained only to rescue titles that also contain a senior word.
-      if (!isInternTitle && SENIOR_TITLE_RE.test(title) && !ENTRY_TITLE_RE.test(title)) continue;
+      // Entry-level gate: prefer JSearch's structured experience data, fall back
+      // to title keywords. Interns are always entry-appropriate.
+      if (!isInternTitle && !isEntryLevel(job, title)) continue;
 
       if (!jobMatchesLocation(locText, prefCity, prefState)) continue;
 
+      // Allow up to MAX_PER_COMPANY roles per employer so the feed has volume
+      // without one company dominating.
       const orgKey = org.toLowerCase();
-      if (seenOrgs.has(orgKey)) continue;
-      seenOrgs.add(orgKey);
+      const count = orgCounts.get(orgKey) || 0;
+      if (count >= MAX_PER_COMPANY) continue;
+      orgCounts.set(orgKey, count + 1);
 
       const description = job.job_description?.trim() || `${org} is hiring for ${title}.`;
       const salary = (job.job_min_salary || job.job_max_salary)
