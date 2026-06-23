@@ -421,7 +421,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           {/* Header */}
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🚀</span>
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
               <h2 className="text-xl font-bold text-gray-900 tracking-tight">CLiFF's Live Target Matches</h2>
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -465,7 +465,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           <section className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🛰️</span>
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <h3 className="text-base font-bold text-gray-900 tracking-tight">
                   Target-Matched Opportunities ({anyLoading ? '…' : totalCount})
                 </h3>

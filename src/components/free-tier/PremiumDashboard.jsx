@@ -422,8 +422,18 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             />
           </div>
 
-          {/* Right Column (Desktop Only) - Compact sidebar */}
-          <aside style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '340px', flexShrink: 0 }} className="desktop-only">
+          {/* Right Column (Desktop Only) - Sticky sidebar */}
+          <aside style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 16, 
+            width: '340px', 
+            flexShrink: 0,
+            position: 'sticky',
+            top: 24,
+            maxHeight: 'calc(100vh - 48px)',
+            overflowY: 'auto',
+          }} className="desktop-only">
             {/* Active Profile Status Pill */}
             <PremiumActiveProfilePill user={user} onPillClick={() => navRef.current?.openDropdown()} />
 

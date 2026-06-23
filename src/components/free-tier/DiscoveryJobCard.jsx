@@ -151,7 +151,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
   if (dismissed) return null;
 
   return (
-    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm flex flex-col hover:border-indigo-200 hover:shadow-md transition-all relative">
+    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm flex flex-col hover:border-indigo-200 hover:shadow-md transition-all relative" style={{ paddingBottom: compact ? '12px' : '16px' }}>
 
       {/* Top signal strip */}
       {(hasAlumniSignal || hasParentSignal || insiderPill) && (
@@ -255,7 +255,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
               className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95 text-purple-700 border-2 border-purple-200 bg-transparent hover:bg-purple-50"
               style={{ minHeight: 'auto' }}
             >
-              {mascot} Find {school} Network
+              <span style={{ color: '#7c3aed' }}>{mascot}</span> Find {school} Network
             </button>
           )}
 
@@ -333,13 +333,13 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
             </div>
           )}
 
-          {/* Secondary actions — subtle text links */}
+          {/* Secondary actions — subtle text links with better spacing */}
           {(alumniPhase === 'found' || alumniPhase === 'idle') && (
-            <div className="flex items-center justify-between gap-2 pt-0.5">
+            <div className="flex items-center justify-between gap-2 pt-1 pb-1">
               {alumniPhase === 'idle' && (
                 <button
                   onClick={handleLoadInsight}
-                  className="text-[11px] text-amber-600 font-semibold hover:underline cursor-pointer"
+                  className="text-[11px] text-amber-700 font-bold hover:underline cursor-pointer"
                   style={{ minHeight: 'auto', minWidth: 'auto' }}
                 >
                   💡 Stand-Out Tips
@@ -348,7 +348,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
               {jobUrl && (
                 <button
                   onClick={handleApplyExternal}
-                  className="text-[11px] text-gray-400 font-semibold hover:text-gray-600 cursor-pointer flex items-center gap-0.5 ml-auto"
+                  className="text-[11px] text-gray-500 font-bold hover:text-gray-700 cursor-pointer flex items-center gap-0.5 ml-auto"
                   style={{ minHeight: 'auto', minWidth: 'auto' }}
                   title="Apply on company site"
                 >
