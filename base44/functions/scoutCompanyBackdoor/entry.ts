@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       }, { status: 401 });
     }
 
-    const { jobId, companyName } = await req.json().catch(() => ({}));
+    const { jobId, companyName, cacheOnly } = await req.json().catch(() => ({}));
 
     if (!jobId || !companyName) {
       return Response.json({ 
@@ -112,6 +112,20 @@ Deno.serve(async (req) => {
           linkedin_url: a.linkedin_url,
           persona: 'alumni'
         }))
+      });
+    }
+
+    // Cache-only mode: stop here without firing the paid Exa/Hunter search.
+    // The frontend auto-runs this on role open to surface instant matches for
+    // free; the expensive web search only fires on an explicit user tap.
+    if (cacheOnly) {
+      return Response.json({
+        success: true,
+        insiderFound: false,
+        cacheMiss: true,
+        message: `No cached ${userSchoolCode} alumni at ${companyName} yet.`,
+        connectionsCount: 0,
+        alumni: []
       });
     }
 

@@ -36,26 +36,39 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
       .finally(() => setLoadingInsight(false));
   }, [lead]);
 
-  // Run the network search on EVERY role so the result is real (searched),
-  // not assumed. Without this, leads from the live feed (alumniCount=0) would
-  // silently show "no connections" without ever searching.
-  const [searchedAlumni, setSearchedAlumni] = useState(false);
+  // Hybrid network search: on role open, do a FREE cache-only lookup so any
+  // already-discovered alumni show instantly. The paid web search only fires
+  // when the student taps "Scan network" (handleScanNetwork below).
+  const [scanned, setScanned] = useState(false);   // true once a full Exa scan has run
+  const [scanning, setScanning] = useState(false);  // full scan in flight
   useEffect(() => {
     if (!lead || !companyName) return;
-    setSearchedAlumni(false);
     setAlumni([]);
+    setScanned(false);
+    setScanning(false);
     setLoadingAlumni(true);
+    scoutCompanyBackdoor({ jobId: companyName, companyName, cacheOnly: true })
+      .then(res => {
+        const data = res?.data || res;
+        if (data?.alumni?.length) setAlumni(data.alumni.slice(0, 5));
+      })
+      .catch(() => {})
+      .finally(() => setLoadingAlumni(false));
+  }, [lead, companyName]);
+
+  const handleScanNetwork = () => {
+    setScanning(true);
     scoutCompanyBackdoor({ jobId: companyName, companyName })
       .then(res => {
         const data = res?.data || res;
-        if (data?.alumni) setAlumni(data.alumni.slice(0, 5));
+        if (data?.alumni?.length) setAlumni(data.alumni.slice(0, 5));
       })
       .catch(() => {})
       .finally(() => {
-        setLoadingAlumni(false);
-        setSearchedAlumni(true);
+        setScanning(false);
+        setScanned(true);
       });
-  }, [lead, companyName]);
+  };
 
   const handleApply = () => {
     setShowApplyModal(true);
@@ -171,17 +184,46 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
               {loadingAlumni ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontSize: 12 }}>
                   <span style={{ width: 13, height: 13, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  Searching {schoolAbbr || 'your'} network for connections at {companyName}…
+                  Checking your network for connections at {companyName}…
                 </div>
               ) : alumni.length > 0 ? (
                 <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
                   We found <strong>{alumni.length}</strong> {alumni.length === 1 ? 'connection' : 'connections'} who can champion your application at {companyName}.
                 </p>
-              ) : searchedAlumni ? (
+              ) : scanning ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontSize: 12 }}>
+                  <span style={{ width: 13, height: 13, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  Scanning {schoolAbbr || 'your'} network at {companyName}…
+                </div>
+              ) : scanned ? (
                 <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: 0, lineHeight: 1.5 }}>
                   No verified {schoolAbbr || 'network'} connections at {companyName} yet — CLIFF can still help you find a backdoor in. Use <strong>Find Connection</strong> below to scout cold contacts.
                 </p>
-              ) : null}
+              ) : (
+                <>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    See if anyone from your school can champion your application here.
+                  </p>
+                  <button
+                    onClick={handleScanNetwork}
+                    style={{
+                      fontFamily: dm,
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: '#fff',
+                      background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                      border: 'none',
+                      borderRadius: 10,
+                      padding: '10px 16px',
+                      cursor: 'pointer',
+                      width: '100%',
+                      boxShadow: '0 2px 8px rgba(124,58,237,0.25)',
+                    }}
+                  >
+                    🔍 Scan {schoolAbbr || 'my'} network at {companyName.charAt(0).toUpperCase() + companyName.slice(1).toLowerCase()}
+                  </button>
+                </>
+              )}
 
               {/* Alumni List */}
               {!loadingAlumni && alumni.length > 0 ? (
