@@ -12,6 +12,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
   const [alumni, setAlumni] = useState([]);
   const [loadingAlumni, setLoadingAlumni] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
+  const [networkDismissed, setNetworkDismissed] = useState(false);
 
   const companyName = lead.company || lead.companyName || '';
   const jobTitle = lead.job_title || lead.role || '';
@@ -46,6 +47,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
     setAlumni([]);
     setScanned(false);
     setScanning(false);
+    setNetworkDismissed(false);
     setLoadingAlumni(true);
     scoutCompanyBackdoor({ jobId: companyName, companyName, cacheOnly: true })
       .then(res => {
@@ -166,12 +168,35 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
       </div>
 
       {/* Zone B: Network Advantage — always shown so the search is visible */}
+      {!networkDismissed && (
       <div style={{
+          position: 'relative',
           padding: '16px 24px',
           background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)',
           borderBottom: '1px solid #e9d5ff',
         }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <button
+                onClick={() => setNetworkDismissed(true)}
+                aria-label="Close network advantage"
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  right: 12,
+                  background: 'none',
+                  border: 'none',
+                  color: '#7c3aed',
+                  fontSize: 16,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                  padding: 4,
+                  minHeight: 'auto',
+                  minWidth: 'auto',
+                }}
+              >
+                ✕
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, paddingRight: 24 }}>
                 <svg style={{ width: 18, height: 18, color: '#6d28d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -291,6 +316,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                 </div>
               ) : null}
       </div>
+      )}
 
       {/* Zone C: Job Details */}
       <div style={{
