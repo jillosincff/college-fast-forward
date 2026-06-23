@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { getStandoutInsight } from '@/functions/getStandoutInsight';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
-import { CliffLogo } from '@/components/brand/CliffLogo';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
 export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroad, schoolAbbr }) {
-  const [activeTab, setActiveTab] = useState('details'); // 'details' | 'chat'
   const [insight, setInsight] = useState(null);
   const [loadingInsight, setLoadingInsight] = useState(false);
   const [alumni, setAlumni] = useState([]);
@@ -96,155 +94,64 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
       background: '#fff',
       overflow: 'hidden',
     }}>
-      {/* Tab Navigation */}
+      {/* Zone A: Action Header */}
       <div style={{
-        display: 'flex',
+        padding: '20px 24px',
         borderBottom: '1px solid #e5e7eb',
         background: '#fff',
-        flexShrink: 0,
-        paddingRight: 16,
       }}>
+        <div style={{ marginBottom: 16 }}>
+          <h2 style={{
+            fontFamily: dm,
+            fontSize: 18,
+            fontWeight: 900,
+            color: '#111827',
+            margin: '0 0 4px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>{jobTitle}</h2>
+          <p style={{
+            fontFamily: dm,
+            fontSize: 14,
+            fontWeight: 700,
+            color: '#6b7280',
+            margin: 0,
+            textTransform: 'capitalize',
+          }}>{companyName.charAt(0).toUpperCase() + companyName.slice(1).toLowerCase()}</p>
+        </div>
+
+        {/* Single Primary CTA */}
         <button
-          onClick={() => setActiveTab('details')}
+          onClick={handleApply}
           style={{
             fontFamily: dm,
-            fontSize: 13,
-            fontWeight: activeTab === 'details' ? 800 : 600,
-            color: activeTab === 'details' ? '#7c3aed' : '#6b7280',
-            background: 'none',
+            fontSize: 14,
+            fontWeight: 800,
+            color: '#fff',
+            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
             border: 'none',
-            borderBottom: activeTab === 'details' ? '3px solid #7c3aed' : '3px solid transparent',
-            padding: '14px 20px',
+            borderRadius: 12,
+            padding: '14px 24px',
             cursor: 'pointer',
-            flex: 1,
-            transition: 'all 0.15s',
+            width: '100%',
+            boxShadow: '0 4px 12px rgba(124,58,237,0.3)',
+            transition: 'transform 0.1s',
           }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
         >
-          📋 Job Details
-        </button>
-        <button
-          onClick={() => setActiveTab('chat')}
-          style={{
-            fontFamily: dm,
-            fontSize: 13,
-            fontWeight: activeTab === 'chat' ? 800 : 600,
-            color: activeTab === 'chat' ? '#7c3aed' : '#6b7280',
-            background: 'none',
-            border: 'none',
-            borderBottom: activeTab === 'chat' ? '3px solid #7c3aed' : '3px solid transparent',
-            padding: '14px 20px',
-            cursor: 'pointer',
-            flex: 1,
-            transition: 'all 0.15s',
-          }}
-        >
-          💬 CLIFF AI
+          📋 Apply & Track via CLIFF
         </button>
       </div>
 
-      {activeTab === 'details' ? (
-        /* JOB DETAILS TAB */
+      {/* Zone B: Network Advantage */}
+      {(hasAlumni || hasParent) && (
         <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          overflowY: 'auto',
+          padding: '16px 24px',
+          background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)',
+          borderBottom: '1px solid #e9d5ff',
         }}>
-          {/* Zone A: Action Header */}
-          <div style={{
-            padding: '20px 24px',
-            borderBottom: '1px solid #e5e7eb',
-            background: '#fff',
-          }}>
-            <div style={{ marginBottom: 16 }}>
-              <h2 style={{
-                fontFamily: dm,
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#111827',
-                margin: '0 0 4px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}>{jobTitle}</h2>
-              <p style={{
-                fontFamily: dm,
-                fontSize: 14,
-                fontWeight: 700,
-                color: '#6b7280',
-                margin: 0,
-                textTransform: 'capitalize',
-              }}>{companyName.charAt(0).toUpperCase() + companyName.slice(1).toLowerCase()}</p>
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button
-                onClick={handleApply}
-                style={{
-                  fontFamily: dm,
-                  fontSize: 13,
-                  fontWeight: 800,
-                  color: '#fff',
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-                  border: 'none',
-                  borderRadius: 12,
-                  padding: '13px 20px',
-                  cursor: 'pointer',
-                  width: '100%',
-                  boxShadow: '0 4px 12px rgba(124,58,237,0.3)',
-                  transition: 'transform 0.1s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-              >
-                📋 Apply & Track via CLIFF
-              </button>
-              <button
-                onClick={handleFindConnection}
-                style={{
-                  fontFamily: dm,
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#6d28d9',
-                  background: 'transparent',
-                  border: '2px solid #7c3aed',
-                  borderRadius: 12,
-                  padding: '12px 20px',
-                  cursor: 'pointer',
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  transition: 'all 0.15s',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = '#f5f3ff';
-                  e.currentTarget.style.borderColor = '#6d28d9';
-                  e.currentTarget.style.color = '#5b21b6';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.borderColor = '#7c3aed';
-                  e.currentTarget.style.color = '#6d28d9';
-                }}
-              >
-                <svg style={{ width: 16, height: 16, color: '#6d28d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Find Alumni Connection
-              </button>
-            </div>
-          </div>
-
-          {/* Zone B: Network Advantage */}
-          {(hasAlumni || hasParent) && (
-            <div style={{
-              padding: '16px 24px',
-              background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)',
-              borderBottom: '1px solid #e9d5ff',
-            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <svg style={{ width: 18, height: 18, color: '#6d28d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -334,17 +241,17 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                   ))}
                 </div>
               ) : null}
-            </div>
-          )}
+      </div>
+      )}
 
-          {/* Zone C: Job Details */}
-          <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '20px 24px',
-            background: '#faf5ff',
-          }}>
-            {/* Metadata */}
+      {/* Zone C: Job Details */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '20px 24px',
+        background: '#faf5ff',
+      }}>
+        {/* Metadata */}
             <div style={{ marginBottom: 20 }}>
               <h4 style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>
                 Role Details
@@ -363,40 +270,17 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
               </div>
             </div>
 
-            {/* Job Description */}
-            {jobDesc && (
-              <div style={{ marginBottom: 20 }}>
-                <h4 style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>
-                  About the Role
-                </h4>
-                <div style={{
-                  fontFamily: dm,
-                  fontSize: 12,
-                  color: '#374151',
-                  lineHeight: 1.7,
-                  background: '#fff',
-                  borderRadius: 12,
-                  padding: '14px 16px',
-                  border: '1px solid #e5e7eb',
-                }}>
-                  {jobDesc.split('\n').map((para, i) => (
-                    <p key={i} style={{ margin: para.trim() ? '0 0 10px' : '0', whiteSpace: 'pre-wrap' }}>{para}</p>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* CLIFF Standout Tip */}
+            {/* CLIFF Standout Tip - Prominent Banner */}
             {loadingInsight ? (
               <div style={{
                 background: '#fff',
                 borderRadius: 12,
-                padding: '14px 16px',
+                padding: '16px 20px',
                 border: '1px solid #e5e7eb',
-                marginBottom: 20,
+                marginBottom: 24,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 16 }}>✨</span>
+                  <span style={{ fontSize: 18 }}>✨</span>
                   <h4 style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
                     CLIFF Standout Tip
                   </h4>
@@ -411,27 +295,53 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
               <div style={{
                 background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
                 borderRadius: 12,
-                padding: '14px 16px',
+                padding: '18px 20px',
                 border: '1px solid #fbbf24',
-                marginBottom: 20,
+                marginBottom: 24,
+                boxShadow: '0 2px 8px rgba(251,191,36,0.15)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 16 }}>✨</span>
-                  <h4 style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <span style={{ fontSize: 18 }}>✨</span>
+                  <h4 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
                     CLIFF Standout Tip
                   </h4>
                 </div>
                 <p style={{
                   fontFamily: dm,
-                  fontSize: 12,
+                  fontSize: 13,
                   color: '#78350f',
-                  lineHeight: 1.6,
+                  lineHeight: 1.7,
                   margin: 0,
                 }}>
                   {insight.standout_tip}
                 </p>
               </div>
             ) : null}
+
+            {/* Job Description - Full Width, Premium Readability */}
+            {jobDesc && (
+              <div style={{ marginBottom: 24 }}>
+                <h4 style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px' }}>
+                  About the Role
+                </h4>
+                <div style={{
+                  fontFamily: dm,
+                  fontSize: 13,
+                  color: '#1f2937',
+                  lineHeight: 1.8,
+                  background: '#faf5ff',
+                  borderRadius: 12,
+                  padding: '20px 24px',
+                  border: '1px solid #e9d5ff',
+                }}>
+                  {jobDesc.split('\n').map((para, i) => (
+                    <p key={i} style={{ margin: para.trim() ? '0 0 12px' : '0', whiteSpace: 'pre-wrap' }}>{para}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Remove duplicate insight rendering below */}
 
             {/* Apply Link */}
             {jobUrl && (
@@ -459,33 +369,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                 </a>
               </div>
             )}
-          </div>
-        </div>
-      ) : (
-        /* AI CHAT TAB - Placeholder for now */
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#faf5ff',
-          padding: 40,
-          textAlign: 'center',
-        }}>
-          <div>
-            <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.5 }}>💬</div>
-            <h3 style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#6d28d9', margin: '0 0 8px' }}>
-              CLIFF AI Assistant
-            </h3>
-            <p style={{ fontFamily: dm, fontSize: 12, color: '#9ca3af', margin: 0, maxWidth: 280 }}>
-              Ask CLIFF anything about this role, company, or your application strategy.
-            </p>
-            <p style={{ fontFamily: dm, fontSize: 10, color: '#d1d5db', margin: '12px 0 0' }}>
-              (Integration coming soon)
-            </p>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
