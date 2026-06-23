@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
+import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { toast } from 'sonner';
 import ScorePanel from './ScorePanel';
 import ResumeView from './ResumeView';
@@ -10,10 +11,35 @@ import DownloadBar from './DownloadBar';
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
-export default function TailoringResults({ result, companyName, jobTitle, originalResumeText, onStartOver, userEmail }) {
+export default function TailoringResults({ result, companyName, jobTitle, originalResumeText, onStartOver, applyContext, userEmail }) {
   const tr = result.tailoredResume || {};
   const [changes, setChanges] = useState(tr.changes || []);
   const [activeTab, setActiveTab] = useState('tailored');
+  const [submitting, setSubmitting] = useState(false);
+
+  // When the student arrived via the job-application "tailor it first" flow,
+  // submitting here tracks the application in their pipeline with the tailored
+  // resume, then sends them back to the job listing.
+  const handleSubmitApplication = async () => {
+    setSubmitting(true);
+    try {
+      await addPipelineEntry({
+        company: applyContext.company || companyName,
+        job_title: applyContext.role || jobTitle,
+        job_description: applyContext.jd || '',
+        job_url: applyContext.jobUrl || '',
+        application_path: 'cold_apply',
+        status: 'identified',
+        location: applyContext.location || '',
+        notes: `Resume tailored via CLiFF (ATS ${result.tailoredScore || tr.ats_score || 0}%)`,
+      });
+      toast.success('Application tracked with your tailored resume!');
+      navigate('FreeTierDashboard');
+    } catch (e) {
+      toast.error('Could not submit. Please try again.');
+      setSubmitting(false);
+    }
+  };
 
   const handleAccept = async (changeId) => {
     const updated = changes.map(c => c.id === changeId ? { ...c, accepted: true } : c);
@@ -60,6 +86,37 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
         <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', marginBottom: 24 }}>
           {jobTitle || 'Role'} · {changes.length} changes made
         </p>
+
+        {/* Return-to-application banner (apply-modal flow) */}
+        {applyContext && (
+          <div style={{
+            background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
+            border: '1px solid rgba(124,58,237,0.25)', borderRadius: 14,
+            padding: '18px 20px', marginBottom: 24,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
+          }}>
+            <div>
+              <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#5b21b6', margin: '0 0 3px' }}>
+                ✨ Your tailored resume is ready
+              </p>
+              <p style={{ fontFamily: dmSans, fontSize: 12.5, color: '#7c3aed', margin: 0, lineHeight: 1.5 }}>
+                Review the changes below, then submit your application to {applyContext.company || companyName}.
+              </p>
+            </div>
+            <button
+              onClick={handleSubmitApplication}
+              disabled={submitting}
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none',
+                borderRadius: 10, padding: '12px 24px', fontFamily: dmSans, fontSize: 14, fontWeight: 700,
+                color: '#fff', cursor: submitting ? 'default' : 'pointer', minHeight: 'auto',
+                whiteSpace: 'nowrap', opacity: submitting ? 0.7 : 1,
+              }}
+            >
+              {submitting ? 'Submitting…' : `Submit Application →`}
+            </button>
+          </div>
+        )}
 
         <div className="rt-grid">
           {/* Left — Score Panel */}

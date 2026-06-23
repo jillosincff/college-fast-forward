@@ -73,6 +73,8 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
           company: companyName,
           role: jobTitle,
           jd: lead.jobDescription || lead.description || '',
+          job_url: lead.job_url || lead.jobSource || lead.url || '',
+          location: lead.location || '',
           from: 'apply_modal',
         });
         onClose();

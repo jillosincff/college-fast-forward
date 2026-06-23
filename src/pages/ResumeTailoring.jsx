@@ -9,6 +9,7 @@ import JobDescriptionStep from '@/components/resume-tailor/JobDescriptionStep';
 import ResumeBuilderStep from '@/components/fast-track-pro/ResumeBuilderStep';
 import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
 import TailoringResults from '@/components/resume-tailor/TailoringResults';
+import ApplyTailorStep from '@/components/resume-tailor/ApplyTailorStep';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
 import { getFastTrackVariant, trackQueuedView, trackQueuedUpgradeClick, trackQueuedBackOut } from '@/utils/tailoringLatency';
 
@@ -40,6 +41,9 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [queuedAvailableAt, setQueuedAvailableAt] = useState(null);
   const [analysisError, setAnalysisError] = useState(false);
+  // When arriving from the job-application "Yes, tailor it first" flow, we carry
+  // the job context so we can return to the listing and submit once done.
+  const [applyContext, setApplyContext] = useState(null);
 
   // Churn tracking — lifted above conditional render to satisfy rules-of-hooks
   const queuedViewTracked = useRef(false);
@@ -84,6 +88,8 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         const tailoredList = tailored || [];
         setResumes(resList);
         setTailoredResumes(tailoredList);
+        // Did we arrive from the apply-modal handoff? If so, keep that phase.
+        const fromApply = new URLSearchParams(window.location.hash.split('?')[1] || window.location.search).get('from') === 'apply_modal';
         if (resList.length > 0) {
           const active = resList.find(r => r.is_active) || resList[0];
           setResumeText(active.parsed_text || '');
@@ -98,7 +104,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               try { setAnalysis(JSON.parse(cached)); } catch (e) {}
             }
           }
-          setPhase('hub');
+          if (!fromApply) setPhase('hub');
         } else {
           setPhase('entry');
         }
@@ -110,6 +116,33 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     };
     if (user?.email) loadResumes();
   }, [user?.email]);
+
+  // Handle hand-off from the job-application modal ("Yes, tailor it first").
+  // Reads ?company=&role=&jd=&from=apply_modal, pre-fills the job, and jumps
+  // straight to the focused tailoring screen — skipping the resume hub.
+  useEffect(() => {
+    if (applyContext) return; // only run once
+    const hashQuery = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(hashQuery || window.location.search);
+    if (params.get('from') !== 'apply_modal') return;
+    const ctx = {
+      company: params.get('company') || '',
+      role: params.get('role') || '',
+      jd: params.get('jd') || '',
+      jobUrl: params.get('job_url') || '',
+      location: params.get('location') || '',
+    };
+    setApplyContext(ctx);
+    setCompanyName(ctx.company);
+    setJobTitle(ctx.role);
+    setJobDescription(ctx.jd);
+    setPhase('applyTailor');
+    // Clean params so a refresh doesn't re-trigger
+    try {
+      const cleanHash = window.location.hash.split('?')[0];
+      window.history.replaceState(null, '', cleanHash);
+    } catch {}
+  }, [applyContext]);
 
   // Handle deep-link from batch completion email: ?resume_id=xxx
   useEffect(() => {
@@ -291,9 +324,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         jobDescription: jobDescription.trim(),
         sourceResumeId: resumeId || '',
       });
+      const failPhase = applyContext ? 'applyTailor' : 'tailor';
       if (res.data?.upgrade_required) {
         setError(res.data.message || 'Upgrade to unlock full resume tailoring.');
-        setPhase('tailor');
+        setPhase(failPhase);
       } else if (res.data?.queued) {
         // Free tier latency — show the queued screen
         setQueuedAvailableAt(res.data.available_at);
@@ -306,11 +340,11 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         setPhase('results');
       } else {
         setError(res.data?.error || 'Tailoring failed. Please try again.');
-        setPhase('tailor');
+        setPhase(failPhase);
       }
     } catch (e) {
       setError('Something went wrong. Please try again.');
-      setPhase('tailor');
+      setPhase(applyContext ? 'applyTailor' : 'tailor');
     }
   };
 
@@ -449,6 +483,28 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   // ── PHASE: tailoring loader ──────────────────────────────────────────────
   if (phase === 'tailoring') return <TailoringLoader />;
 
+  // ── PHASE: applyTailor (arrived from job-application "tailor it first") ────
+  if (phase === 'applyTailor') {
+    const active = resumes.find(r => r.is_active) || resumes[0];
+    const resumeName = active?.name || active?.original_file_name || fileName || 'Your Resume';
+    return (
+      <ApplyTailorStep
+        applyContext={applyContext}
+        resumeName={resumeName}
+        companyName={companyName}
+        jobTitle={jobTitle}
+        jobDescription={jobDescription}
+        resumeText={resumeText}
+        error={error}
+        onCompanyChange={setCompanyName}
+        onJobTitleChange={setJobTitle}
+        onJobDescriptionChange={setJobDescription}
+        onTailor={handleDoTailor}
+        onCancel={() => navigate('FreeTierDashboard')}
+      />
+    );
+  }
+
   // ── PHASE: results ───────────────────────────────────────────────────────
   if (phase === 'results' && result) {
     return (
@@ -457,7 +513,8 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         companyName={companyName}
         jobTitle={jobTitle}
         originalResumeText={resumeText}
-        onStartOver={() => { setResult(null); setPhase('hub'); }}
+        onStartOver={() => { setResult(null); setPhase(applyContext ? 'applyTailor' : 'hub'); }}
+        applyContext={applyContext}
         userEmail={user.email}
       />
     );
