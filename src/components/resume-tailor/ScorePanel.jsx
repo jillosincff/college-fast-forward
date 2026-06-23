@@ -3,22 +3,33 @@ import React from 'react';
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const orange = '#E85D20';
 
-function ScoreRing({ score, size = 70, color }) {
+function ScoreRing({ score, size = 72, color, label }) {
   const r = (size - 10) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (circ * Math.min(score, 100)) / 100;
   return (
-    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#E2E8F0" strokeWidth={6} />
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={6}
-        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
-        style={{ transition: 'stroke-dashoffset 1.5s ease-out' }}
-      />
-      <text x={size / 2} y={size / 2} textAnchor="middle" dominantBaseline="central"
-        style={{ transform: 'rotate(90deg)', transformOrigin: 'center', fontSize: 18, fontWeight: 700, fontFamily: dmSans, fill: color }}>
-        {score}%
-      </text>
-    </svg>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#E2E8F0" strokeWidth={6} />
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={6}
+            strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+            style={{ transition: 'stroke-dashoffset 1.5s ease-out' }}
+          />
+        </svg>
+        <span style={{
+          position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 18, fontWeight: 700, fontFamily: dmSans, color,
+        }}>
+          {score}%
+        </span>
+      </div>
+      {label && (
+        <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#94A3B8' }}>
+          {label}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -33,9 +44,9 @@ export default function ScorePanel({ originalScore, tailoredScore, keywordsAdded
           Resume Match Score
         </p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <ScoreRing score={originalScore} color="#94A3B8" />
-          <span style={{ fontFamily: dmSans, fontSize: 18, color: '#ccc' }}>→</span>
-          <ScoreRing score={tailoredScore} color={orange} />
+          <ScoreRing score={originalScore} color="#94A3B8" label="Before" />
+          <span style={{ fontFamily: dmSans, fontSize: 18, color: '#ccc', marginBottom: 16 }}>→</span>
+          <ScoreRing score={tailoredScore} color={orange} label="Optimized" />
         </div>
       </div>
 

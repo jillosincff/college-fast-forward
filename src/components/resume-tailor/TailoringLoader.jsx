@@ -12,6 +12,7 @@ const STEPS = [
   'Optimizing for ATS...',
   'Calculating match score...',
   'Done.',
+  'Hang on a few seconds, finalizing finishing touches...',
 ];
 
 export default function TailoringLoader() {
@@ -59,7 +60,7 @@ export default function TailoringLoader() {
 
         <div style={{ textAlign: 'left', maxWidth: 280, margin: '0 auto' }}>
           {STEPS.slice(0, visibleLines).map((line, i) => {
-            const isDone = line === 'Done.';
+            const isDone = line === 'Done.' || line.startsWith('Hang on');
             return (
               <p key={i} style={{
                 fontFamily: dmSans, fontSize: 13, fontWeight: isDone ? 600 : 400,
