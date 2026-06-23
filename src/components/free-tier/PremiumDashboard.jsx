@@ -212,7 +212,17 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
+    
+    // Also listen for custom user update event from Resume Studio
+    const handleUserUpdate = (e) => {
+      if (e.detail) setUser(e.detail);
+    };
+    window.addEventListener('cff:user-updated', handleUserUpdate);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('cff:user-updated', handleUserUpdate);
+    };
   }, []);
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const shortName = t.shortName || college || 'your university';

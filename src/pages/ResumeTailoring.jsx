@@ -207,6 +207,11 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       const freshUser = updatedUser || await base44.auth.me();
       window.dispatchEvent(new CustomEvent('cff:user-updated', { detail: freshUser }));
       
+      // Force reload the dashboard by navigating away and back
+      setTimeout(() => {
+        window.location.hash = '#FreeTierDashboard';
+      }, 500);
+      
       // Extract text asynchronously in background
       base44.integrations.Core.InvokeLLM({
         prompt: 'Extract all text content from this resume document. Return only the raw text, preserving structure but no JSON or formatting.',
