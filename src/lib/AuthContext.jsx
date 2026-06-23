@@ -61,7 +61,13 @@ const AuthProviderInner = ({ children }) => {
     // OnboardingGuard to instantly redirect to /GatorAuth (the dark login page),
     // which flashes before the reload below. The full reload re-initializes the
     // app unauthenticated anyway.
-    window.location.replace(window.location.origin + '/#/StudentLandingPage');
+    //
+    // Point the hash at the landing page FIRST, then do a full reload of that
+    // same URL. Calling replace() + reload() separately races: reload() reloads
+    // the page they logged out from, which (now unauthenticated) bounces to the
+    // dark /GatorAuth screen. Setting window.location.href to the target hash and
+    // hard-reloading guarantees they land on the home page.
+    window.location.href = window.location.origin + '/#/StudentLandingPage';
     window.location.reload();
   };
 
