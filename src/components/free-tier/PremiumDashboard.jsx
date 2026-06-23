@@ -459,10 +459,13 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       )}
 
       {/* ── Main Content ── */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
+      {(() => {
+        const showSidebar = parentCount === null || parentCount >= 20;
+        return (
+      <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
+        <div style={{ display: 'grid', gridTemplateColumns: showSidebar ? 'minmax(0, 1fr) 340px' : '1fr', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
           {/* Left Column - Job Feed */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
             {/* ── Three-Tier Organized Feeds ── */}
             <OrganizedFeeds 
               key={`${JSON.stringify(user?.career_goals?.target_roles)}-${JSON.stringify(user?.career_goals?.target_industries)}-${user?.career_goals?.company_size_preference}`} 
@@ -473,25 +476,26 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             />
           </div>
 
-          {/* Right Column (Desktop Only) - Sticky sidebar */}
-          <aside style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: 16, 
-            width: '340px', 
-            flexShrink: 0,
-            position: 'sticky',
-            top: 24,
-            maxHeight: 'calc(100vh - 48px)',
-            overflowY: 'auto',
-          }} className="desktop-only">
-            {/* Parent Network — unlocked if ≥20 parents */}
-            {(parentCount === null || parentCount >= 20) && (
+          {/* Right Column (Desktop Only) - Sticky sidebar, only when Parent Network is unlocked */}
+          {showSidebar && (
+            <aside style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 16, 
+              width: '340px', 
+              flexShrink: 0,
+              position: 'sticky',
+              top: 24,
+              maxHeight: 'calc(100vh - 48px)',
+              overflowY: 'auto',
+            }} className="desktop-only">
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
-            )}
-          </aside>
+            </aside>
+          )}
         </div>
       </div>
+        );
+      })()}
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav user={user} onOpenPipeline={() => setShowKanbanModal(true)} />

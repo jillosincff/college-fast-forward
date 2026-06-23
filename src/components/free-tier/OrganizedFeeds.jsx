@@ -419,7 +419,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       {/* Split-View Container */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: showDetailPane ? '30% 70%' : '1fr',
+        gridTemplateColumns: showDetailPane ? 'minmax(260px, 28%) minmax(0, 1fr)' : '1fr',
         gap: 0,
         flex: 1,
         overflow: 'hidden',
@@ -511,6 +511,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           <div style={{
             overflowY: 'auto',
             background: '#fff',
+            paddingTop: 16,
           }}>
             <JobDetailPane
               lead={selectedLead}
