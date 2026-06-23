@@ -192,6 +192,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const [warmCompanyNames, setWarmCompanyNames] = useState([]);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [showKanbanModal, setShowKanbanModal] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const navRef = useRef(null);
 
@@ -239,10 +240,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const handleBackdoorClick = (job) => {
     setSelectedJob(job);
     setSelectedSignal(null); // clear any signal selection
-    // Scroll CliFF panel into view
-    setTimeout(() => {
-      document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+    setShowChat(true); // open the floating CLIFF chat
   };
 
   const handleAddFromSignals = (company, roles) => {
@@ -300,10 +298,10 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         </div>
       )}
 
-      {/* Floating CLIFF Chat Button (Dashboard only) */}
-      {activeTab === 'dashboard' && (
+      {/* Floating CLIFF Chat Button (Dashboard only) — toggles the chat panel */}
+      {activeTab === 'dashboard' && !showChat && (
         <button
-          onClick={() => document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'end' })}
+          onClick={() => setShowChat(true)}
           style={{
             position: 'fixed',
             bottom: isMobile ? 84 : 40,
@@ -332,6 +330,43 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           <span style={{ fontSize: 18 }}>💬</span>
           <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff' }}>Ask CLIFF</span>
         </button>
+      )}
+
+      {/* Floating CLIFF Chat Panel — opened by the purple bubble, X closes it back to the bubble */}
+      {activeTab === 'dashboard' && showChat && (
+        <div style={{
+          position: 'fixed',
+          bottom: isMobile ? 0 : 40,
+          right: isMobile ? 0 : 40,
+          left: isMobile ? 0 : 'auto',
+          top: isMobile ? 0 : 'auto',
+          width: isMobile ? '100%' : 400,
+          maxHeight: isMobile ? '100%' : 'calc(100vh - 80px)',
+          height: isMobile ? '100%' : 'auto',
+          background: '#fff',
+          borderRadius: isMobile ? 0 : 20,
+          boxShadow: '0 16px 48px rgba(0,0,0,0.25)',
+          zIndex: 1000,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', flexShrink: 0 }}>
+            <span style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>💬</span> Ask CLIFF
+            </span>
+            <button
+              onClick={() => setShowChat(false)}
+              aria-label="Close CLIFF chat"
+              style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', lineHeight: 1, padding: '6px 10px', minHeight: 'auto', minWidth: 'auto' }}
+            >
+              ✕
+            </button>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+            <PremiumHiringChat user={user} selectedSignal={selectedSignal} selectedJob={selectedJob} />
+          </div>
+        </div>
       )}
 
       {/* Mobile-first responsive container */}
@@ -454,11 +489,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             {(parentCount === null || parentCount >= 20) && (
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
             )}
-
-            {/* CLIFF Chat Panel - Full interface in sidebar */}
-            <div id="cliff-chat-panel" style={{ flex: '0 0 auto' }}>
-              <PremiumHiringChat user={user} selectedSignal={selectedSignal} selectedJob={selectedJob} />
-            </div>
           </aside>
         </div>
       </div>
