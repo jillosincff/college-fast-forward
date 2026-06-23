@@ -316,7 +316,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const parentsCount = networkStats?.parents || 0;
   const companiesCount = networkStats?.companies || 0;
   const networkCount = alumniCount + parentsCount;
-  const hasResume = !!user?.resume_filename;
+  const hasResume = !!(user?.resume_filename || user?.resume_url);
   const stats = [
     { emoji: '🤖', label: 'Agent Status', value: 'ACTIVE' },
     { emoji: '📄', label: 'Resume', value: hasResume ? 'On File' : 'Not Uploaded', warning: !hasResume },
