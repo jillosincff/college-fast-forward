@@ -467,12 +467,12 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
         {/* Header */}
         <div style={{ marginBottom: 40 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 12px' }}>Resume Studio</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>Resume Studio</p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
             Let the Agent optimize your resume
           </h1>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#666', margin: 0, lineHeight: 1.6 }}>
-            Based on your career goals, the Agent will strengthen your bullet points, improve clarity, and better align your experience with what employers are looking for.
+            Based on your <strong>career goals</strong>, the Agent will strengthen your bullet points, improve clarity, and better align your experience with what employers are looking for.
           </p>
         </div>
 
@@ -611,7 +611,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: window.innerWidth < 600 ? 'wrap' : 'nowrap' }}>
             <div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 8px' }}>Resume</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>Resume Studio</p>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Resumes</h1>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -673,7 +673,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
               {analysis && !analyzing && (
                 <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px' }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>Resume Analysis • Matched to Your Goals</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>Resume Analysis • Matched to Your Career Goals</p>
 
                   <div style={{ display: 'flex', flexDirection: window.innerWidth < 600 ? 'column' : 'row', gap: 24, alignItems: window.innerWidth < 600 ? 'center' : 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
                     <div style={{ textAlign: 'center', flexShrink: 0 }}>
@@ -688,6 +688,17 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                       <div style={{ background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top Priority</p>
                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>{analysis.top_fix}</p>
+                       </div>
+                       <div style={{ marginTop: 12 }}>
+                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Analyzing Against</p>
+                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                           {user?.career_goals?.target_roles?.slice(0, 3).map((role, i) => (
+                             <span key={i} style={{ background: 'rgba(232,93,32,0.2)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{role}</span>
+                           ))}
+                           {user?.career_goals?.target_industries?.slice(0, 2).map((ind, i) => (
+                             <span key={i} style={{ background: 'rgba(232,93,32,0.2)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{ind}</span>
+                           ))}
+                         </div>
                        </div>
                     </div>
                   </div>
@@ -811,14 +822,17 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
           {/* Next step CTA */}
           <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid #F0F0F0' }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: '0 0 12px', textAlign: 'center' }}>
+              Your resume is optimized for your career goals. Now research companies and find roles.
+            </p>
             <button
               onClick={() => {
                 const targetCompany = user?.career_goals?.target_companies?.[0] || '';
-                navigate(`FreeTierDashboard?tab=company_intel${targetCompany ? `&company=${encodeURIComponent(targetCompany)}` : ''}`);
+                navigate(`FreeTierDashboard${targetCompany ? `?company=${encodeURIComponent(targetCompany)}` : ''}`);
               }}
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
+              style={{ background: 'linear-gradient(135deg, #E85D20, #d44e14)', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
               >
-              Next: Research Target Companies →
+              Go to Job Discovery →
             </button>
           </div>
         </div>
