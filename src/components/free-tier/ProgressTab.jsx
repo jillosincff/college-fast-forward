@@ -19,6 +19,7 @@ const ACTIONABLE_STATUSES = ['applied', 'reached_out', 'messaged', 'replied', 'c
 
 export default function ProgressTab({ user, onUpgrade }) {
   const [pipeline, setPipeline] = useState([]);
+  const [allPipeline, setAllPipeline] = useState([]);
   const [tailoredResumes, setTailoredResumes] = useState([]);
   const [tailoredCount, setTailoredCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -34,6 +35,7 @@ export default function ProgressTab({ user, onUpgrade }) {
           base44.entities.NetworkingPipeline.list('-created_date', 200),
           base44.entities.TailoredResume.filter({ user_email: user.email }, '-created_date', 100),
         ]);
+        setAllPipeline(pipelineRecords || []);
         // Filter to only actionable statuses (exclude identified/matched)
         const actionable = (pipelineRecords || []).filter(r => ACTIONABLE_STATUSES.includes(r.status));
         setPipeline(actionable);
@@ -59,11 +61,12 @@ export default function ProgressTab({ user, onUpgrade }) {
   const interviews = all.filter(r => r.status === 'interview').length;
   const offers = all.filter(r => r.status === 'offer').length;
 
-  // Streak: count distinct days with pipeline activity in last 7 days
+  // Streak: count distinct days with ANY pipeline activity in last 7 days
+  // (includes just-applied "identified" entries, not only actionable ones)
   const streak = (() => {
     const days = new Set();
     const now = Date.now();
-    for (const r of all) {
+    for (const r of allPipeline) {
       const d = r.status_date || r.created_date;
       if (!d) continue;
       const diffDays = Math.floor((now - new Date(d).getTime()) / (1000 * 60 * 60 * 24));
