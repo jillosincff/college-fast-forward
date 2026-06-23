@@ -46,6 +46,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
 
   const [phase, setPhase] = useState('intro');
   const [currentQ, setCurrentQ] = useState(0);
+  const [selectedScore, setSelectedScore] = useState(null);
   const [responses, setResponses] = useState({});
   const [archetype, setArchetype] = useState(null);
   const [error, setError] = useState('');
@@ -267,55 +268,59 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             </p>
           </div>
 
-          {/* Scale */}
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#AAAAAA', margin: 0 }}>Strongly Disagree</p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#AAAAAA', margin: 0 }}>Strongly Agree</p>
-            </div>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              {SCALE_LABELS.map(({ value, label }) => {
-                const isSelected = responses[currentQuestion.id]?.score === value;
-                return (
+          {/* Scale — full-width labeled options so taps are unmistakable */}
+          <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {SCALE_LABELS.map(({ value, label }) => {
+              const isSelected = responses[currentQuestion.id]?.score === value;
+              return (
                 <button
                   key={value}
-                  onClick={() => handleAnswer(value)}
-                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.borderColor = '#7c3aed'; }}
-                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.borderColor = '#E0E0E0'; }}
-                  title={label}
+                  onClick={() => setSelectedScore(value)}
                   style={{
-                    width: 56, height: 56, borderRadius: '50%',
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                    borderRadius: 12, padding: '14px 18px', cursor: 'pointer',
                     border: `2px solid ${isSelected ? '#7c3aed' : '#E0E0E0'}`,
-                    background: isSelected ? '#7c3aed' : '#fff',
-                    color: isSelected ? '#fff' : '#1A1A1A',
-                    fontSize: 18, fontWeight: 700, cursor: 'pointer',
-                    fontFamily: "'DM Sans', sans-serif",
+                    background: isSelected ? '#f5f3ff' : '#fff',
+                    fontFamily: "'DM Sans', sans-serif", textAlign: 'left',
                     transition: 'all 0.15s',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    minHeight: 'auto', minWidth: 'auto',
                   }}
                 >
-                  {value}
+                  <span style={{
+                    width: 32, height: 32, flexShrink: 0, borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: isSelected ? '#7c3aed' : '#F0F0F0',
+                    color: isSelected ? '#fff' : '#555', fontSize: 15, fontWeight: 700,
+                    minHeight: 'auto', minWidth: 'auto',
+                  }}>{value}</span>
+                  <span style={{ fontSize: 15, fontWeight: isSelected ? 600 : 500, color: isSelected ? '#7c3aed' : '#1A1A1A' }}>{label}</span>
                 </button>
-                );
-              })}
-            </div>
+              );
+            })}
           </div>
 
           {error && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#EF4444', textAlign: 'center', margin: '0 0 16px' }}>{error}</p>}
 
-          {/* Continue button — appears once the current question is answered */}
-          {responses[currentQuestion.id]?.score && (
-            <button
-              onClick={() => handleAnswer(responses[currentQuestion.id].score)}
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', marginBottom: 16 }}
-            >
-              {currentQ < QUESTIONS.length - 1 ? 'Continue →' : 'See My Results →'}
-            </button>
-          )}
+          {/* Continue button — always visible, disabled until an option is picked */}
+          {(() => {
+            const picked = selectedScore ?? responses[currentQuestion.id]?.score;
+            return (
+              <button
+                onClick={() => { if (picked) { setSelectedScore(null); handleAnswer(picked); } }}
+                disabled={!picked}
+                style={{
+                  background: picked ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : '#E5E5E5',
+                  border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600,
+                  color: picked ? '#fff' : '#999', cursor: picked ? 'pointer' : 'not-allowed',
+                  fontFamily: "'DM Sans', sans-serif", width: '100%', marginBottom: 16,
+                }}
+              >
+                {currentQ < QUESTIONS.length - 1 ? 'Continue →' : 'See My Results →'}
+              </button>
+            );
+          })()}
 
           {currentQ > 0 && (
-            <button onClick={() => setCurrentQ(prev => prev - 1)} style={{ background: 'none', border: 'none', fontSize: 13, color: '#AAAAAA', cursor: 'pointer', display: 'block', margin: '0 auto', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', minWidth: 'auto' }}>
+            <button onClick={() => { setSelectedScore(null); setCurrentQ(prev => prev - 1); }} style={{ background: 'none', border: 'none', fontSize: 13, color: '#AAAAAA', cursor: 'pointer', display: 'block', margin: '0 auto', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', minWidth: 'auto' }}>
               ← Previous question
             </button>
           )}
