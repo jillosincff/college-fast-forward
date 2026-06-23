@@ -38,7 +38,7 @@ const SCALE_LABELS = [
 ];
 
 const dimensionColor = (score) =>
-  score >= 7 ? '#22C55E' : score >= 4 ? '#F59E0B' : '#E85D20';
+  score >= 7 ? '#22C55E' : score >= 4 ? '#F59E0B' : '#7c3aed';
 
 export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
   const { user } = useAuth();
@@ -199,8 +199,8 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             20 questions. 10 minutes. Your unique career archetype — how you think, what drives you, and which roles and environments you'll thrive in. Inspired by Ray Dalio's PrinciplesYou methodology.
           </p>
 
-          <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px', marginBottom: 32 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>WHAT YOU'LL DISCOVER</p>
+          <div style={{ background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', borderRadius: 16, padding: '28px 32px', marginBottom: 32 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#ddd6fe', margin: '0 0 20px' }}>WHAT YOU'LL DISCOVER</p>
             {[
               { icon: '🎭', label: 'Your unique Career Archetype', desc: 'A custom name and description built just for you' },
               { icon: '⚡', label: 'Your superpowers', desc: 'The strengths that make you stand out' },
@@ -218,7 +218,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             ))}
           </div>
 
-          <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 32 }}>
+          <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 12, padding: '16px 20px', marginBottom: 32 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: 0, lineHeight: 1.6 }}>
               💡 <strong>For best results:</strong> Answer based on how you actually are, not how you wish you were. There are no right or wrong answers — every archetype has unique strengths.
             </p>
@@ -242,10 +242,10 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           <div style={{ marginBottom: 40 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>Question {currentQ + 1} of {QUESTIONS.length}</p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#E85D20', margin: 0 }}>{progress}% complete</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#7c3aed', margin: 0 }}>{progress}% complete</p>
             </div>
             <div style={{ height: 4, background: '#F0F0F0', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${progress}%`, background: '#E85D20', borderRadius: 2, transition: 'width 0.3s ease' }} />
+              <div style={{ height: '100%', width: `${progress}%`, background: 'linear-gradient(90deg, #6d28d9, #7c3aed)', borderRadius: 2, transition: 'width 0.3s ease' }} />
             </div>
           </div>
 
@@ -257,6 +257,9 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(20px, 4vw, 26px)', fontWeight: 700, color: '#1A1A1A', margin: 0, lineHeight: 1.3 }}>
               "{currentQuestion.text}"
             </h2>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#9ca3af', margin: '12px 0 0' }}>
+              Tap a number below — you'll move to the next question automatically.
+            </p>
           </div>
 
           {/* Scale */}
@@ -312,7 +315,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <AssessmentSidebar />
         <div style={{ maxWidth: 480, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
-          <div style={{ width: 80, height: 80, borderRadius: '50%', border: '4px solid rgba(232,93,32,0.2)', borderTop: '4px solid #E85D20', margin: '0 auto 32px', animation: 'spin 1s linear infinite' }} />
+          <div style={{ width: 80, height: 80, borderRadius: '50%', border: '4px solid rgba(124,58,237,0.2)', borderTop: '4px solid #7c3aed', margin: '0 auto 32px', animation: 'spin 1s linear infinite' }} />
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Discovering your archetype...</h2>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0, lineHeight: 1.6 }}>
             Analyzing your responses across 6 dimensions and building your unique career profile. Takes about 15 seconds.
@@ -350,9 +353,9 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
         <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
 
           {/* Hero */}
-          <div style={{ background: '#0A0A0A', borderRadius: 20, padding: '40px 36px', marginBottom: 24, textAlign: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, #4c1d95, #6d28d9)', borderRadius: 20, padding: '40px 36px', marginBottom: 24, textAlign: 'center' }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>{archetype.archetype_emoji}</div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 12px' }}>YOUR CAREER ARCHETYPE</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#c4b5fd', margin: '0 0 12px' }}>YOUR CAREER ARCHETYPE</p>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 700, color: '#fff', margin: '0 0 12px', lineHeight: 1.2 }}>{archetype.archetype_name}</h1>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: 'rgba(255,255,255,0.6)', margin: '0 0 24px', fontStyle: 'italic' }}>{archetype.archetype_tagline}</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.85)', margin: '0 auto', lineHeight: 1.7, maxWidth: 560 }}>{archetype.summary}</p>
@@ -391,10 +394,10 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>No superpowers data</p>
               )}
             </div>
-            <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '20px 24px' }}>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 14px' }}>⚠️ WATCH OUT FOR</p>
+            <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 14, padding: '20px 24px' }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7c3aed', margin: '0 0 14px' }}>⚠️ WATCH OUT FOR</p>
               {archetype.watch_out_for && archetype.watch_out_for.length > 0 ? archetype.watch_out_for.map((w, i) => (
-                 <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: i < archetype.watch_out_for.length - 1 ? '0 0 10px' : 0, lineHeight: 1.5, paddingLeft: 8, borderLeft: '2px solid rgba(232,93,32,0.4)' }}>{w}</p>
+                 <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: i < archetype.watch_out_for.length - 1 ? '0 0 10px' : 0, lineHeight: 1.5, paddingLeft: 8, borderLeft: '2px solid rgba(124,58,237,0.4)' }}>{w}</p>
               ))
               : (
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>No areas to watch out for</p>
@@ -429,8 +432,8 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
 
             {/* Career path insight */}
             <CollapsibleSection title="🗺️ CAREER PATH INSIGHT" section="insight">
-            <div style={{ background: '#0A0A0A', borderRadius: 14, padding: '20px 24px' }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 12px' }}>🗺️ YOUR CAREER PATH INSIGHT</p>
+            <div style={{ background: 'linear-gradient(135deg, #4c1d95, #6d28d9)', borderRadius: 14, padding: '20px 24px' }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#c4b5fd', margin: '0 0 12px' }}>🗺️ YOUR CAREER PATH INSIGHT</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.7 }}>{archetype.career_path_insight}</p>
             </div>
             </CollapsibleSection>
@@ -445,8 +448,8 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
 
             {/* Advice */}
             <CollapsibleSection title="💬 ADVICE FOR YOU" section="advice">
-            <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 12px' }}>💬 ADVICE FOR YOU</p>
+            <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7c3aed', margin: '0 0 12px' }}>💬 ADVICE FOR YOU</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0, lineHeight: 1.7 }}>{archetype.advice}</p>
             </div>
             </CollapsibleSection>
