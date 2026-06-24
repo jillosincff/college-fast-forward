@@ -93,8 +93,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }, []);
 
   const PAGE_SIZE = 20;
-  const FREE_DAILY_LIMIT = 15;
-  const FIRST_DAY_BONUS = 30;
+  const FREE_DAILY_LIMIT = 5;
+  const FIRST_DAY_BONUS = 5;
+  const PREMIUM_DAILY_LIMIT = 25;
   const [refreshKey, setRefreshKey] = useState(0);
   const [forceRefresh, setForceRefresh] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(null);
@@ -104,7 +105,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     if (!user?.created_date) return false;
     return (Date.now() - new Date(user.created_date).getTime()) / (1000 * 60 * 60) < 24;
   })();
-  const dailyLimit = isPremium ? Infinity : (isFirstDay ? FIRST_DAY_BONUS : FREE_DAILY_LIMIT);
+  const dailyLimit = isPremium ? PREMIUM_DAILY_LIMIT : (isFirstDay ? FIRST_DAY_BONUS : FREE_DAILY_LIMIT);
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
@@ -339,8 +340,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   });
 
   const totalCount = targetOpportunities.length;
-  const cappedVisibleCount = isPremium ? visibleCount : Math.min(visibleCount, dailyLimit);
-  const limitReached = !isPremium && targetOpportunities.length > dailyLimit && cappedVisibleCount >= dailyLimit;
+  const cappedVisibleCount = Math.min(visibleCount, dailyLimit);
+  const limitReached = targetOpportunities.length > dailyLimit && cappedVisibleCount >= dailyLimit;
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
   const rawNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
   const totalNetworkCount = rawNetworkCount > 0
@@ -491,12 +492,12 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                     Show more opportunities ({totalCount - cappedVisibleCount} more)
                   </button>
                 )}
-                {limitReached && !isPremium && (
+                {limitReached && (
                   <div style={{
                     fontFamily: dm, fontSize: 12, color: '#6b7280', textAlign: 'center',
                     background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '14px', marginTop: 4,
                   }}>
-                    You've reached today's free limit of {dailyLimit} opportunities. Check back tomorrow for more.
+                    You've reached today's limit of {dailyLimit} opportunities. Check back tomorrow for more.
                   </div>
                 )}
               </div>
