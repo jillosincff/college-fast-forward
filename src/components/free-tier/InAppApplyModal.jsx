@@ -90,18 +90,26 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
         ? (activeResume.name || activeResume.original_file_name || 'Current Resume')
         : resumeFile?.name || null;
 
-      await addPipelineEntry({
+      const res = await addPipelineEntry({
         company: companyName,
         job_title: jobTitle,
         job_description: lead.jobDescription || lead.description || '',
         job_url: lead.job_url || lead.jobSource || '',
         application_path: 'cold_apply',
-        status: 'identified',
+        status: 'applied',
+        status_date: new Date().toISOString(),
         location: lead.location || '',
         notes: [note, resumeLabel ? `Resume submitted: ${resumeLabel}` : null].filter(Boolean).join('\n') || null,
       });
 
+      const result = res?.data || res;
+      if (result?.error) {
+        throw new Error(result.message || 'Could not save to your tracker. Please try again.');
+      }
+
       setSubmitted(true);
+      // Notify the tracker to refresh so the new application shows immediately
+      window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
       onSuccess?.();
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');

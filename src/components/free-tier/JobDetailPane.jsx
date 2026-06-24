@@ -434,7 +434,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
           standoutTip={insight?.standout_tip || ''}
           onClose={() => setShowApplyModal(false)}
           onSuccess={() => {
-            setShowApplyModal(false);
+            // Keep the modal open so the "Application Tracked!" success screen is visible.
             onAddToPipeline?.(lead);
           }}
         />
