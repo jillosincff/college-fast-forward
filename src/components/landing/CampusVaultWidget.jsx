@@ -364,7 +364,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
                       You're on the list!
                     </h3>
                     <p style={{ fontFamily: FONT, fontSize: 14, color: '#64748B', margin: '0 0 8px', lineHeight: 1.6 }}>
-                      Thanks! We'll email you as soon as <strong style={{ color: BLUE }}>{formData.university}</strong> is added to CLiFF.
+                      Thanks! We'll email you as soon as <strong style={{ color: BLUE }}>{formData.university}</strong> is added to CFF.
                     </p>
                     <p style={{ fontFamily: FONT, fontSize: 14, color: '#64748B', margin: '0 0 24px', lineHeight: 1.6 }}>
                       In the meantime, feel free to explore our free resources or join the general waitlist for early access.
@@ -432,7 +432,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
                 hidden opportunities matched for you right now
               </p>
               <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
-                These roles are never posted on public job boards. CLiFF found them through your school's alumni network.
+                These roles are never posted on public job boards. CFF found them through your school's alumni network.
               </p>
             </div>
 

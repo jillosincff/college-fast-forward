@@ -31,7 +31,7 @@ function DashboardMock() {
           <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>Good morning,<br />Marcus ⚡</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 18 }}>
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981', flexShrink: 0, animation: 'cliffPulse 2s infinite' }} />
-            <span style={{ fontSize: 10, fontWeight: 700, color: '#10B981' }}>CliFF Agent: Active</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#10B981' }}>CFF Agent: Active</span>
           </div>
           {['🎯 Dashboard', '📋 My Pipeline', '🤝 Alumni Network', '📄 Resume'].map((item, i) => (
             <div key={i} style={{ padding: '8px 10px', borderRadius: 7, background: i === 0 ? 'rgba(109,40,217,0.08)' : 'transparent', border: i === 0 ? '1px solid rgba(109,40,217,0.20)' : '1px solid transparent', fontSize: 11, fontWeight: i === 0 ? 700 : 500, color: i === 0 ? '#6D28D9' : '#94A3B8', cursor: 'default' }}>

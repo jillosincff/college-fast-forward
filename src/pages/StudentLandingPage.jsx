@@ -577,7 +577,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 ))}
               </div>
               <div style={{ marginTop: 20, background: CORAL_LIGHT, borderRadius: 10, padding: '10px 14px', textAlign: 'center', border: `1px solid ${CORAL_BORDER}` }}>
-                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: CORAL }}>❌ 98% of cold apps get ghosted</span>
+                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: CORAL }}>❌ Only ~2% of online applications lead to a job (Jobvite Recruiting Benchmark)</span>
               </div>
             </div>
 
@@ -600,7 +600,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 ))}
               </div>
               <div style={{ marginTop: 20, background: '#fff', borderRadius: 10, padding: '10px 14px', textAlign: 'center', border: `1px solid ${INDIGO_BORDER}` }}>
-                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO }}>✅ 1 warm intro = 10x more interviews</span>
+                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO }}>✅ Referred candidates are far more likely to land interviews (LinkedIn)</span>
               </div>
             </div>
           </div>
@@ -698,12 +698,12 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 56px)', fontWeight: 900, color: INDIGO, letterSpacing: '-0.04em', lineHeight: 1 }}>$4.99</span>
-              <span style={{ fontFamily: SF, fontSize: 16, color: TEXT3, fontWeight: 500 }}>/week</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: SF, fontSize: 'clamp(56px, 14vw, 80px)', fontWeight: 900, color: INDIGO, letterSpacing: '-0.05em', lineHeight: 0.9 }}>$4.99</span>
+              <span style={{ fontFamily: SF, fontSize: 'clamp(18px, 5vw, 22px)', color: TEXT, fontWeight: 700 }}>/week</span>
             </div>
-            <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 clamp(24px, 5vw, 32px)', lineHeight: 1.5 }}>
-              Billed monthly ($19.96) · Cancel in 1-tap anytime
+            <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 4vw, 16px)', color: TEXT2, fontWeight: 600, margin: '0 0 clamp(24px, 5vw, 32px)', lineHeight: 1.5 }}>
+              That's just <span style={{ color: TEXT, fontWeight: 800 }}>$19.96/month</span> — billed monthly, cancel in 1 tap anytime.
             </p>
 
             <div style={{ background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '12px 16px', marginBottom: 'clamp(20px, 4vw, 24px)' }}>
