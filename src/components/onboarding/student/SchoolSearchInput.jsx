@@ -143,7 +143,7 @@ const COMMON_UNIVERSITIES = [
   'Davidson College', 'Elon University', 'High Point University',
 ];
 
-export default function SchoolSearchInput({ value, onChange, error }) {
+export default function SchoolSearchInput({ value, onChange, error, light }) {
   const [search, setSearch] = useState(value || '');
   const [showDropdown, setShowDropdown] = useState(false);
   const [filtered, setFiltered] = useState([]);
@@ -181,22 +181,23 @@ export default function SchoolSearchInput({ value, onChange, error }) {
         onChange={e => { setSearch(e.target.value); onChange(e.target.value); }}
         placeholder="Start typing your school..."
         style={{
-          width: '100%', background: 'rgba(255,255,255,0.06)',
-          border: `1px solid ${error ? 'rgba(229,57,53,0.6)' : '#2A2A2A'}`,
-          borderRadius: 12, padding: '14px 16px',
-          fontFamily: dmSans, fontSize: 15, fontWeight: 400,
-          color: '#fff', boxSizing: 'border-box',
-          transition: 'border-color 0.2s',
+          width: '100%', background: light ? '#f8f9ff' : 'rgba(255,255,255,0.06)',
+          border: `1px solid ${error ? 'rgba(229,57,53,0.6)' : (light ? '#E2E8F0' : '#2A2A2A')}`,
+          borderRadius: light ? 10 : 12, padding: light ? '12px 14px' : '14px 16px',
+          fontFamily: dmSans, fontSize: light ? 14 : 15, fontWeight: 400,
+          color: light ? '#0f172a' : '#fff', boxSizing: 'border-box',
+          outline: 'none', transition: 'border-color 0.2s',
         }}
-        onFocus={e => { e.target.style.borderColor = ORANGE; }}
-        onBlur={e => { if (!error) e.target.style.borderColor = '#2A2A2A'; }}
+        onFocus={e => { e.target.style.borderColor = light ? '#6d28d9' : ORANGE; }}
+        onBlur={e => { if (!error) e.target.style.borderColor = light ? '#E2E8F0' : '#2A2A2A'; }}
       />
       {showDropdown && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-          background: '#1A1A1A', border: '1px solid #2A2A2A',
-          borderRadius: 12, marginTop: 4, maxHeight: 220, overflowY: 'auto',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+          background: light ? '#ffffff' : '#1A1A1A',
+          border: `1px solid ${light ? '#E2E8F0' : '#2A2A2A'}`,
+          borderRadius: light ? 10 : 12, marginTop: 4, maxHeight: 220, overflowY: 'auto',
+          boxShadow: light ? '0 8px 24px rgba(0,0,0,0.12)' : '0 8px 24px rgba(0,0,0,0.5)',
         }}>
           {filtered.map(school => (
             <button
@@ -207,10 +208,10 @@ export default function SchoolSearchInput({ value, onChange, error }) {
                 display: 'block', width: '100%', textAlign: 'left',
                 padding: '12px 16px', background: 'none', border: 'none',
                 fontFamily: dmSans, fontSize: 14, fontWeight: 400,
-                color: '#fff', cursor: 'pointer', minHeight: 'auto',
+                color: light ? '#0f172a' : '#fff', cursor: 'pointer', minHeight: 'auto',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = light ? '#f8f9ff' : 'rgba(255,255,255,0.06)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
             >
               {school}

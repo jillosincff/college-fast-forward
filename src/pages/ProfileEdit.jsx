@@ -118,6 +118,16 @@ export default function ProfileEdit() {
     })();
   }, [user]);
 
+  // If navigated here to add parent info, scroll straight to that section
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    if (params.get('focus') === 'parent') {
+      setTimeout(() => {
+        document.getElementById('parent-network-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, []);
+
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
   const toggleIndustry = (key) => {
@@ -276,7 +286,7 @@ export default function ProfileEdit() {
 
             <div style={{ marginBottom: 16 }}>
               <label style={labelStyle}>School / University</label>
-              <SchoolSearchInput value={form.school} onChange={val => update('school', val)} />
+              <SchoolSearchInput value={form.school} onChange={val => update('school', val)} light />
             </div>
 
             <div style={{ marginBottom: 16 }}>
@@ -506,7 +516,7 @@ export default function ProfileEdit() {
           </div>
 
           {/* ── Section: Parent Network ── */}
-          <div style={sectionCard}>
+          <div id="parent-network-section" style={sectionCard}>
             <p style={{ ...labelStyle, marginBottom: 4 }}>Parent Network <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none' }}>(optional)</span></p>
             <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, marginBottom: 16 }}>
               Where do your parents or guardians work? This unlocks warm intro pathways for fellow students.

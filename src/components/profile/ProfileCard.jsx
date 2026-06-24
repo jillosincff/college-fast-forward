@@ -379,7 +379,7 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
                 Add where your parents work to unlock the Inside Track network.
               </p>
               {isMyProfile && (
-                <button onClick={() => navigate('ProfileEdit')} style={{
+                <button onClick={() => navigate('ProfileEdit', { focus: 'parent' })} style={{
                   marginTop: 8, fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
                   background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
                   borderRadius: 8, padding: '6px 14px', cursor: 'pointer', minHeight: 'auto',
