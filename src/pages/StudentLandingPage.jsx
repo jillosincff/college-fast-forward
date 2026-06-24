@@ -233,6 +233,10 @@ export default function StudentLandingPage({ onParentClick }) {
     navigate('ParentLandingPage');
   };
 
+  const login = () => {
+    navigate('GatorAuth');
+  };
+
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -307,6 +311,9 @@ export default function StudentLandingPage({ onParentClick }) {
         @media (max-width: 640px) {
           .agent-feature-grid { grid-template-columns: 1fr 1fr !important; }
         }
+        /* Hide the page scrollbar so it doesn't appear as a UI artifact over the gradient sections */
+        html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
+        html, body { scrollbar-width: none !important; -ms-overflow-style: none !important; }
       `}</style>
 
       {/* ── NAV ── */}
@@ -328,6 +335,9 @@ export default function StudentLandingPage({ onParentClick }) {
           <button onClick={() => scrollToSection('how-it-works')} className="nav-secondary-link nav-jump-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>How it Works</button>
           <button onClick={() => scrollToSection('pricing')} className="nav-secondary-link nav-jump-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Pricing</button>
           <button onClick={parent} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Parents &amp; Alumni</button>
+          {!(!isLoadingAuth && user) && (
+            <button onClick={login} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Log In</button>
+          )}
           <button onClick={go} className="nav-cta-btn" style={{
             fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
             background: GRAD_INDIGO, border: 'none', borderRadius: 10,
@@ -790,7 +800,7 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── FOOTER ── */}
       <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px) calc(clamp(20px, 5vw, 28px) + 76px)', textAlign: 'center', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
-          {[['Parents & Alumni', null, parent], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href, handler]) => (
+          {[['Log In', null, login], ['Parents & Alumni', null, parent], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com?subject=College%20Fast%20Forward%20Support']].map(([label, href, handler]) => (
             <a key={label} href={href || undefined} onClick={!href ? (e) => { e.preventDefault(); handler && handler(); } : undefined} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s', cursor: 'pointer' }}
               onMouseEnter={e => e.currentTarget.style.color = TEXT}
               onMouseLeave={e => e.currentTarget.style.color = TEXT3}
