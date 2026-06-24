@@ -156,13 +156,16 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
         `}</style>
 
         <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
-          Live Campus Vault Status
+          Your Campus Vault
         </p>
         <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 10px', lineHeight: 1.2 }}>
           Stop competing in public.<br />Access the hidden job market.
         </h2>
+        <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 8px', lineHeight: 1.6 }}>
+          Your Campus Vault is the private pool of roles surfaced through your school's alumni — opportunities that are never posted on public job boards.
+        </p>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Most roles are never posted. CLiFF taps your school's alumni network to connect you directly with unlisted opportunities and insiders who can get you interviews.
+          Pick your school below to see how many insiders and hidden roles are waiting for you.
         </p>
 
         {/* Autocomplete search */}

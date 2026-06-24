@@ -233,6 +233,11 @@ export default function StudentLandingPage({ onParentClick }) {
     navigate('ParentLandingPage');
   };
 
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const SectionLabel = ({ text, color = INDIGO }) => (
     <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
@@ -286,6 +291,7 @@ export default function StudentLandingPage({ onParentClick }) {
         @media (max-width: 640px) {
           .nav-secondary-link { font-size: 12px !important; padding: 8px 6px !important; }
           .nav-cta-btn { padding: 10px 14px !important; font-size: 13px !important; }
+          .nav-jump-link { display: none !important; }
         }
         /* Hero: stack layout on mobile */
         @media (max-width: 768px) {
@@ -319,6 +325,8 @@ export default function StudentLandingPage({ onParentClick }) {
           </span></span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <button onClick={() => scrollToSection('how-it-works')} className="nav-secondary-link nav-jump-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>How it Works</button>
+          <button onClick={() => scrollToSection('pricing')} className="nav-secondary-link nav-jump-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Pricing</button>
           <button onClick={parent} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Parents &amp; Alumni</button>
           <button onClick={go} className="nav-cta-btn" style={{
             fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
@@ -582,12 +590,8 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}>⚡</div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>CFF is already working for you</p>
-                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>Scanning opportunities right now</p>
-              </div>
-              <div style={{ background: '#dcfce7', border: '1px solid #86efac', borderRadius: 100, padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', animation: 'pulseGreen 1.5s ease-in-out infinite' }} />
-                <span style={{ fontFamily: SF, fontSize: 10, fontWeight: 800, color: '#15803d', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Live</span>
+                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>Here's what CFF does for you</p>
+                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>From your first scan onward</p>
               </div>
             </div>
             {PROOF_CALLOUTS.map((item, i) => (
@@ -609,7 +613,7 @@ export default function StudentLandingPage({ onParentClick }) {
       <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG2} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
+      <div id="how-it-works" style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <SectionLabel text="What the Agent does for you" color={TEAL_DARK} />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(24px, 6vw, 40px)', textAlign: 'center' }}>
