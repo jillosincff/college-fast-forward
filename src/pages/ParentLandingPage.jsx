@@ -80,6 +80,7 @@ export default function ParentLandingPage({ onStudentClick }) {
   const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState({ fullName: '', jobTitle: '', industry: '', linkedin: '', email: '', school: '', persona: 'parent' });
   const [submitted, setSubmitted] = useState(false);
+  const [submittedInfo, setSubmittedInfo] = useState({ school: '', email: '' });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -152,6 +153,7 @@ export default function ParentLandingPage({ onStudentClick }) {
       sessionStorage.setItem('pending_invite_role', 'parent');
       
       // Show success screen
+      setSubmittedInfo({ school: form.school.trim(), email: form.email.toLowerCase().trim() });
       setSubmitted(true);
     } catch (error) {
       console.error('Failed to create parent:', error);
@@ -209,7 +211,7 @@ export default function ParentLandingPage({ onStudentClick }) {
               }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-              >Join the Network →</button>
+              >Add Yourself to the Network →</button>
             </>
           )}
         </div>
@@ -249,6 +251,25 @@ export default function ParentLandingPage({ onStudentClick }) {
           </p>
         </div>
 
+        {/* ── HOW IT WORKS (above the form) ── */}
+        <div style={{ width: '100%', maxWidth: 480, marginTop: 8, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease 0.2s' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
+            {[
+              ['📝', 'Add yourself in 2 minutes', 'Your industry, company, and how you\'re open to help.'],
+              ['🔍', 'Students find you when it matches', 'Only students from your school searching your industry can reach out.'],
+              ['🤝', 'Help on your terms', 'Advice, a referral, or an intro — you decide. No spam, no pressure.'],
+            ].map(([emoji, title, desc], i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 14, padding: '14px 16px', boxShadow: SHADOW }}>
+                <span style={{ fontSize: 20, flexShrink: 0, lineHeight: 1.2 }}>{emoji}</span>
+                <div>
+                  <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 2px' }}>{title}</p>
+                  <p style={{ fontFamily: SF, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ── SIGNUP FORM ── */}
         <div id="parent-signup-form" style={{
           width: '100%', maxWidth: 480,
@@ -262,12 +283,12 @@ export default function ParentLandingPage({ onStudentClick }) {
           {submitted ? (
             <div style={{ textAlign: 'center', padding: '24px 16px' }}>
               <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
-              <h3 style={{ fontFamily: FONT, fontSize: 26, fontWeight: 800, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.02em' }}>Thank you!</h3>
-              <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT, lineHeight: 1.5, margin: '0 0 16px' }}>
-                Your information has been added to the College Fast Forward network.
+              <h3 style={{ fontFamily: FONT, fontSize: 26, fontWeight: 800, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.02em' }}>You're in!</h3>
+              <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT, lineHeight: 1.6, margin: '0 0 16px' }}>
+                A student from <span style={{ color: INDIGO }}>{submittedInfo.school}</span> will reach out when there's a match. We'll email you at <span style={{ color: INDIGO }}>{submittedInfo.email}</span>.
               </p>
               <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 0 24px' }}>
-                Each parent connection strengthens the student community. Your profile will now be surfaced to relevant students from your school who are looking in your industry — creating real opportunities for the next generation.
+                Your profile is now part of the College Fast Forward network — surfaced to relevant students from your school looking in your industry. There's nothing else you need to do right now.
               </p>
               <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: TEAL, margin: '0 0 24px' }}>
                 You just helped make the network better for everyone.
