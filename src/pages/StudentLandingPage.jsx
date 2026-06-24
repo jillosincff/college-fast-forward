@@ -162,6 +162,7 @@ export default function StudentLandingPage({ onParentClick }) {
   const [mounted, setMounted] = useState(false);
   const [showFunnel, setShowFunnel] = useState(false);
   const [funnelStartScreen, setFunnelStartScreen] = useState(null);
+  const [showStickyCTA, setShowStickyCTA] = useState(false);
   const { user, isLoadingAuth } = useAuth();
 
   const launchWithSchool = (schoolName) => {
@@ -191,6 +192,15 @@ export default function StudentLandingPage({ onParentClick }) {
       l.href = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap';
       document.head.appendChild(l);
     }
+  }, []);
+
+  // Show sticky CTA bar after scrolling past ~50% of the viewport-height hero
+  useEffect(() => {
+    const onScroll = () => {
+      setShowStickyCTA(window.scrollY > window.innerHeight * 0.6);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -706,23 +716,55 @@ export default function StudentLandingPage({ onParentClick }) {
             Join 2,400+ students who stopped applying blindly and started getting results.
           </p>
           <button onClick={go} style={{
-            fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 700, color: INDIGO,
-            background: '#fff', border: 'none', borderRadius: 14,
+            fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: '#0f172a',
+            background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 14,
             padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
             cursor: 'pointer', minHeight: 56,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.30), 0 0 0 4px rgba(255,255,255,0.15)',
             transition: 'all 0.2s ease', touchAction: 'manipulation',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.25)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 18px 52px rgba(0,0,0,0.38), 0 0 0 4px rgba(255,255,255,0.25)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.30), 0 0 0 4px rgba(255,255,255,0.15)'; }}
           >
             Start Free →
           </button>
+          <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', color: 'rgba(255,255,255,0.85)', margin: 'clamp(20px, 5vw, 28px) 0 0', lineHeight: 1.6 }}>
+            Got a parent or alum who can help students land?{' '}
+            <button onClick={parent} style={{ fontFamily: SF, fontSize: 'inherit', fontWeight: 800, color: '#fff', background: 'none', border: 'none', borderBottom: '2px solid rgba(255,255,255,0.5)', padding: 0, cursor: 'pointer', minHeight: 'auto', transition: 'border-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = '#fff'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'}
+            >Join as a Parent or Alum →</button>
+          </p>
         </div>
       </div>
 
+      {/* ── STICKY CTA BAR ── */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 90,
+        background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)',
+        borderTop: '1px solid rgba(109,40,217,0.12)',
+        boxShadow: '0 -4px 24px rgba(15,23,42,0.08)',
+        padding: 'clamp(10px, 3vw, 14px) clamp(16px, 5vw, 32px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        transform: showStickyCTA ? 'translateY(0)' : 'translateY(110%)',
+        transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
+      }}>
+        <span style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 700, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          See your first matches in 2 min
+        </span>
+        <button onClick={go} style={{
+          fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 700, color: '#fff',
+          background: GRAD_INDIGO, border: 'none', borderRadius: 12,
+          padding: '12px clamp(20px, 5vw, 32px)', cursor: 'pointer', minHeight: 48, flexShrink: 0,
+          boxShadow: '0 6px 20px rgba(109,40,217,0.35)', transition: 'all 0.15s', whiteSpace: 'nowrap',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+        >{!isLoadingAuth && user ? 'Dashboard →' : 'Start Free →'}</button>
+      </div>
+
       {/* ── FOOTER ── */}
-      <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', textAlign: 'center', background: '#fff' }}>
+      <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px) calc(clamp(20px, 5vw, 28px) + 76px)', textAlign: 'center', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
           {[['Parents & Alumni', null, parent], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href, handler]) => (
             <a key={label} href={href || undefined} onClick={!href ? (e) => { e.preventDefault(); handler && handler(); } : undefined} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s', cursor: 'pointer' }}
