@@ -614,28 +614,17 @@ export default function StudentLandingPage({ onParentClick }) {
             One scan. Your entire edge,{' '}
             <span style={{ background: 'linear-gradient(90deg, #06b6d4, #4f46e5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>unlocked.</span>
           </h2>
-          <div className="agent-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
+          <div className="agent-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 28 }}>
             {[
-              {
-                emoji: '🎯', step: 'Step 1', title: 'Curated Entry-Level Job Board', color: INDIGO,
-                body: 'Stop scrolling endless, irrelevant job feeds. Get a tailored list of roles explicitly looking for candidates from your university.',
-              },
-              {
-                emoji: '📄', step: 'Step 2', title: 'AI-Powered Resume Tailoring', color: VIOLET,
-                body: 'Before you apply, CFF automatically scans the job description and injects the exact keywords needed to pass the corporate ATS.',
-              },
-              {
-                emoji: '🤝', step: 'Step 3', title: 'Built-In Parent & Alumni Network', color: TEAL_DARK,
-                body: 'The millisecond you hit apply, we match you with opted-in parent and alumni advocates at that specific company to secure a warm internal referral.',
-              },
+              { emoji: '🎯', title: 'Target Matches', sub: 'Your curated feed', color: INDIGO },
+              { emoji: '📄', title: 'ATS Optimizer', sub: 'Your resume tailor', color: VIOLET },
+              { emoji: '👥', title: 'Warm Intros', sub: 'Your parent & alumni connection', color: TEAL_DARK },
+              { emoji: '🚀', title: 'Application Tracker', sub: 'Your automated pipeline dashboard', color: PINK },
             ].map((item, i) => (
-              <div key={i} style={{ background: '#fff', borderRadius: 18, padding: 'clamp(16px, 3.5vw, 24px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 24 }}>{item.emoji}</span>
-                  <span style={{ fontFamily: SF, fontSize: 10, fontWeight: 800, color: item.color, letterSpacing: '0.08em', textTransform: 'uppercase', background: `${item.color}14`, border: `1px solid ${item.color}2e`, borderRadius: 100, padding: '3px 10px' }}>{item.step}</span>
-                </div>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.25, letterSpacing: '-0.01em' }}>{item.title}</p>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(12px, 3vw, 13.5px)', fontWeight: 500, color: TEXT2, margin: 0, lineHeight: 1.55 }}>{item.body}</p>
+              <div key={i} style={{ background: '#fff', borderRadius: 18, padding: 'clamp(18px, 4vw, 26px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: `${item.color}14`, border: `1px solid ${item.color}2e`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, marginBottom: 4 }}>{item.emoji}</div>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.5vw, 19px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>{item.title}</p>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 600, color: item.color, margin: 0, lineHeight: 1.4 }}>{item.sub}</p>
               </div>
             ))}
           </div>
