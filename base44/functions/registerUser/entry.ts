@@ -3,7 +3,7 @@ import bcrypt from 'npm:bcryptjs@2.4.3';
 
 // Centralized function to send the verification email
 async function triggerVerificationEmail(email, token, origin) {
-  const verificationUrl = `${origin}/#VerifyEmail?token=${token}`;
+  const verificationUrl = `${origin}/#/VerifyEmail?token=${token}`;
   
   const emailBody = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 12px; overflow: hidden;">
