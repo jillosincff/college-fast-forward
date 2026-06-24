@@ -3,6 +3,17 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 // Proxycurl/NinjaPear API is sunset. All alumni lookups now route through Exa.
 // This service is kept as a thin proxy to exaService for backward compatibility.
 
+// External calls get a 10s timeout so a stalled provider never hangs the request
+const fetchWithTimeout = async (url, options, ms = 10000) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -26,7 +37,7 @@ Deno.serve(async (req) => {
 
       const query = `${universityShortName} alumni graduate works at ${companyName} site:linkedin.com/in`;
 
-      const res = await fetch('https://api.exa.ai/search', {
+      const res = await fetchWithTimeout('https://api.exa.ai/search', {
         method: 'POST',
         headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -61,7 +72,7 @@ Deno.serve(async (req) => {
         .replace(/ College$/i, '')
         .trim();
 
-      const res = await fetch('https://api.exa.ai/search', {
+      const res = await fetchWithTimeout('https://api.exa.ai/search', {
         method: 'POST',
         headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -108,7 +119,7 @@ Deno.serve(async (req) => {
 
       // Fire Exa alumni search + parent DB query in parallel
       const [exaRes, parentProfiles] = await Promise.all([
-        fetch('https://api.exa.ai/search', {
+        fetchWithTimeout('https://api.exa.ai/search', {
           method: 'POST',
           headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -189,7 +200,10 @@ Deno.serve(async (req) => {
 
     return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
   } catch (error) {
-    console.error('[proxycurlService] Error:', error.message);
-    return Response.json({ error: error.message }, { status: 500 });
+    const timedOut = error.name === 'AbortError';
+    console.error('[proxycurlService] Error:', timedOut ? 'request timed out' : error.message);
+    return Response.json({
+      error: timedOut ? 'Network lookup is taking longer than expected. Please try again.' : error.message,
+    }, { status: timedOut ? 504 : 500 });
   }
 });

@@ -42,14 +42,26 @@ const SCHOOL_EXTRA_URLS = {
 };
 
 async function firecrawlScrape(url, apiKey, formats = ['markdown']) {
-  const resp = await fetch(`${FIRECRAWL_API_BASE}/scrape`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url, formats }),
-  });
+  // 10s timeout so a stalled scrape returns null instead of hanging the request
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  let resp;
+  try {
+    resp = await fetch(`${FIRECRAWL_API_BASE}/scrape`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url, formats }),
+      signal: controller.signal,
+    });
+  } catch (e) {
+    console.warn(`[FirecrawlService] ${e.name === 'AbortError' ? 'Timed out' : 'Fetch failed'} for ${url}: ${e.message}`);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!resp.ok) {
     const errText = await resp.text();

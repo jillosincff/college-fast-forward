@@ -19,8 +19,19 @@ Deno.serve(async (req) => {
   const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
   if (!EXA_API_KEY) return Response.json({ success: false, error: 'EXA_API_KEY not set' }, { status: 500 });
 
+  // External calls get a 10s timeout so a stalled provider never hangs the request
+  const fetchWithTimeout = async (url, options, ms = 10000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
   const exaFetch = async (endpoint, body) => {
-    const res = await fetch(`https://api.exa.ai/${endpoint}`, {
+    const res = await fetchWithTimeout(`https://api.exa.ai/${endpoint}`, {
       method: 'POST',
       headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -237,7 +248,7 @@ Deno.serve(async (req) => {
       let profiles = rawProfiles;
       if (rawProfiles.length > 0) {
         try {
-          const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+          const claudeRes = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
               'x-api-key': Deno.env.get('ANTHROPIC_API_KEY'),
@@ -400,7 +411,12 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: false, error: 'Unknown action' });
   } catch (e) {
-    console.error('[exaService] Error:', e.message);
-    return Response.json({ success: false, error: e.message }, { status: 500 });
+    const timedOut = e.name === 'AbortError';
+    console.error('[exaService] Error:', timedOut ? 'request timed out' : e.message);
+    return Response.json({
+      success: false,
+      error: timedOut ? 'The search is taking longer than expected. Please try again in a moment.' : e.message,
+      profiles: [], jobs: [],
+    }, { status: timedOut ? 504 : 500 });
   }
 });
