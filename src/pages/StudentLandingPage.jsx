@@ -456,7 +456,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── TRUST BAR ── */}
-      <div style={{ background: '#fff', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '20px clamp(16px, 5vw, 32px)' }}>
+      <div id="stats" style={{ background: '#fff', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '20px clamp(16px, 5vw, 32px)', scrollMarginTop: 80 }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'clamp(12px, 4vw, 32px)', justifyContent: 'center', alignItems: 'center' }}>
           {[
             { emoji: '🎓', stat: '2,400+', label: 'Students on CFF' },
@@ -652,7 +652,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── PRICING ── */}
-      <div style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
+      <div id="pricing" style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
         <div style={{ maxWidth: 540, margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(109,40,217,0.08)', border: '1px solid rgba(109,40,217,0.20)', borderRadius: 100, padding: '6px 16px', marginBottom: 16 }}>
             <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Simple Pricing</span>

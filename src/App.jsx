@@ -8,6 +8,7 @@ import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { HashRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
+import UnknownRouteRedirect from './lib/UnknownRouteRedirect';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
@@ -203,7 +204,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="*" element={<PageNotFound />} />
+      <Route path="*" element={<UnknownRouteRedirect />} />
     </Routes>
   );
 };
