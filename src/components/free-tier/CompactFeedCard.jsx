@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { findParentsAtCompany } from '@/functions/findParentsAtCompany';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -22,10 +23,37 @@ export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr 
   const jobTitle = lead.job_title || lead.role || '';
   const location = lead.location || lead.location_text || '';
   const jobDesc = lead.hiring_description || lead.description || lead.jobDescription || '';
-  const hasAlumni = lead.alumniCount > 0;
-  const hasParent = lead.parentCount > 0;
-  const networkCount = (lead.alumniCount || 0) + (lead.parentCount || 0);
   const logoData = getLogoPlaceholder(companyName);
+
+  // Up-front parent lookup so the network pill appears as students scan the list,
+  // not just after they click Apply. Cheap, cached per-company on the backend.
+  const [liveParentCount, setLiveParentCount] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    if (!companyName) return;
+    findParentsAtCompany({ companyName })
+      .then((res) => {
+        const data = res?.data || res;
+        if (!cancelled) setLiveParentCount(data?.parents?.length || 0);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [companyName]);
+
+  const alumniCount = lead.alumniCount || 0;
+  const parentCount = Math.max(lead.parentCount || 0, liveParentCount);
+  const hasAlumni = alumniCount > 0;
+  const hasParent = parentCount > 0;
+  const networkCount = alumniCount + parentCount;
+
+  // Build precise badge copy. Parent matches lead the copy when present.
+  let badgeLabel = '✨ Connected';
+  if (hasParent && parentCount >= 1) {
+    badgeLabel = `${parentCount} Parent Match${parentCount === 1 ? '' : 'es'}`;
+  } else if (hasAlumni) {
+    badgeLabel = `${alumniCount} Alumni`;
+  }
+  const badgeIcon = hasParent ? '👥' : hasAlumni ? '🎓' : '✨';
 
   return (
     <div
@@ -109,16 +137,15 @@ export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr 
               border: '1px solid rgba(124,58,237,0.25)',
               boxShadow: '0 2px 6px rgba(124,58,237,0.15)',
             }}>
-              <span style={{ fontSize: 10 }}>
-                {hasAlumni && hasParent ? '👥' : hasAlumni ? '🎓' : '🏡'}
-              </span>
+              <span style={{ fontSize: 10 }}>{badgeIcon}</span>
               <span style={{
                 fontFamily: dm,
                 fontSize: 9,
                 fontWeight: 700,
                 color: '#6d28d9',
+                whiteSpace: 'nowrap',
               }}>
-                {networkCount} {networkCount === 1 ? (hasAlumni ? 'Alumni' : 'Parent') : 'Parent/Alum Matches'}
+                {badgeLabel}
               </span>
             </div>
           )}
