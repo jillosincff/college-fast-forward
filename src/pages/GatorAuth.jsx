@@ -111,6 +111,15 @@ export default function GatorAuth() {
     try {
       const response = await registerUser({ email: signupEmail, password: signupPassword, full_name: fullName });
       if (response.data?.success) {
+        // Immediately sign the new student in so they go straight into the 13-step onboarding
+        // (instead of a dead-end "check your email" page). The verification email still sends in the background.
+        try {
+          const { data } = await signInWithPassword({ email: signupEmail, password: signupPassword });
+          if (data?.success && data?.magicLink) {
+            window.location.href = data.magicLink;
+            return;
+          }
+        } catch (signinErr) { /* fall through to verify-email page below */ }
         navigate('RegistrationSuccess', { email: signupEmail });
       } else {
         setError(response.data?.error || 'Registration failed.');
