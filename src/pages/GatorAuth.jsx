@@ -10,21 +10,21 @@ import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
-const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
-const ACCENT = '#4F8CFF';
+const ACCENT = '#6d28d9';
+const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 
 function AuthPageShell({ children }) {
   React.useEffect(() => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap';
     document.head.appendChild(link);
   }, []);
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: '#0d1117', position: 'relative', overflow: 'hidden' }}>
-      <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translate(-50%, -50%)', width: 700, height: 700, background: 'radial-gradient(ellipse at center, rgba(79,140,255,0.04), transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 500 }}>{children}</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden' }}>
+      <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translate(-50%, -50%)', width: 700, height: 700, background: 'radial-gradient(ellipse at center, rgba(109,40,217,0.08), transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 460 }}>{children}</div>
     </div>
   );
 }
@@ -247,12 +247,14 @@ export default function GatorAuth() {
 
   const inputStyle = {
     width: '100%', fontSize: 14, padding: '14px 16px',
-    border: '1px solid rgba(255,255,255,0.12)',
-    background: 'rgba(255,255,255,0.06)',
-    borderRadius: 10, color: '#fff',
+    border: '1px solid #e2e8f0',
+    background: '#fff',
+    borderRadius: 10, color: '#0f172a',
     fontFamily: dmSans, outline: 'none',
     boxSizing: 'border-box',
   };
+  const labelStyle = { fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', display: 'block', marginBottom: 6 };
+  const primaryBtn = (l) => ({ background: l ? '#cbd5e1' : GRAD_INDIGO, border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 700, color: '#fff', cursor: l ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto', boxShadow: l ? 'none' : '0 8px 24px rgba(109,40,217,0.28)' });
 
   // While determining what to show, render a visible loading screen (not blank)
   if (step === null) {
@@ -260,7 +262,7 @@ export default function GatorAuth() {
       <AuthPageShell>
         <div style={{ textAlign: 'center' }}>
           <Loader2 className="w-10 h-10 animate-spin" style={{ color: ACCENT, margin: '0 auto 16px' }} />
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>Setting up your account...</p>
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#64748b' }}>Setting up your account...</p>
         </div>
       </AuthPageShell>
     );
@@ -284,28 +286,32 @@ export default function GatorAuth() {
     return (
       <AuthPageShell>
         <div style={{ maxWidth: 500, width: '100%' }}>
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 20, minHeight: 'auto', padding: 0, display: 'block', margin: '0 auto 20px' }}>
+          <div style={{ textAlign: 'center', marginBottom: 36 }}>
+            <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#94a3b8', marginBottom: 24, minHeight: 'auto', padding: 0, display: 'block', margin: '0 auto 24px' }}>
               ← Back to home
             </button>
-            <h1 style={{ fontFamily: playfair, fontSize: 36, fontWeight: 700, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
-              COLLEGE FAST FORWARD
-            </h1>
-            <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+              <img src="https://media.base44.com/images/public/684474c5723dc90efce23588/5181e2c8e_generated_image.png" alt="College Fast Forward" style={{ width: 40, height: 40, borderRadius: 10 }} />
+              <h1 style={{ fontFamily: dmSans, fontSize: 26, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.03em' }}>
+                College{' '}
+                <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Fast Forward</span>
+              </h1>
+            </div>
+            <p style={{ fontFamily: dmSans, fontSize: 15, color: '#64748b', margin: 0 }}>
               Your network. Your career. Let's go.
             </p>
           </div>
 
           {isMigration && (
             <div style={{
-              background: 'rgba(232,93,32,0.08)',
-              border: '1px solid rgba(232,93,32,0.2)',
+              background: 'rgba(109,40,217,0.06)',
+              border: '1px solid rgba(109,40,217,0.2)',
               borderRadius: 10,
               padding: '12px 16px',
               marginBottom: 20,
               fontFamily: dmSans,
               fontSize: 13,
-              color: 'rgba(255,255,255,0.75)',
+              color: '#475569',
               lineHeight: 1.6,
               textAlign: 'center',
             }}>
@@ -314,7 +320,7 @@ export default function GatorAuth() {
             </div>
           )}
 
-          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: 4, marginBottom: 28, display: 'flex', gap: 4 }}>
+          <div style={{ background: '#f1f5f9', borderRadius: 10, padding: 4, marginBottom: 28, display: 'flex', gap: 4 }}>
             {['signin', 'signup', 'magic'].map(tab => (
               <button
                 key={tab}
@@ -322,8 +328,9 @@ export default function GatorAuth() {
                 style={{
                   flex: 1, padding: '10px 12px', borderRadius: 8, border: 'none',
                   background: activeTab === tab ? '#fff' : 'transparent',
-                  color: activeTab === tab ? '#1a1a1a' : 'rgba(255,255,255,0.4)',
-                  fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: dmSans,
+                  color: activeTab === tab ? ACCENT : '#94a3b8',
+                  boxShadow: activeTab === tab ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                  fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: dmSans,
                   transition: 'all 0.2s', minHeight: 'auto',
                 }}
               >
@@ -337,23 +344,23 @@ export default function GatorAuth() {
           {activeTab === 'signin' && (
             <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
+                <label style={labelStyle}>Email</label>
                 <input type="email" value={signinEmail} onChange={(e) => setSigninEmail(e.target.value)} placeholder="you@example.com" style={inputStyle} />
               </div>
               <div>
-                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Password</label>
+                <label style={labelStyle}>Password</label>
                 <input type="password" value={signinPassword} onChange={(e) => setSigninPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
               </div>
               <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 8 }}>
                 <button
                   type="button"
                   onClick={() => navigate('/MigrationSignIn?forgot=true')}
-                  style={{ fontFamily: dmSans, fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
+                  style={{ fontFamily: dmSans, fontSize: 13, color: ACCENT, background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
                 >
                   Forgot your password?
                 </button>
               </div>
-              <button type="submit" disabled={loading} style={{ background: loading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
+              <button type="submit" disabled={loading} style={primaryBtn(loading)}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
@@ -363,27 +370,27 @@ export default function GatorAuth() {
             <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'flex', gap: 10 }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>First Name</label>
+                  <label style={labelStyle}>First Name</label>
                   <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" style={inputStyle} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Last Name</label>
+                  <label style={labelStyle}>Last Name</label>
                   <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Smith" style={inputStyle} />
                 </div>
               </div>
               <div>
-                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
+                <label style={labelStyle}>Email</label>
                 <input type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} placeholder="you@example.com" style={inputStyle} />
               </div>
               <div>
-                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Password</label>
+                <label style={labelStyle}>Password</label>
                 <input type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
               </div>
               <div>
-                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Confirm Password</label>
+                <label style={labelStyle}>Confirm Password</label>
                 <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
               </div>
-              <button type="submit" disabled={loading} style={{ background: loading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
+              <button type="submit" disabled={loading} style={primaryBtn(loading)}>
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>
             </form>
@@ -392,16 +399,16 @@ export default function GatorAuth() {
           {activeTab === 'magic' && (
             <form onSubmit={handleSendMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
+                <label style={labelStyle}>Email</label>
                 <input type="email" value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} placeholder="you@example.com" style={inputStyle} />
               </div>
-              <button type="submit" disabled={loading} style={{ background: loading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
+              <button type="submit" disabled={loading} style={primaryBtn(loading)}>
                 {loading ? 'Sending...' : 'Send Magic Link'}
               </button>
-              <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
-              <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '8px 0 0' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
+              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', textAlign: 'center', margin: '8px 0 0' }}>
                 Need to reset your password?{' '}
-                <button type="button" onClick={() => navigate('/MigrationSignIn?forgot=true')} style={{ fontFamily: dmSans, fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none' }}>Click here →</button>
+                <button type="button" onClick={() => navigate('/MigrationSignIn?forgot=true')} style={{ fontFamily: dmSans, fontSize: 13, color: ACCENT, background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none', fontWeight: 600 }}>Click here →</button>
               </p>
             </form>
           )}
@@ -410,9 +417,9 @@ export default function GatorAuth() {
           {info && !error && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#22C55E', margin: 0 }}>{info}</p></div>}
 
           <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0 }}>Or continue with Google →</p>
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: '#94a3b8', margin: 0 }}>Or continue with Google →</p>
           </div>
-          <button onClick={handleGoogleSignIn} disabled={loading} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '14px', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff', opacity: loading ? 0.7 : 1, minHeight: 'auto' }}>
+          <button onClick={handleGoogleSignIn} disabled={loading} style={{ width: '100%', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#0f172a', opacity: loading ? 0.7 : 1, minHeight: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <GoogleIcon /> Continue with Google
           </button>
         </div>
