@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
+import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import { navigate } from '@/components/utils/navigation';
 import DashboardNav from '@/components/dashboard-v2/DashboardNav';
 import DarkFooter from '@/components/common/DarkFooter';
@@ -47,16 +48,16 @@ export default function MyMessagesPage() {
     if (!user?.email) return;
     setLoading(true);
 
-    const [allMsgs, users, matches, pipeline] = await Promise.all([
+    const [allMsgs, dirRes, matches, pipeline] = await Promise.all([
       base44.entities.Message.list('-created_date', 500).catch(() => []),
-      base44.entities.User.list('-created_date', 500).catch(() => []),
+      getDirectoryUsers({}).catch(() => ({ data: { data: [] } })),
       base44.entities.Match.filter({ student_email: user.email }, '-match_score', 100).catch(() => []),
       base44.entities.NetworkingPipeline.filter({ user_email: user.email }).catch(() => []),
     ]);
 
-    // Build user lookup
+    // Build user lookup from school-scoped directory (avoids 403 on direct User.list)
     const lookup = {};
-    (users || []).forEach(u => {
+    (dirRes?.data?.data || []).forEach(u => {
       if (u.email) lookup[u.email] = u;
     });
     setUserLookup(lookup);

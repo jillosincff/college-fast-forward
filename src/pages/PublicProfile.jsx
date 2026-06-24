@@ -7,7 +7,7 @@ import {
   FileText, Sparkles, Loader2
 } from 'lucide-react';
 import { useParams, navigate } from '@/components/utils/navigation';
-import { base44 } from '@/api/base44Client';
+import { getPublicProfileBySlug } from '@/functions/getPublicProfileBySlug';
 import UserAvatar from '@/components/common/UserAvatar';
 import MobileBackHeader from '@/components/navigation/MobileBackHeader';
 import PublicFastTrackSection from '@/components/profile/PublicFastTrackSection';
@@ -31,53 +31,18 @@ export default function PublicProfile() {
 
   const loadProfile = async () => {
     try {
-      // Find user by shareable_profile_slug
-      const users = await base44.asServiceRole.entities.User.filter({
-        shareable_profile_slug: slug
-      });
-
-      if (!users || users.length === 0) {
-        setError('Profile not found');
+      const res = await getPublicProfileBySlug({ slug });
+      const data = res?.data;
+      if (!data?.success || !data?.profile) {
+        setError(data?.error || 'Profile not found');
         setLoading(false);
         return;
       }
-
-      const user = users[0];
-
-      // Check visibility settings
-      if (user.profile_visibility === 'private') {
-        setError('This profile is private');
-        setLoading(false);
-        return;
-      }
-
-      // If gators_only, check if current user is authenticated
-      if (user.profile_visibility === 'gators_only') {
-        try {
-          const currentUser = await base44.auth.me();
-          if (!currentUser) {
-            setError('This profile is only visible to Gators. Please sign in.');
-            setLoading(false);
-            return;
-          }
-        } catch {
-          setError('This profile is only visible to Gators. Please sign in.');
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Increment profile views
-      await base44.asServiceRole.entities.User.update(user.id, {
-        profile_views: (user.profile_views || 0) + 1
-      });
-
-      setProfile(user);
+      setProfile(data.profile);
       setLoading(false);
-
     } catch (error) {
-      console.error('Failed to load profile:', error);
-      setError('Failed to load profile');
+      const msg = error?.response?.data?.error;
+      setError(msg || 'Failed to load profile');
       setLoading(false);
     }
   };
