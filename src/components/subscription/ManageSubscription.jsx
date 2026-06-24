@@ -6,6 +6,7 @@ import { Settings, ExternalLink, Loader2, Zap, Crown, Users } from 'lucide-react
 import { useToast } from '@/components/ui/use-toast';
 import { createCustomerPortal } from '@/functions/createCustomerPortal';
 import { getUserTierInfo, isFoundingMember } from '@/components/access/useAccessControl';
+import CancelSubscriptionButton from '@/components/subscription/CancelSubscriptionButton';
 
 export default function ManageSubscription({ user, family }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -121,8 +122,9 @@ export default function ManageSubscription({ user, family }) {
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </Button>
                 <p className="text-xs text-slate-500">
-                  Update payment method, change plan, or cancel.
+                  Update payment method or change plan.
                 </p>
+                <CancelSubscriptionButton onCanceled={() => { window.location.reload(); }} />
               </>
             )}
           </div>
