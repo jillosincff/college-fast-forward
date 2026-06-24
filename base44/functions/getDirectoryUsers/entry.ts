@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const TEST_NAMES = ['test', 'movie', 'demo', 'sample', 'fake'];
 
@@ -60,56 +60,29 @@ Deno.serve(async (req) => {
       });
     }
 
-    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
-    
-    // DEBUG: Log current user's school and first 10 returned users' schools
-    console.log('=== DIRECTORY DEBUG ===');
-    console.log('Current user school_code:', schoolCode);
-    console.log('First 10 users school values:');
-    (allUsers || []).slice(0, 10).forEach((u, i) => {
-      console.log(`  ${i}: id=${u.id}, school_code=${u.school_code}, school_name=${u.school_name}, school=${u.school}, university=${u.university}`);
-    });
-    
-    // Check total UF users in database
-    const ufUsers = await base44.asServiceRole.entities.User.filter({ school_code: 'ufl' });
-    console.log('Total UF users (school_code=ufl):', ufUsers.length);
-    console.log('Visible in directory:', ufUsers.filter(u => u.visible_in_directory !== false).length);
-    console.log('=======================');
+    // Filter server-side by school for non-admins (admins see all). Avoids pulling
+    // the entire user table into memory on every directory load.
+    const allUsers = isAdmin
+      ? await base44.asServiceRole.entities.User.list('-created_date', 5000)
+      : await base44.asServiceRole.entities.User.filter({ school_code: schoolCode }, '-created_date', 5000);
 
     const directoryUsers = [];
-    
-    // DEBUG: Track filtering
-    let filtered = { rejected: 0, noPersona: 0, wrongSchool: 0, hidden: 0, noName: 0, testAccount: 0, noMinData: 0 };
 
     for (const u of (allUsers || [])) {
       const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
       const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
       const isStudent = u.persona === 'gator' || u.persona === 'student' || (Array.isArray(u.roles) && (u.roles.includes('gator') || u.roles.includes('student')));
-      if (!isParent && !isAlumni && !isStudent) { filtered.noPersona++; continue; }
-
-      // School isolation: only show users from the same school (admins see all)
-      if (!isAdmin) {
-        const userSchoolCode = u.school_code || '';
-        const userSchoolName = u.school_name || u.school || u.university || '';
-        const viewerSchoolCode = schoolCode || '';
-        const viewerSchoolName = user.school_name || user.school || user.university || '';
-
-        // Match by school_code, OR fall back to school_name if code is missing
-        const codeMatch = userSchoolCode.toLowerCase() === viewerSchoolCode.toLowerCase();
-        const nameMatch = userSchoolName.toLowerCase() === viewerSchoolName.toLowerCase() && userSchoolName;
-
-        if (!codeMatch && !nameMatch) { filtered.wrongSchool++; continue; }
-      }
+      if (!isParent && !isAlumni && !isStudent) continue;
 
       // Respect visibility setting — hidden profiles are excluded (except the viewer's own)
-      if (u.visible_in_directory === false && u.id !== user.id) { filtered.hidden++; continue; }
+      if (u.visible_in_directory === false && u.id !== user.id) continue;
 
       const hasName = !!(u.full_name || u.first_name);
-      if (!hasName) { filtered.noName++; continue; }
+      if (!hasName) continue;
 
-      if (isTestAccount(u)) { filtered.testAccount++; continue; }
+      if (isTestAccount(u)) continue;
 
-      if (!hasMinimumData(u)) { filtered.noMinData++; continue; }
+      if (!hasMinimumData(u)) continue;
 
       const company = getCompany(u);
       const industry = getIndustry(u);
@@ -177,9 +150,6 @@ Deno.serve(async (req) => {
         updated_date: u.updated_date,
       });
     }
-
-    console.log(`Directory: returning ${directoryUsers.length} members for school: ${schoolCode || 'ALL (admin)'}`);
-    console.log('Filter breakdown:', filtered);
 
     return Response.json({
       success: true,

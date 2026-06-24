@@ -79,7 +79,14 @@ export default function Profile() {
       }
 
       try {
-        const userToDisplay = id ? await base44.entities.User.get(profileId) : await base44.auth.me();
+        let userToDisplay;
+        if (id) {
+          const res = await base44.functions.invoke('getPublicUserInfo', { userId: profileId });
+          userToDisplay = res?.data?.data || null;
+          if (!userToDisplay) throw new Error('Profile not available');
+        } else {
+          userToDisplay = await base44.auth.me();
+        }
         setProfileUser(userToDisplay);
         try {
           const records = await base44.entities.ParentNetworkProfile.filter({ created_by_id: profileId });
