@@ -7,13 +7,21 @@ const JSEARCH_BASE = 'https://api.openwebninja.com/jsearch';
 
 Deno.serve(async (req) => {
   try {
+    // Bare liveness ping (HEAD) — answer 200 without touching the secret or the API.
+    if (req.method === 'HEAD') {
+      return new Response(null, { status: 200 });
+    }
+
     const expected = Deno.env.get('MONITOR_SECRET_KEY');
     if (!expected) {
       return Response.json({ status: 'fail', error: 'MONITOR_SECRET_KEY not set' }, { status: 500 });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const secret = req.headers.get('x-monitor-secret') || body?.secret;
+    // Accept the secret from header, query param (?secret=), or JSON body —
+    // so the monitor passes whether it uses GET or POST.
+    const url = new URL(req.url);
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    const secret = req.headers.get('x-monitor-secret') || url.searchParams.get('secret') || body?.secret;
     if (secret !== expected) {
       return Response.json({ status: 'fail', error: 'Unauthorized' }, { status: 401 });
     }
