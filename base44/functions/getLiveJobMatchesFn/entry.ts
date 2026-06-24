@@ -53,6 +53,13 @@ function jobMatchesLocation(locText, city, stateAbbr) {
 
 Deno.serve(async (req) => {
   try {
+    // Lightweight health-check: uptime monitors ping with GET (or HEAD) and no
+    // auth. Answer 200 OK immediately so the monitor sees the endpoint is alive,
+    // instead of a 405/401 from the authenticated job-fetch path below.
+    if (req.method === 'GET' || req.method === 'HEAD') {
+      return Response.json({ ok: true, status: 'healthy', service: 'getLiveJobMatchesFn' });
+    }
+
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
