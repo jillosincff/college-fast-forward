@@ -283,6 +283,10 @@ export default function StudentLandingPage({ onParentClick }) {
           .hero-visual { order: 3; min-height: 280px !important; margin-top: 8px; }
           .hero-text { order: 1; }
         }
+        /* Hero: compress height on desktop so the visual doesn't float in empty space */
+        @media (min-width: 769px) {
+          .hero-section { min-height: auto !important; }
+        }
       `}</style>
 
       {/* ── NAV ── */}
@@ -315,9 +319,9 @@ export default function StudentLandingPage({ onParentClick }) {
       </nav>
 
       {/* ── HERO ── */}
-      <div style={{
+      <div className="hero-section" style={{
         minHeight: '90vh', display: 'flex', alignItems: 'center',
-        padding: 'clamp(80px, 12vw, 120px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)',
+        padding: 'clamp(80px, 12vw, 112px) clamp(20px, 5vw, 40px) clamp(48px, 7vw, 64px)',
         background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden',
       }}>
         {/* Subtle radial glow */}
@@ -391,12 +395,12 @@ export default function StudentLandingPage({ onParentClick }) {
 
           {/* Right Column - Visual Anchor (40%) */}
           {mounted && (
-            <div className="hero-animate-6 hero-visual" style={{ position: 'relative', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="hero-animate-6 hero-visual" style={{ position: 'relative', minHeight: 460, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Base Layer - Soft radial gradient */}
               <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24 }} />
               
               {/* Dark "Black Hole" Element */}
-              <div style={{ position: 'absolute', width: 280, height: 280, background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%', boxShadow: '0 24px 48px rgba(15,23,42,0.15)', animation: 'float 6s ease-in-out infinite' }} />
+              <div style={{ position: 'absolute', width: 340, height: 340, background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%', boxShadow: '0 24px 48px rgba(15,23,42,0.15)', animation: 'float 6s ease-in-out infinite' }} />
               
               {/* Floating Card 1 */}
               <div style={{ position: 'absolute', top: '15%', right: '10%', width: 180, background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 5s ease-in-out infinite 0.5s', zIndex: 2 }}>
