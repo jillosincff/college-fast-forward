@@ -716,15 +716,15 @@ export default function StudentLandingPage({ onParentClick }) {
             Join 2,400+ students who stopped applying blindly and started getting results.
           </p>
           <button onClick={go} style={{
-            fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: '#0f172a',
-            background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 14,
+            fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: '#fff',
+            background: '#0f172a', border: 'none', borderRadius: 14,
             padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
             cursor: 'pointer', minHeight: 56,
-            boxShadow: '0 12px 40px rgba(0,0,0,0.30), 0 0 0 4px rgba(255,255,255,0.15)',
+            boxShadow: '0 14px 44px rgba(15,23,42,0.45), 0 0 0 4px rgba(255,255,255,0.20)',
             transition: 'all 0.2s ease', touchAction: 'manipulation',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 18px 52px rgba(0,0,0,0.38), 0 0 0 4px rgba(255,255,255,0.25)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.30), 0 0 0 4px rgba(255,255,255,0.15)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.boxShadow = '0 20px 56px rgba(15,23,42,0.55), 0 0 0 4px rgba(255,255,255,0.30)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.background = '#0f172a'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(15,23,42,0.45), 0 0 0 4px rgba(255,255,255,0.20)'; }}
           >
             Start Free →
           </button>
