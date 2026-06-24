@@ -287,6 +287,10 @@ export default function StudentLandingPage({ onParentClick }) {
         @media (min-width: 769px) {
           .hero-section { min-height: auto !important; }
         }
+        /* Agent feature grid: 3x2 on desktop, 2x3 on mobile */
+        @media (max-width: 640px) {
+          .agent-feature-grid { grid-template-columns: 1fr 1fr !important; }
+        }
       `}</style>
 
       {/* ── NAV ── */}
@@ -602,7 +606,7 @@ export default function StudentLandingPage({ onParentClick }) {
             One scan. Your entire edge,{' '}
             <span style={{ background: 'linear-gradient(90deg, #06b6d4, #4f46e5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>unlocked.</span>
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 28 }}>
+          <div className="agent-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 28 }}>
             {[
               { emoji: '⚡', label: 'Finds the right people to message', color: VIOLET },
               { emoji: '🎯', label: "Fixes your resume so bots don't reject it", color: INDIGO },
@@ -616,11 +620,6 @@ export default function StudentLandingPage({ onParentClick }) {
                 <p style={{ fontFamily: SF, fontSize: 'clamp(11px, 3vw, 13px)', fontWeight: 700, color: item.color, margin: 0, lineHeight: 1.3 }}>{item.label}</p>
               </div>
             ))}
-          </div>
-          <div style={{ background: 'rgba(245,243,255,0.6)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center', boxShadow: SHADOW }}>
-            <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 600, color: INDIGO_DIM, margin: 0, lineHeight: 1.5 }}>
-              💬 "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours." — Nerissa, USC '25
-            </p>
           </div>
         </div>
       </div>
