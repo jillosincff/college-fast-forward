@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PipelineKanbanModal from './PipelineKanbanModal';
 import PremiumHiringChat from './PremiumHiringChat';
 import { navigate } from '@/components/utils/navigation';
 
@@ -56,13 +55,14 @@ const TABS = [
 
 export default function PremiumMobileNav({ user }) {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [showKanban, setShowKanban] = useState(false);
   const [showCliff, setShowCliff] = useState(false);
 
   const handleTabClick = (tabKey) => {
     if (tabKey === 'pipeline') {
-      setShowKanban(true);
+      // Open the same Application Tracker view as the top tab
       setActiveTab('pipeline');
+      window.dispatchEvent(new CustomEvent('cff:switch-dashboard-tab', { detail: 'progress' }));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tabKey === 'cliff') {
       setShowCliff(true);
       setActiveTab('cliff');
@@ -148,17 +148,6 @@ export default function PremiumMobileNav({ user }) {
               <PremiumHiringChat user={user} selectedSignal={null} selectedJob={null} fullHeight />
             </div>
           </div>
-        )}
-
-        {showKanban && (
-          <PipelineKanbanModal
-            isOpen={showKanban}
-            onClose={() => {
-              setShowKanban(false);
-              setActiveTab('dashboard');
-            }}
-            user={user}
-          />
         )}
       </div>
     </>

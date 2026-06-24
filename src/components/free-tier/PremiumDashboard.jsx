@@ -209,6 +209,13 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
     return () => window.removeEventListener('cff:open-goals-modal', handleOpenGoals);
   }, []);
 
+  // Bottom-nav "Pipeline" tab opens the same Application Tracker view as the top tab
+  useEffect(() => {
+    const handleSwitchTab = (e) => { if (e.detail) setActiveTab(e.detail); };
+    window.addEventListener('cff:switch-dashboard-tab', handleSwitchTab);
+    return () => window.removeEventListener('cff:switch-dashboard-tab', handleSwitchTab);
+  }, []);
+
   useEffect(() => {
     const industries = user?.career_goals?.target_industries || [];
     getVerifiedNetworkCompanies({ target_industries: industries })
