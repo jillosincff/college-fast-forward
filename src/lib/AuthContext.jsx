@@ -57,17 +57,12 @@ const AuthProviderInner = ({ children }) => {
       sessionStorage.clear();
     } catch (e) { /* private browsing */ }
 
-    // IMPORTANT: do NOT clear React auth state here. Setting user=null causes
-    // OnboardingGuard to instantly redirect to /GatorAuth (the dark login page),
-    // which flashes before the reload below. The full reload re-initializes the
-    // app unauthenticated anyway.
-    //
-    // Point the hash at the landing page FIRST, then do a full reload of that
-    // same URL. Calling replace() + reload() separately races: reload() reloads
-    // the page they logged out from, which (now unauthenticated) bounces to the
-    // dark /GatorAuth screen. Setting window.location.href to the target hash and
-    // hard-reloading guarantees they land on the home page.
-    window.location.href = window.location.origin + '/#/StudentLandingPage';
+    // Point the URL at the HOME route ("/", the public landing page) BEFORE
+    // reloading, so the fresh document load re-initializes unauthenticated
+    // directly on the home page — never bouncing through the dark /GatorAuth
+    // screen (which is what happened when we reloaded the guarded page they
+    // logged out from).
+    window.history.replaceState(null, '', window.location.origin + '/#/');
     window.location.reload();
   };
 
