@@ -222,7 +222,7 @@ export default function StudentLandingPage({ onParentClick }) {
         localStorage.setItem('pending_invite_role', 'student');
         sessionStorage.setItem('cff_onboarding_type', 'student');
       } catch (e) {}
-      base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
+      navigate('GatorAuth');
     }
   };
 
@@ -411,6 +411,26 @@ export default function StudentLandingPage({ onParentClick }) {
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: '8px 0 0', lineHeight: 1.5 }}>
                   Free to start · See your first matches in 2 minutes
                 </p>
+
+                {/* Above-the-fold social proof */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex' }}>
+                    {STORIES.map((st, i) => (
+                      <img key={i} src={st.photo} alt={st.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', marginLeft: i > 0 ? -10 : 0, boxShadow: SHADOW }} />
+                    ))}
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.01em' }}>2,400+ students on CFF</p>
+                    <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '1px 0 0', fontWeight: 500 }}>Landing interviews through warm intros</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 10, marginTop: 14, background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 14, padding: '12px 16px', boxShadow: SHADOW, maxWidth: 460 }}>
+                  <span style={{ fontSize: 16, lineHeight: 1.3, flexShrink: 0 }}>💬</span>
+                  <p style={{ fontFamily: SF, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
+                    "I got a response from an alumna within 48 hours." <span style={{ color: TEXT, fontWeight: 700, fontStyle: 'normal' }}>— Nerissa R., USC '25</span>
+                  </p>
+                </div>
               </div>
             )}
           </div>
