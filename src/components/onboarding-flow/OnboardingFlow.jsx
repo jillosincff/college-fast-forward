@@ -532,13 +532,13 @@ CRITICAL RULES:
     // In postAuth mode or if user is already authenticated, complete directly
     if (postAuth || onAlreadyAuthed) {
       if (planType === 'free') {
-        window.location.hash = '#FreeTierDashboard';
+        window.location.hash = '#/FreeTierDashboard';
       } else {
         if (onAlreadyAuthed) onAlreadyAuthed();
         else if (onClose) onClose();
       }
     } else {
-      const redirectPath = planType === 'free' ? '/#FreeTierDashboard' : '/#GatorAuth';
+      const redirectPath = planType === 'free' ? '/#/FreeTierDashboard' : '/#/GatorAuth';
       base44.auth.loginWithProvider('google', window.location.origin + redirectPath);
     }
   };

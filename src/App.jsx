@@ -136,6 +136,17 @@ const AuthenticatedApp = () => {
       {/* Public/Auth routes — NO guard, rendered immediately */}
       <Route path="/GetStarted" element={<GatorAuth />} />
       <Route path="/GatorAuth" element={<GatorAuth />} />
+      {/* Common auth URL aliases — these used to dead-end on UnknownRouteRedirect
+          and bounce users back to the landing page (blank/white page bug). */}
+      <Route path="/login" element={<GatorAuth />} />
+      <Route path="/Login" element={<GatorAuth />} />
+      <Route path="/signin" element={<GatorAuth />} />
+      <Route path="/SignIn" element={<GatorAuth />} />
+      <Route path="/signup" element={<GatorAuth />} />
+      <Route path="/SignUp" element={<GatorAuth />} />
+      <Route path="/sign-up" element={<GatorAuth />} />
+      <Route path="/register" element={<GatorAuth />} />
+      <Route path="/Register" element={<GatorAuth />} />
       <Route path="/MigrationSignIn" element={<MigrationSignIn />} />
       <Route path="/Logout" element={<Logout />} />
       <Route path="/StudentLandingPage" element={<StudentLandingPage />} />

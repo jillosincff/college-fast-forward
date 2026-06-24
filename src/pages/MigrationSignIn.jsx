@@ -37,8 +37,13 @@ export default function MigrationSignIn() {
         if (data.email) sessionStorage.setItem('migration_verified_email', data.email);
         setInfo('Identity verified! Redirecting you in...');
         setTimeout(() => {
-          base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
-        }, 1800);
+          // The session is already created by verifyMagicLink. Go STRAIGHT to GatorAuth
+          // (whose routing logic sends new students to onboarding, returning users to the
+          // dashboard). Do NOT call redirectToLogin — it round-trips through Base44's hosted
+          // login page (the "black gator" screen) and can land back on a blank page.
+          window.location.href = window.location.origin + '/#/GatorAuth';
+          window.location.reload();
+        }, 1500);
       } else {
         setError(data?.error || 'This link is invalid or has expired. Please request a new one.');
         setTimeout(() => { window.location.hash = '#MigrationSignIn?migration=true'; }, 2500);

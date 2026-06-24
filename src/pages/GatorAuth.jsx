@@ -167,7 +167,7 @@ export default function GatorAuth() {
       }
       // Do NOT set cff_onboarding_type for plain sign-ins — returning users must not see onboarding
     } catch (e) { /* private browsing */ }
-    base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
+    base44.auth.loginWithProvider('google', window.location.origin + '/#/GatorAuth');
   };
 
   useEffect(() => {
@@ -286,7 +286,7 @@ export default function GatorAuth() {
       try {
         await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
       } catch (e) {}
-      window.location.hash = '#FreeTierDashboard';
+      window.location.hash = '#/FreeTierDashboard';
     };
     return <OnboardingFlow postAuth={true} onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} resumeAtScreen={null} />;
   }
