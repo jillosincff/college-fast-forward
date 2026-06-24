@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
 import AppShowcase from '@/components/landing/AppShowcase';
 import LiveJobsSection from '@/components/landing/LiveJobsSection';
+import HeroProductVisual from '@/components/landing/HeroProductVisual';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -445,49 +446,12 @@ export default function StudentLandingPage({ onParentClick }) {
             )}
           </div>
 
-          {/* Right Column - Visual Anchor (40%) */}
+          {/* Right Column - Product Visualization (40%) */}
           {mounted && (
-            <div className="hero-animate-6 hero-visual" style={{ position: 'relative', minHeight: 460, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {/* Base Layer - Soft radial gradient */}
-              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24 }} />
-              
-              {/* Dark "Black Hole" Element */}
-              <div style={{ position: 'absolute', width: 340, height: 340, background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%', boxShadow: '0 24px 48px rgba(15,23,42,0.15)', animation: 'float 6s ease-in-out infinite' }} />
-              
-              {/* Floating Card 1 */}
-              <div style={{ position: 'absolute', top: '15%', right: '10%', width: 180, background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 5s ease-in-out infinite 0.5s', zIndex: 2 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: INDIGO_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎯</div>
-                  <div>
-                    <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: '#1e293b', margin: 0 }}>Hidden Roles</p>
-                    <p style={{ fontFamily: SF, fontSize: 9, color: '#64748b', margin: 0 }}>Unlocked</p>
-                  </div>
-                </div>
-                <div style={{ height: 4, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ width: '78%', height: '100%', background: INDIGO }} />
-                </div>
-              </div>
-
-              {/* Floating Card 2 */}
-              <div style={{ position: 'absolute', bottom: '20%', left: '5%', width: 160, background: '#fff', borderRadius: 16, padding: 14, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 5.5s ease-in-out infinite 1s', zIndex: 2 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 6, background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>✓</div>
-                  <p style={{ fontFamily: SF, fontSize: 10, fontWeight: 700, color: '#166534', margin: 0 }}>Resume Match: 94%</p>
-                </div>
-                <p style={{ fontFamily: SF, fontSize: 9, color: '#64748b', margin: 0 }}>ATS-optimized & ready</p>
-              </div>
-
-              {/* Floating Card 3 - nudged down */}
-              <div style={{ position: 'absolute', bottom: '10%', right: '15%', width: 140, background: '#fff', borderRadius: 14, padding: 12, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 6.5s ease-in-out infinite 1.5s', zIndex: 3 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ display: 'flex' }}>
-                    {[1,2,3].map(i => (
-                      <div key={i} style={{ width: 24, height: 24, borderRadius: '50%', background: `hsl(${230 + i * 15}, 75%, 75%)`, border: '2px solid #fff', marginLeft: i > 0 ? -6 : 0 }} />
-                    ))}
-                  </div>
-                  <p style={{ fontFamily: SF, fontSize: 9, fontWeight: 700, color: '#1e293b', margin: 0 }}>+12 intros</p>
-                </div>
-              </div>
+            <div className="hero-animate-6 hero-visual" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Soft radial glow behind the product card */}
+              <div style={{ position: 'absolute', inset: '-10%', background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24, pointerEvents: 'none' }} />
+              <HeroProductVisual />
             </div>
           )}
         </div>
