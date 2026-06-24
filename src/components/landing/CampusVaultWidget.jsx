@@ -159,10 +159,10 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
           Your Campus Vault
         </p>
         <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 10px', lineHeight: 1.2 }}>
-          Stop applying as a stranger.<br />Tap into institutional affinity.
+          Stop applying as a stranger.<br />Tap into your school's home-team advantage.
         </h2>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 8px', lineHeight: 1.6 }}>
-          Unlock a closed-loop job network tied to your university, where parents and alumni are actively waiting to champion your application.
+          Employers get flooded with thousands of random resumes. We connect you directly with alumni and parents from your university who are already eager to pull your application to the top of the pile.
         </p>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>
           Pick your school below to see how many advocates and matched roles are waiting for you.
