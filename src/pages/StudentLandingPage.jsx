@@ -7,6 +7,7 @@ import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
 import AppShowcase from '@/components/landing/AppShowcase';
 import LiveJobsSection from '@/components/landing/LiveJobsSection';
 import HeroProductVisual from '@/components/landing/HeroProductVisual';
+import SchoolMarquee from '@/components/landing/SchoolMarquee';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -476,6 +477,9 @@ export default function StudentLandingPage({ onParentClick }) {
           ))}
         </div>
       </div>
+
+      {/* ── SCHOOL MARQUEE ── */}
+      <SchoolMarquee />
 
       {/* ── LIVE JOBS ── */}
       <LiveJobsSection go={go} />
