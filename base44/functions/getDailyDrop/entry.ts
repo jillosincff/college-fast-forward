@@ -74,6 +74,91 @@ async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults
   }
 }
 
+// ── OpenWeb Ninja (Real-Time Jobs / JSearch) fetcher — PRIMARY live source ──
+// Maps to the same normalized shape ({ name, job_title, hiring_description, ... })
+// the downstream merge step consumes, so slotType:"live" rendering stays intact.
+async function fetchOpenWebNinjaJobs({ role, location, seeking, apiKey, maxResults = 50 }) {
+  console.log('[fetchOpenWebNinjaJobs] START - role:', role, 'location:', location, 'seeking:', seeking);
+  try {
+    // Build an entry-level-targeted query string.
+    const levelTerms =
+      seeking === 'internship' ? 'intern'
+      : seeking === 'fulltime' ? 'entry level'
+      : 'entry level OR intern';
+    const baseRole = (role || 'analyst').trim();
+    const locPart = (location && !/remote/i.test(location)) ? ` in ${location}` : '';
+    const query = `${baseRole} ${levelTerms}${locPart}`.trim();
+
+    const params = new URLSearchParams({
+      query,
+      num_pages: '2',
+      date_posted: 'month',
+      country: 'us',
+    });
+    if (seeking === 'internship') params.set('employment_types', 'INTERN');
+    else if (seeking === 'fulltime') params.set('employment_types', 'FULLTIME');
+
+    const url = `https://api.openwebninja.com/jsearch/search-v2?${params.toString()}`;
+    console.log('[fetchOpenWebNinjaJobs] URL:', url);
+
+    const res = await fetch(url, {
+      headers: { 'x-api-key': apiKey, 'Accept': 'application/json' },
+    });
+    console.log('[fetchOpenWebNinjaJobs] API status:', res.status);
+
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => 'no body');
+      console.error('[fetchOpenWebNinjaJobs] API error:', res.status, errorText.slice(0, 200));
+      return [];
+    }
+
+    const data = await res.json();
+    // search-v2 returns { data: { jobs: [...] } }; older /search returns { data: [...] }
+    const list = Array.isArray(data.data) ? data.data : (data.data?.jobs || data.jobs || []);
+    console.log('[fetchOpenWebNinjaJobs] Raw count:', Array.isArray(list) ? list.length : 0);
+
+    const filtered = (Array.isArray(list) ? list : [])
+      .filter(job => {
+        const title = (job.job_title || '').trim();
+        const org = job.employer_name || job.company_name;
+        if (!org || !title) return false;
+        // Skip senior roles
+        if (SENIOR_RE.test(title)) return false;
+        // Match internship/fulltime intent
+        const isIntern = INTERN_RE.test(title) || /intern/i.test(job.job_employment_type || '');
+        if (seeking === 'internship' && !isIntern) return false;
+        if (seeking === 'fulltime' && isIntern) return false;
+        return true;
+      })
+      .slice(0, maxResults)
+      .map(job => {
+        const city = job.job_city || '';
+        const state = job.job_state || '';
+        const loc = [city, state].filter(Boolean).join(', ') || (job.job_is_remote ? 'Remote' : (location || ''));
+        const salary = (job.job_min_salary && job.job_max_salary)
+          ? `$${Math.round(job.job_min_salary / 1000)}K-$${Math.round(job.job_max_salary / 1000)}K`
+          : null;
+        return {
+          name: job.employer_name || job.company_name,
+          job_title: job.job_title,
+          hiring_description: (job.job_description || `${job.employer_name || job.company_name} is hiring for ${job.job_title}`).slice(0, 600),
+          job_url: job.job_apply_link || job.job_google_link || null,
+          location: loc,
+          posted_date: job.job_posted_at_datetime_utc || null,
+          salary_range: salary,
+          source: 'openwebninja',
+        };
+      })
+      .filter(j => j.name && j.job_title && j.job_url);
+
+    console.log('[fetchOpenWebNinjaJobs] Filtered to %d jobs', filtered.length);
+    return filtered;
+  } catch (e) {
+    console.error('[fetchOpenWebNinjaJobs] Error:', e.message);
+    return [];
+  }
+}
+
 function sizeFromHeadcount(n) {
   if (!n || n <= 0) return null;
   if (n <= 50) return 'startup';
@@ -458,8 +543,12 @@ Deno.serve(async (req) => {
     // TEST MODE: Set to true to bypass ALL APIs and use ONLY fallback pool (for testing variety)
     const TEST_FALLBACK_ONLY = false;
     
-    // Slots from Fantastic Jobs (FRESH - last 24 hours ONLY)
+    // Live job slots. PRIMARY source is now OpenWeb Ninja (Fantastic Jobs deprecated).
     let allLiveSlots = [];
+    const openWebNinjaApiKey = Deno.env.get('OPENWEB_NINJA_API_KEY');
+    // Fantastic Jobs is deprecated — quota-exhausted, serving only fallback. Set
+    // USE_FANTASTIC_JOBS=true to re-enable the legacy fresh/modified/backfill fetches.
+    const USE_FANTASTIC_JOBS = false;
     const fantasticApiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
     
     // ROTATE ROLE QUERIES for variety - alternate between exact role and broader terms
@@ -480,64 +569,38 @@ Deno.serve(async (req) => {
     let backfillJobs = [];
     
     if (!TEST_FALLBACK_ONLY) {
-      // Primary: Fantastic Jobs API - FRESH (7-day window, broadened filters)
-      if (!fantasticApiKey) {
-        console.warn('[getDailyDrop] No Fantastic API key');
+      // PRIMARY: OpenWeb Ninja (Real-Time Jobs) — live, dynamic entry-level roles.
+      if (!openWebNinjaApiKey) {
+        console.warn('[getDailyDrop] No OpenWeb Ninja API key — falling back to curated pool');
       } else {
         try {
-          console.log('[getDailyDrop] Fetching FRESH jobs (7-day window, broadened)...');
+          console.log('[getDailyDrop] Fetching LIVE jobs from OpenWeb Ninja...');
           freshJobs = await Promise.race([
-            fetchFreshJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 }),
-            new Promise((_, r) => setTimeout(() => {
-              console.error('[getDailyDrop] Fresh jobs TIMEOUT after 25s');
-              return [];
+            fetchOpenWebNinjaJobs({ role, location, seeking, apiKey: openWebNinjaApiKey, maxResults: dailyLimit * 4 }),
+            new Promise((resolve) => setTimeout(() => {
+              console.error('[getDailyDrop] OpenWeb Ninja TIMEOUT after 25s');
+              resolve([]);
             }, 25000)),
           ]);
-          console.log('[getDailyDrop] Fresh jobs result: %d companies', freshJobs?.length || 0);
+          console.log('[getDailyDrop] OpenWeb Ninja result: %d companies', freshJobs?.length || 0);
         } catch (e) {
-          console.error('[getDailyDrop] Fresh jobs fetch failed:', e.message);
+          console.error('[getDailyDrop] OpenWeb Ninja fetch failed:', e.message);
         }
       }
-      
-      // Secondary: MODIFIED jobs endpoint (updated/reposted listings)
-      if (!fantasticApiKey) {
-        console.warn('[getDailyDrop] No Fantastic API key for modified jobs');
-      } else {
+
+      // DEPRECATED: legacy Fantastic Jobs fetches (fresh/modified/backfill).
+      // Gated off behind USE_FANTASTIC_JOBS — quota-exhausted, served only fallback.
+      if (USE_FANTASTIC_JOBS && fantasticApiKey) {
         try {
-          console.log('[getDailyDrop] Fetching MODIFIED jobs (updated/reposted)...');
-          modifiedJobs = await Promise.race([
-            fetchModifiedJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit }),
-            new Promise((_, r) => setTimeout(() => {
-              console.error('[getDailyDrop] Modified jobs TIMEOUT after 20s');
-              return [];
-            }, 20000)),
-          ]);
-          console.log('[getDailyDrop] Modified jobs result: %d companies', modifiedJobs?.length || 0);
+          freshJobs = freshJobs.concat(await fetchFreshJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 }));
+          modifiedJobs = await fetchModifiedJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit });
+          backfillJobs = await fetchBackfillJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 });
         } catch (e) {
-          console.error('[getDailyDrop] Modified jobs fetch failed:', e.message);
+          console.error('[getDailyDrop] Legacy Fantastic Jobs fetch failed:', e.message);
         }
       }
-      
-      // Tertiary: BACKFILL (6-month historical, last 30 days only for variety seeding)
-      if (!fantasticApiKey) {
-        console.warn('[getDailyDrop] No Fantastic API key for backfill');
-      } else {
-        try {
-          console.log('[getDailyDrop] Fetching BACKFILL jobs (variety seeding from last 30 days)...');
-          backfillJobs = await Promise.race([
-            fetchBackfillJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 }),
-            new Promise((_, r) => setTimeout(() => {
-              console.error('[getDailyDrop] Backfill jobs TIMEOUT after 30s');
-              return [];
-            }, 30000)),
-          ]);
-          console.log('[getDailyDrop] Backfill jobs result: %d companies', backfillJobs?.length || 0);
-        } catch (e) {
-          console.error('[getDailyDrop] Backfill jobs fetch failed:', e.message);
-        }
-      }
-      
-      console.log('[getDailyDrop] Coresignal DISABLED - using Fantastic Jobs (fresh+modified+backfill) + expanded fallback pool');
+
+      console.log('[getDailyDrop] Live source: OpenWeb Ninja (primary), Fantastic Jobs %s, + curated fallback pool', USE_FANTASTIC_JOBS ? 'ENABLED' : 'deprecated');
     } else {
       console.log('[getDailyDrop] TEST MODE: Bypassing APIs, using fallback pool only');
     }

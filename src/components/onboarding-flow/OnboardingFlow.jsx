@@ -27,7 +27,25 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [citySuggestionsClosed, setCitySuggestionsClosed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState(saved?.resumeUrl ?? '');
-  const [resumeData, setResumeData] = useState(null);
+  const [resumeData, setResumeDataRaw] = useState(() => {
+    // V1 resume cache: restore parsed/optimized data if the user dropped off
+    // earlier (within 24h) so we never re-fire the LLM on return.
+    try {
+      const raw = localStorage.getItem('cachedResumeData');
+      if (!raw) return null;
+      const { data, ts } = JSON.parse(raw);
+      if (data && ts && (Date.now() - ts) < 24 * 60 * 60 * 1000) return data;
+      localStorage.removeItem('cachedResumeData');
+    } catch {}
+    return null;
+  });
+  // Wrap setter so any resume data we produce is cached for 24h (zero server complexity).
+  const setResumeData = (data) => {
+    setResumeDataRaw(data);
+    try {
+      if (data) localStorage.setItem('cachedResumeData', JSON.stringify({ data, ts: Date.now() }));
+    } catch {}
+  };
   const [showPaywall, setShowPaywall] = useState(false);
   const [linkedinInput, setLinkedinInput] = useState('');
   const [quickMajor, setQuickMajor] = useState('');
@@ -98,6 +116,19 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // V1 cache guard: if we already parsed/optimized a resume in the last 24h,
+    // skip the LLM call entirely and reuse the cached result.
+    try {
+      const raw = localStorage.getItem('cachedResumeData');
+      if (raw) {
+        const { data, ts } = JSON.parse(raw);
+        if (data && ts && (Date.now() - ts) < 24 * 60 * 60 * 1000) {
+          setResumeData(data);
+          next();
+          return;
+        }
+      }
+    } catch {}
     setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
