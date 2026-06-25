@@ -203,7 +203,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
                 flexShrink: 0,
               }}
             >
-              ⚡ Show Me Hidden Roles
+              ⚡ Show My Matched Roles
             </button>
           </div>
 

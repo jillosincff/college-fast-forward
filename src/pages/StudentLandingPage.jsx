@@ -79,7 +79,7 @@ const R = 16;
 const PRO_FEATURES = ['Unlimited AI Agent', 'Advanced tailoring + modern templates', 'Smart reminders + interview prep', 'Most students upgrade once they see results'];
 const PROOF_CALLOUTS = [
   { text: 'Upload once — get perfectly tailored resume versions for every job you target' },
-  { text: 'Discovers hidden jobs most students never see, including unlisted internal roles' },
+  { text: 'Surfaces curated roles matched to your goals and school' },
   { text: 'Surfaces warm alumni & parent connections far more likely to actually respond' },
   { text: 'Tracks every application automatically — smart reminders so nothing falls through' },
   { text: 'Crafts personalized outreach messages that get real replies instead of silence' },
@@ -489,7 +489,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <span style={{ color: TEXT }}>literal nightmare</span><span style={{ marginLeft: 4 }}>😮‍💨</span>
           </h2>
           <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', color: TEXT2, lineHeight: 1.75, margin: '0 0 24px', textAlign: 'center' }}>
-            Spending hours tailoring a resume just to get screened out by a bot is exhausting. CFF brings hidden jobs, warm networking, and smart tools into one place.
+            Spending hours tailoring a resume just to get screened out by a bot is exhausting. CFF brings curated role matches, warm networking, and smart tools into one place.
           </p>
 
           <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #f1f5f9', boxShadow: SHADOW, padding: 'clamp(24px, 6vw, 36px)', marginBottom: 28 }}>
@@ -562,7 +562,7 @@ export default function StudentLandingPage({ onParentClick }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
                   { emoji: '🔥', text: 'Start strategic and confident with CFF' },
-                  { emoji: '🔍', text: 'Uncover hidden jobs most students never see' },
+                  { emoji: '🔍', text: 'Get matched to roles tailored to your profile' },
                   { emoji: '🤝', text: 'Warm intros from alumni & parents who actually want to help' },
                   { emoji: '🚀', text: 'Move quickly from application to real interviews' },
                   { emoji: '🎉', text: 'Get hired through human connections, not algorithms' },
