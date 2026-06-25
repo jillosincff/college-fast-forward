@@ -3,10 +3,9 @@ import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Loader2 } from 'lucide-react';
-import { registerUser } from '@/functions/registerUser';
-import { signInWithPassword } from '@/functions/signInWithPassword';
 import { sendMagicLink } from '@/functions/sendMagicLink';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
+import OtpVerifyForm from '@/components/auth/OtpVerifyForm';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -67,6 +66,16 @@ export default function GatorAuth() {
   // Magic link state
   const [magicEmail, setMagicEmail] = useState('');
 
+  // OTP verification step (after native signup)
+  const [pendingOtpEmail, setPendingOtpEmail] = useState('');
+
+  // After a session is minted (login or OTP verify), refresh auth so checkAndRoute runs
+  // and routes the user (new → 13-step onboarding, returning → dashboard).
+  const completeAuth = async () => {
+    try { await refreshUser(); } catch (e) {}
+    setStep(null); // re-trigger the routing effect via loading state
+  };
+
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError('');
@@ -77,14 +86,20 @@ export default function GatorAuth() {
     }
     setLoading(true);
     try {
-      const { data } = await signInWithPassword({ email: signinEmail, password: signinPassword });
-      if (data?.success && data?.magicLink) {
-        window.location.href = data.magicLink;
-      } else {
-        setError(data?.error || 'Sign in failed.');
-      }
+      // Native, silent login — mints a real Base44 session in-place (no redirect, no Base44 page).
+      const res = await base44.auth.loginViaEmailPassword(signinEmail.trim(), signinPassword);
+      const token = res?.access_token || res?.data?.access_token;
+      if (token) base44.auth.setToken(token);
+      await completeAuth();
     } catch (err) {
-      setError(err?.response?.data?.error || 'Invalid email or password.');
+      const detail = err?.response?.data?.detail || err?.response?.data?.message || '';
+      if (/verify/i.test(detail)) {
+        // Account exists but email not verified yet — send them to the OTP step.
+        try { await base44.auth.resendOtp(signinEmail.trim()); } catch (e) {}
+        setPendingOtpEmail(signinEmail.trim());
+      } else {
+        setError(detail || 'Invalid email or password.');
+      }
     } finally {
       setLoading(false);
     }
@@ -109,24 +124,16 @@ export default function GatorAuth() {
     }
     setLoading(true);
     try {
-      const response = await registerUser({ email: signupEmail, password: signupPassword, full_name: fullName });
-      if (response.data?.success) {
-        // Immediately sign the new student in so they go straight into the 13-step onboarding
-        // (instead of a dead-end "check your email" page). The verification email still sends in the background.
-        try {
-          const { data } = await signInWithPassword({ email: signupEmail, password: signupPassword });
-          if (data?.success && data?.magicLink) {
-            window.location.href = data.magicLink;
-            return;
-          }
-        } catch (signinErr) { /* fall through to verify-email page below */ }
-        navigate('RegistrationSuccess', { email: signupEmail });
-      } else {
-        setError(response.data?.error || 'Registration failed.');
-      }
+      // Native registration — creates the account and emails a 6-digit verification code.
+      await base44.auth.register({ email: signupEmail.trim(), password: signupPassword, full_name: fullName });
+      setPendingOtpEmail(signupEmail.trim());
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || 'Registration failed.';
-      setError(msg.includes('duplicate') ? 'An account with this email already exists.' : msg);
+      const detail = err?.response?.data?.detail || err?.response?.data?.message || err?.message || '';
+      if (/already|exist|registered/i.test(detail)) {
+        setError('An account with this email already exists. Try signing in.');
+      } else {
+        setError(detail || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -264,6 +271,30 @@ export default function GatorAuth() {
   };
   const labelStyle = { fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', display: 'block', marginBottom: 6 };
   const primaryBtn = (l) => ({ background: l ? '#cbd5e1' : GRAD_INDIGO, border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 700, color: '#fff', cursor: l ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto', boxShadow: l ? 'none' : '0 8px 24px rgba(109,40,217,0.28)' });
+
+  // OTP verification step — shown after native signup (or unverified sign-in).
+  // On success, completeAuth() refreshes the session and lets checkAndRoute route the user.
+  if (pendingOtpEmail) {
+    return (
+      <AuthPageShell>
+        <div style={{ maxWidth: 460, width: '100%' }}>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+              <img src="https://media.base44.com/images/public/684474c5723dc90efce23588/5181e2c8e_generated_image.png" alt="College Fast Forward" style={{ width: 40, height: 40, borderRadius: 10 }} />
+              <h1 style={{ fontFamily: dmSans, fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.03em' }}>
+                College <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Fast Forward</span>
+              </h1>
+            </div>
+            <p style={{ fontFamily: dmSans, fontSize: 15, color: '#64748b', margin: 0 }}>Verify your email to continue.</p>
+          </div>
+          <OtpVerifyForm email={pendingOtpEmail} onVerified={completeAuth} />
+          <div style={{ textAlign: 'center', marginTop: 20 }}>
+            <button onClick={() => { setPendingOtpEmail(''); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: '#94a3b8', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>← Back</button>
+          </div>
+        </div>
+      </AuthPageShell>
+    );
+  }
 
   // While determining what to show, render a visible loading screen (not blank)
   if (step === null) {
