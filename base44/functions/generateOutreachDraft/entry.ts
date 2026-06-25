@@ -3,8 +3,19 @@ import Anthropic from 'npm:@anthropic-ai/sdk@0.27.3';
 
 const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
 Deno.serve(async (req) => {
   try {
+    // CORS preflight — answer OPTIONS first so cross-origin callers don't get a 405.
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });

@@ -5,16 +5,28 @@
 // to confirm the job pipeline is alive and returning real postings.
 const JSEARCH_BASE = 'https://api.openwebninja.com/jsearch';
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, HEAD, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, x-monitor-secret, Authorization',
+};
+
 Deno.serve(async (req) => {
   try {
+    // CORS preflight — answer OPTIONS before anything else so cross-origin
+    // monitors don't get a 405 from the gateway.
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
     // Bare liveness ping (HEAD) — answer 200 without touching the secret or the API.
     if (req.method === 'HEAD') {
-      return new Response(null, { status: 200 });
+      return new Response(null, { status: 200, headers: CORS_HEADERS });
     }
 
     const expected = Deno.env.get('MONITOR_SECRET_KEY');
     if (!expected) {
-      return Response.json({ status: 'fail', error: 'MONITOR_SECRET_KEY not set' }, { status: 500 });
+      return Response.json({ status: 'fail', error: 'MONITOR_SECRET_KEY not set' }, { status: 500, headers: CORS_HEADERS });
     }
 
     // Accept the secret from header, query param (?secret=), or JSON body —
@@ -23,12 +35,12 @@ Deno.serve(async (req) => {
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
     const secret = req.headers.get('x-monitor-secret') || url.searchParams.get('secret') || body?.secret;
     if (secret !== expected) {
-      return Response.json({ status: 'fail', error: 'Unauthorized' }, { status: 401 });
+      return Response.json({ status: 'fail', error: 'Unauthorized' }, { status: 401, headers: CORS_HEADERS });
     }
 
     const token = Deno.env.get('OPENWEB_NINJA_API_KEY');
     if (!token) {
-      return Response.json({ status: 'fail', error: 'OPENWEB_NINJA_API_KEY not set' }, { status: 500 });
+      return Response.json({ status: 'fail', error: 'OPENWEB_NINJA_API_KEY not set' }, { status: 500, headers: CORS_HEADERS });
     }
 
     const params = new URLSearchParams({
@@ -69,7 +81,7 @@ Deno.serve(async (req) => {
         upstream: 'openweb_ninja_jsearch',
         error: upstreamError,
         elapsed_ms: elapsed,
-      });
+      }, { headers: CORS_HEADERS });
     }
 
     // Upstream answered but with an error status (e.g. 429 rate limit, 5xx) — provider issue.
@@ -80,7 +92,7 @@ Deno.serve(async (req) => {
         upstream_status: apiRes.status,
         error: `Upstream job API returned ${apiRes.status}`,
         elapsed_ms: elapsed,
-      });
+      }, { headers: CORS_HEADERS });
     }
 
     const jobs = Array.isArray(payload?.data) ? payload.data : [];
@@ -100,8 +112,8 @@ Deno.serve(async (req) => {
       elapsed_ms: elapsed,
       companies_count: companies.length,
       companies,
-    });
+    }, { headers: CORS_HEADERS });
   } catch (err) {
-    return Response.json({ status: 'fail', error: err.message }, { status: 500 });
+    return Response.json({ status: 'fail', error: err.message }, { status: 500, headers: CORS_HEADERS });
   }
 });
