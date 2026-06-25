@@ -99,7 +99,7 @@ export default function RegistrationSuccess() {
         }}>
           Didn't get it? Check your spam folder, or{' '}
           <button
-            onClick={() => window.location.hash = '#GatorAuth'}
+            onClick={() => window.location.hash = '#/GatorAuth'}
             style={{
               fontFamily: dmSans, fontSize: 13, fontWeight: 600,
               color: ACCENT, background: 'none', border: 'none',
