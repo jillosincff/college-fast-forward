@@ -117,19 +117,28 @@ async function fetchOpenWebNinjaJobs({ role, location, seeking, apiKey, maxResul
     const list = Array.isArray(data.data) ? data.data : (data.data?.jobs || data.jobs || []);
     console.log('[fetchOpenWebNinjaJobs] Raw count:', Array.isArray(list) ? list.length : 0);
 
-    const filtered = (Array.isArray(list) ? list : [])
+    const preFilter = (Array.isArray(list) ? list : [])
       .filter(job => {
         const title = (job.job_title || '').trim();
         const org = job.employer_name || job.company_name;
         if (!org || !title) return false;
         // Skip senior roles
         if (SENIOR_RE.test(title)) return false;
+        // QUALITY FILTER: drop low-signal staffing/aggregator publishers & employers
+        if (isLowSignalLiveJob(job)) return false;
         // Match internship/fulltime intent
         const isIntern = INTERN_RE.test(title) || /intern/i.test(job.job_employment_type || '');
         if (seeking === 'internship' && !isIntern) return false;
         if (seeking === 'fulltime' && isIntern) return false;
         return true;
-      })
+      });
+
+    // Sort highest-quality (direct-employer / direct-apply) listings to the TOP
+    // BEFORE the slice, so the first jobs a free-tier student sees feel premium.
+    preFilter.sort((a, b) => liveJobQualityScore(b) - liveJobQualityScore(a));
+    console.log('[fetchOpenWebNinjaJobs] After quality filter: %d jobs (sorted by direct-employer signal)', preFilter.length);
+
+    const filtered = preFilter
       .slice(0, maxResults)
       .map(job => {
         const city = job.job_city || '';
@@ -206,6 +215,36 @@ function buildTitleQuery(role, seeking) {
 
 const SENIOR_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive)\b|\b(ii|iii|iv|v)\b/i;
 const INTERN_RE = /\b(intern|internship|co-?op)\b/i;
+
+// ── Quality filter for live (OpenWeb Ninja) results ──────────────────────────
+// First impression matters: a generic staffing/aggregator post at the top of a
+// new student's feed reads as "cheap Indeed scraper" and kills trust. We blacklist
+// low-signal publishers/employers and sort direct-employer listings to the top.
+const LOW_SIGNAL_RE = /\b(staffing|recruiting|recruitment|recruiter|talent\s*(acquisition|solutions|group)|consulting\s*group|placement|headhunt|temp(orary)?\s*agency|workforce|employment\s*agency|hire|hiring\s*(agency|partners)|jobot|aerotek|robert\s*half|adecco|randstad|kelly\s*services|manpower|insight\s*global|teksystems|cybercoders|apex\s*systems|beacon\s*hill|lhh|gpac|actalent|motion\s*recruitment|ledgent|addison\s*group|the\s*judge\s*group|lega\s*nova|ff\s*inc)\b/i;
+
+function isLowSignalLiveJob(job) {
+  const publisher = job.job_publisher || '';
+  const employer = job.employer_name || job.company_name || '';
+  if (LOW_SIGNAL_RE.test(publisher) || LOW_SIGNAL_RE.test(employer)) return true;
+  return false;
+}
+
+// Direct-employer listings (employer site / direct-apply) get priority. Aggregator
+// publishers (LinkedIn, Indeed, ZipRecruiter, etc.) score lower even when allowed.
+const AGGREGATOR_PUBLISHER_RE = /\b(linkedin|indeed|ziprecruiter|glassdoor|monster|simplyhired|learn4good|jobleads|whatjobs|adzuna|talent\.com|builtin|usnlx|nlx|google\s*jobs)\b/i;
+
+function liveJobQualityScore(job) {
+  let score = 0;
+  // Strongest signal: the API marks this as a direct-apply listing.
+  if (job.job_apply_is_direct === true) score += 3;
+  // Publisher is the employer itself (e.g. "Nike Careers") rather than an aggregator.
+  const publisher = job.job_publisher || '';
+  if (publisher && !AGGREGATOR_PUBLISHER_RE.test(publisher)) score += 2;
+  // Has a real logo + employer website → looks like an established brand.
+  if (job.employer_logo) score += 1;
+  if (job.employer_website) score += 1;
+  return score;
+}
 
 function jobMatchesLocation(job, city, stateName) {
   if (!city && !stateName) return true;
@@ -625,14 +664,12 @@ Deno.serve(async (req) => {
     console.log('[getDailyDrop] All sources: fresh=%d, modified=%d, backfill=%d, total=%d, eligible=%d', 
       freshJobs?.length || 0, modifiedJobs?.length || 0, backfillJobs?.length || 0, allJobs.length, eligibleJobs.length);
     
-    // AGGRESSIVE SHUFFLE before dedup - prevents same companies always appearing first
-    const shuffledEligible = [...eligibleJobs];
-    for (let i = shuffledEligible.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledEligible[i], shuffledEligible[j]] = [shuffledEligible[j], shuffledEligible[i]];
-    }
+    // PRESERVE quality order: the OpenWeb Ninja fetcher already sorts direct-employer
+    // listings to the top, so we keep that order rather than re-shuffling — this is
+    // what guarantees the first jobs a free-tier student sees are the highest-signal.
+    const orderedEligible = eligibleJobs;
     
-    for (const job of shuffledEligible) {
+    for (const job of orderedEligible) {
       const companyKey = job.name.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (mergedCompanies.has(companyKey)) continue;
       mergedCompanies.add(companyKey);
