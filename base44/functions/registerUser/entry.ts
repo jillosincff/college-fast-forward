@@ -6,28 +6,29 @@ async function triggerVerificationEmail(email, token, origin) {
   const verificationUrl = `${origin}/#/VerifyEmail?token=${token}`;
   
   const emailBody = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 12px; overflow: hidden;">
-      <div style="background: linear-gradient(135deg, #0021A5 0%, #FA4616 100%); padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">🐊 Welcome to College Fast Forward!</h1>
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; background: #F5F5F5; padding: 40px 20px;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <p style="font-size: 13px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #E85D20; margin: 0;">CLIFF · COLLEGE FAST FORWARD</p>
       </div>
-      <div style="padding: 30px 20px;">
-        <h2 style="color: #333; margin-top: 0;">One last step...</h2>
-        <p style="color: #555; line-height: 1.6;">
-          Thanks for joining the Gator Network! To secure your account and start connecting, please verify your email address.
-        </p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${verificationUrl}" 
-             style="background-color: #FA4616; color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-            Verify My Email
-          </a>
+      <div style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="background: #0A0A0A; padding: 36px 36px 32px;">
+          <p style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #E85D20; margin: 0 0 12px;">👋 VERIFY YOUR EMAIL</p>
+          <h1 style="font-size: 26px; font-weight: 700; color: #fff; margin: 0 0 10px; line-height: 1.3;">One last step.</h1>
+          <p style="font-size: 15px; color: rgba(255,255,255,0.55); margin: 0; line-height: 1.6;">Confirm your email to activate your account and start finding warm paths into the companies you care about.</p>
         </div>
-        <p style="color: #777; font-size: 14px;">
-          If the button doesn't work, you can copy and paste this link into your browser:
-          <br>
-          <a href="${verificationUrl}" style="color: #0021A5; word-break: break-all;">${verificationUrl}</a>
-        </p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-        <p style="font-size: 12px; color: #999; text-align: center;">Go Gators!</p>
+        <div style="padding: 28px 36px 32px;">
+          <p style="font-size: 15px; color: #444; line-height: 1.7; margin: 0 0 16px;">Thanks for joining College Fast Forward. Click the button below to verify your email address and finish setting up your account.</p>
+          <div style="text-align: center; margin: 8px 0 20px;">
+            <a href="${verificationUrl}" style="display: inline-block; background: #E85D20; color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 10px;">Verify My Email →</a>
+          </div>
+          <p style="font-size: 13px; color: #888; line-height: 1.6; margin: 0;">
+            If the button doesn't work, copy and paste this link into your browser:<br>
+            <a href="${verificationUrl}" style="color: #E85D20; word-break: break-all;">${verificationUrl}</a>
+          </p>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 24px;">
+        <p style="font-size: 12px; color: #AAAAAA; margin: 0;">College Fast Forward · support@collegefastforward.com</p>
       </div>
     </div>
   `;
@@ -41,7 +42,7 @@ async function triggerVerificationEmail(email, token, origin) {
   const sendgridPayload = {
       personalizations: [{ to: [{ email }] }],
       from: { email: 'hello@collegefastforward.com', name: 'College Fast Forward' },
-      subject: '🐊 Verify Your Email for College Fast Forward',
+      subject: 'Verify your email for College Fast Forward',
       content: [{ type: 'text/html', value: emailBody }],
   };
 

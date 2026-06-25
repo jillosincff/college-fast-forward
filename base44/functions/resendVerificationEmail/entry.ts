@@ -11,14 +11,30 @@ async function sendVerificationEmail(req, email, link) {
   if (!SENDGRID_API_KEY) return { sent: false, reason: 'SENDGRID_API_KEY not set', link };
 
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto;">
-      <h2 style="color:#0021A5;margin:0 0 10px;">Verify your email</h2>
-      <p>Click the button below to verify your email and continue.</p>
-      <p style="text-align:center;margin:20px 0;">
-        <a href="${link}" style="display:inline-block;background:#FA4616;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:700">Verify Email</a>
-      </p>
-      <p>If the button doesn't work, copy and paste this link:</p>
-      <p style="word-break:break-all;color:#374151;"><a href="${link}">${link}</a></p>
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #F5F5F5; padding: 40px 20px;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <p style="font-size: 13px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #E85D20; margin: 0;">CLIFF · COLLEGE FAST FORWARD</p>
+      </div>
+      <div style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="background: #0A0A0A; padding: 36px 36px 32px;">
+          <p style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #E85D20; margin: 0 0 12px;">👋 VERIFY YOUR EMAIL</p>
+          <h1 style="font-size: 26px; font-weight: 700; color: #fff; margin: 0 0 10px; line-height: 1.3;">One last step.</h1>
+          <p style="font-size: 15px; color: rgba(255,255,255,0.55); margin: 0; line-height: 1.6;">Confirm your email to activate your account and continue.</p>
+        </div>
+        <div style="padding: 28px 36px 32px;">
+          <p style="font-size: 15px; color: #444; line-height: 1.7; margin: 0 0 16px;">Click the button below to verify your email and continue.</p>
+          <div style="text-align: center; margin: 8px 0 20px;">
+            <a href="${link}" style="display:inline-block;background:#E85D20;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">Verify Email →</a>
+          </div>
+          <p style="font-size: 13px; color: #888; line-height: 1.6; margin: 0;">
+            If the button doesn't work, copy and paste this link:<br>
+            <a href="${link}" style="color:#E85D20;word-break:break-all;">${link}</a>
+          </p>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 24px;">
+        <p style="font-size: 12px; color: #AAAAAA; margin: 0;">College Fast Forward · support@collegefastforward.com</p>
+      </div>
     </div>
   `;
 
