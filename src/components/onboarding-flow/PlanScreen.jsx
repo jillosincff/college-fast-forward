@@ -586,6 +586,21 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         </div>
       </div>
 
+      {/* ── Free-tier exit — clear next step for users who don't upgrade now ── */}
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <button
+          onClick={() => saveAndAuth?.('free')}
+          style={{ width: '100%', maxWidth: 520, margin: '0 auto', fontFamily: dm, fontSize: 15, fontWeight: 700, color: TEXT, background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 14, padding: '16px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', transition: 'all 0.18s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.08)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; }}
+        >
+          Continue with the free version →
+        </button>
+        <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '10px 0 0', lineHeight: 1.5 }}>
+          Get started free with 5 daily job matches. Upgrade anytime to unlock alumni intros &amp; your full sprint plan.
+        </p>
+      </div>
+
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
         <button onClick={handleBack} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
       </div>
