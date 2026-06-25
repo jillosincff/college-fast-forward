@@ -235,7 +235,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
         }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: TEAL }} />
-          <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>⚡ JOIN 1,500+ PARENTS & ALUMNI</span>
+          <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>⚡ JOIN 4100+ PARENTS & ALUMNI</span>
         </div>
 
         <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 620, textAlign: 'center', marginBottom: 16 }}>
