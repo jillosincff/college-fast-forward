@@ -930,6 +930,22 @@ Deno.serve(async (req) => {
         existingCompanyKeys.add(fbCompanyKey);
         if (slots.length >= targetSlots) break;
       }
+
+      // SAFETY NET: the feed must NEVER be empty. For active daily users (or a
+      // heavily-tested account), the 14-day cooldown can eventually block the entire
+      // fallback pool. If we're still short of a minimally-populated feed, relax the
+      // cooldown and fill from the pool so the student always sees roles.
+      const MIN_SLOTS = Math.min(dailyLimit, 5);
+      if (slots.length < MIN_SLOTS) {
+        console.log('[getDailyDrop] SAFETY NET: only %d slots after cooldown — relaxing cooldown to refill', slots.length);
+        for (const fb of shuffled) {
+          const fbCompanyKey = fb.company.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (existingCompanyKeys.has(fbCompanyKey)) continue; // still avoid duplicates within this drop
+          slots.push(fb);
+          existingCompanyKeys.add(fbCompanyKey);
+          if (slots.length >= MIN_SLOTS) break;
+        }
+      }
       
       console.log('[getDailyDrop] Added %d fallback slots (cooldown-filtered, target: %d)', slots.length - (slots.filter(s => !s.isLiveResult).length), targetSlots);
       
