@@ -201,8 +201,12 @@ CRITICAL RULES:
         console.warn('Failed to update user persona during onboarding:', updateErr);
       }
     } catch (e) {}
-    // In postAuth mode or if user is already authenticated, complete directly
-    if (postAuth || onAlreadyAuthed) {
+    // Deterministic routing: if the user is ALREADY authenticated, never trigger
+    // an OAuth round-trip — push them straight to their destination.
+    let alreadyAuthed = false;
+    try { alreadyAuthed = !!(await base44.auth.me().catch(() => null)); } catch {}
+
+    if (postAuth || onAlreadyAuthed || alreadyAuthed) {
       if (planType === 'free') {
         window.location.hash = '#/FreeTierDashboard';
       } else {
@@ -210,6 +214,7 @@ CRITICAL RULES:
         else if (onClose) onClose();
       }
     } else {
+      // Only unauthenticated users get routed through Google OAuth.
       const redirectPath = planType === 'free' ? '/#/FreeTierDashboard' : '/#/GatorAuth';
       base44.auth.loginWithProvider('google', window.location.origin + redirectPath);
     }
