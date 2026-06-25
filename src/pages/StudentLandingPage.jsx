@@ -463,7 +463,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'clamp(12px, 4vw, 32px)', justifyContent: 'center', alignItems: 'center' }}>
           {[
             { emoji: '🎓', stat: '2,400+', label: 'Students on CFF' },
-            { emoji: '🏢', stat: '500+', label: 'Companies in the network' },
+            { emoji: '🏢', stat: '4,100+', label: 'Parents in the network' },
             { emoji: '🤝', stat: 'Warm intros', label: 'From alumni & parents' },
             { emoji: '⚡', stat: 'Free', label: 'To get started' },
           ].map((item, i) => (
