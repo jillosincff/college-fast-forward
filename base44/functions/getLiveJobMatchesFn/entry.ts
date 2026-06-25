@@ -130,6 +130,11 @@ Deno.serve(async (req) => {
       } catch (e) {
         if (e.name === 'AbortError') {
           console.error('[getLiveJobMatchesFn] Jobs API timed out (15s)');
+          // Ride out the outage: serve last cached leads (even if >24h old) if we have any.
+          if (cached?.length > 0) {
+            console.log(`[getLiveJobMatchesFn] Timeout — serving ${cached.length} stale cached leads`);
+            return Response.json({ companies: cached, from_cache: true, stale: true });
+          }
           return Response.json({ error: 'The job provider is taking too long to respond. Please try again in a moment.', upstream_timeout: true }, { status: 503 });
         }
         throw e;
@@ -140,7 +145,12 @@ Deno.serve(async (req) => {
     if (!apiRes.ok) {
       const errText = await apiRes.text();
       console.error(`[getLiveJobMatchesFn] Jobs API error ${apiRes.status}: ${errText.slice(0, 300)}`);
-      // Upstream provider issue (rate limit / outage) — surface as 503, not a generic 500.
+      // Ride out the outage: serve last cached leads (even if >24h old) if we have any.
+      if (cached?.length > 0) {
+        console.log(`[getLiveJobMatchesFn] Upstream ${apiRes.status} — serving ${cached.length} stale cached leads`);
+        return Response.json({ companies: cached, from_cache: true, stale: true });
+      }
+      // No cache to fall back on — surface as 503, not a generic 500.
       return Response.json({ error: 'The job provider is temporarily unavailable. Please try again shortly.', upstream_status: apiRes.status }, { status: 503 });
     }
     const payload = await apiRes.json();
