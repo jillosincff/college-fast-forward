@@ -433,6 +433,7 @@ export default function GatorAuth() {
               <button type="submit" disabled={loading} style={primaryBtn(loading)}>
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>
+              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', textAlign: 'center', margin: 0 }}>We'll email you a 6-digit code to verify your account.</p>
             </form>
           )}
 
