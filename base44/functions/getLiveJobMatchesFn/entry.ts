@@ -116,14 +116,32 @@ Deno.serve(async (req) => {
     });
     if (isRemote) params.set('work_from_home', 'true');
 
-    const apiRes = await fetch(`${JSEARCH_BASE}/search?${params.toString()}`, {
-      method: 'GET',
-      headers: { 'x-api-key': token },
-    });
+    // Hard timeout so a hanging upstream provider doesn't stall the student's request.
+    let apiRes;
+    {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        apiRes = await fetch(`${JSEARCH_BASE}/search?${params.toString()}`, {
+          method: 'GET',
+          headers: { 'x-api-key': token },
+          signal: controller.signal,
+        });
+      } catch (e) {
+        if (e.name === 'AbortError') {
+          console.error('[getLiveJobMatchesFn] Jobs API timed out (15s)');
+          return Response.json({ error: 'The job provider is taking too long to respond. Please try again in a moment.', upstream_timeout: true }, { status: 503 });
+        }
+        throw e;
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
     if (!apiRes.ok) {
       const errText = await apiRes.text();
       console.error(`[getLiveJobMatchesFn] Jobs API error ${apiRes.status}: ${errText.slice(0, 300)}`);
-      throw new Error(`Jobs API returned ${apiRes.status}`);
+      // Upstream provider issue (rate limit / outage) — surface as 503, not a generic 500.
+      return Response.json({ error: 'The job provider is temporarily unavailable. Please try again shortly.', upstream_status: apiRes.status }, { status: 503 });
     }
     const payload = await apiRes.json();
     const jobs = Array.isArray(payload?.data) ? payload.data : [];

@@ -38,13 +38,50 @@ Deno.serve(async (req) => {
       num_pages: '1',
     });
 
+    // Probe the upstream job provider with a hard timeout so a hanging API
+    // can't stall the health check. A degraded/unreachable third-party provider
+    // is reported as `degraded` (HTTP 200) — NOT a 500 — so it doesn't page us
+    // as if OUR service were down. Only an unexpected internal failure 500s.
     const start = Date.now();
-    const apiRes = await fetch(`${JSEARCH_BASE}/search?${params.toString()}`, {
-      method: 'GET',
-      headers: { 'x-api-key': token },
-    });
-    const payload = await apiRes.json().catch(() => ({}));
+    let apiRes, payload, upstreamError = null;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        apiRes = await fetch(`${JSEARCH_BASE}/search?${params.toString()}`, {
+          method: 'GET',
+          headers: { 'x-api-key': token },
+          signal: controller.signal,
+        });
+        payload = await apiRes.json().catch(() => ({}));
+      } finally {
+        clearTimeout(timeout);
+      }
+    } catch (e) {
+      upstreamError = e.name === 'AbortError' ? 'Upstream job API timed out (15s)' : `Upstream job API unreachable: ${e.message}`;
+    }
     const elapsed = Date.now() - start;
+
+    // Upstream never answered (network error / timeout) — provider outage, not ours.
+    if (!apiRes) {
+      return Response.json({
+        status: 'degraded',
+        upstream: 'openweb_ninja_jsearch',
+        error: upstreamError,
+        elapsed_ms: elapsed,
+      });
+    }
+
+    // Upstream answered but with an error status (e.g. 429 rate limit, 5xx) — provider issue.
+    if (!apiRes.ok) {
+      return Response.json({
+        status: 'degraded',
+        upstream: 'openweb_ninja_jsearch',
+        upstream_status: apiRes.status,
+        error: `Upstream job API returned ${apiRes.status}`,
+        elapsed_ms: elapsed,
+      });
+    }
 
     const jobs = Array.isArray(payload?.data) ? payload.data : [];
     const companies = jobs
@@ -53,14 +90,13 @@ Deno.serve(async (req) => {
       .map((j) => ({ name: j.employer_name, job_title: j.job_title }));
 
     const passed =
-      apiRes.ok &&
       companies.length >= 1 &&
       !!companies[0]?.name &&
       !!companies[0]?.job_title &&
       elapsed < 20000;
 
     return Response.json({
-      status: passed ? 'pass' : 'fail',
+      status: passed ? 'pass' : 'degraded',
       elapsed_ms: elapsed,
       companies_count: companies.length,
       companies,
