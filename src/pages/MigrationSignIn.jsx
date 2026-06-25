@@ -46,12 +46,12 @@ export default function MigrationSignIn() {
         }, 1500);
       } else {
         setError(data?.error || 'This link is invalid or has expired. Please request a new one.');
-        setTimeout(() => { window.location.hash = '#MigrationSignIn?migration=true'; }, 2500);
+        setTimeout(() => { window.location.hash = '#/MigrationSignIn?migration=true'; }, 2500);
       }
       })
       .catch(() => {
       setError('This link is invalid or has expired. Please request a new one.');
-      setTimeout(() => { window.location.hash = '#MigrationSignIn?migration=true'; }, 2500);
+      setTimeout(() => { window.location.hash = '#/MigrationSignIn?migration=true'; }, 2500);
       })
       .finally(() => setChecking(false));
   }, []);
@@ -154,23 +154,23 @@ export default function MigrationSignIn() {
   };
 
   if (checking) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0d1117', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', flexDirection: 'column', gap: 12 }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      <div style={{ width: 28, height: 28, border: '2px solid rgba(232,93,32,0.3)', borderTop: '2px solid #E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)', margin: 0 }}>Signing you in...</p>
+      <div style={{ width: 28, height: 28, border: '2px solid rgba(109,40,217,0.25)', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <p style={{ fontFamily: dmSans, fontSize: 14, color: '#64748b', margin: 0 }}>Signing you in...</p>
     </div>
   );
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: '#0d1117', position: 'relative', overflow: 'hidden' }}>
-      <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translate(-50%, -50%)', width: 700, height: 700, background: 'radial-gradient(ellipse at center, rgba(79,140,255,0.04), transparent 70%)', pointerEvents: 'none' }} />
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden' }}>
+      <div aria-hidden style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translate(-50%, -50%)', width: 700, height: 700, background: 'radial-gradient(ellipse at center, rgba(109,40,217,0.08), transparent 70%)', pointerEvents: 'none' }} />
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 500 }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <h1 style={{ fontFamily: playfair, fontSize: 36, fontWeight: 700, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.02em' }}>COLLEGE FAST FORWARD</h1>
-          <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0 }}>Your network. Your career. Let's go.</p>
+          <h1 style={{ fontFamily: dmSans, fontSize: 30, fontWeight: 800, color: '#0f172a', margin: '0 0 12px', letterSpacing: '-0.03em' }}>College <span style={{ background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Fast Forward</span></h1>
+          <p style={{ fontFamily: dmSans, fontSize: 15, color: '#64748b', margin: 0 }}>Your network. Your career. Let's go.</p>
         </div>
 
-        <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 28, fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, textAlign: 'center' }}>
+        <div style={{ background: 'rgba(109,40,217,0.06)', border: '1px solid rgba(109,40,217,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 28, fontFamily: dmSans, fontSize: 13, color: '#475569', lineHeight: 1.6, textAlign: 'center' }}>
           👋 Welcome to the new College Fast Forward.<br/>
           Enter your email below and we'll send you a one-time login link — no password needed.
         </div>
@@ -188,25 +188,25 @@ export default function MigrationSignIn() {
             finally { setIsLoading(false); }
           }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Your Email</label>
-              <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
+              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', display: 'block', marginBottom: 6 }}>Your Email</label>
+              <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid #e2e8f0', background: '#fff', borderRadius: 10, color: '#0f172a', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
             </div>
-            <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
+            <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#cbd5e1' : 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 700, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto', boxShadow: isLoading ? 'none' : '0 8px 24px rgba(109,40,217,0.28)' }}>
               {isLoading ? 'Sending...' : 'Send Reset Link'}
             </button>
-            <button type="button" onClick={() => { setForgotMode(false); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>← Back to sign in</button>
+            <button type="button" onClick={() => { setForgotMode(false); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: '#94a3b8', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>← Back to sign in</button>
           </form>
         ) : (
         <form onSubmit={handleSendMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
-            <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
-            <input type="email" value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
+            <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', display: 'block', marginBottom: 6 }}>Email</label>
+            <input type="email" value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid #e2e8f0', background: '#fff', borderRadius: 10, color: '#0f172a', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
           </div>
-          <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
+          <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#cbd5e1' : 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 700, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto', boxShadow: isLoading ? 'none' : '0 8px 24px rgba(109,40,217,0.28)' }}>
             {isLoading ? 'Sending...' : 'Send Magic Link'}
           </button>
-          <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
-          <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(magicEmail); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>Forgot your password?</button>
+          <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
+          <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(magicEmail); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: '#94a3b8', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>Forgot your password?</button>
         </form>
         )}
 

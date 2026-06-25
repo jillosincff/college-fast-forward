@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     });
 
     const origin = req.headers.get('origin') || 'https://www.collegefastforward.com';
-    const magicLink = `${origin}/#MigrationSignIn?token=${token}`;
+    const magicLink = `${origin}/#/MigrationSignIn?token=${token}`;
 
     return new Response(JSON.stringify({ success: true, magicLink }), {
       status: 200,
