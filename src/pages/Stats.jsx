@@ -22,6 +22,13 @@ export default function Stats() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(null);
+  const [authState, setAuthState] = useState('checking'); // 'checking' | 'authed' | 'guest'
+
+  useEffect(() => {
+    base44.auth.me()
+      .then(() => setAuthState('authed'))
+      .catch(() => setAuthState('guest'));
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -47,9 +54,37 @@ export default function Stats() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (authState === 'authed') load(); }, [authState]);
 
   const fmt = (n) => (n ?? 0).toLocaleString();
+
+  // Auth gate — checking spinner / guest sign-in prompt
+  if (authState !== 'authed') {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+        {authState === 'checking' ? (
+          <div style={{ width: 32, height: 32, border: '3px solid #e5e7eb', borderTop: '3px solid #6366f1', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        ) : (
+          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '40px 36px', textAlign: 'center', maxWidth: 380, width: '100%' }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>📊</div>
+            <h1 style={{ fontFamily: dm, fontSize: 22, fontWeight: 900, color: '#111827', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
+              Sign in to view your stats
+            </h1>
+            <p style={{ fontFamily: dm, fontSize: 14, color: '#6b7280', margin: '0 0 24px', lineHeight: 1.6 }}>
+              Log in to see your students, jobs matched, outreach sent, and more.
+            </p>
+            <a
+              href="#/GatorAuth"
+              style={{ display: 'inline-block', fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#fff', background: '#6366f1', borderRadius: 10, padding: '12px 28px', textDecoration: 'none' }}
+            >
+              Sign in
+            </a>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>

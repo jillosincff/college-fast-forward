@@ -8,7 +8,7 @@ import OnboardingSteps5to8 from './OnboardingSteps5to8';
 import OnboardingSteps9to13 from './OnboardingSteps9to13';
 import {
   FONT, BG, CARD, TEXT, TEXT2, TEXT3, SHADOW, GREEN,
-  TOP_SCHOOLS, saveProgress, loadSavedProgress,
+  saveProgress, loadSavedProgress,
 } from './onboardingShared';
 
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false, resumeAtScreen = null }) {
@@ -22,7 +22,6 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [seeking, setSeeking] = useState(saved?.seeking ?? '');
   const [blockers, setBlockers] = useState(saved?.blockers ?? []);
   const [college, setCollege] = useState(saved?.college ?? '');
-  const [collegeSuggestions, setCollegeSuggestions] = useState([]);
   const [locationPref, setLocationPref] = useState(saved?.locationPref ?? '');
   const [locationCity, setLocationCity] = useState(saved?.locationCity ?? '');
   const [citySuggestionsClosed, setCitySuggestionsClosed] = useState(false);
@@ -74,12 +73,6 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
 
   const toggleBlocker = (key) => {
     setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
-  };
-
-  const handleCollegeInput = (val) => {
-    setCollege(val);
-    if (val.length < 2) { setCollegeSuggestions([]); return; }
-    setCollegeSuggestions(TOP_SCHOOLS.filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 5));
   };
 
   // Fire referral milestone when referee hits the school step
