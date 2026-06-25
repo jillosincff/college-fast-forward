@@ -95,7 +95,9 @@ export default function GatorAuth() {
       const detail = err?.response?.data?.detail || err?.response?.data?.message || '';
       if (/verify/i.test(detail)) {
         // Account exists but email not verified yet — send them to the OTP step.
-        try { await base44.auth.resendOtp(signinEmail.trim()); } catch (e) {}
+        // Do NOT auto-resend: that issues a NEW code and invalidates the one already
+        // sitting in their inbox, causing a correct code to read as "wrong/expired".
+        // They can press "Resend code" on the OTP screen if they truly need a fresh one.
         setPendingOtpEmail(signinEmail.trim());
       } else {
         setError(detail || 'Invalid email or password.');

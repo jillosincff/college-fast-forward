@@ -62,6 +62,9 @@ export default function OtpVerifyForm({ email, onVerified }) {
         <p style={{ fontFamily: dmSans, fontSize: 15, color: '#475569', margin: 0, lineHeight: 1.6 }}>
           We emailed a verification code to<br/><strong style={{ color: '#0f172a' }}>{email}</strong>.
         </p>
+        <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', margin: '10px 0 0', lineHeight: 1.5 }}>
+          Don't see it? Check your <strong style={{ color: '#64748b' }}>spam / junk</strong> folder. If you requested more than one code, enter the <strong style={{ color: '#64748b' }}>most recent</strong> one.
+        </p>
       </div>
       <div>
         <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', display: 'block', marginBottom: 6 }}>Verification Code</label>
