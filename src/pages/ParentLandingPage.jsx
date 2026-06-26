@@ -485,7 +485,7 @@ export default function ParentLandingPage({ onStudentClick }) {
       <div style={{ background: '#fff', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '20px clamp(16px, 5vw, 32px)' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'clamp(12px, 4vw, 32px)', justifyContent: 'center', alignItems: 'center' }}>
           {[
-            { emoji: '🎓', stat: '1,500+', label: 'Parents & Alumni' },
+            { emoji: '🎓', stat: '4,100+', label: 'Parents & Alumni' },
             { emoji: '🏢', stat: '15+', label: 'Universities' },
             { emoji: '🤝', stat: '50+', label: 'Industries' },
             { emoji: '⚡', stat: 'Free', label: 'Always, for parents and alumni' },
