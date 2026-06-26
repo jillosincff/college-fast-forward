@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { ArrowLeft, Linkedin, Loader2 } from 'lucide-react';
+import { Linkedin, Loader2 } from 'lucide-react';
 import { proxycurlService } from '@/functions/proxycurlService';
 
 // ── Brand tokens (matched to ParentAllSet / StudentLandingPage) ──
@@ -36,7 +36,7 @@ const INTRO_OPTIONS = [
 ];
 
 export default function ParentProfileEdit() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, isLoadingAuth } = useAuth();
 
   const [form, setForm] = useState({
     fullName: '',
@@ -52,6 +52,14 @@ export default function ParentProfileEdit() {
   const [importingPhoto, setImportingPhoto] = useState(false);
   const [photoImported, setPhotoImported] = useState(false);
   const [photoImportError, setPhotoImportError] = useState('');
+
+  // Logged-out parent clicking the email link: send them to sign in, then
+  // bring them right back to this edit page.
+  useEffect(() => {
+    if (!isLoadingAuth && !user) {
+      base44.auth.redirectToLogin(window.location.href);
+    }
+  }, [isLoadingAuth, user]);
 
   useEffect(() => {
     if (!document.getElementById('ppe-satoshi')) {
@@ -92,7 +100,7 @@ export default function ParentProfileEdit() {
       if (refreshUser) refreshUser().catch(() => {});
       try { sessionStorage.removeItem('directoryDataCache'); } catch (e) { /* ok */ }
       setSaved(true);
-      setTimeout(() => { setSaved(false); navigate('Profile'); }, 1200);
+      setTimeout(() => setSaved(false), 2500);
     } finally {
       setSaving(false);
     }
@@ -108,20 +116,6 @@ export default function ParentProfileEdit() {
   return (
     <div style={{ minHeight: '100vh', background: BG, fontFamily: SF, display: 'flex', flexDirection: 'column', padding: '0 0 80px' }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      {/* Header */}
-      <div style={{
-        background: CARD, borderBottom: `1px solid ${FIELD_BORDER}`,
-        padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 16,
-        position: 'sticky', top: 0, zIndex: 10,
-      }}>
-        <button onClick={() => navigate('Profile')} style={{
-          background: 'none', border: 'none', cursor: 'pointer', color: INDIGO,
-          display: 'flex', alignItems: 'center', gap: 6,
-          fontFamily: SF, fontSize: 13, fontWeight: 600, minHeight: 'auto', padding: 0,
-        }}>
-          <ArrowLeft size={16} /> Back to Profile
-        </button>
-      </div>
 
       <div style={{ flex: 1, maxWidth: 540, margin: '0 auto', width: '100%', padding: '40px 24px' }}>
         <h1 style={{ fontFamily: SF, fontWeight: 900, fontSize: 28, color: TEXT, textAlign: 'center', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: 10 }}>
