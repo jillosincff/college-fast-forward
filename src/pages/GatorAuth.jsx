@@ -225,12 +225,12 @@ export default function GatorAuth() {
       const onboardingDone = user.onboarding_completed === true;
 
       // Fully onboarded → send to the right home.
-      // Parents/alumni use the Profile hub; students use the dashboard.
-      // (FreeTierDashboard is a student-only view and renders blank for parents.)
+      // Parents/alumni only have the one-page signup form + success screen —
+      // they never use the student dashboard (which renders blank for them).
       if (hasPersona && onboardingDone) {
         const isParentOrAlum = user.persona === 'parent' || user.persona === 'alumni'
           || user.roles?.includes('parent') || user.roles?.includes('alumni');
-        window.location.hash = isParentOrAlum ? '#/Profile' : '#/FreeTierDashboard';
+        window.location.hash = isParentOrAlum ? '#/ParentAllSet' : '#/FreeTierDashboard';
         return;
       }
 

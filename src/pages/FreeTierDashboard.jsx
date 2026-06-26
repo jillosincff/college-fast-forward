@@ -199,11 +199,11 @@ export default function FreeTierDashboard() {
       }
       // FreeTierDashboard is a student-only view. Parents/alumni must never render
       // here — the student render tree assumes student-shaped data and blanks out.
-      // Send them to their Profile hub instead.
+      // They only have the signup form + success screen, so send them there.
       const isParentOrAlum = u?.persona === 'parent' || u?.persona === 'alumni'
         || u?.roles?.includes('parent') || u?.roles?.includes('alumni');
       if (isParentOrAlum) {
-        window.location.hash = '#/Profile';
+        window.location.hash = '#/ParentAllSet';
         return;
       }
       setUser(u);
