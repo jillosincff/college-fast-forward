@@ -36,6 +36,45 @@ Deno.serve(async (req) => {
     // Distinguish parents vs alumni — default to parent
     const userPersona = persona === 'alumni' ? 'alumni' : 'parent';
 
+    // Derive a lowercase company domain for fast matching (e.g. "Google" -> "google.com")
+    const deriveDomain = (name) => {
+      const clean = (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return clean ? `${clean}.com` : '';
+    };
+
+    // Upsert the matchable ParentNetworkProfile record the matching engine reads.
+    // Without this, parents are captured in User but never surfaced to students.
+    const upsertNetworkProfile = async () => {
+      const sc = (school_code || '').toUpperCase();
+      const companyName = (company || '').trim();
+      // The matcher requires school_code + company_name to be useful — skip if missing.
+      if (!sc || !companyName) return;
+      const nameParts = full_name.trim().split(/\s+/);
+      const firstName = nameParts[0] || full_name.trim();
+      const lastName = nameParts.slice(1).join(' ') || firstName;
+      const profileData = {
+        first_name: firstName,
+        last_name: lastName,
+        company_name: companyName,
+        company_domain: deriveDomain(companyName),
+        role_title: (career_background || '').trim() || 'Professional',
+        linkedin_url: linkedin_url?.trim() || '',
+        school_code: sc,
+        is_active: visible_in_directory !== false,
+      };
+      const existingProfiles = await base44.asServiceRole.entities.ParentNetworkProfile.filter({
+        school_code: sc,
+        first_name: firstName,
+        last_name: lastName,
+        company_name: companyName,
+      }).catch(() => []);
+      if (existingProfiles && existingProfiles.length > 0) {
+        await base44.asServiceRole.entities.ParentNetworkProfile.update(existingProfiles[0].id, profileData);
+      } else {
+        await base44.asServiceRole.entities.ParentNetworkProfile.create(profileData);
+      }
+    };
+
     // Validate required fields
     if (!email || !full_name || !school) {
       return Response.json(
@@ -75,6 +114,7 @@ Deno.serve(async (req) => {
     const existingUsers = await base44.asServiceRole.entities.User.filter({ email: lowerEmail });
     if (existingUsers && existingUsers.length > 0) {
       const updated = await base44.asServiceRole.entities.User.update(existingUsers[0].id, profileData);
+      await upsertNetworkProfile();
       console.log('✅ Existing parent profile updated:', lowerEmail);
       return Response.json({
         success: true,
@@ -95,6 +135,8 @@ Deno.serve(async (req) => {
       profile_completion_score: 30,
       ...profileData,
     });
+
+    await upsertNetworkProfile();
 
     console.log('✅ Parent created:', lowerEmail);
 
