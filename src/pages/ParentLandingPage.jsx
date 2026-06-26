@@ -82,6 +82,7 @@ export default function ParentLandingPage({ onStudentClick }) {
   const [form, setForm] = useState({ fullName: '', jobTitle: '', company: '', industry: '', linkedin: '', email: '', school: '', persona: 'parent' });
   const [submitted, setSubmitted] = useState(false);
   const [submittedInfo, setSubmittedInfo] = useState({ school: '', email: '' });
+  const [alreadyExists, setAlreadyExists] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -117,7 +118,7 @@ export default function ParentLandingPage({ onStudentClick }) {
       const schoolCode = deriveSchoolCode(form.school);
       
       // Create parent user directly in database
-      await base44.functions.invoke('createParentUser', {
+      const res = await base44.functions.invoke('createParentUser', {
         email: form.email.toLowerCase().trim(),
         full_name: form.fullName.trim(),
         school: form.school.trim(),
@@ -153,7 +154,8 @@ export default function ParentLandingPage({ onStudentClick }) {
       localStorage.setItem('pending_invite_role', 'parent');
       sessionStorage.setItem('pending_invite_role', 'parent');
       
-      // Show success screen
+      // Show success screen — flag if they were already in the system
+      setAlreadyExists(res?.data?.already_exists === true);
       setSubmittedInfo({ school: form.school.trim(), email: form.email.toLowerCase().trim() });
       setSubmitted(true);
     } catch (error) {
@@ -283,13 +285,19 @@ export default function ParentLandingPage({ onStudentClick }) {
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: GRAD_INDIGO, borderRadius: '20px 20px 0 0' }} />
           {submitted ? (
             <div style={{ textAlign: 'center', padding: '24px 16px' }}>
-              <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
-              <h3 style={{ fontFamily: FONT, fontSize: 26, fontWeight: 800, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.02em' }}>You're in!</h3>
+              <div style={{ fontSize: 56, marginBottom: 16 }}>{alreadyExists ? '✅' : '🎉'}</div>
+              <h3 style={{ fontFamily: FONT, fontSize: 26, fontWeight: 800, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.02em' }}>{alreadyExists ? "You're already in the system!" : "You're in!"}</h3>
               <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT, lineHeight: 1.6, margin: '0 0 16px' }}>
-                A student from <span style={{ color: INDIGO }}>{submittedInfo.school}</span> will reach out when there's a match. We'll email you at <span style={{ color: INDIGO }}>{submittedInfo.email}</span>.
+                {alreadyExists ? (
+                  <>Good news — <span style={{ color: INDIGO }}>{submittedInfo.email}</span> is already part of the network. We've refreshed your profile with the details you just entered.</>
+                ) : (
+                  <>A student from <span style={{ color: INDIGO }}>{submittedInfo.school}</span> will reach out when there's a match. We'll email you at <span style={{ color: INDIGO }}>{submittedInfo.email}</span>.</>
+                )}
               </p>
               <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 0 24px' }}>
-                Your profile is now part of the College Fast Forward network — surfaced to relevant students from your school looking in your industry. There's nothing else you need to do right now.
+                {alreadyExists
+                  ? "No need to sign up again — your profile is active and surfaced to relevant students from your school looking in your industry. There's nothing else you need to do."
+                  : "Your profile is now part of the College Fast Forward network — surfaced to relevant students from your school looking in your industry. There's nothing else you need to do right now."}
               </p>
               <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: TEAL, margin: '0 0 24px' }}>
                 You just helped make the network better for everyone.

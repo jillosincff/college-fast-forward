@@ -119,6 +119,7 @@ Deno.serve(async (req) => {
       console.log('✅ Existing parent profile updated:', lowerEmail);
       return Response.json({
         success: true,
+        already_exists: true,
         user: {
           id: updated.id,
           email: lowerEmail,
