@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 export default function ParentAllSet() {
@@ -71,35 +70,6 @@ export default function ParentAllSet() {
           we'll let you know immediately.
           Until then, you don't need to do a thing.
         </p>
-
-        {/* Profile CTAs */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 0 }}>
-          <button onClick={() => navigate('ParentHome')} style={{
-            background: '#E85D20', color: '#fff', border: 'none',
-            borderRadius: 12, padding: '14px 32px',
-            fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600,
-            cursor: 'pointer', minHeight: 'auto', marginBottom: 12,
-            width: '100%', maxWidth: 360,
-          }}>
-            View My Profile →
-          </button>
-          <button onClick={() => navigate('Profile')} style={{
-            background: 'none', color: '#E85D20', border: 'none',
-            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-            cursor: 'pointer', minHeight: 'auto', marginBottom: 8,
-            padding: 0,
-          }}>
-            Edit my profile →
-          </button>
-          <button onClick={() => navigate('FastIQDashboard?gift=open')} style={{
-            background: 'none', color: '#E85D20', border: 'none',
-            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-            cursor: 'pointer', minHeight: 'auto', marginBottom: 32,
-            padding: 0,
-          }}>
-            Gift FastIQ to my student →
-          </button>
-        </div>
 
         {/* Share box */}
         <div style={{
