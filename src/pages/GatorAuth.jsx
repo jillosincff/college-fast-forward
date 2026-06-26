@@ -224,9 +224,13 @@ export default function GatorAuth() {
       const hasPersona = !!user.persona?.trim();
       const onboardingDone = user.onboarding_completed === true;
 
-      // Fully onboarded → send to dashboard
+      // Fully onboarded → send to the right home.
+      // Parents/alumni use the Profile hub; students use the dashboard.
+      // (FreeTierDashboard is a student-only view and renders blank for parents.)
       if (hasPersona && onboardingDone) {
-        window.location.hash = '#/FreeTierDashboard';
+        const isParentOrAlum = user.persona === 'parent' || user.persona === 'alumni'
+          || user.roles?.includes('parent') || user.roles?.includes('alumni');
+        window.location.hash = isParentOrAlum ? '#/Profile' : '#/FreeTierDashboard';
         return;
       }
 

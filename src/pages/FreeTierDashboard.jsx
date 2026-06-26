@@ -189,7 +189,23 @@ export default function FreeTierDashboard() {
 
   useEffect(() => {
     const loadUser = async () => {
-      const u = await base44.auth.me();
+      let u;
+      try {
+        u = await base44.auth.me();
+      } catch {
+        // Session check failed — bounce to login instead of hanging on a blank loader
+        base44.auth.redirectToLogin('/#/FreeTierDashboard');
+        return;
+      }
+      // FreeTierDashboard is a student-only view. Parents/alumni must never render
+      // here — the student render tree assumes student-shaped data and blanks out.
+      // Send them to their Profile hub instead.
+      const isParentOrAlum = u?.persona === 'parent' || u?.persona === 'alumni'
+        || u?.roles?.includes('parent') || u?.roles?.includes('alumni');
+      if (isParentOrAlum) {
+        window.location.hash = '#/Profile';
+        return;
+      }
       setUser(u);
       // Show first-visit toast once per session
       const key = 'cff_ftd_welcomed';
