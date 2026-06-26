@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,14 +13,14 @@ Deno.serve(async (req) => {
 
   try {
     const base44 = createClientFromRequest(req);
-    
-    const { 
-      email, 
-      full_name, 
-      school, 
-      school_name, 
+
+    const {
+      email,
+      full_name,
+      school,
+      school_name,
       school_code,
-      company, 
+      company,
       career_background,
       industry,
       industries,
@@ -44,56 +44,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user already exists
-    const existingUsers = await base44.asServiceRole.entities.User.filter({ email: email.toLowerCase().trim() });
-    if (existingUsers && existingUsers.length > 0) {
-      return Response.json(
-        { error: 'A user with this email already exists' },
-        { status: 409, headers: corsHeaders }
-      );
-    }
+    const lowerEmail = email.toLowerCase().trim();
 
-    // Generate temporary password
-    const tempPassword = Math.random().toString(36).slice(-12) + 'Aa1!';
-
-    // Create user via Supabase admin API
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return Response.json(
-        { error: 'Server configuration error' },
-        { status: 500, headers: corsHeaders }
-      );
-    }
-
-    const { createClient } = await import('npm:@supabase/supabase-js@2.39.3');
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
-
-    // Create auth user
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: email.toLowerCase().trim(),
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: {
-        full_name: full_name.trim(),
-        persona: userPersona,
-        onboarding_completed: true,
-      }
-    });
-
-    if (authError) {
-      console.error('Auth creation error:', authError);
-      return Response.json(
-        { error: `Failed to create user: ${authError.message}` },
-        { status: 500, headers: corsHeaders }
-      );
-    }
-
-    // Update user entity with parent profile data
-    await base44.asServiceRole.entities.User.update(authUser.user.id, {
+    // Build the profile payload shared by create + update paths
+    const profileData = {
       persona: userPersona,
       roles: [userPersona],
       full_name: full_name.trim(),
@@ -115,19 +69,44 @@ Deno.serve(async (req) => {
       onboarding_completed_at: new Date().toISOString(),
       pledge_taken: true,
       pledge_taken_at: new Date().toISOString(),
+    };
+
+    // If a user with this email already exists, just update their profile
+    const existingUsers = await base44.asServiceRole.entities.User.filter({ email: lowerEmail });
+    if (existingUsers && existingUsers.length > 0) {
+      const updated = await base44.asServiceRole.entities.User.update(existingUsers[0].id, profileData);
+      console.log('✅ Existing parent profile updated:', lowerEmail);
+      return Response.json({
+        success: true,
+        user: {
+          id: updated.id,
+          email: lowerEmail,
+          full_name: profileData.full_name,
+          persona: userPersona,
+        },
+        message: 'Parent profile updated successfully',
+      }, { headers: corsHeaders });
+    }
+
+    // Create the parent record (platform-native, no external auth provider)
+    const newUser = await base44.asServiceRole.entities.User.create({
+      email: lowerEmail,
+      email_verified: false,
+      profile_completion_score: 30,
+      ...profileData,
     });
 
-    console.log('✅ Parent created:', email);
+    console.log('✅ Parent created:', lowerEmail);
 
     return Response.json({
       success: true,
       user: {
-        id: authUser.user.id,
-        email: authUser.user.email,
-        full_name: full_name.trim(),
+        id: newUser.id,
+        email: lowerEmail,
+        full_name: profileData.full_name,
         persona: userPersona,
       },
-      message: 'Parent user created successfully'
+      message: 'Parent user created successfully',
     }, { headers: corsHeaders });
 
   } catch (error) {

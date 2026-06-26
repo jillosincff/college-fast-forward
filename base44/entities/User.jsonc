@@ -60,8 +60,6 @@
     }
   },
   "required": [
-    "persona",
-    "linkedin_optimization",
-    "linkedin_optimization_generated_at"
+    "persona"
   ]
 }
