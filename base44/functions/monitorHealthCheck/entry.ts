@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
     let apiRes, payload, upstreamError = null;
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
+      const timeout = setTimeout(() => controller.abort(), 8000);
       try {
         apiRes = await fetch(`${JSEARCH_BASE}/search?${params.toString()}`, {
           method: 'GET',
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
         clearTimeout(timeout);
       }
     } catch (e) {
-      upstreamError = e.name === 'AbortError' ? 'Upstream job API timed out (15s)' : `Upstream job API unreachable: ${e.message}`;
+      upstreamError = e.name === 'AbortError' ? 'Upstream job API timed out (8s)' : `Upstream job API unreachable: ${e.message}`;
     }
     const elapsed = Date.now() - start;
 
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
       companies.length >= 1 &&
       !!companies[0]?.name &&
       !!companies[0]?.job_title &&
-      elapsed < 20000;
+      elapsed < 8000;
 
     return Response.json({
       status: passed ? 'pass' : 'degraded',
