@@ -226,12 +226,18 @@ Deno.serve(async (req) => {
 
     console.log(`[getLiveJobMatchesFn] Built pool of ${allCompanies.length} verified real jobs`);
 
-    // Cache the FULL pool so Load More can paginate without re-fetching
-    await base44.asServiceRole.entities.User.update(user.id, {
-      job_leads_cache: allCompanies,
-      job_leads_cached_at: new Date().toISOString(),
-      job_leads_cache_key: goalKey,
-    });
+    // Cache the FULL pool so Load More can paginate without re-fetching.
+    // Best-effort only — a cache-write failure (e.g. auth/permission hiccup) must
+    // NEVER crash the request and turn a healthy job fetch into a 500.
+    try {
+      await base44.asServiceRole.entities.User.update(user.id, {
+        job_leads_cache: allCompanies,
+        job_leads_cached_at: new Date().toISOString(),
+        job_leads_cache_key: goalKey,
+      });
+    } catch (cacheErr) {
+      console.warn(`[getLiveJobMatchesFn] Cache write skipped: ${cacheErr.message}`);
+    }
 
     return Response.json({ companies: allCompanies, from_cache: false });
 
