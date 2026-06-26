@@ -3,6 +3,7 @@ import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 import { base44 } from '@/api/base44Client';
+import SchoolAutocomplete from '@/components/parent-landing/SchoolAutocomplete';
 
 // ── Design Tokens — match StudentLandingPage ──────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -370,13 +371,12 @@ export default function ParentLandingPage({ onStudentClick }) {
               </div>
               <div>
                 <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Which school would you like to support? *</label>
-                <input
-                  className="parent-input"
-                  style={inputStyle}
-                  placeholder="e.g. University of Florida"
+                <SchoolAutocomplete
                   value={form.school}
-                  onChange={e => setForm(f => ({ ...f, school: e.target.value }))}
-                  required
+                  onChange={(val) => setForm(f => ({ ...f, school: val }))}
+                  inputStyle={inputStyle}
+                  indigo={INDIGO}
+                  textColor={TEXT}
                 />
               </div>
               <div>
