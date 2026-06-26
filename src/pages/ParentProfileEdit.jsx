@@ -53,13 +53,18 @@ export default function ParentProfileEdit() {
   const [photoImported, setPhotoImported] = useState(false);
   const [photoImportError, setPhotoImportError] = useState('');
 
-  // Logged-out parent clicking the email link: send them to sign in, then
-  // bring them right back to this edit page.
+  // Logged-out parent clicking the email link: send them to GatorAuth (the app's
+  // own light/purple sign-in screen) with a return path back to this page.
+  // We avoid base44.auth.redirectToLogin() because it round-trips through Base44's
+  // black hosted login screen and drops the hash route on the way back.
+  const [redirecting, setRedirecting] = useState(false);
   useEffect(() => {
-    if (!isLoadingAuth && !user) {
-      base44.auth.redirectToLogin(window.location.href);
+    if (!isLoadingAuth && !user && !redirecting) {
+      setRedirecting(true);
+      const returnTo = encodeURIComponent('/ParentProfileEdit');
+      window.location.replace(window.location.origin + '/#/GatorAuth?returnTo=' + returnTo);
     }
-  }, [isLoadingAuth, user]);
+  }, [isLoadingAuth, user, redirecting]);
 
   useEffect(() => {
     if (!document.getElementById('ppe-satoshi')) {
@@ -107,8 +112,9 @@ export default function ParentProfileEdit() {
   };
 
   if (!user) return (
-    <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', background: BG, display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center', justifyContent: 'center', fontFamily: SF }}>
       <div style={{ width: 32, height: 32, border: `3px solid ${INDIGO}`, borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 500, color: TEXT2, margin: 0 }}>Taking you to sign in…</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );

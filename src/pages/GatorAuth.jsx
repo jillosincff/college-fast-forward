@@ -176,7 +176,14 @@ export default function GatorAuth() {
       }
       // Do NOT set cff_onboarding_type for plain sign-ins — returning users must not see onboarding
     } catch (e) { /* private browsing */ }
-    base44.auth.loginWithProvider('google', window.location.origin + '/#/GatorAuth');
+    // Preserve any returnTo so Google sign-ins land back on the intended page.
+    let returnSuffix = '';
+    try {
+      const hashQuery = window.location.hash.split('?')[1] || '';
+      const returnTo = new URLSearchParams(hashQuery).get('returnTo');
+      if (returnTo) returnSuffix = '?returnTo=' + encodeURIComponent(returnTo);
+    } catch (e) { /* ignore */ }
+    base44.auth.loginWithProvider('google', window.location.origin + '/#/GatorAuth' + returnSuffix);
   };
 
   useEffect(() => {
@@ -223,6 +230,18 @@ export default function GatorAuth() {
 
       const hasPersona = !!user.persona?.trim();
       const onboardingDone = user.onboarding_completed === true;
+
+      // Honor an explicit returnTo (e.g. parent clicking the "confirm your profile"
+      // email link). Only for already-onboarded users so we never short-circuit a
+      // brand-new user's onboarding.
+      try {
+        const hashQuery = window.location.hash.split('?')[1] || '';
+        const returnTo = new URLSearchParams(hashQuery).get('returnTo');
+        if (returnTo && hasPersona && onboardingDone) {
+          window.location.hash = '#' + decodeURIComponent(returnTo);
+          return;
+        }
+      } catch (e) { /* ignore */ }
 
       // Fully onboarded → send to the right home.
       // Parents/alumni only have the one-page signup form + success screen —
