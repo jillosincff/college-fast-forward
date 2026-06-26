@@ -79,7 +79,7 @@ function FAQItem({ q, a }) {
 export default function ParentLandingPage({ onStudentClick }) {
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
-  const [form, setForm] = useState({ fullName: '', jobTitle: '', industry: '', linkedin: '', email: '', school: '', persona: 'parent' });
+  const [form, setForm] = useState({ fullName: '', jobTitle: '', company: '', industry: '', linkedin: '', email: '', school: '', persona: 'parent' });
   const [submitted, setSubmitted] = useState(false);
   const [submittedInfo, setSubmittedInfo] = useState({ school: '', email: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -109,7 +109,7 @@ export default function ParentLandingPage({ onStudentClick }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.fullName || !form.jobTitle || !form.industry || !form.email || !form.school) return;
+    if (!form.fullName || !form.jobTitle || !form.company || !form.industry || !form.email || !form.school) return;
     setSubmitting(true);
     
     try {
@@ -123,7 +123,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         school: form.school.trim(),
         school_name: form.school.trim(),
         school_code: schoolCode,
-        company: form.industry.trim(),
+        company: form.company.trim(),
         career_background: form.jobTitle.trim(),
         industry: form.industry.trim(),
         industries: [form.industry.trim()],
@@ -391,11 +391,23 @@ export default function ParentLandingPage({ onStudentClick }) {
                 />
               </div>
               <div>
-                <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Industry / Company *</label>
+                <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Company *</label>
                 <input
                   className="parent-input"
                   style={inputStyle}
-                  placeholder="e.g. Software Engineering at Google"
+                  placeholder="e.g. Google"
+                  value={form.company}
+                  onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
+                  required
+                />
+                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '6px 0 0', lineHeight: 1.4 }}>This is what students search by — enter the company name on its own.</p>
+              </div>
+              <div>
+                <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Industry *</label>
+                <input
+                  className="parent-input"
+                  style={inputStyle}
+                  placeholder="e.g. Software Engineering"
                   value={form.industry}
                   onChange={e => setForm(f => ({ ...f, industry: e.target.value }))}
                   required
