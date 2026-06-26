@@ -1,30 +1,39 @@
 import React, { useState } from 'react';
 
-const dmSans = "'DM Sans', system-ui, sans-serif";
-const playfair = "'Playfair Display', Georgia, serif";
-const ORANGE = '#E85D20';
+// ── Brand tokens — purple/Satoshi system (matches ParentLandingPage / ParentAllSet) ──
+const dmSans = "'Satoshi', 'Inter', system-ui, sans-serif";
+const playfair = "'Satoshi', 'Inter', system-ui, sans-serif";
+const ORANGE = '#6d28d9'; // kept name for backward-compat; now the brand indigo
+
+const INDIGO = '#6d28d9';
+const INDIGO_HOVER = '#5b21b6';
+const GRAD = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
+const TEXT = '#0f172a';
+const TEXT2 = '#475569';
+const TEXT3 = '#94a3b8';
 
 export { dmSans, playfair, ORANGE };
 
 export function OnboardingShell({ children }) {
   return (
     <div style={{
-      minHeight: '100vh', background: '#0d1117',
+      minHeight: '100vh', background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '40px 20px',
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         @keyframes poFadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-        .po3-field:focus { border-color: rgba(232,93,32,0.5) !important; outline: none; box-shadow: 0 0 0 2px rgba(232,93,32,0.1); }
-        .po3-field::placeholder { color: rgba(244,240,232,0.25); }
-        .po3-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(244,240,232,0.4)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+        .po3-field:focus { border-color: ${INDIGO} !important; outline: none; background: #fff !important; box-shadow: 0 0 0 3px rgba(109,40,217,0.1); }
+        .po3-field::placeholder { color: #94a3b8; }
+        .po3-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
       `}</style>
       <div style={{
         maxWidth: 520, width: '100%',
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: '#ffffff',
+        border: '1px solid rgba(109,40,217,0.18)',
         borderRadius: 24, padding: '40px 36px',
+        boxShadow: '0 24px 48px rgba(109,40,217,0.12), 0 4px 12px rgba(0,0,0,0.06)',
         animation: 'poFadeUp 0.5s ease both',
       }}>
         {children}
@@ -39,7 +48,7 @@ export function ProgressDots({ current, total }) {
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} style={{
           width: 8, height: 8, borderRadius: '50%',
-          background: i === current ? ORANGE : 'rgba(255,255,255,0.15)',
+          background: i === current ? INDIGO : 'rgba(15,23,42,0.12)',
           transition: 'background 0.3s',
         }} />
       ))}
@@ -51,11 +60,11 @@ export function FieldLabel({ children, required }) {
   return (
     <label style={{
       display: 'block', fontFamily: dmSans, fontSize: 12, fontWeight: 600,
-      color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em',
+      color: TEXT2, letterSpacing: '0.03em',
       marginBottom: 8,
     }}>
       {children}
-      {required && <span style={{ color: ORANGE, marginLeft: 3 }}>*</span>}
+      {required && <span style={{ color: INDIGO, marginLeft: 3 }}>*</span>}
     </label>
   );
 }
@@ -69,12 +78,12 @@ export function FieldInput({ value, onChange, placeholder, type = 'text', error,
       onChange={onChange}
       placeholder={placeholder}
       style={{
-        width: '100%', background: 'rgba(255,255,255,0.06)',
-        border: `0.5px solid ${error ? 'rgba(229,57,53,0.6)' : 'rgba(255,255,255,0.1)'}`,
-        borderRadius: 12, padding: '12px 16px',
-        fontFamily: dmSans, fontSize: 14, fontWeight: 300,
-        color: '#f4f0e8', boxSizing: 'border-box',
-        transition: 'border-color 0.2s',
+        width: '100%', background: '#F8FAFC',
+        border: `1.5px solid ${error ? 'rgba(244,63,94,0.6)' : '#E2E8F0'}`,
+        borderRadius: 12, padding: '14px 16px',
+        fontFamily: dmSans, fontSize: 15, fontWeight: 400,
+        color: TEXT, boxSizing: 'border-box',
+        transition: 'border-color 0.2s, background 0.2s',
       }}
       {...rest}
     />
@@ -88,18 +97,18 @@ export function FieldSelect({ value, onChange, placeholder, options, error }) {
       value={value}
       onChange={onChange}
       style={{
-        width: '100%', background: 'rgba(255,255,255,0.06)',
-        border: `0.5px solid ${error ? 'rgba(229,57,53,0.6)' : 'rgba(255,255,255,0.1)'}`,
-        borderRadius: 12, padding: '12px 16px', paddingRight: 36,
-        fontFamily: dmSans, fontSize: 14, fontWeight: 300,
-        color: value ? '#f4f0e8' : 'rgba(244,240,232,0.25)',
+        width: '100%', background: '#F8FAFC',
+        border: `1.5px solid ${error ? 'rgba(244,63,94,0.6)' : '#E2E8F0'}`,
+        borderRadius: 12, padding: '14px 16px', paddingRight: 36,
+        fontFamily: dmSans, fontSize: 15, fontWeight: 400,
+        color: value ? TEXT : '#94a3b8',
         boxSizing: 'border-box', transition: 'border-color 0.2s',
         cursor: 'pointer',
       }}
     >
-      <option value="" style={{ color: '#888', background: '#1a1a2e' }}>{placeholder}</option>
+      <option value="" style={{ color: '#94a3b8', background: '#fff' }}>{placeholder}</option>
       {options.map(opt => (
-        <option key={opt} value={opt} style={{ color: '#f4f0e8', background: '#1a1a2e' }}>{opt}</option>
+        <option key={opt} value={opt} style={{ color: TEXT, background: '#fff' }}>{opt}</option>
       ))}
     </select>
   );
@@ -108,8 +117,8 @@ export function FieldSelect({ value, onChange, placeholder, options, error }) {
 export function HelperText({ children, error }) {
   return (
     <p style={{
-      fontFamily: dmSans, fontSize: 11, fontWeight: 300,
-      color: error ? 'rgba(229,57,53,0.7)' : 'rgba(244,240,232,0.3)',
+      fontFamily: dmSans, fontSize: 12, fontWeight: 400,
+      color: error ? '#e11d48' : TEXT3,
       marginTop: 6, lineHeight: 1.5,
     }}>
       {children}
@@ -127,13 +136,14 @@ export function PrimaryButton({ children, onClick, disabled, loading }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width: '100%', padding: 14, borderRadius: 100, border: 'none',
-        background: disabled ? 'rgba(232,93,32,0.4)' : (hovered ? '#d44e14' : ORANGE),
-        color: '#fff', fontFamily: dmSans, fontSize: 15, fontWeight: 500,
+        width: '100%', padding: 16, borderRadius: 14, border: 'none',
+        background: disabled ? '#94A3B8' : GRAD,
+        color: '#fff', fontFamily: dmSans, fontSize: 15, fontWeight: 700,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.2s', minHeight: 'auto',
+        transition: 'all 0.2s', minHeight: 52,
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        opacity: disabled ? 0.6 : 1,
+        boxShadow: disabled ? 'none' : '0 8px 28px rgba(109,40,217,0.30)',
+        transform: hovered && !disabled ? 'scale(1.02)' : 'scale(1)',
       }}
     >
       {children}
@@ -152,8 +162,8 @@ export function BackLink({ onClick }) {
       style={{
         display: 'block', width: '100%', marginTop: 24, textAlign: 'center',
         background: 'none', border: 'none',
-        fontFamily: dmSans, fontSize: 12, fontWeight: 300,
-        color: hovered ? 'rgba(244,240,232,0.5)' : 'rgba(244,240,232,0.3)',
+        fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+        color: hovered ? TEXT2 : TEXT3,
         cursor: 'pointer', transition: 'color 0.2s', minHeight: 'auto',
       }}
     >

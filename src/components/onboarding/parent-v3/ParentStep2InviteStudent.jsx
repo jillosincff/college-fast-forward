@@ -147,14 +147,14 @@ export default function ParentStep2InviteStudent({
         <div style={{ marginBottom: 28 }}>
           {invitedStudents.map((s, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
-              <span style={{ color: '#4CAF50', fontSize: 14 }}>✓</span>
-              <span style={{ fontFamily: dmSans, fontSize: 14, color: '#fff' }}>
+              <span style={{ color: '#16a34a', fontSize: 14 }}>✓</span>
+              <span style={{ fontFamily: dmSans, fontSize: 14, color: '#0f172a' }}>
                 Invitation sent to <strong>{s.name}</strong> at {s.university}
               </span>
             </div>
           ))}
         </div>
-        <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 28 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#475569', textAlign: 'center', lineHeight: 1.6, marginBottom: 28 }}>
           {"You've invited"} {MAX_STUDENTS} {"students — that's the maximum per account."}
         </p>
         <PrimaryButton onClick={onSkip}>
@@ -196,10 +196,10 @@ export default function ParentStep2InviteStudent({
       {showForm && (
         <>
           {/* Header */}
-          <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#f4f0e8', textAlign: 'center', lineHeight: 1.3, marginBottom: 8 }}>
+          <h1 style={{ fontFamily: playfair, fontWeight: 800, fontSize: 26, color: '#0f172a', textAlign: 'center', lineHeight: 1.3, marginBottom: 8, letterSpacing: '-0.02em' }}>
             {totalInvited > 0 ? 'Invite another student.' : "Now let's get your student set up."}
           </h1>
-          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#475569', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
             {totalInvited > 0
               ? `You can invite up to ${MAX_STUDENTS} students total.`
               : "Send them an invitation to join College Fast Forward. They'll create their own profile and get access to FastIQ."
@@ -246,11 +246,11 @@ export default function ParentStep2InviteStudent({
               }}
               placeholder="Start typing their school..."
               style={{
-                width: '100%', background: 'rgba(255,255,255,0.06)',
-                border: `0.5px solid ${errors.studentUniversity ? 'rgba(229,57,53,0.6)' : 'rgba(255,255,255,0.1)'}`,
-                borderRadius: 12, padding: '12px 16px',
-                fontFamily: dmSans, fontSize: 14, fontWeight: 300,
-                color: '#f4f0e8', boxSizing: 'border-box', transition: 'border-color 0.2s',
+                width: '100%', background: '#F8FAFC',
+                border: `1.5px solid ${errors.studentUniversity ? 'rgba(244,63,94,0.6)' : '#E2E8F0'}`,
+                borderRadius: 12, padding: '14px 16px',
+                fontFamily: dmSans, fontSize: 15, fontWeight: 400,
+                color: '#0f172a', boxSizing: 'border-box', transition: 'border-color 0.2s',
               }}
             />
             {errors.studentUniversity
@@ -261,9 +261,9 @@ export default function ParentStep2InviteStudent({
             {showDropdown && (
               <div style={{
                 position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-                background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
+                background: '#ffffff', border: '1px solid #E2E8F0',
                 borderRadius: 12, marginTop: 4, maxHeight: 200, overflowY: 'auto',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                boxShadow: '0 8px 24px rgba(15,23,42,0.12)',
               }}>
                 {filteredSchools.map(school => (
                   <button
@@ -273,11 +273,11 @@ export default function ParentStep2InviteStudent({
                     style={{
                       display: 'block', width: '100%', textAlign: 'left',
                       padding: '10px 16px', background: 'none', border: 'none',
-                      fontFamily: dmSans, fontSize: 13, fontWeight: 400,
-                      color: '#f4f0e8', cursor: 'pointer', minHeight: 'auto',
+                      fontFamily: dmSans, fontSize: 14, fontWeight: 400,
+                      color: '#0f172a', cursor: 'pointer', minHeight: 'auto',
                       transition: 'background 0.15s',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#f1f5ff'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
                   >
                     {school}
@@ -299,12 +299,12 @@ export default function ParentStep2InviteStudent({
             style={{
               display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
               background: 'none', border: 'none',
-              fontFamily: dmSans, fontSize: 13, fontWeight: 300,
-              color: 'rgba(244,240,232,0.4)', cursor: 'pointer',
+              fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+              color: '#94a3b8', cursor: 'pointer',
               transition: 'color 0.2s', minHeight: 'auto',
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.6)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#475569'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; }}
           >
             {totalInvited > 0 ? '← Back to confirmation' : "I'll invite them later"}
           </button>

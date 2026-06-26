@@ -43,6 +43,7 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
   const [schoolSearch, setSchoolSearch] = useState(formData.school || '');
   const [showDropdown, setShowDropdown] = useState(false);
   const [filteredSchools, setFilteredSchools] = useState([]);
+  const [error, setError] = useState('');
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -71,7 +72,12 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
   };
 
   const handleContinue = () => {
-    if (schoolSearch.trim()) onUpdate({ school: schoolSearch.trim() });
+    if (!schoolSearch.trim() || !(formData.fullName || '').trim() || !(formData.company || '').trim()) {
+      setError('Please add your name, school, and company so students can find you.');
+      return;
+    }
+    setError('');
+    onUpdate({ school: schoolSearch.trim() });
     onNext();
   };
 
@@ -80,20 +86,20 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
       <ProgressDots current={0} total={2} />
 
       {/* Header */}
-      <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#f4f0e8', textAlign: 'center', lineHeight: 1.3, marginBottom: 8 }}>
+      <h1 style={{ fontFamily: playfair, fontWeight: 800, fontSize: 26, color: '#0f172a', textAlign: 'center', lineHeight: 1.3, marginBottom: 8, letterSpacing: '-0.02em' }}>
         Help students find you.
       </h1>
-      <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+      <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#475569', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
         This helps us match your connections to students who need them.
       </p>
 
       {/* Framing card */}
-      <div style={{ borderLeft: '3px solid #E85D20', padding: '16px 20px', background: 'rgba(255,255,255,0.04)', borderRadius: '0 10px 10px 0', marginBottom: 24 }}>
+      <div style={{ borderLeft: '3px solid #6d28d9', padding: '16px 20px', background: 'rgba(109,40,217,0.06)', borderRadius: '0 10px 10px 0', marginBottom: 24 }}>
         <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, margin: '0 0 10px' }}>WHY WE ASK</p>
-        <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.82)', margin: '0 0 10px', lineHeight: 1.7 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#334155', margin: '0 0 10px', lineHeight: 1.7 }}>
           Your network helps students get in front of the right people — whether you’re currently working, between roles, retired, or a stay-at-home parent with years of professional experience.
         </p>
-        <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.82)', margin: '0 0 10px', lineHeight: 1.7 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#334155', margin: '0 0 10px', lineHeight: 1.7 }}>
           When you share your background, students who need someone exactly like you can find you and reach out directly — for guidance, advice, or introductions.
         </p>
         <p style={{ fontFamily: dmSans, fontSize: 14, color: ORANGE, margin: 0, lineHeight: 1.7, fontStyle: 'italic' }}>
@@ -111,21 +117,22 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
             onUpdate({ school: e.target.value });
           }}
           placeholder="Start typing their university..."
+          className="po3-field"
           style={{
-            width: '100%', background: 'rgba(255,255,255,0.06)',
-            border: '0.5px solid rgba(255,255,255,0.1)',
-            borderRadius: 12, padding: '12px 16px',
-            fontFamily: dmSans, fontSize: 14, fontWeight: 300,
-            color: '#f4f0e8', boxSizing: 'border-box',
+            width: '100%', background: '#F8FAFC',
+            border: '1.5px solid #E2E8F0',
+            borderRadius: 12, padding: '14px 16px',
+            fontFamily: dmSans, fontSize: 15, fontWeight: 400,
+            color: '#0f172a', boxSizing: 'border-box',
           }}
         />
         <HelperText>This connects you to the right school network.</HelperText>
         {showDropdown && (
           <div style={{
             position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-            background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
+            background: '#ffffff', border: '1px solid #E2E8F0',
             borderRadius: 12, marginTop: 4, maxHeight: 200, overflowY: 'auto',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+            boxShadow: '0 8px 24px rgba(15,23,42,0.12)',
           }}>
             {filteredSchools.map(school => (
               <button
@@ -135,10 +142,10 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
                 style={{
                   display: 'block', width: '100%', textAlign: 'left',
                   padding: '10px 16px', background: 'none', border: 'none',
-                  fontFamily: dmSans, fontSize: 13, color: '#f4f0e8',
+                  fontFamily: dmSans, fontSize: 14, color: '#0f172a',
                   cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#f1f5ff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
               >
                 {school}
@@ -160,16 +167,15 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
 
       {/* Company */}
       <div style={{ marginBottom: 20 }}>
-        <FieldLabel>
-          Where do you work or have you worked?{' '}
-          <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+        <FieldLabel required>
+          Where do you work or have you worked?
         </FieldLabel>
         <FieldInput
           value={formData.company || ''}
           onChange={e => onUpdate({ company: e.target.value })}
           placeholder="e.g. Disney, Goldman Sachs, Google..."
         />
-        <HelperText>Not currently working? No problem — your past experience and network are just as valuable here.</HelperText>
+        <HelperText>This is what students search by — enter your company on its own (most recent is fine if you're between roles).</HelperText>
       </div>
 
       {/* Career Background */}
@@ -279,6 +285,9 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
       </div>
 
       {/* CTA */}
+      {error && (
+        <p style={{ fontFamily: dmSans, fontSize: 13, color: '#e11d48', textAlign: 'center', margin: '0 0 12px', lineHeight: 1.5 }}>{error}</p>
+      )}
       <PrimaryButton onClick={handleContinue} loading={loading} disabled={loading}>
         {loading ? 'Saving...' : 'Continue — help students find me →'}
       </PrimaryButton>
