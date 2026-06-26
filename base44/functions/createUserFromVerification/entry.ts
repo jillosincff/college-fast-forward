@@ -87,6 +87,15 @@ Deno.serve(async (req) => {
 
     console.log("User created successfully:", newUser.id);
 
+    // Notify admin of the new signup (non-blocking — never fail signup over this)
+    try {
+      await base44.functions.invoke('notifyAdminNewSignup', {
+        full_name, email: lowerCaseEmail, persona: 'student',
+      });
+    } catch (notifyErr) {
+      console.error('[createUserFromVerification] Admin notify failed:', notifyErr.message);
+    }
+
     // Check if a parent gifted FastIQ to this email before they signed up
     try {
       // Find parents who have this email in their pending_fastiq_gift_emails array

@@ -139,6 +139,18 @@ Deno.serve(async (req) => {
 
     await upsertNetworkProfile();
 
+    // Notify admin of the new signup (non-blocking)
+    try {
+      await base44.functions.invoke('notifyAdminNewSignup', {
+        full_name: profileData.full_name,
+        email: lowerEmail,
+        persona: userPersona,
+        school_name: profileData.school_name,
+      });
+    } catch (notifyErr) {
+      console.error('[createParentUser] Admin notify failed:', notifyErr.message);
+    }
+
     console.log('✅ Parent created:', lowerEmail);
 
     return Response.json({
