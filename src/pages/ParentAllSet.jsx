@@ -1,5 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
+
+// ── Brand tokens (matched to StudentLandingPage) ──
+const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
+const BG = '#f8f9ff';
+const CARD = '#ffffff';
+const TEXT = '#0f172a';
+const TEXT2 = '#475569';
+const TEXT3 = '#94a3b8';
+const INDIGO = '#6d28d9';
+const INDIGO_DIM = '#5b21b6';
+const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
+const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
+const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
+const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
 
 export default function ParentAllSet() {
   const { user } = useAuth();
@@ -7,85 +22,80 @@ export default function ParentAllSet() {
   const schoolName = user?.school_name || user?.school || 'the network';
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    if (!document.getElementById('pas-satoshi')) {
+      const l = document.createElement('link');
+      l.id = 'pas-satoshi'; l.rel = 'stylesheet';
+      l.href = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap';
+      document.head.appendChild(l);
+    }
+  }, []);
+
   return (
     <div style={{
-      minHeight: '100vh',
-      background: '#0A0A0A',
-      display: 'flex', alignItems: 'center',
-      justifyContent: 'center',
+      minHeight: '100vh', background: BG, fontFamily: SF,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '48px 24px',
     }}>
       <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
 
         {/* Check */}
         <div style={{
-          width: 80, height: 80, borderRadius: '50%',
-          background: '#4ADE80',
-          border: 'none',
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'center', fontSize: 42,
+          width: 76, height: 76, borderRadius: '50%',
+          background: GRAD_INDIGO,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 32px',
-          fontFamily: 'Apple Color Emoji, Segoe UI Emoji, sans-serif',
-          color: '#fff', fontWeight: 700, lineHeight: 1,
+          boxShadow: '0 12px 32px rgba(109,40,217,0.32)',
         }}>
-          ✓
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
         </div>
 
         {/* Label */}
         <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 11, fontWeight: 700,
-          textTransform: 'uppercase', letterSpacing: '0.15em',
-          color: '#E85D20', margin: '0 0 16px',
+          fontFamily: SF, fontSize: 12, fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.10em',
+          color: INDIGO, margin: '0 0 14px',
         }}>
-          YOU'RE ALL SET
+          You're all set
         </p>
 
         {/* Headline */}
         <h1 style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 'clamp(28px, 4vw, 38px)',
-          fontWeight: 700, color: '#fff',
-          margin: '0 0 20px', lineHeight: 1.3,
+          fontFamily: SF, fontSize: 'clamp(28px, 7vw, 40px)',
+          fontWeight: 900, color: TEXT, letterSpacing: '-0.03em',
+          margin: '0 0 20px', lineHeight: 1.15,
         }}>
           You're live in the network{firstName ? `, ${firstName}` : ''}.
         </h1>
 
         {/* Body */}
         <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 16, color: 'rgba(255,255,255,0.75)',
-          lineHeight: 1.8, margin: '0 0 16px',
+          fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: TEXT2,
+          lineHeight: 1.7, margin: '0 0 16px',
         }}>
-          Your profile is now visible to students across 
-          the {schoolName} network.
+          Your profile is now visible to students across the {schoolName} network.
         </p>
 
         <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 16, color: 'rgba(255,255,255,0.75)',
-          lineHeight: 1.8, margin: '0 0 48px',
+          fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: TEXT2,
+          lineHeight: 1.7, margin: '0 0 40px',
         }}>
-          The moment a student reaches out —
-          we'll let you know immediately.
-          Until then, you don't need to do a thing.
+          The moment a student reaches out — we'll let you know immediately. Until then, you don't need to do a thing.
         </p>
 
         {/* Share box */}
         <div style={{
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 14, padding: '20px 24px',
-          marginBottom: 32,
+          background: CARD, border: `1px solid ${INDIGO_BORDER}`,
+          borderRadius: 18, padding: 'clamp(20px, 5vw, 28px)',
+          boxShadow: SHADOW_LG, marginBottom: 28,
         }}>
           <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, color: 'rgba(255,255,255,0.6)',
-            margin: '0 0 16px', lineHeight: 1.6,
+            fontFamily: SF, fontSize: 14, color: TEXT2,
+            margin: '0 0 18px', lineHeight: 1.6, fontWeight: 500,
           }}>
-            Know another parent who'd want to help?
-            Every parent makes the network stronger
-            for everyone's kids.
+            Know another parent who'd want to help? Every parent makes the network stronger for everyone's kids.
           </p>
           <button
             onClick={() => {
@@ -94,14 +104,14 @@ export default function ParentAllSet() {
               setTimeout(() => setCopied(false), 2500);
             }}
             style={{
-              background: 'none',
-              border: '1px solid rgba(232,93,32,0.4)',
-              borderRadius: 8, padding: '10px 20px',
-              fontSize: 13, fontWeight: 600,
-              color: '#E85D20', cursor: 'pointer',
-              fontFamily: "'DM Sans', sans-serif",
-              width: '100%',
+              width: '100%', fontFamily: SF, fontSize: 15, fontWeight: 700,
+              color: '#fff', background: GRAD_INDIGO, border: 'none',
+              borderRadius: 12, padding: '14px 20px', cursor: 'pointer',
+              minHeight: 52, boxShadow: '0 8px 24px rgba(109,40,217,0.30)',
+              transition: 'all 0.2s ease', touchAction: 'manipulation',
             }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
           >
             {copied ? '✓ Link copied!' : 'Share College Fast Forward →'}
           </button>
@@ -109,10 +119,8 @@ export default function ParentAllSet() {
 
         {/* Closing line */}
         <p style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 18, color: 'rgba(255,255,255,0.4)',
-          fontStyle: 'italic', margin: 0,
-          lineHeight: 1.6,
+          fontFamily: SF, fontSize: 15, color: TEXT3,
+          margin: 0, lineHeight: 1.6, fontWeight: 500,
         }}>
           Thank you for being part of something new.
         </p>
