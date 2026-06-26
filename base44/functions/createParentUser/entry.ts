@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
         role_title: (career_background || '').trim() || 'Professional',
         linkedin_url: linkedin_url?.trim() || '',
         school_code: sc,
+        persona: userPersona,
         is_active: visible_in_directory !== false,
       };
       const existingProfiles = await base44.asServiceRole.entities.ParentNetworkProfile.filter({

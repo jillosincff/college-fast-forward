@@ -30,6 +30,15 @@
       "type": "string",
       "description": "Strict university ecosystem key, e.g. UF, USC, OSU. Ensures a parent only surfaces for their university's students."
     },
+    "persona": {
+      "type": "string",
+      "enum": [
+        "parent",
+        "alumni"
+      ],
+      "default": "parent",
+      "description": "Whether this network member is a parent or an alum \u2014 lets students distinguish parent vs alumni warm connections."
+    },
     "is_active": {
       "type": "boolean",
       "default": true,

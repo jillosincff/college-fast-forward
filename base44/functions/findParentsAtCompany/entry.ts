@@ -37,6 +37,7 @@ Deno.serve(async (req) => {
         role_title: p.role_title || null,
         company: p.company_name,
         linkedin_url: p.linkedin_url || null,
+        persona: p.persona || 'parent',
       })),
     });
   } catch (error) {
