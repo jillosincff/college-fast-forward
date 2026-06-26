@@ -55,16 +55,14 @@ export default function ParentProfileEdit() {
 
   // Logged-out parent clicking the email link: send them to GatorAuth (the app's
   // own light/purple sign-in screen) with a return path back to this page.
-  // We avoid base44.auth.redirectToLogin() because it round-trips through Base44's
-  // black hosted login screen and drops the hash route on the way back.
-  const [redirecting, setRedirecting] = useState(false);
+  // Use React Router navigation (hash assignment) — a window.location.replace
+  // race with the router was bouncing users to the landing page instead.
   useEffect(() => {
-    if (!isLoadingAuth && !user && !redirecting) {
-      setRedirecting(true);
+    if (!isLoadingAuth && !user) {
       const returnTo = encodeURIComponent('/ParentProfileEdit');
-      window.location.replace(window.location.origin + '/#/GatorAuth?returnTo=' + returnTo);
+      navigate('/GatorAuth?returnTo=' + returnTo);
     }
-  }, [isLoadingAuth, user, redirecting]);
+  }, [isLoadingAuth, user]);
 
   useEffect(() => {
     if (!document.getElementById('ppe-satoshi')) {
