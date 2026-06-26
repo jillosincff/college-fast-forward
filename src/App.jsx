@@ -58,6 +58,7 @@ import JillOsinoffDashboard from '@/pages/JillOsinoffDashboard';
 import CompanyIntelDashboard from '@/pages/CompanyIntelDashboard';
 import CliffChat from '@/pages/CliffChat';
 import Stats from '@/pages/Stats';
+import BlogAICareerTools from '@/pages/BlogAICareerTools';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -155,6 +156,9 @@ const AuthenticatedApp = () => {
       <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
       <Route path="/ResetPassword" element={<ResetPassword />} />
       <Route path="/Unsubscribe" element={<Unsubscribe />} />
+
+      {/* Public SEO blog article — no guard, no app chrome */}
+      <Route path="/blog/ai-career-tools-college-students" element={<BlogAICareerTools />} />
 
       {/* Onboarding routes — no guard */}
       <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
