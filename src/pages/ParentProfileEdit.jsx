@@ -5,9 +5,20 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { ArrowLeft, Linkedin, Loader2 } from 'lucide-react';
 import { proxycurlService } from '@/functions/proxycurlService';
 
-const dmSans = "'DM Sans', system-ui, sans-serif";
-const playfair = "'Playfair Display', Georgia, serif";
-const ORANGE = '#E85D20';
+// ── Brand tokens (matched to ParentAllSet / StudentLandingPage) ──
+const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
+const BG = '#f8f9ff';
+const CARD = '#ffffff';
+const TEXT = '#0f172a';
+const TEXT2 = '#475569';
+const TEXT3 = '#94a3b8';
+const INDIGO = '#6d28d9';
+const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
+const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
+const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
+const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+const FIELD_BG = '#f8f9ff';
+const FIELD_BORDER = '#e2e8f0';
 
 const INDUSTRIES = [
   'Accounting & Finance', 'Advertising & Marketing', 'Architecture & Design',
@@ -41,6 +52,15 @@ export default function ParentProfileEdit() {
   const [importingPhoto, setImportingPhoto] = useState(false);
   const [photoImported, setPhotoImported] = useState(false);
   const [photoImportError, setPhotoImportError] = useState('');
+
+  useEffect(() => {
+    if (!document.getElementById('ppe-satoshi')) {
+      const l = document.createElement('link');
+      l.id = 'ppe-satoshi'; l.rel = 'stylesheet';
+      l.href = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap';
+      document.head.appendChild(l);
+    }
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -79,39 +99,43 @@ export default function ParentProfileEdit() {
   };
 
   if (!user) return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 32, height: 32, border: `3px solid ${INDIGO}`, borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column', padding: '0 0 80px' }}>
+    <div style={{ minHeight: '100vh', background: BG, fontFamily: SF, display: 'flex', flexDirection: 'column', padding: '0 0 80px' }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       {/* Header */}
       <div style={{
-        background: '#0d1117', borderBottom: '1px solid #1A1A1A',
+        background: CARD, borderBottom: `1px solid ${FIELD_BORDER}`,
         padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 16,
         position: 'sticky', top: 0, zIndex: 10,
       }}>
         <button onClick={() => navigate('Profile')} style={{
-          background: 'none', border: 'none', cursor: 'pointer', color: ORANGE,
+          background: 'none', border: 'none', cursor: 'pointer', color: INDIGO,
           display: 'flex', alignItems: 'center', gap: 6,
-          fontFamily: dmSans, fontSize: 13, fontWeight: 500, minHeight: 'auto', padding: 0,
+          fontFamily: SF, fontSize: 13, fontWeight: 600, minHeight: 'auto', padding: 0,
         }}>
           <ArrowLeft size={16} /> Back to Profile
         </button>
       </div>
 
       <div style={{ flex: 1, maxWidth: 540, margin: '0 auto', width: '100%', padding: '40px 24px' }}>
-        <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#f4f0e8', textAlign: 'center', lineHeight: 1.3, marginBottom: 8 }}>
+        <h1 style={{ fontFamily: SF, fontWeight: 900, fontSize: 28, color: TEXT, textAlign: 'center', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: 10 }}>
           Update your profile
         </h1>
-        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
+        <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 400, color: TEXT2, textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
           Keep your information current so students can find and connect with you.
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{
+          background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 18,
+          padding: 'clamp(20px, 5vw, 28px)', boxShadow: SHADOW,
+          display: 'flex', flexDirection: 'column', gap: 20,
+        }}>
           {/* Full Name */}
           <div>
             <FieldLabel required>Full Name</FieldLabel>
@@ -126,7 +150,7 @@ export default function ParentProfileEdit() {
           <div>
             <FieldLabel>
               Where do you work or have you worked?{' '}
-              <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+              <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
             </FieldLabel>
             <FieldInput
               value={form.company}
@@ -139,7 +163,7 @@ export default function ParentProfileEdit() {
           <div>
             <FieldLabel>
               Career Background{' '}
-              <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+              <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
             </FieldLabel>
             <FieldInput
               value={form.careerBackground}
@@ -152,7 +176,7 @@ export default function ParentProfileEdit() {
           <div>
             <FieldLabel>
               What industry are you in or have you worked in?{' '}
-              <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+              <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
             </FieldLabel>
             <FieldSelect
               value={form.industry}
@@ -174,12 +198,12 @@ export default function ParentProfileEdit() {
                     onClick={() => setForm(f => ({ ...f, introWillingness: opt.value }))}
                     style={{
                       flex: 1, minWidth: 110, padding: '10px 12px', borderRadius: 100,
-                      fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+                      fontFamily: SF, fontSize: 13, fontWeight: 600,
                       cursor: 'pointer', transition: 'all 0.2s',
                       minHeight: 'auto', whiteSpace: 'nowrap', textAlign: 'center',
-                      background: selected ? ORANGE : 'transparent',
-                      color: selected ? '#fff' : ORANGE,
-                      border: `1.5px solid ${ORANGE}`,
+                      background: selected ? GRAD_INDIGO : 'transparent',
+                      color: selected ? '#fff' : INDIGO,
+                      border: `1.5px solid ${selected ? 'transparent' : INDIGO_BORDER}`,
                     }}
                   >
                     {opt.label}
@@ -193,7 +217,7 @@ export default function ParentProfileEdit() {
           <div>
             <FieldLabel>
               LinkedIn Profile{' '}
-              <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+              <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
             </FieldLabel>
             <div style={{ display: 'flex', gap: 8 }}>
               <FieldInput
@@ -228,10 +252,10 @@ export default function ParentProfileEdit() {
                   }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8,
-                    fontFamily: dmSans, fontSize: 13, fontWeight: 600,
-                    color: photoImported ? '#4CAF50' : '#0a66c2',
-                    background: photoImported ? 'rgba(76,175,80,0.1)' : 'rgba(10,102,194,0.1)',
-                    border: `1px solid ${photoImported ? 'rgba(76,175,80,0.3)' : 'rgba(10,102,194,0.3)'}`,
+                    fontFamily: SF, fontSize: 13, fontWeight: 600,
+                    color: photoImported ? '#16a34a' : '#0a66c2',
+                    background: photoImported ? 'rgba(22,163,74,0.08)' : 'rgba(10,102,194,0.08)',
+                    border: `1px solid ${photoImported ? 'rgba(22,163,74,0.3)' : 'rgba(10,102,194,0.3)'}`,
                     borderRadius: 8, padding: '8px 16px', cursor: importingPhoto || photoImported ? 'not-allowed' : 'pointer',
                     minHeight: 'auto', opacity: importingPhoto ? 0.7 : 1,
                   }}
@@ -240,7 +264,7 @@ export default function ParentProfileEdit() {
                   {photoImported ? '✓ Photo imported!' : importingPhoto ? 'Importing...' : 'Import profile photo from LinkedIn'}
                 </button>
                 {photoImportError && (
-                  <p style={{ fontFamily: dmSans, fontSize: 12, color: '#EF4444', margin: '6px 0 0' }}>{photoImportError}</p>
+                  <p style={{ fontFamily: SF, fontSize: 12, color: '#dc2626', margin: '6px 0 0' }}>{photoImportError}</p>
                 )}
               </div>
             )}
@@ -248,11 +272,11 @@ export default function ParentProfileEdit() {
 
           {/* Directory Visibility */}
           <div>
-            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 12 }}>
+            <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: INDIGO, marginBottom: 12 }}>
               Directory Visibility
             </p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-              <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#f4f0e8', lineHeight: 1.5 }}>
+              <span style={{ fontFamily: SF, fontSize: 14, fontWeight: 400, color: TEXT, lineHeight: 1.5 }}>
                 Make my profile visible to students
               </span>
               <button
@@ -260,7 +284,7 @@ export default function ParentProfileEdit() {
                 onClick={() => setForm(f => ({ ...f, directoryVisible: !f.directoryVisible }))}
                 style={{
                   width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
-                  background: form.directoryVisible ? ORANGE : '#444',
+                  background: form.directoryVisible ? INDIGO : '#cbd5e1',
                   position: 'relative', transition: 'background 0.2s', flexShrink: 0, minHeight: 'auto', minWidth: 44,
                 }}
               >
@@ -279,10 +303,12 @@ export default function ParentProfileEdit() {
             disabled={saving || saved}
             style={{
               width: '100%', padding: '14px 24px', borderRadius: 100, border: 'none',
-              background: saved ? '#4CAF50' : ORANGE, color: '#fff',
-              fontFamily: dmSans, fontSize: 15, fontWeight: 600,
+              background: saved ? '#16a34a' : GRAD_INDIGO, color: '#fff',
+              fontFamily: SF, fontSize: 15, fontWeight: 700,
               cursor: saving || saved ? 'not-allowed' : 'pointer',
-              opacity: saving ? 0.7 : 1, minHeight: 'auto', transition: 'background 0.2s', marginTop: 8,
+              opacity: saving ? 0.7 : 1, minHeight: 52,
+              boxShadow: saved ? 'none' : '0 8px 24px rgba(109,40,217,0.30)',
+              transition: 'all 0.2s', marginTop: 8,
             }}
           >
             {saved ? '✓ Saved!' : saving ? 'Saving...' : 'Save Changes'}
@@ -296,12 +322,12 @@ export default function ParentProfileEdit() {
 function FieldLabel({ children, required }) {
   return (
     <label style={{
-      display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-      textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE,
+      display: 'block', fontFamily: SF, fontSize: 11, fontWeight: 700,
+      textTransform: 'uppercase', letterSpacing: '0.1em', color: INDIGO,
       marginBottom: 8,
     }}>
       {children}
-      {required && <span style={{ color: '#ff6b6b' }}>*</span>}
+      {required && <span style={{ color: '#dc2626' }}>*</span>}
     </label>
   );
 }
@@ -313,10 +339,12 @@ function FieldInput({ value, onChange, placeholder }) {
       onChange={onChange}
       placeholder={placeholder}
       style={{
-        width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid #2A2A2A',
-        borderRadius: 10, padding: '12px 14px', fontFamily: dmSans, fontSize: 14,
-        color: '#fff', outline: 'none', boxSizing: 'border-box',
+        width: '100%', background: FIELD_BG, border: `1px solid ${FIELD_BORDER}`,
+        borderRadius: 10, padding: '12px 14px', fontFamily: SF, fontSize: 14,
+        color: TEXT, outline: 'none', boxSizing: 'border-box',
       }}
+      onFocus={e => { e.currentTarget.style.borderColor = INDIGO; }}
+      onBlur={e => { e.currentTarget.style.borderColor = FIELD_BORDER; }}
     />
   );
 }
@@ -327,14 +355,14 @@ function FieldSelect({ value, onChange, options }) {
       value={value}
       onChange={onChange}
       style={{
-        width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid #2A2A2A',
-        borderRadius: 10, padding: '12px 14px', fontFamily: dmSans, fontSize: 14,
-        color: value ? '#fff' : '#666', outline: 'none', cursor: 'pointer', boxSizing: 'border-box',
+        width: '100%', background: FIELD_BG, border: `1px solid ${FIELD_BORDER}`,
+        borderRadius: 10, padding: '12px 14px', fontFamily: SF, fontSize: 14,
+        color: value ? TEXT : TEXT3, outline: 'none', cursor: 'pointer', boxSizing: 'border-box',
       }}
     >
       <option value="">Select industry</option>
       {options.map(opt => (
-        <option key={opt} value={opt} style={{ background: '#1A1A1A' }}>
+        <option key={opt} value={opt} style={{ background: '#fff', color: TEXT }}>
           {opt}
         </option>
       ))}
