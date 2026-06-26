@@ -117,7 +117,8 @@ export default function ParentAllSet() {
           </button>
         </div>
 
-        {/* Dashboard link */}
+        {/* Dashboard link — admin only */}
+        {user?.role === 'admin' && (
         <a
           href="#/admin"
           style={{
@@ -132,6 +133,7 @@ export default function ParentAllSet() {
         >
           Go to my dashboard →
         </a>
+        )}
 
         {/* Closing line */}
         <p style={{
