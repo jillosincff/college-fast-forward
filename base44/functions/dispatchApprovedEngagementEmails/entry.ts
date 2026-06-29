@@ -13,6 +13,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 const FROM_EMAIL = 'support@collegefastforward.com';
 const FROM_NAME = 'Jill at CFF';
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
+const APP_BASE = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
+
+// base64(userId:email) — matches handleUnsubscribe token format
+function makeUnsubToken(userId, email) {
+  return btoa(`${userId}:${email}`).replace(/=/g, '');
+}
+
+function appendUnsubFooter(bodyHtml, bodyText, unsubUrl) {
+  const htmlFooter = `<p style="margin-top:32px;font-size:12px;color:#94a3b8;line-height:1.5">You're receiving this because you signed up for College Fast Forward.<br/><a href="${unsubUrl}" style="color:#94a3b8;text-decoration:underline">Unsubscribe</a> from these emails.</p>`;
+  const textFooter = `\n\n—\nYou're receiving this because you signed up for College Fast Forward.\nUnsubscribe: ${unsubUrl}`;
+  return {
+    html: (bodyHtml || '') + htmlFooter,
+    text: (bodyText || '') + textFooter,
+  };
+}
 
 async function sendEmail(toEmail, toName, subject, bodyHtml, bodyText) {
   const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
@@ -66,16 +81,26 @@ Deno.serve(async (req) => {
     const hasMore = page.length > limit;
     const toSend = page.slice(0, limit);
 
-    const results = { sent: 0, failed: 0, errors: [] };
+    const results = { sent: 0, failed: 0, skipped: 0, errors: [] };
 
     for (const email of toSend) {
       try {
+        // Honor unsubscribes — skip anyone who opted out via EmailPreference
+        const prefs = await db.EmailPreference.filter({ user_id: email.user_id });
+        if (prefs.length > 0 && prefs[0].all_emails === false) {
+          await db.EngagementEmail.update(email.id, { status: 'skipped', rejected_reason: 'unsubscribed' });
+          results.skipped++;
+          continue;
+        }
+
+        const unsubUrl = `${APP_BASE}/#Unsubscribe?token=${makeUnsubToken(email.user_id, email.user_email)}`;
+        const withFooter = appendUnsubFooter(email.body_html, email.body_text, unsubUrl);
         const msgId = await sendEmail(
           email.user_email,
           email.user_name,
           email.subject,
-          email.body_html,
-          email.body_text,
+          withFooter.html,
+          withFooter.text,
         );
         await db.EngagementEmail.update(email.id, {
           status: 'sent',
@@ -98,6 +123,7 @@ Deno.serve(async (req) => {
       success: true,
       sent: results.sent,
       failed: results.failed,
+      skipped: results.skipped,
       hasMore,
       errors: results.errors,
     });
