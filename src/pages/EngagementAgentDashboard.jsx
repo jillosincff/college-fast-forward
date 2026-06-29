@@ -83,10 +83,18 @@ export default function EngagementAgentDashboard() {
         });
       }
       setActionMsg(`Approved ${toApprove.length} emails — sending now...`);
-      // 2. Dispatch all approved emails
-      const res = await base44.functions.invoke('dispatchApprovedEngagementEmails', {});
-      const d = res.data;
-      setActionMsg(`Done: Sent ${d.sent}, Failed ${d.failed}`);
+      // 2. Dispatch all approved emails — loop through every batch (function sends 50 at a time)
+      let totalSent = 0, totalFailed = 0, hasMore = true, guard = 0;
+      while (hasMore && guard < 50) {
+        guard++;
+        const res = await base44.functions.invoke('dispatchApprovedEngagementEmails', {});
+        const d = res.data || {};
+        totalSent += d.sent || 0;
+        totalFailed += d.failed || 0;
+        hasMore = !!d.hasMore;
+        setActionMsg(`Sending... ${totalSent} sent so far`);
+      }
+      setActionMsg(`Done: Sent ${totalSent}, Failed ${totalFailed}`);
       await loadEmails();
     } catch (e) {
       setActionMsg(`Error: ${e.message}`);
@@ -143,9 +151,18 @@ export default function EngagementAgentDashboard() {
     setDispatching(true);
     setActionMsg('');
     try {
-      const res = await base44.functions.invoke('dispatchApprovedEngagementEmails', {});
-      const d = res.data;
-      setActionMsg(`Sent: ${d.sent}, Failed: ${d.failed}`);
+      // Loop through every batch — the function only sends 50 emails per call
+      let totalSent = 0, totalFailed = 0, hasMore = true, guard = 0;
+      while (hasMore && guard < 50) {
+        guard++;
+        const res = await base44.functions.invoke('dispatchApprovedEngagementEmails', {});
+        const d = res.data || {};
+        totalSent += d.sent || 0;
+        totalFailed += d.failed || 0;
+        hasMore = !!d.hasMore;
+        setActionMsg(`Sending... ${totalSent} sent so far`);
+      }
+      setActionMsg(`Sent: ${totalSent}, Failed: ${totalFailed}`);
       await loadEmails();
     } catch (e) {
       setActionMsg(`Error: ${e.message}`);
