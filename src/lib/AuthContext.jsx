@@ -22,6 +22,7 @@ const AuthProviderInner = ({ children }) => {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
+      await attributePendingReferral(currentUser);
     } catch (error) {
       setIsAuthenticated(false);
       setUser(null);
@@ -30,6 +31,24 @@ const AuthProviderInner = ({ children }) => {
       }
     } finally {
       setIsLoadingAuth(false);
+    }
+  };
+
+  // One-time attribution: if the user arrived via a ?ref__= referral link, the
+  // code was stashed in localStorage by App.jsx. On first authenticated load,
+  // write it onto the user (only if not already attributed) so the referral
+  // leaderboard can credit the referrer.
+  const attributePendingReferral = async (currentUser) => {
+    try {
+      const pendingRef = localStorage.getItem('pendingReferralCode');
+      if (!pendingRef || !currentUser || currentUser.referral_code_used) return;
+      await base44.auth.updateMe({
+        referral_code_used: pendingRef,
+        referral_used_at: new Date().toISOString(),
+      });
+      localStorage.removeItem('pendingReferralCode');
+    } catch (e) {
+      console.warn('Referral attribution failed:', e);
     }
   };
 

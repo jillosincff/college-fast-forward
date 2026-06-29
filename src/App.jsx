@@ -240,6 +240,9 @@ function App() {
       const hashParams = new URLSearchParams(hashQuery);
       const pref = searchParams.get('pref') || hashParams.get('pref');
       if (pref) localStorage.setItem('cff_parent_ref_code', pref.toUpperCase());
+      // Student referral code from the referral blast (?ref__=CODE)
+      const refCode = searchParams.get('ref__') || hashParams.get('ref__');
+      if (refCode) localStorage.setItem('pendingReferralCode', refCode);
     } catch {}
   }, []);
 

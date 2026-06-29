@@ -32,6 +32,15 @@
       "type": "number",
       "description": "ATS resume score from analysis (0-100)"
     },
+    "referral_code_used": {
+      "type": "string",
+      "description": "Referral code this user signed up with (from a ?ref__= referral link)"
+    },
+    "referral_used_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the referral code was attributed to this user"
+    },
     "linkedin_optimization": {
       "type": "object",
       "properties": {
