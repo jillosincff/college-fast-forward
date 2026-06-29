@@ -30,6 +30,7 @@ export default function EngagementAgentDashboard() {
   const [previewEmail, setPreviewEmail] = useState(null);
   const [runningAgent, setRunningAgent] = useState(false);
   const [dispatching, setDispatching] = useState(false);
+  const [approvingAll, setApprovingAll] = useState(false);
   const [rejectingStale, setRejectingStale] = useState(false);
   const [syncingOpens, setSyncingOpens] = useState(false);
   const [actionMsg, setActionMsg] = useState('');
@@ -67,6 +68,28 @@ export default function EngagementAgentDashboard() {
     });
     setEmails(prev => prev.map(e => e.id === id ? { ...e, status: 'rejected' } : e));
     if (previewEmail?.id === id) setPreviewEmail(prev => ({ ...prev, status: 'rejected' }));
+  };
+
+  const approveAllPending = async () => {
+    setApprovingAll(true);
+    setActionMsg('');
+    try {
+      const toApprove = emails.filter(e => e.status === 'pending_approval');
+      for (const email of toApprove) {
+        await base44.functions.invoke('updateEngagementEmail', {
+          id: email.id,
+          updates: { status: 'approved', approved_by: user?.email, approved_at: new Date().toISOString() },
+        });
+      }
+      setEmails(prev => prev.map(e => e.status === 'pending_approval'
+        ? { ...e, status: 'approved', approved_by: user?.email }
+        : e));
+      setActionMsg(`Approved ${toApprove.length} emails — click "Send approved" to dispatch them.`);
+    } catch (e) {
+      setActionMsg(`Error: ${e.message}`);
+    } finally {
+      setApprovingAll(false);
+    }
   };
 
   const runAgent = async (dryRun = false) => {
@@ -214,11 +237,18 @@ export default function EngagementAgentDashboard() {
               <TabsTrigger value="sent" className="data-[state=active]:bg-slate-700">Sent ({sent.length})</TabsTrigger>
               <TabsTrigger value="rejected" className="data-[state=active]:bg-slate-700">Rejected ({rejected.length})</TabsTrigger>
             </TabsList>
-            {approved.length > 0 && (
-              <Button size="sm" onClick={dispatchApproved} disabled={dispatching} className="bg-green-700 hover:bg-green-600 text-white">
-                <Send className="w-4 h-4 mr-1" /> {dispatching ? 'Sending...' : `Send ${approved.length} approved`}
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {pending.length > 0 && (
+                <Button size="sm" onClick={approveAllPending} disabled={approvingAll} className="bg-blue-700 hover:bg-blue-600 text-white">
+                  <CheckCircle className="w-4 h-4 mr-1" /> {approvingAll ? 'Approving...' : `Select All (${pending.length})`}
+                </Button>
+              )}
+              {approved.length > 0 && (
+                <Button size="sm" onClick={dispatchApproved} disabled={dispatching} className="bg-green-700 hover:bg-green-600 text-white">
+                  <Send className="w-4 h-4 mr-1" /> {dispatching ? 'Sending...' : `Send ${approved.length} approved`}
+                </Button>
+              )}
+            </div>
           </div>
 
           {['pending', 'approved', 'sent', 'rejected'].map(tab => {
