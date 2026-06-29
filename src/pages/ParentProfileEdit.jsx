@@ -49,6 +49,10 @@ export default function ParentProfileEdit() {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Any edit to the form clears the saved confirmation so the button
+  // accurately reflects whether there are unsaved changes.
+  const updateForm = (updater) => { setSaved(false); setForm(updater); };
   const [importingPhoto, setImportingPhoto] = useState(false);
   const [photoImported, setPhotoImported] = useState(false);
   const [photoImportError, setPhotoImportError] = useState('');
@@ -103,7 +107,6 @@ export default function ParentProfileEdit() {
       if (refreshUser) refreshUser().catch(() => {});
       try { sessionStorage.removeItem('directoryDataCache'); } catch (e) { /* ok */ }
       setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
     } finally {
       setSaving(false);
     }
@@ -139,7 +142,7 @@ export default function ParentProfileEdit() {
             <FieldLabel required>Full Name</FieldLabel>
             <FieldInput
               value={form.fullName}
-              onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
+              onChange={e => updateForm(f => ({ ...f, fullName: e.target.value }))}
               placeholder="Your full name"
             />
           </div>
@@ -152,7 +155,7 @@ export default function ParentProfileEdit() {
             </FieldLabel>
             <FieldInput
               value={form.company}
-              onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
+              onChange={e => updateForm(f => ({ ...f, company: e.target.value }))}
               placeholder="e.g. Disney, Goldman Sachs, Google..."
             />
           </div>
@@ -165,7 +168,7 @@ export default function ParentProfileEdit() {
             </FieldLabel>
             <FieldInput
               value={form.careerBackground}
-              onChange={e => setForm(f => ({ ...f, careerBackground: e.target.value }))}
+              onChange={e => updateForm(f => ({ ...f, careerBackground: e.target.value }))}
               placeholder="e.g. 20 years in finance, former marketing exec, retired teacher..."
             />
           </div>
@@ -178,7 +181,7 @@ export default function ParentProfileEdit() {
             </FieldLabel>
             <FieldSelect
               value={form.industry}
-              onChange={e => setForm(f => ({ ...f, industry: e.target.value }))}
+              onChange={e => updateForm(f => ({ ...f, industry: e.target.value }))}
               options={INDUSTRIES}
             />
           </div>
@@ -193,7 +196,7 @@ export default function ParentProfileEdit() {
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setForm(f => ({ ...f, introWillingness: opt.value }))}
+                    onClick={() => updateForm(f => ({ ...f, introWillingness: opt.value }))}
                     style={{
                       flex: 1, minWidth: 110, padding: '10px 12px', borderRadius: 100,
                       fontFamily: SF, fontSize: 13, fontWeight: 600,
@@ -220,7 +223,7 @@ export default function ParentProfileEdit() {
             <div style={{ display: 'flex', gap: 8 }}>
               <FieldInput
                 value={form.linkedinUrl}
-                onChange={e => { setForm(f => ({ ...f, linkedinUrl: e.target.value })); setPhotoImportError(''); setPhotoImported(false); }}
+                onChange={e => { updateForm(f => ({ ...f, linkedinUrl: e.target.value })); setPhotoImportError(''); setPhotoImported(false); }}
                 placeholder="https://linkedin.com/in/yourname"
               />
             </div>
@@ -279,7 +282,7 @@ export default function ParentProfileEdit() {
               </span>
               <button
                 type="button"
-                onClick={() => setForm(f => ({ ...f, directoryVisible: !f.directoryVisible }))}
+                onClick={() => updateForm(f => ({ ...f, directoryVisible: !f.directoryVisible }))}
                 style={{
                   width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
                   background: form.directoryVisible ? INDIGO : '#cbd5e1',
@@ -311,6 +314,15 @@ export default function ParentProfileEdit() {
           >
             {saved ? '✓ Saved!' : saving ? 'Saving...' : 'Save Changes'}
           </button>
+
+          {saved && (
+            <p style={{
+              fontFamily: SF, fontSize: 13, fontWeight: 600, color: '#16a34a',
+              textAlign: 'center', margin: '-4px 0 0', lineHeight: 1.5,
+            }}>
+              Your profile has been saved. You can close this page or keep editing.
+            </p>
+          )}
         </div>
       </div>
     </div>
