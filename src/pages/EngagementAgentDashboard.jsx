@@ -70,21 +70,24 @@ export default function EngagementAgentDashboard() {
     if (previewEmail?.id === id) setPreviewEmail(prev => ({ ...prev, status: 'rejected' }));
   };
 
-  const approveAllPending = async () => {
+  const approveAndSendAllPending = async () => {
     setApprovingAll(true);
     setActionMsg('');
     try {
       const toApprove = emails.filter(e => e.status === 'pending_approval');
+      // 1. Approve every pending email
       for (const email of toApprove) {
         await base44.functions.invoke('updateEngagementEmail', {
           id: email.id,
           updates: { status: 'approved', approved_by: user?.email, approved_at: new Date().toISOString() },
         });
       }
-      setEmails(prev => prev.map(e => e.status === 'pending_approval'
-        ? { ...e, status: 'approved', approved_by: user?.email }
-        : e));
-      setActionMsg(`Approved ${toApprove.length} emails — click "Send approved" to dispatch them.`);
+      setActionMsg(`Approved ${toApprove.length} emails — sending now...`);
+      // 2. Dispatch all approved emails
+      const res = await base44.functions.invoke('dispatchApprovedEngagementEmails', {});
+      const d = res.data;
+      setActionMsg(`Done: Sent ${d.sent}, Failed ${d.failed}`);
+      await loadEmails();
     } catch (e) {
       setActionMsg(`Error: ${e.message}`);
     } finally {
@@ -239,8 +242,8 @@ export default function EngagementAgentDashboard() {
             </TabsList>
             <div className="flex gap-2">
               {pending.length > 0 && (
-                <Button size="sm" onClick={approveAllPending} disabled={approvingAll} className="bg-blue-700 hover:bg-blue-600 text-white">
-                  <CheckCircle className="w-4 h-4 mr-1" /> {approvingAll ? 'Approving...' : `Select All (${pending.length})`}
+                <Button size="sm" onClick={approveAndSendAllPending} disabled={approvingAll} className="bg-green-700 hover:bg-green-600 text-white">
+                  <Send className="w-4 h-4 mr-1" /> {approvingAll ? 'Sending...' : `Approve & Send All (${pending.length})`}
                 </Button>
               )}
               {approved.length > 0 && (
