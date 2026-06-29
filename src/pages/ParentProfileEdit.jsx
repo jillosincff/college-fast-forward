@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Linkedin, Loader2 } from 'lucide-react';
 import { proxycurlService } from '@/functions/proxycurlService';
+import { upsertMyParentNetworkProfile } from '@/functions/upsertMyParentNetworkProfile';
 
 // ── Brand tokens (matched to ParentAllSet / StudentLandingPage) ──
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -104,6 +105,9 @@ export default function ParentProfileEdit() {
         visible_in_directory: form.directoryVisible,
         ...(form.linkedinUrl.trim() ? { linkedin_url: form.linkedinUrl.trim() } : {}),
       });
+      // Sync the matchable ParentNetworkProfile so these edits actually surface
+      // to students — the matcher only ever reads that entity, not the User record.
+      await upsertMyParentNetworkProfile({}).catch(() => {});
       if (refreshUser) refreshUser().catch(() => {});
       try { sessionStorage.removeItem('directoryDataCache'); } catch (e) { /* ok */ }
       setSaved(true);
