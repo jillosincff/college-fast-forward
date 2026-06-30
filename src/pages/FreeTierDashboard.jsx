@@ -202,7 +202,8 @@ export default function FreeTierDashboard() {
       // They only have the signup form + success screen, so send them there.
       const isParentOrAlum = u?.persona === 'parent' || u?.persona === 'alumni'
         || u?.roles?.includes('parent') || u?.roles?.includes('alumni');
-      if (isParentOrAlum) {
+      // Preview bypass: owner account can view the student dashboard directly.
+      if (isParentOrAlum && u?.email !== 'josinoff@gmail.com') {
         window.location.hash = '#/ParentAllSet';
         return;
       }
