@@ -21,14 +21,19 @@ const MAX_PER_COMPANY = 2;
 // Is this posting genuinely entry-level? Uses JSearch's structured experience data
 // (most reliable), falling back to title keywords.
 function isEntryLevel(job, title) {
+  // A clearly-senior TITLE always disqualifies — even when structured experience
+  // data says otherwise. (e.g. "Enterprise Product Marketing, GTM lead" carried
+  // no_experience_required but is plainly a senior role.) Interns/explicit
+  // entry titles are exempt from the senior gate.
+  if (SENIOR_TITLE_RE.test(title) && !ENTRY_TITLE_RE.test(title) && !INTERN_TITLE_RE.test(title)) {
+    return false;
+  }
   const exp = job.job_required_experience;
   if (exp) {
     if (exp.no_experience_required === true) return true;
     const months = exp.required_experience_in_months;
     if (typeof months === 'number') return months <= 24; // <= 2 years = entry
   }
-  // No structured data: trust the title — block clearly-senior, allow the rest
-  if (SENIOR_TITLE_RE.test(title) && !ENTRY_TITLE_RE.test(title)) return false;
   return true;
 }
 

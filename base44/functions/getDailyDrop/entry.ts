@@ -16,60 +16,90 @@ const STATE_NAMES = {
   WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia',
 };
 
-// ── Coresignal Job Data API fetcher (public job postings) ─────────────────
-async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults = 50 }) {
+// ── Coresignal Base Jobs API fetcher (BACKUP live source) ─────────────────
+// Real 2-step flow: POST /search/filter → array of job IDs, then
+// GET /collect/{id} for each (capped, in parallel). Used when the primary
+// (OpenWeb Ninja) is throttled/timing out, so students still get LIVE jobs
+// instead of curated filler.
+async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults = 20 }) {
   console.log('[fetchCoresignalJobs] START - role:', role, 'location:', location, 'seeking:', seeking);
-  const INTERN_TERMS = ['intern', 'internship', 'co-op'];
-  const ENTRY_TERMS = ['junior', 'coordinator', 'entry level', 'graduate', 'trainee', 'new grad', 'analyst', 'assistant'];
-  const levelTerms = seeking === 'internship' ? INTERN_TERMS : seeking === 'fulltime' ? ENTRY_TERMS : [...INTERN_TERMS, ...ENTRY_TERMS];
-  
+  const BASE = 'https://api.coresignal.com/cdapi/v2/job_base';
+  const headers = { 'apikey': apiKey, 'Content-Type': 'application/json', 'Accept': 'application/json' };
+
   try {
-    // Coresignal job postings API v2 - simpler GET request with query params
-    const params = new URLSearchParams({
-      size: maxResults.toString(),
-      job_title: role || 'analyst',
-      location: location || 'United States',
-      seniority: levelTerms.join(','),
-      date_from: '30',
-    });
+    // ── Step 1: search for matching job IDs ──
+    const levelTerms = seeking === 'internship'
+      ? '(intern) OR (internship)'
+      : seeking === 'fulltime'
+        ? '(junior) OR (entry level) OR (graduate) OR (associate) OR (coordinator)'
+        : '(intern) OR (junior) OR (entry level) OR (graduate) OR (associate)';
+    const baseRole = (role || 'analyst').trim();
+    const titleFilter = `(${baseRole}) AND (${levelTerms})`;
 
-    const url = `https://api.coresignal.com/cdapi/v2/job/search?${params.toString()}`;
-    console.log('[fetchCoresignalJobs] GET URL:', url);
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/json',
-      },
-    });
+    // Last 30 days only, active postings, US.
+    const createdGte = new Date(Date.now() - 30 * 86400000)
+      .toISOString().replace('T', ' ').slice(0, 19);
+    const filterBody = {
+      title: titleFilter,
+      country: 'United States',
+      application_active: true,
+      created_at_gte: createdGte,
+    };
+    if (location && !/remote/i.test(location)) filterBody.location = location.split(',')[0].trim();
 
-    console.log('[fetchCoresignalJobs] API response status:', res.status);
-    if (!res.ok) {
-      const errorText = await res.text().catch(() => 'no body');
-      console.error('[fetchCoresignalJobs] API error:', res.status, errorText);
-      // Log the actual error for debugging
-      throw new Error(`Coresignal API ${res.status}: ${errorText}`);
+    const searchRes = await fetch(`${BASE}/search/filter`, {
+      method: 'POST', headers, body: JSON.stringify(filterBody),
+    });
+    console.log('[fetchCoresignalJobs] search status:', searchRes.status);
+    if (!searchRes.ok) {
+      console.error('[fetchCoresignalJobs] search error:', searchRes.status, (await searchRes.text().catch(() => '')).slice(0, 200));
+      return [];
+    }
+    const ids = await searchRes.json();
+    if (!Array.isArray(ids) || ids.length === 0) {
+      console.log('[fetchCoresignalJobs] no matching IDs');
+      return [];
     }
 
-    const data = await res.json();
-    console.log('[fetchCoresignalJobs] Raw response structure:', Object.keys(data).join(', '));
-    console.log('[fetchCoresignalJobs] Raw response:', JSON.stringify(data).slice(0, 300));
-    // Coresignal v2 returns 'results' array
-    const results = (data.results || []).map(job => ({
-      name: job.company_name || job.company,
-      job_title: job.job_title,
-      hiring_description: job.description || `${job.company_name || job.company} is hiring for ${job.job_title}`,
-      job_url: job.job_url || job.apply_url,
-      location: job.location || '',
-      posted_date: job.date_posted || null,
-      salary_range: job.salary ? `${job.salary_min || job.salary}-${job.salary_max || job.salary}` : null,
-      source: 'coresignal',
-    })).filter(j => j.name && j.job_title);
-    console.log('[fetchCoresignalJobs] Filtered results:', results.length);
+    // ── Step 2: collect full records for the first N IDs (parallel) ──
+    const pickIds = ids.slice(0, maxResults);
+    console.log('[fetchCoresignalJobs] collecting %d of %d IDs', pickIds.length, ids.length);
+    const records = await Promise.all(pickIds.map(async (id) => {
+      try {
+        const r = await fetch(`${BASE}/collect/${id}`, { headers });
+        if (!r.ok) return null;
+        return await r.json();
+      } catch { return null; }
+    }));
+
+    const results = records
+      .filter(Boolean)
+      .map(job => {
+        const company = job.company_name || job.company;
+        const title = job.title;
+        const url = job.url || job.external_url || job.application_url;
+        if (!company || !title || !url) return null;
+        if (SENIOR_RE.test(title)) return null;
+        const isIntern = INTERN_RE.test(title);
+        if (seeking === 'internship' && !isIntern) return null;
+        if (seeking === 'fulltime' && isIntern) return null;
+        return {
+          name: company,
+          job_title: title,
+          hiring_description: (job.description || `${company} is hiring for ${title}`).slice(0, 600),
+          job_url: url,
+          location: job.location || location || '',
+          posted_date: job.created || job.last_updated || null,
+          salary_range: null,
+          source: 'coresignal',
+        };
+      })
+      .filter(Boolean);
+
+    console.log('[fetchCoresignalJobs] usable results:', results.length);
     return results;
   } catch (e) {
-    console.error('[fetchCoresignalJobs] Fetch failed:', e.message);
-    console.error('[fetchCoresignalJobs] Stack:', e.stack);
+    console.error('[fetchCoresignalJobs] failed:', e.message);
     return [];
   }
 }
@@ -624,6 +654,27 @@ Deno.serve(async (req) => {
           console.log('[getDailyDrop] OpenWeb Ninja result: %d companies', freshJobs?.length || 0);
         } catch (e) {
           console.error('[getDailyDrop] OpenWeb Ninja fetch failed:', e.message);
+        }
+      }
+
+      // BACKUP LIVE SOURCE: if OpenWeb Ninja is throttled/timed out and returned
+      // too few live jobs, pull from Coresignal so students still get REAL jobs
+      // instead of dropping straight to the curated filler pool.
+      const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
+      if (freshJobs.length < dailyLimit && coresignalApiKey) {
+        try {
+          console.log('[getDailyDrop] OpenWeb Ninja sparse (%d) — trying Coresignal backup...', freshJobs.length);
+          const csJobs = await Promise.race([
+            fetchCoresignalJobs({ role, location, seeking, apiKey: coresignalApiKey, maxResults: dailyLimit }),
+            new Promise((resolve) => setTimeout(() => {
+              console.error('[getDailyDrop] Coresignal TIMEOUT after 20s');
+              resolve([]);
+            }, 20000)),
+          ]);
+          console.log('[getDailyDrop] Coresignal backup returned %d jobs', csJobs?.length || 0);
+          freshJobs = freshJobs.concat(csJobs || []);
+        } catch (e) {
+          console.error('[getDailyDrop] Coresignal backup failed:', e.message);
         }
       }
 
