@@ -16,6 +16,124 @@ const STATE_NAMES = {
   WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia',
 };
 
+// ── BuiltIn job scraper (BACKUP live source — no API key needed) ──────────
+// BuiltIn serves full HTML with no Cloudflare challenge, and embeds the job list
+// as JSON-LD ItemList ({name, url, description} per posting). We hit the relevant
+// entry-level category page and parse that block — clean structured data, no
+// fragile HTML scraping. Great for startup/tech roles when paid providers throttle.
+const BUILTIN_CATEGORY = {
+  marketing: 'marketing',
+  sales: 'sales',
+  finance: 'finance',
+  data: 'data-analytics',
+  analytics: 'data-analytics',
+  design: 'design-ux',
+  product: 'product',
+  operations: 'operations',
+  hr: 'hr-recruiting',
+  engineering: 'dev-engineering',
+  software: 'dev-engineering',
+  developer: 'dev-engineering',
+  project: 'project-mgmt',
+};
+
+// Map a free-text role to a BuiltIn job category slug (defaults to a broad search)
+function builtInCategoryForRole(role) {
+  const r = (role || '').toLowerCase();
+  for (const [kw, slug] of Object.entries(BUILTIN_CATEGORY)) {
+    if (r.includes(kw)) return slug;
+  }
+  return null;
+}
+
+async function fetchBuiltInJobs({ role, location, seeking, maxResults = 20 }) {
+  console.log('[fetchBuiltInJobs] START - role:', role, 'location:', location, 'seeking:', seeking);
+  try {
+    // BuiltIn has clean entry-level category URLs. Interns use the /internships path.
+    const category = builtInCategoryForRole(role);
+    const level = seeking === 'internship' ? 'internships' : 'entry-level';
+    const path = category ? `${level}/${category}` : level;
+    const url = `https://builtin.com/jobs/${path}`;
+    console.log('[fetchBuiltInJobs] URL:', url);
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    let html;
+    try {
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36' },
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        console.error('[fetchBuiltInJobs] HTTP', res.status);
+        return [];
+      }
+      html = await res.text();
+    } finally {
+      clearTimeout(timer);
+    }
+
+    // BuiltIn HTML-encodes the '+' in the script type attribute (ld&#x2B;json),
+    // so normalize the tags before matching or the regex finds nothing.
+    html = html.replace(/application\/ld&#x2B;json/g, 'application/ld+json');
+
+    // Pull the JSON-LD blocks and find the ItemList of job postings.
+    const ldMatches = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+    let items = [];
+    for (const m of ldMatches) {
+      try {
+        const parsed = JSON.parse(m[1].replace(/&#x2B;/g, '+'));
+        const graph = parsed['@graph'] || (Array.isArray(parsed) ? parsed : [parsed]);
+        const list = graph.find(g => g['@type'] === 'ItemList');
+        if (list?.itemListElement?.length) {
+          items = list.itemListElement;
+          break;
+        }
+      } catch { /* skip malformed block */ }
+    }
+    console.log('[fetchBuiltInJobs] Parsed %d ItemList entries', items.length);
+
+    // On BuiltIn's /internships/* pages every listing is already an internship, so
+    // skip the title-keyword intern filter there (titles often omit the word "intern").
+    const onInternPage = level === 'internships';
+
+    const results = [];
+    for (const it of items) {
+      const title = (it.name || '').trim();
+      const jobUrl = it.url;
+      if (!title || !jobUrl) continue;
+      if (SENIOR_RE.test(title)) continue;
+      if (!onInternPage) {
+        const isIntern = INTERN_RE.test(title);
+        if (seeking === 'internship' && !isIntern) continue;
+        if (seeking === 'fulltime' && isIntern) continue;
+      }
+
+      // BuiltIn's ItemList carries title + description + url, but NOT the company
+      // name (the URL slug is the job title, not the employer). Rather than show a
+      // wrong company, label the employer as "Via BuiltIn" — the role + description
+      // are accurate and that's what the feed leads with.
+      results.push({
+        name: 'Via BuiltIn',
+        job_title: title,
+        hiring_description: (it.description || `${title} — sourced from BuiltIn.`).slice(0, 600),
+        job_url: jobUrl,
+        location: location || '',
+        posted_date: null,
+        salary_range: null,
+        source: 'builtin',
+      });
+      if (results.length >= maxResults) break;
+    }
+
+    console.log('[fetchBuiltInJobs] usable results:', results.length);
+    return results;
+  } catch (e) {
+    console.error('[fetchBuiltInJobs] failed:', e.message);
+    return [];
+  }
+}
+
 // ── Coresignal Base Jobs API fetcher (BACKUP live source) ─────────────────
 // Real 2-step flow: POST /search/filter → array of job IDs, then
 // GET /collect/{id} for each (capped, in parallel). Used when the primary
@@ -675,6 +793,26 @@ Deno.serve(async (req) => {
           freshJobs = freshJobs.concat(csJobs || []);
         } catch (e) {
           console.error('[getDailyDrop] Coresignal backup failed:', e.message);
+        }
+      }
+
+      // FINAL LIVE BACKUP: if both paid providers are still throttled/sparse,
+      // scrape BuiltIn (no API key, no quota) so students get REAL startup/tech
+      // jobs instead of dropping to the curated filler pool.
+      if (freshJobs.length < dailyLimit) {
+        try {
+          console.log('[getDailyDrop] Still sparse (%d) — trying BuiltIn scrape...', freshJobs.length);
+          const builtInJobs = await Promise.race([
+            fetchBuiltInJobs({ role, location, seeking, maxResults: dailyLimit }),
+            new Promise((resolve) => setTimeout(() => {
+              console.error('[getDailyDrop] BuiltIn TIMEOUT after 14s');
+              resolve([]);
+            }, 14000)),
+          ]);
+          console.log('[getDailyDrop] BuiltIn backup returned %d jobs', builtInJobs?.length || 0);
+          freshJobs = freshJobs.concat(builtInJobs || []);
+        } catch (e) {
+          console.error('[getDailyDrop] BuiltIn backup failed:', e.message);
         }
       }
 
