@@ -117,10 +117,9 @@ export default function ParentAllSet() {
           </button>
         </div>
 
-        {/* Dashboard link — admin only */}
-        {user?.role === 'admin' && (
+        {/* Student dashboard link — always visible */}
         <a
-          href="#/admin"
+          href="#/FreeTierDashboard"
           style={{
             display: 'inline-block', fontFamily: SF, fontSize: 15, fontWeight: 700,
             color: INDIGO, background: 'transparent',
@@ -132,6 +131,23 @@ export default function ParentAllSet() {
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
         >
           Go to my dashboard →
+        </a>
+
+        {/* Admin dashboard link — admin only */}
+        {user?.role === 'admin' && (
+        <a
+          href="#/admin"
+          style={{
+            display: 'inline-block', fontFamily: SF, fontSize: 14, fontWeight: 600,
+            color: TEXT3, background: 'transparent',
+            border: 'none', borderRadius: 12,
+            padding: '8px 24px', textDecoration: 'none', cursor: 'pointer',
+            marginBottom: 28, transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = INDIGO; }}
+          onMouseLeave={e => { e.currentTarget.style.color = TEXT3; }}
+        >
+          Admin dashboard →
         </a>
         )}
 
