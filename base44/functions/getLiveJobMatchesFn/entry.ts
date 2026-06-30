@@ -13,7 +13,11 @@ const JSEARCH_BASE = 'https://api.openwebninja.com/jsearch';
 // Hard seniority blocklist — these NEVER belong in a student feed
 const SENIOR_TITLE_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive|expert|experienced)\b|\b(ii|iii|iv|v)\b/i;
 const INTERN_TITLE_RE = /\b(intern|internship|co-?op)\b/i;
-const ENTRY_TITLE_RE = /\b(junior|jr\.?|coordinator|entry|graduate|trainee|new grad|associate)\b/i;
+// NOTE: "associate" is intentionally NOT in this set. It co-occurs with senior
+// titles too often ("Associate Director", "Senior Associate", "Associate Product
+// Manager") and was wrongly exempting those from the senior gate below. A plain
+// "Marketing Associate" still passes because no senior word is present.
+const ENTRY_TITLE_RE = /\b(junior|jr\.?|entry|graduate|trainee|new grad)\b/i;
 
 // Max roles surfaced per company so a single big employer can't flood the feed
 const MAX_PER_COMPANY = 2;
