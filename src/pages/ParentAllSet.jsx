@@ -117,7 +117,8 @@ export default function ParentAllSet() {
           </button>
         </div>
 
-        {/* Student dashboard link — always visible */}
+        {/* Student dashboard link — josinoff@gmail.com only */}
+        {user?.email === 'josinoff@gmail.com' && (
         <a
           href="#/FreeTierDashboard"
           style={{
@@ -132,6 +133,7 @@ export default function ParentAllSet() {
         >
           Go to my dashboard →
         </a>
+        )}
 
         {/* Admin dashboard link — admin only */}
         {user?.role === 'admin' && (

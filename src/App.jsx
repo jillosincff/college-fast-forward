@@ -88,6 +88,10 @@ function OnboardingGuard({ children }) {
     return <Navigate to="/GatorAuth" replace />;
   }
 
+  // Preview bypass: let the owner account view guarded dashboards directly,
+  // regardless of persona/onboarding state.
+  if (user.email === 'josinoff@gmail.com') return children;
+
   const hasPersona = !!user.persona?.trim();
   const onboardingDone = user.onboarding_completed === true;
 
