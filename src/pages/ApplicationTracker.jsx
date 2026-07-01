@@ -7,8 +7,6 @@ import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
-import ImportToast from '@/components/tracker/ImportToast';
-import ImportUpdateModal from '@/components/tracker/ImportUpdateModal';
 import EmailParserTestPanel from '@/components/tracker/EmailParserTestPanel';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -93,15 +91,6 @@ export default function ApplicationTracker() {
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [showParserTest, setShowParserTest] = useState(false);
-  const [importToast, setImportToast] = useState(null);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const importNotification = {
-    company: 'Disney', jobTitle: 'Marketing Intern',
-    details: [
-      'Status changed to Interviewing',
-      'Interview scheduled for March 25 @ 2:00 PM via Zoom with Sarah Chen',
-    ],
-  };
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -151,23 +140,6 @@ export default function ApplicationTracker() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f8f8', fontFamily: dm }}>
-      {/* Import Toast */}
-      {importToast && (
-        <ImportToast
-          notification={importToast}
-          onView={() => { setImportToast(null); setShowImportModal(true); }}
-          onDismiss={() => setImportToast(null)}
-        />
-      )}
-
-      {/* Import Update Modal */}
-      {showImportModal && (
-        <ImportUpdateModal
-          notification={importNotification}
-          onViewDetails={() => { setShowImportModal(false); setSelectedApp(applications[0]); }}
-          onDismiss={() => setShowImportModal(false)}
-        />
-      )}
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '32px 20px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -218,18 +190,20 @@ export default function ApplicationTracker() {
               <Mail size={16} />
               Connect Email for Auto-Import
             </button>
-            <button
-              onClick={() => setShowParserTest(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: '#F5F3FF', border: '1.5px solid #7C3AED',
-                color: '#7C3AED', padding: '12px 20px', borderRadius: 8,
-                fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                fontFamily: dm, minHeight: 'auto',
-              }}
-            >
-              🧪 Test Email Parser
-            </button>
+            {user?.role === 'admin' && (
+              <button
+                onClick={() => setShowParserTest(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  background: '#F5F3FF', border: '1.5px solid #7C3AED',
+                  color: '#7C3AED', padding: '12px 20px', borderRadius: 8,
+                  fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                  fontFamily: dm, minHeight: 'auto',
+                }}
+              >
+                🧪 Test Email Parser
+              </button>
+            )}
           </div>
         </div>
 
@@ -306,6 +280,22 @@ export default function ApplicationTracker() {
                 Connect Email for Auto-Import
               </button>
             </div>
+          </div>
+        ) : filtered.length === 0 ? (
+          /* No results for current search/filter */
+          <div style={{ background: '#fff', borderRadius: 12, padding: '48px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
+            <h3 style={{ fontFamily: pf, fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
+              No matching applications
+            </h3>
+            <p style={{ fontSize: 14, color: '#666', margin: '0 0 20px', lineHeight: 1.6 }}>
+              Nothing matches your current search or filter.
+            </p>
+            <button
+              onClick={() => { setSearchTerm(''); setFilterStatus('all'); }}
+              style={{ background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}
+            >
+              Clear search & filters
+            </button>
           </div>
         ) : isMobile ? (
           /* Mobile Card View */
@@ -385,9 +375,9 @@ export default function ApplicationTracker() {
                       {new Date(app.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <button style={{ background: 'none', border: 'none', color: '#0021A5', fontSize: 12, fontFamily: "'Monaco', monospace", cursor: 'pointer', textDecoration: 'underline', padding: 0, minHeight: 'auto' }}>
+                      <span style={{ color: '#666', fontSize: 12, fontFamily: "'Monaco', monospace" }}>
                         {app.resumeVersion}
-                      </button>
+                      </span>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{
@@ -398,13 +388,7 @@ export default function ApplicationTracker() {
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      {app.nextAction === '—' ? (
-                        <span style={{ color: '#888' }}>—</span>
-                      ) : (
-                        <button style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, minHeight: 'auto' }}>
-                          {app.nextAction}
-                        </button>
-                      )}
+                      <span style={{ color: '#888' }}>{app.nextAction}</span>
                     </td>
                   </tr>
                 ))}
