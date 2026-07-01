@@ -127,8 +127,8 @@ export default function MatchTeaser({ go }) {
         {/* No matches fallback */}
         {!loading && result && (!result.found || result.count === 0) && (
           <div style={{ marginTop: 28, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: '20px 24px', maxWidth: 460, margin: '28px auto 0' }}>
-            <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 6px' }}>Your school's network is just getting started</p>
-            <p style={{ fontFamily: SF, fontSize: 13, color: TEXT2, margin: '0 0 14px', lineHeight: 1.6 }}>4,100+ parents are already in the CFF network — join free and we'll match you as your campus grows, plus you get the full AI toolkit today.</p>
+            <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 6px' }}>Our AI agent finds your alumni anyway</p>
+            <p style={{ fontFamily: SF, fontSize: 13, color: TEXT2, margin: '0 0 14px', lineHeight: 1.6 }}>CLIFF searches the open web to find alumni from your school at any company in the country — even ones who haven't joined CFF yet. Sign up free and name a company; we'll find your warm connection there.</p>
             <button onClick={go} style={{
               fontFamily: SF, fontSize: 15, fontWeight: 700, color: '#fff', background: GRAD_INDIGO,
               border: 'none', borderRadius: 999, padding: '13px 30px', cursor: 'pointer', minHeight: 48,
