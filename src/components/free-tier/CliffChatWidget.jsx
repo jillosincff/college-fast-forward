@@ -199,6 +199,16 @@ export default function CliffChatWidget({ onOpenUpgrade, embedded = false }) {
               </button>
             </div>
 
+            {/* Usage meter — always-visible so the limit never feels like a surprise wall */}
+            <div style={{ height: 4, background: '#ede9fe', flexShrink: 0 }}>
+              <div style={{
+                height: '100%',
+                width: `${Math.min(100, (dailyCount / FREE_LIMIT) * 100)}%`,
+                background: dailyCount >= FREE_LIMIT ? '#dc2626' : dailyCount >= FREE_LIMIT - 2 ? '#d97706' : '#a78bfa',
+                transition: 'width 0.3s ease',
+              }} />
+            </div>
+
             {/* Messages */}
             <div style={{
               flex: 1,

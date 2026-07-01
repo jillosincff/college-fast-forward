@@ -32,7 +32,7 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
           maxWidth: 420, width: '100%',
           padding: '32px 28px 28px',
           boxShadow: '0 32px 72px -12px rgba(0,0,0,0.18)',
-          position: 'relative', overflow: 'hidden',
+          position: 'relative', overflowY: 'auto', maxHeight: '90vh',
           animation: 'fi-modal 0.28s cubic-bezier(0.22,1,0.36,1)',
         }}
       >
@@ -79,8 +79,8 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
           <h3 style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.025em', lineHeight: 1.2 }}>
             Unlock the Inside Track
           </h3>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.65, maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>
-            Traditional job applications are a black hole. Let CLiFF bypass the filters and connect you directly.
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.65, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
+            Referred candidates are <strong style={{ color: '#0f172a' }}>~9x more likely to get hired</strong> than cold applicants. Premium exists to get you referrals.
           </p>
         </div>
 
@@ -97,6 +97,28 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
             <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: i < 2 ? 12 : 0 }}>
               <span style={{ fontSize: 15, color: '#4f46e5', flexShrink: 0, marginTop: -1 }}>{icon}</span>
               <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#334155', margin: 0, lineHeight: 1.6 }}>{text}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Free vs Premium compare ── */}
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: 16, marginBottom: 20, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 84px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '8px 14px' }}>
+            <span />
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#94a3b8', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Free</span>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#4338ca', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Premium</span>
+          </div>
+          {[
+            { label: 'Daily job drop', free: '✓', prem: '✓' },
+            { label: 'Warm alumni & parent matches', free: '1', prem: 'All' },
+            { label: 'AI outreach scripts & intros', free: '—', prem: '✓' },
+            { label: 'Resume tailoring per job', free: '—', prem: '✓' },
+            { label: 'CLiFF AI coach', free: '10/day', prem: 'Unlimited' },
+          ].map((row, i, arr) => (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 64px 84px', padding: '8px 14px', borderBottom: i < arr.length - 1 ? '1px solid #f1f5f9' : 'none', alignItems: 'center' }}>
+              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 600, color: '#334155' }}>{row.label}</span>
+              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: row.free === '—' ? '#cbd5e1' : '#64748b', textAlign: 'center' }}>{row.free}</span>
+              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#16a34a', textAlign: 'center' }}>{row.prem}</span>
             </div>
           ))}
         </div>
