@@ -8,12 +8,14 @@ import PipelineKanbanModal from './PipelineKanbanModal';
 import EmptyMatchesState from './EmptyMatchesState';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useIsMobile } from '@/utils/useIsMobile';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
 export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount, isPremium = false }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [isKanbanOpen, setIsKanbanOpen] = useState(false);
+  const isMobile = useIsMobile(768);
   const [showDetailPane, setShowDetailPane] = useState(false);
   const queryClient = useQueryClient();
 
@@ -507,7 +509,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Workspace — always present, fills remaining 65-70% */}
+        {/* RIGHT COLUMN: Workspace — desktop only; on mobile the detail opens as a full-screen overlay */}
+        {!isMobile && (
         <div style={{
           overflowY: 'auto',
           background: '#fff',
@@ -534,7 +537,41 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             </div>
           )}
         </div>
+        )}
       </div>
+
+      {/* MOBILE: Full-screen job detail overlay */}
+      {isMobile && showDetailPane && selectedLead && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#fff', display: 'flex', flexDirection: 'column' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+            paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
+            borderBottom: '1px solid #e5e7eb', background: '#fff', flexShrink: 0,
+          }}>
+            <button
+              onClick={() => { setShowDetailPane(false); setSelectedLead(null); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, fontFamily: dm, fontSize: 14, fontWeight: 700,
+                color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer',
+                padding: '8px 10px', minHeight: 44,
+              }}
+            >
+              <svg style={{ width: 18, height: 18 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
+              Back to matches
+            </button>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 'calc(90px + env(safe-area-inset-bottom, 0px))' }}>
+            <JobDetailPane
+              lead={selectedLead}
+              user={user}
+              schoolAbbr={schoolAbbr}
+              onClose={() => { setShowDetailPane(false); setSelectedLead(null); }}
+              onAddToPipeline={handleAddToPipeline}
+              onColdInroad={handleColdInroad}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Kanban Modal */}
       <PipelineKanbanModal
