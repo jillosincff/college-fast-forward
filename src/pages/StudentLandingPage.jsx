@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { GraduationCap, Users, Target, FileText, Rocket, Check, X, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -87,9 +88,9 @@ const PROOF_CALLOUTS = [
 ];
 
 const STORIES = [
-  { quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/c2df92fac_IMG_8456.png", tag: "🎉 Landed an internship", color: INDIGO },
-  { quote: "I finally felt like I had a system instead of a mess. Before this I had 40 tabs open and no idea where anything stood.", name: "Maya R.", school: "UF '26, Business", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png", tag: "😮‍💨 Less stress", color: VIOLET },
-  { quote: "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours.", name: "Nerissa R.", school: "USC '25, Marketing", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png", tag: "🤝 Better outreach", color: PINK },
+  { quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/c2df92fac_IMG_8456.png", tag: "Landed an internship", color: INDIGO },
+  { quote: "I finally felt like I had a system instead of a mess. Before this I had 40 tabs open and no idea where anything stood.", name: "Maya R.", school: "UF '26, Business", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png", tag: "Less stress", color: VIOLET },
+  { quote: "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours.", name: "Nerissa R.", school: "USC '25, Marketing", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png", tag: "Better outreach", color: PINK },
 ];
 
 function StoriesCarousel() {
@@ -148,11 +149,11 @@ function StoriesCarousel() {
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          {['←', '→'].map((arrow, i) => (
-            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 36, height: 36, borderRadius: '50%', background: CARD2, border: '1px solid #e2e8f0', fontSize: 14, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: 44, transition: 'all 0.15s' }}
+          {[0, 1].map((i) => (
+            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 36, height: 36, borderRadius: '50%', background: CARD2, border: '1px solid #e2e8f0', color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: 44, transition: 'all 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.color = INDIGO; }}
               onMouseLeave={e => { e.currentTarget.style.background = CARD2; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = TEXT2; }}
-            >{arrow}</button>
+            >{i === 0 ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button>
           ))}
         </div>
       </div>
@@ -199,7 +200,9 @@ export default function StudentLandingPage({ onParentClick }) {
   // Show sticky CTA bar after scrolling past ~50% of the viewport-height hero
   useEffect(() => {
     const onScroll = () => {
-      setShowStickyCTA(window.scrollY > window.innerHeight * 0.6);
+      const scrolled = window.scrollY > window.innerHeight * 0.6;
+      const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 640;
+      setShowStickyCTA(scrolled && !nearBottom);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -369,7 +372,8 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Eyebrow badge */}
             {mounted && (
               <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: '12px 28px', marginBottom: 32 }}>
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em' }}>🎓 INTERNSHIPS &amp; ENTRY-LEVEL JOBS FOR COLLEGE STUDENTS</span>
+                <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em' }}>INTERNSHIPS &amp; ENTRY-LEVEL JOBS FOR COLLEGE STUDENTS</span>
               </div>
             )}
 
@@ -385,7 +389,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Sub-headline */}
             {mounted && (
               <div className="hero-animate-3">
-                <h2 style={{ fontFamily: SF, fontSize: 'clamp(20px, 5vw, 30px)', fontWeight: 600, color: INDIGO, margin: '0 0 16px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+                <h2 style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 26px)', fontWeight: 600, color: '#334155', margin: '0 0 16px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
                   Land the interview through a network built for you.
                 </h2>
               </div>
@@ -417,7 +421,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Start Free →
+                  See My Matches →
                 </button>
 
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: '8px 0 0', lineHeight: 1.5 }}>
@@ -437,12 +441,6 @@ export default function StudentLandingPage({ onParentClick }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 10, marginTop: 14, background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 14, padding: '12px 16px', boxShadow: SHADOW, maxWidth: 460 }}>
-                  <span style={{ fontSize: 16, lineHeight: 1.3, flexShrink: 0 }}>💬</span>
-                  <p style={{ fontFamily: SF, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
-                    "I got a response from an alumna within 48 hours." <span style={{ color: TEXT, fontWeight: 700, fontStyle: 'normal' }}>— Nerissa R., USC '25</span>
-                  </p>
-                </div>
               </div>
             )}
           </div>
@@ -462,13 +460,11 @@ export default function StudentLandingPage({ onParentClick }) {
       <div id="stats" style={{ background: '#fff', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '20px clamp(16px, 5vw, 32px)', scrollMarginTop: 80 }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'clamp(12px, 4vw, 32px)', justifyContent: 'center', alignItems: 'center' }}>
           {[
-            { emoji: '🎓', stat: '2,400+', label: 'Students on CFF' },
-            { emoji: '🏢', stat: '4,100+', label: 'Parents in the network' },
-            { emoji: '🤝', stat: 'Warm intros', label: 'From alumni & parents' },
-            { emoji: '⚡', stat: 'Free', label: 'To get started' },
+            { icon: GraduationCap, stat: '2,400+', label: 'Students on CFF' },
+            { icon: Users, stat: '4,100+', label: 'Parents in the network' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px' }}>
-              <span style={{ fontSize: 20 }}>{item.emoji}</span>
+              <item.icon size={20} color={INDIGO} style={{ flexShrink: 0 }} />
               <div>
                 <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>{item.stat}</p>
                 <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: 0, fontWeight: 500 }}>{item.label}</p>
@@ -484,49 +480,6 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── LIVE JOBS ── */}
       <LiveJobsSection go={go} />
 
-      {/* ── HONEST SECTION ── */}
-      <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: BG }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <SectionLabel text="The real talk" color={PINK} />
-          <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6vw, 44px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 20px', textAlign: 'center' }}>
-            The modern job hunt is a<br />
-            <span style={{ color: TEXT }}>literal nightmare</span><span style={{ marginLeft: 4 }}>😮‍💨</span>
-          </h2>
-          <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', color: TEXT2, lineHeight: 1.75, margin: '0 0 24px', textAlign: 'center' }}>
-            Spending hours tailoring a resume just to get screened out by a bot is exhausting. CFF brings curated role matches, warm networking, and smart tools into one place.
-          </p>
-
-          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #f1f5f9', boxShadow: SHADOW, padding: 'clamp(24px, 6vw, 36px)', marginBottom: 28 }}>
-            <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>The Bottom Line</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <span style={{ fontSize: 22, flexShrink: 0 }}>❌</span>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.5vw, 20px)', fontWeight: 800, color: CORAL, letterSpacing: '-0.02em', lineHeight: 1.2, margin: 0 }}>More applications won't save you.</p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <span style={{ fontSize: 22, flexShrink: 0 }}>🎯</span>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.5vw, 20px)', fontWeight: 800, color: INDIGO, letterSpacing: '-0.02em', lineHeight: 1.2, margin: 0 }}>More interviews will.</p>
-              </div>
-            </div>
-            <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', color: TEXT3, lineHeight: 1.6, margin: '16px 0 0' }}>
-              We're here to help you skip the line and get real results.
-            </p>
-          </div>
-
-          <button onClick={go} style={{
-            width: '100%', fontFamily: SF, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 700, color: '#fff',
-            background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: 'clamp(16px, 5vw, 20px)',
-            cursor: 'pointer', minHeight: 52, boxShadow: '0 8px 28px rgba(109,40,217,0.30)',
-            transition: 'all 0.2s ease', touchAction: 'manipulation',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(109,40,217,0.30)'; }}
-          >
-            Start Free →
-          </button>
-        </div>
-      </div>
-
       {/* ── OLD WAY VS SMART WAY ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
@@ -538,7 +491,7 @@ export default function StudentLandingPage({ onParentClick }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(20px, 5vw, 28px)' }}>
             {/* Old Way - "Black Hole" box with warning state */}
             <div style={{ background: 'rgba(254,242,242,0.6)', border: `1px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: '0 1px 3px rgba(244,63,94,0.08)' }}>
-              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>🕳️ The Old Way</p>
+              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>The Old Way</p>
               <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Brutal Cycle</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
@@ -549,19 +502,19 @@ export default function StudentLandingPage({ onParentClick }) {
                   { emoji: '💔', text: 'Feel discouraged, anxious, stuck in the void' },
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <span style={{ fontSize: 18, flexShrink: 0, lineHeight: 1.4 }}>{item.emoji}</span>
+                    <X size={15} color={CORAL} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
                     <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#9f1239', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
                   </div>
                 ))}
               </div>
               <div style={{ marginTop: 20, background: CORAL_LIGHT, borderRadius: 10, padding: '10px 14px', textAlign: 'center', border: `1px solid ${CORAL_BORDER}` }}>
-                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: CORAL }}>❌ Only ~2% of online applications lead to a job (Jobvite Recruiting Benchmark)</span>
+                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: CORAL }}>Only ~2% of online applications lead to a job (Jobvite Recruiting Benchmark)</span>
               </div>
             </div>
 
             {/* Smart Way - elevated with soft glow */}
             <div style={{ background: 'rgba(245,243,255,0.8)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: SHADOW_MD }}>
-              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>⚡ The CFF Way</p>
+              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>The CFF Way</p>
               <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: INDIGO, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Smart Path</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
@@ -572,13 +525,13 @@ export default function StudentLandingPage({ onParentClick }) {
                   { emoji: '🎉', text: 'Get hired through human connections, not algorithms' },
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <span style={{ fontSize: 18, flexShrink: 0, lineHeight: 1.4 }}>{item.emoji}</span>
+                    <Check size={15} color={INDIGO} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
                     <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: INDIGO_DIM, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
                   </div>
                 ))}
               </div>
               <div style={{ marginTop: 20, background: '#fff', borderRadius: 10, padding: '10px 14px', textAlign: 'center', border: `1px solid ${INDIGO_BORDER}` }}>
-                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO }}>✅ Referred candidates are far more likely to land interviews (LinkedIn)</span>
+                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO }}>Referred candidates are far more likely to land interviews (LinkedIn)</span>
               </div>
             </div>
           </div>
@@ -586,7 +539,7 @@ export default function StudentLandingPage({ onParentClick }) {
           {/* CFF proof list - connected dashboard element */}
           <div style={{ marginTop: 'clamp(32px, 8vw, 48px)', background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, boxShadow: SHADOW, padding: 'clamp(20px, 5vw, 32px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}>⚡</div>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}><Zap size={18} color="#fff" /></div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>Here's what CFF does for you</p>
                 <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>From your first scan onward</p>
@@ -620,13 +573,13 @@ export default function StudentLandingPage({ onParentClick }) {
           </h2>
           <div className="agent-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 28 }}>
             {[
-              { emoji: '🎯', title: 'Target Matches', sub: 'Your curated feed', color: INDIGO },
-              { emoji: '📄', title: 'ATS Optimizer', sub: 'Your resume tailor', color: VIOLET },
-              { emoji: '👥', title: 'Warm Intros', sub: 'Your parent & alumni connection', color: TEAL_DARK },
-              { emoji: '🚀', title: 'Application Tracker', sub: 'Your automated pipeline dashboard', color: PINK },
+              { icon: Target, title: 'Target Matches', sub: 'Your curated feed', color: INDIGO },
+              { icon: FileText, title: 'ATS Optimizer', sub: 'Your resume tailor', color: VIOLET },
+              { icon: Users, title: 'Warm Intros', sub: 'Your parent & alumni connection', color: TEAL_DARK },
+              { icon: Rocket, title: 'Application Tracker', sub: 'Your automated pipeline dashboard', color: PINK },
             ].map((item, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 18, padding: 'clamp(18px, 4vw, 26px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: `${item.color}14`, border: `1px solid ${item.color}2e`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, marginBottom: 4 }}>{item.emoji}</div>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: `${item.color}14`, border: `1px solid ${item.color}2e`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}><item.icon size={22} color={item.color} /></div>
                 <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.5vw, 19px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>{item.title}</p>
                 <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 600, color: item.color, margin: 0, lineHeight: 1.4 }}>{item.sub}</p>
               </div>
@@ -666,15 +619,25 @@ export default function StudentLandingPage({ onParentClick }) {
           <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(28px, 6vw, 40px)', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid #e2e8f0', position: 'relative' }}>
             <div style={{ display: 'flex', gap: 10, marginBottom: 'clamp(20px, 5vw, 28px)', flexWrap: 'wrap' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '6px 14px' }}>
-                <span style={{ fontSize: 12 }}>🎓</span>
+                <GraduationCap size={13} color={INDIGO} style={{ flexShrink: 0 }} />
                 <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Graduation Sprint Plan</span>
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fefce8', border: '1px solid #fde68a', borderRadius: 100, padding: '6px 14px' }}>
-                <span style={{ fontSize: 12 }}>⚡</span>
+                <Zap size={13} color="#854d0e" style={{ flexShrink: 0 }} />
                 <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: '#854d0e' }}>Less than a latte a week</span>
               </div>
             </div>
 
+            <div style={{ background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '14px 16px', marginBottom: 'clamp(20px, 4vw, 24px)' }}>
+              <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: INDIGO_DIM, margin: '0 0 2px', lineHeight: 1.4 }}>
+                Start completely free — no card required.
+              </p>
+              <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, margin: 0, lineHeight: 1.5 }}>
+                Upgrade to Premium only when you're ready to accelerate.
+              </p>
+            </div>
+
+            <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 8px' }}>When you upgrade</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
               <span style={{ fontFamily: SF, fontSize: 'clamp(56px, 14vw, 80px)', fontWeight: 900, color: INDIGO, letterSpacing: '-0.05em', lineHeight: 0.9 }}>$4.99</span>
               <span style={{ fontFamily: SF, fontSize: 'clamp(18px, 5vw, 22px)', color: TEXT, fontWeight: 700 }}>/week</span>
@@ -682,12 +645,6 @@ export default function StudentLandingPage({ onParentClick }) {
             <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 4vw, 16px)', color: TEXT2, fontWeight: 600, margin: '0 0 clamp(24px, 5vw, 32px)', lineHeight: 1.5 }}>
               That's just <span style={{ color: TEXT, fontWeight: 800 }}>$19.96/month</span> — billed monthly, cancel in 1 tap anytime.
             </p>
-
-            <div style={{ background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '12px 16px', marginBottom: 'clamp(20px, 4vw, 24px)' }}>
-              <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: INDIGO_DIM, margin: 0, lineHeight: 1.5 }}>
-                Start completely free — upgrade to Premium only when you're ready.
-              </p>
-            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 'clamp(24px, 5vw, 32px)' }}>
               {PRO_FEATURES.map((f, i) => (
@@ -700,7 +657,7 @@ export default function StudentLandingPage({ onParentClick }) {
               ))}
             </div>
 
-            <CTAButton label="Start Free →" fullWidth />
+            <CTAButton label="Find My Warm Intros →" fullWidth />
           </div>
         </div>
       </div>
