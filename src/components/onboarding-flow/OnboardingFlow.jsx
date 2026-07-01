@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { deriveSchoolCode } from '@/lib/schoolNames';
 import { processReferralMilestone } from '@/functions/processReferralMilestone';
 import LiveEngineLoader from './LiveEngineLoader';
 import FunnelTransition from './FunnelTransition';
@@ -66,7 +67,10 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const TOTAL = 13;
 
   const next = () => {
-    const newScreen = screen + 1;
+    let newScreen = screen + 1;
+    // Skippers have no resume — bypass the Before/After screen (11),
+    // which would otherwise render infinite "parsing" spinners.
+    if (newScreen === 11 && !resumeData) newScreen = 12;
     saveProgress(newScreen, {
       cff_seeking: seeking,
       cff_college: college,
@@ -86,7 +90,9 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   };
   const back = () => {
     setScreen(s => {
-      const prev = Math.max(1, s - 1);
+      let prev = Math.max(1, s - 1);
+      // Mirror the forward skip: no resume → screen 11 doesn't exist for this user
+      if (prev === 11 && !resumeData) prev = 10;
       // Reset screen 9 sub-mode when leaving screen 9 via back
       if (s === 9) setDataInputMode('choose');
       return prev;
@@ -120,19 +126,8 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // V1 cache guard: if we already parsed/optimized a resume in the last 24h,
-    // skip the LLM call entirely and reuse the cached result.
-    try {
-      const raw = localStorage.getItem('cachedResumeData');
-      if (raw) {
-        const { data, ts } = JSON.parse(raw);
-        if (data && ts && (Date.now() - ts) < 24 * 60 * 60 * 1000) {
-          setResumeData(data);
-          next();
-          return;
-        }
-      }
-    } catch {}
+    // Note: a fresh upload is ALWAYS parsed — the 24h cache only restores
+    // state for drop-off returns (handled at state init), never new files.
     setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -228,7 +223,9 @@ CRITICAL RULES:
               roles: ['student'],
               onboarding_completed: true,
               school: college || '',
-              school_code: college ? college.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 10) : '',
+              // Use the canonical name→code map (matches ParentNetworkProfile codes like "UF").
+              // Unknown schools get '' — the validateOnboardingSchoolCode automation alerts on those.
+              school_code: (deriveSchoolCode(college) || '').toUpperCase(),
               career_blockers: blockers,
             });
         }
