@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
+import { Sparkles, ClipboardList } from 'lucide-react';
 import UpgradeModal from '@/components/free-tier/UpgradeModal';
 import FreeTierNav from '@/components/free-tier/FreeTierNav';
 import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
@@ -40,7 +41,7 @@ function FirstVisitToast({ firstName, onDismiss }) {
       animation: 'toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
     }}>
       <style>{`@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`}</style>
-      <span style={{ fontSize: 22, flexShrink: 0 }}>👋</span>
+      <Sparkles size={20} color="#a78bfa" style={{ flexShrink: 0, marginTop: 2 }} />
       <div style={{ flex: 1 }}>
         <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
           Welcome to your Command Center, {firstName}!
@@ -221,43 +222,43 @@ export default function FreeTierDashboard() {
     interviews: {
       title: "Hey {name}, we know interviewing can be incredibly stressful.",
       subtitle: "But you don't have to walk into the room nervous. CLiFF didn't just find hidden slots—our agent is fully locked and loaded to run custom mock prep sessions specifically for these exact teams before you talk to them.",
-      badge: "⚡ Interview Shield Activated",
-      cta: '✨ Unlock AI Interview Coach',
+      badge: "Interview Shield Activated",
+      cta: 'Unlock AI Interview Coach',
       feature: 'Mock Interview Coach',
     },
     ghosted: {
       title: "Hey {name}, let's permanently end the job application black hole.",
       subtitle: "We know you are completely exhausted from getting ghosted by automated resume filters. That's why CLiFF completely bypasses the public job boards and plugs you directly into people ready to hire.",
-      badge: "⚡ Ghosting Bypass Active",
-      cta: '✨ Unlock the Inside Track Network',
+      badge: "Ghosting Bypass Active",
+      cta: 'Unlock the Inside Track Network',
       feature: 'Inside Track Signals',
     },
     outreach: {
       title: "Hey {name}, you don't need a massive personal network to break in.",
       subtitle: "If you feel like you don't have the right inside connections, don't worry. CLiFF has mapped out your entire school's active alumni ecosystem to open those closed doors for you.",
-      badge: "⚡ Network Multiplier Engaged",
-      cta: '✨ Unlock Warm Scripts',
+      badge: "Network Multiplier Engaged",
+      cta: 'Unlock Warm Scripts',
       feature: 'AI Outreach Generator',
     },
     resume: {
       title: "Hey {name}, beating corporate ATS resume bots is a broken game.",
       subtitle: "Drop a job description on the right to run your free match check — and see exactly what to fix. CLiFF will optimize your resume to beat the bots and catch human eyes.",
-      badge: "⚡ ATS Crusher Mode",
-      cta: '✨ Fix My Resume Instantly',
+      badge: "ATS Crusher Mode",
+      cta: 'Fix My Resume Instantly',
       feature: 'Resume Wow Rewrite',
     },
     which_jobs: {
       title: "Hey {name}, not knowing which roles to apply for wastes weeks.",
       subtitle: "Your background agent is scanning for openings that actually match your profile. Upgrade to see the unadvertised roles first and skip the application black hole.",
-      badge: "⚡ Job Scout Active",
-      cta: '✨ Unlock My Job Feed',
+      badge: "Job Scout Active",
+      cta: 'Unlock My Job Feed',
       feature: 'Inside Track Signals',
     },
     disorganized: {
       title: "Hey {name}, losing track of where you applied is more common than you think.",
       subtitle: "Use this board to stay organized — and upgrade to let the agent auto-log every application, track follow-ups, and remind you when to reach back out.",
-      badge: "⚡ Auto-Tracking Ready",
-      cta: '✨ Unlock Auto-Tracking',
+      badge: "Auto-Tracking Ready",
+      cta: 'Unlock Auto-Tracking',
       feature: 'Hiring CRM',
     },
   };
@@ -265,8 +266,8 @@ export default function FreeTierDashboard() {
   const painConfig = PAIN_POINT_CONFIG[primaryBlocker] || {
     title: "Hey {name}, your inside track is officially live.",
     subtitle: "Track your applications here while our agent works in the background on unadvertised roles and warm alumni connections.",
-    badge: "⚡ Premium Sprint Active",
-    cta: '⚡ Upgrade to Premium — $4.99/wk',
+    badge: "Premium Sprint Active",
+    cta: 'Upgrade to Premium — $4.99/wk',
     feature: 'Premium Sprint',
   };
 
@@ -343,7 +344,7 @@ export default function FreeTierDashboard() {
           display: 'flex', alignItems: 'center', gap: 12, maxWidth: 440, width: 'calc(100% - 40px)',
           animation: 'toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
         }}>
-          <span style={{ fontSize: 20, flexShrink: 0 }}>📋</span>
+          <ClipboardList size={18} color="#4ade80" style={{ flexShrink: 0 }} />
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>
             Script copied! Pipeline updated to <span style={{ color: '#4ade80' }}>"Reached Out"</span>.
           </p>

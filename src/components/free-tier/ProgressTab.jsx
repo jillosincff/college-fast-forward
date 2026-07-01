@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { X } from 'lucide-react';
+import { X, ClipboardList, MessageCircle, Reply, Mic, Trophy, Flame, Sprout, FileText, Zap, BarChart3 } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -97,11 +97,11 @@ export default function ProgressTab({ user, onUpgrade }) {
 
   // Funnel stages
   const funnel = [
-    { label: 'Applied', value: applied, icon: '📋', color: '#2563eb', bg: '#eff6ff' },
-    { label: 'Direct Messages', value: directMessages, icon: '💬', color: '#7c3aed', bg: '#f5f3ff' },
-    { label: 'Replies', value: replies, icon: '💬', color: '#0891b2', bg: '#ecfeff' },
-    { label: 'Interviews', value: interviews, icon: '🎤', color: '#ea580c', bg: '#fff7ed' },
-    { label: 'Offers', value: offers, icon: '🎉', color: '#16a34a', bg: '#f0fdf4' },
+    { label: 'Applied', value: applied, icon: ClipboardList, color: '#2563eb', bg: '#eff6ff' },
+    { label: 'Direct Messages', value: directMessages, icon: MessageCircle, color: '#7c3aed', bg: '#f5f3ff' },
+    { label: 'Replies', value: replies, icon: Reply, color: '#0891b2', bg: '#ecfeff' },
+    { label: 'Interviews', value: interviews, icon: Mic, color: '#ea580c', bg: '#fff7ed' },
+    { label: 'Offers', value: offers, icon: Trophy, color: '#16a34a', bg: '#f0fdf4' },
   ];
 
   const responseRate = applied > 0 ? Math.round((replies / applied) * 100) : 0;
@@ -111,7 +111,7 @@ export default function ProgressTab({ user, onUpgrade }) {
       {/* Header */}
       <div>
         <h2 style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
-          📋 Application Tracker
+          Application Tracker
         </h2>
         <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0, lineHeight: 1.5 }}>
           Track every application, outreach, and interview. Your pipeline to hired.
@@ -125,7 +125,7 @@ export default function ProgressTab({ user, onUpgrade }) {
         display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
         boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
       }}>
-        <div style={{ fontSize: 36, flexShrink: 0 }}>🔥</div>
+        <Flame size={32} color="#fff" style={{ flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 160 }}>
           <p style={{ fontFamily: dm, fontSize: 22, fontWeight: 800, color: '#fff', margin: 0 }}>
             {streak} day{streak !== 1 ? 's' : ''} active this week
@@ -176,7 +176,7 @@ export default function ProgressTab({ user, onUpgrade }) {
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
               }}
             >
-              <div style={{ fontSize: 16, marginBottom: 4 }}>{stage.icon}</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}><stage.icon size={16} color={stage.color} /></div>
               <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: stage.color, margin: 0, lineHeight: 1 }}>
                 {loading ? '–' : stage.value}
               </p>
@@ -211,7 +211,7 @@ export default function ProgressTab({ user, onUpgrade }) {
           </div>
         ) : recent.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>🌱</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><Sprout size={28} color="#16a34a" /></div>
             <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: '0 0 12px' }}>
               No applications tracked yet. Add your first opportunity on the Dashboard!
             </p>
@@ -239,9 +239,9 @@ export default function ProgressTab({ user, onUpgrade }) {
                   <div style={{
                     width: 32, height: 32, borderRadius: 8,
                     background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, flexShrink: 0,
+                    flexShrink: 0,
                   }}>
-                    {isOutreach ? '💬' : r.status === 'interview' ? '🎤' : r.status === 'offer' ? '🎉' : '📋'}
+                    {isOutreach ? <MessageCircle size={14} color={cfg.color} /> : r.status === 'interview' ? <Mic size={14} color={cfg.color} /> : r.status === 'offer' ? <Trophy size={14} color={cfg.color} /> : <ClipboardList size={14} color={cfg.color} />}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -275,7 +275,7 @@ export default function ProgressTab({ user, onUpgrade }) {
           background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14,
           padding: 16, textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         }}>
-          <div style={{ fontSize: 20, marginBottom: 4 }}>📄</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}><FileText size={18} color="#4F46E5" /></div>
           <p style={{ fontFamily: dm, fontSize: 22, fontWeight: 800, color: '#4F46E5', margin: 0 }}>
             {loading ? '–' : tailoredCount}
           </p>
@@ -287,7 +287,7 @@ export default function ProgressTab({ user, onUpgrade }) {
           background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14,
           padding: 16, textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         }}>
-          <div style={{ fontSize: 20, marginBottom: 4 }}>⚡</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}><Zap size={18} color="#16a34a" /></div>
           <p style={{ fontFamily: dm, fontSize: 22, fontWeight: 800, color: '#16a34a', margin: 0 }}>
             {loading ? '–' : Math.round((directMessages / Math.max(applied, 1)) * 100)}%
           </p>
@@ -303,7 +303,7 @@ export default function ProgressTab({ user, onUpgrade }) {
         border: '1px solid #c7d2fe', borderRadius: 16, padding: 20,
         display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', cursor: 'pointer',
       }} onClick={() => onUpgrade?.('Advanced Analytics')}>
-        <div style={{ fontSize: 24, flexShrink: 0 }}>📊</div>
+        <BarChart3 size={22} color="#4F46E5" style={{ flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 180 }}>
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>
             Want deeper analytics?
@@ -402,7 +402,7 @@ export default function ProgressTab({ user, onUpgrade }) {
             {selectedEntry.status === 'applied' && (
               <div style={{ marginBottom: 20 }}>
                 <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>
-                  📄 Resume Submitted
+                  Resume Submitted
                 </h4>
                 {(() => {
                   const tailoredResume = findTailoredResume(selectedEntry.company, selectedEntry.job_title);
@@ -415,7 +415,7 @@ export default function ProgressTab({ user, onUpgrade }) {
                         padding: '14px 16px',
                       }}>
                         <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '0 0 6px' }}>
-                          ✨ Tailored Resume
+                          Tailored Resume
                         </p>
                         <p style={{ fontFamily: dm, fontSize: 11, color: '#5b21b6', margin: '0 0 8px', lineHeight: 1.5 }}>
                           Customized for {tailoredResume.company_name} • {tailoredResume.role_title}
@@ -490,7 +490,7 @@ export default function ProgressTab({ user, onUpgrade }) {
             {(selectedEntry.status === 'reached_out' || selectedEntry.status === 'messaged' || selectedEntry.status === 'replied') && selectedEntry.alumni_name && (
               <div style={{ marginBottom: 20 }}>
                 <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
-                  🤝 Contact
+                  Contact
                 </h4>
                 <p style={{ fontFamily: dm, fontSize: 12, color: '#111827', margin: '0 0 2px' }}>
                   {selectedEntry.alumni_name}
@@ -507,7 +507,7 @@ export default function ProgressTab({ user, onUpgrade }) {
             {selectedEntry.created_date && (
               <div>
                 <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
-                  📅 Date
+                  Date
                 </h4>
                 <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>
                   {new Date(selectedEntry.created_date).toLocaleDateString('en-US', {

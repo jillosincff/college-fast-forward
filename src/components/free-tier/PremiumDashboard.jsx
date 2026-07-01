@@ -20,6 +20,7 @@ import ProgressTab from './ProgressTab';
 import PremiumActivationSequence from './PremiumActivationSequence';
 import PeakMomentSharePrompt from './PeakMomentSharePrompt';
 import FollowUpNudgeCard from './FollowUpNudgeCard';
+import { Wrench, LogOut, Bot, FileText, Users, MessageCircle, GraduationCap, Building2 } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -75,7 +76,7 @@ function PremiumNav({ user, onEditGoals, navRef }) {
                     onMouseEnter={e => e.currentTarget.style.background = '#faf5ff'}
                     onMouseLeave={e => e.currentTarget.style.background = 'none'}
                   >
-                    🛠️ Admin Dashboard
+                    <Wrench size={14} /> Admin Dashboard
                   </button>
                 )}
 
@@ -85,7 +86,7 @@ function PremiumNav({ user, onEditGoals, navRef }) {
                   onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
-                  🚪 Logout
+                  <LogOut size={14} /> Logout
                 </button>
               </div>
             )}
@@ -96,7 +97,7 @@ function PremiumNav({ user, onEditGoals, navRef }) {
   );
 }
 
-function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning, isMobile }) {
+function StatPill({ icon: Icon, label, value, sublabel, theme, isLoading, warning, isMobile }) {
   // On mobile, a pill with a sublabel (the wide "Active Connections" one) takes a
   // full row so its value + sublabel never get crushed/clipped off the edge.
   const flexBasis = isMobile ? (sublabel ? '100%' : 'calc(50% - 6px)') : '1 1 0';
@@ -113,7 +114,7 @@ function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning, is
       minWidth: 0,
       position: 'relative',
     }}>
-      <span style={{ fontSize: 22, flexShrink: 0 }}>{emoji}</span>
+      <Icon size={20} color="rgba(255,255,255,0.85)" style={{ flexShrink: 0 }} />
       <div style={{ minWidth: 0, flex: 1 }}>
         <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
           {isLoading ? (
@@ -135,7 +136,7 @@ function StatPill({ emoji, label, value, sublabel, theme, isLoading, warning, is
                   padding: '2px 6px',
                   marginLeft: 4,
                 }}>
-                  ⚠ Upload
+                  Upload
                 </span>
               )}
             </>
@@ -273,9 +274,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const networkCount = alumniCount + parentsCount;
   const hasResume = !!(user?.resume_filename || user?.resume_url);
   const stats = [
-    { emoji: '🤖', label: 'Agent Status', value: 'ACTIVE' },
-    { emoji: '📄', label: 'Resume', value: hasResume ? 'On File' : 'Not Uploaded', warning: !hasResume },
-    { emoji: '🐊', label: 'Active Connections', value: `${networkCount}`, sublabel: `${alumniCount} Alumni • ${parentsCount} Parents` },
+    { icon: Bot, label: 'Agent Status', value: 'ACTIVE' },
+    { icon: FileText, label: 'Resume', value: hasResume ? 'On File' : 'Not Uploaded', warning: !hasResume },
+    { icon: Users, label: 'Active Connections', value: `${networkCount}`, sublabel: `${alumniCount} Alumni • ${parentsCount} Parents` },
   ];
 
   return (
@@ -334,7 +335,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             e.currentTarget.style.boxShadow = '0 8px 24px rgba(124,58,237,0.4)';
           }}
         >
-          <span style={{ fontSize: 18 }}>💬</span>
+          <MessageCircle size={18} color="#fff" />
           <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff' }}>Ask CLIFF</span>
         </button>
       )}
@@ -360,7 +361,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', flexShrink: 0 }}>
             <span style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 18 }}>💬</span> Ask CLIFF
+              <MessageCircle size={16} color="#fff" /> Ask CLIFF
             </span>
             <button
               onClick={() => setShowChat(false)}
@@ -420,7 +421,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           </div>
 
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: isMobile ? 20 : 28, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: isMobile ? 1.25 : 1.2, letterSpacing: '-0.01em' }}>
-            Let's get locked in and get you hired, {firstName} 🚀
+            Let's get locked in and get you hired, {firstName}
           </h1>
           <p style={{ fontFamily: dm, fontSize: isMobile ? 13 : 14, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: 680 }}>
             Your career agent is live and working 24/7 — scouting roles that match your goals and mapping your{' '}
@@ -447,12 +448,12 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {[
-                { emoji: '🎓', label: 'Verified Alumni in Network', value: `${alumniCount}`, color: '#2563eb' },
-                { emoji: '👨‍👩‍👧', label: 'Verified Parents in Network', value: `${parentsCount}`, color: '#7c3aed' },
-                { emoji: '🏢', label: 'Companies with Inside Contacts', value: `${companiesCount}`, color: '#0891b2' },
+                { icon: GraduationCap, label: 'Verified Alumni in Network', value: `${alumniCount}`, color: '#2563eb' },
+                { icon: Users, label: 'Verified Parents in Network', value: `${parentsCount}`, color: '#7c3aed' },
+                { icon: Building2, label: 'Companies with Inside Contacts', value: `${companiesCount}`, color: '#0891b2' },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 16px' }}>
-                  <span style={{ fontSize: 22 }}>{item.emoji}</span>
+                  <item.icon size={22} color={item.color} style={{ flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
                     <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '0 0 2px' }}>{item.label}</p>
                     <p style={{ fontFamily: dm, fontSize: 18, fontWeight: 900, color: item.color, margin: 0 }}>{item.value}</p>

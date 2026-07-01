@@ -234,7 +234,7 @@ export default function CliffChatWidget({ onOpenUpgrade, embedded = false }) {
                     <Sparkles size={24} color="#fff" />
                   </div>
                   <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>
-                    Hi! I'm CLIFF 👋
+                    Hi! I'm CLIFF
                   </p>
                   <p style={{ fontFamily: FONT, fontSize: 12, color: '#64748b', margin: '0 0 16px' }}>
                     Your AI career coach. Ask me anything!

@@ -1,11 +1,12 @@
 import { navigate } from '@/components/utils/navigation';
+import { MessageCircle, FileText, Mic, Linkedin, Brain, Mail } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
 const TOOLS = [
   {
     id: 'chat',
-    icon: '💬',
+    icon: MessageCircle,
     title: 'CLIFF AI Chat',
     desc: 'Your AI hiring companion. Get instant answers on resumes, interviews, networking, and job search strategy.',
     cta: 'Start Chatting',
@@ -17,7 +18,7 @@ const TOOLS = [
   },
   {
     id: 'resume',
-    icon: '📄',
+    icon: FileText,
     title: 'Resume Studio',
     desc: 'Upload, tailor, and optimize your resume for any job description with AI-powered ATS matching.',
     cta: 'Open Resume Studio',
@@ -28,7 +29,7 @@ const TOOLS = [
   },
   {
     id: 'mock_interview',
-    icon: '🎤',
+    icon: Mic,
     title: 'Mock Interviews',
     desc: 'Practice with CLiFF AI — behavioral, technical, and case interviews tailored to your target roles.',
     cta: 'Start Practicing',
@@ -39,7 +40,7 @@ const TOOLS = [
   },
   {
     id: 'linkedin',
-    icon: '🔗',
+    icon: Linkedin,
     title: 'LinkedIn Optimizer',
     desc: 'Get a full review of your LinkedIn profile and specific rewrites for your headline, about section, and more.',
     cta: 'Review My Profile',
@@ -50,7 +51,7 @@ const TOOLS = [
   },
   {
     id: 'career_assessment',
-    icon: '🧠',
+    icon: Brain,
     title: 'Career Archetype',
     desc: 'Discover your unique career archetype — how you think, what drives you, and which roles you\'re built for.',
     cta: 'Take Assessment',
@@ -61,7 +62,7 @@ const TOOLS = [
   },
   {
     id: 'outreach',
-    icon: '✉️',
+    icon: Mail,
     title: 'Outreach Drafts',
     desc: 'AI-generated outreach messages for alumni and hiring managers — ready to send.',
     cta: 'View Drafts',
@@ -78,7 +79,7 @@ export default function ToolsTab({ user, onUpgrade }) {
       {/* Header */}
       <div style={{ marginBottom: 4 }}>
         <h2 style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
-          🧰 Your Career Tools
+          Your Career Tools
         </h2>
         <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
           Everything you need to land the interview — resumes, interviews, and outreach, all in one place.
@@ -122,9 +123,9 @@ export default function ToolsTab({ user, onUpgrade }) {
                 width: 40, height: 40, borderRadius: 10,
                 background: tool.bg,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 20, flexShrink: 0,
+                flexShrink: 0,
               }}>
-                {tool.icon}
+                <tool.icon size={20} color={tool.accent} />
               </div>
               <h3 style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#111827', margin: 0 }}>
                 {tool.title}
@@ -158,7 +159,7 @@ export default function ToolsTab({ user, onUpgrade }) {
           display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
         }}
       >
-        <div style={{ fontSize: 32, flexShrink: 0 }}>💬</div>
+        <MessageCircle size={28} color="#818cf8" style={{ flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 200 }}>
           <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
             Hiring Experts Chat
