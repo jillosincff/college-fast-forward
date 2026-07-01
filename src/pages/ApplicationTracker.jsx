@@ -44,6 +44,18 @@ function extractResumeVersion(notes) {
   return '—';
 }
 
+// Derive a suggested next action from status + time since last activity
+function computeNextAction(record) {
+  const status = PIPELINE_STATUS_MAP[record.status] || 'applied';
+  if (status === 'offered') return 'Review offer';
+  if (status === 'interviewing') return 'Prep for interview';
+  if (status === 'rejected') return '—';
+  const lastActivity = new Date(record.status_date || record.updated_date || record.created_date);
+  const daysSince = (Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24);
+  if (daysSince >= 7) return 'Send follow-up';
+  return 'Wait for response';
+}
+
 function pipelineToApp(record) {
   return {
     id: record.id,
@@ -53,7 +65,7 @@ function pipelineToApp(record) {
     dateApplied: record.created_date,
     resumeVersion: extractResumeVersion(record.notes),
     status: PIPELINE_STATUS_MAP[record.status] || 'applied',
-    nextAction: '—',
+    nextAction: computeNextAction(record),
     notes: record.notes || '',
     location: record.location || '',
     jobUrl: record.job_url || '',
@@ -89,6 +101,7 @@ export default function ApplicationTracker() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
+  const [followUpApp, setFollowUpApp] = useState(null);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [showParserTest, setShowParserTest] = useState(false);
 
@@ -333,6 +346,14 @@ export default function ApplicationTracker() {
                     {app.resumeVersion}
                   </p>
                 </div>
+                {app.nextAction === 'Send follow-up' && (
+                  <button
+                    onClick={e => { e.stopPropagation(); setFollowUpApp(app); setShowFollowUpModal(true); }}
+                    style={{ marginTop: 12, width: '100%', background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '10px', borderRadius: 8, fontFamily: dm }}
+                  >
+                    Send follow-up →
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -388,7 +409,16 @@ export default function ApplicationTracker() {
                       </span>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span style={{ color: '#888' }}>{app.nextAction}</span>
+                      {app.nextAction === 'Send follow-up' ? (
+                        <button
+                          onClick={e => { e.stopPropagation(); setFollowUpApp(app); setShowFollowUpModal(true); }}
+                          style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '5px 12px', borderRadius: 100, fontFamily: dm, minHeight: 'auto', whiteSpace: 'nowrap' }}
+                        >
+                          Send follow-up
+                        </button>
+                      ) : (
+                        <span style={{ color: '#888', fontSize: 13 }}>{app.nextAction}</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -456,8 +486,8 @@ export default function ApplicationTracker() {
       {/* Follow-up Draft Modal */}
       <FollowUpDraftModal 
         isOpen={showFollowUpModal} 
-        onClose={() => setShowFollowUpModal(false)} 
-        application={selectedApp}
+        onClose={() => { setShowFollowUpModal(false); setFollowUpApp(null); }} 
+        application={followUpApp || selectedApp}
       />
 
       {/* Email Parser Test Panel */}
