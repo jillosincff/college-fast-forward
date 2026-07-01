@@ -150,7 +150,7 @@ function StoriesCarousel() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {[0, 1].map((i) => (
-            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 36, height: 36, borderRadius: '50%', background: CARD2, border: '1px solid #e2e8f0', color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: 44, transition: 'all 0.15s' }}
+            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} aria-label={i === 0 ? 'Previous story' : 'Next story'} style={{ width: 44, height: 44, borderRadius: '50%', background: CARD2, border: '1px solid #e2e8f0', color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: 44, minWidth: 44, transition: 'all 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.color = INDIGO; }}
               onMouseLeave={e => { e.currentTarget.style.background = CARD2; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = TEXT2; }}
             >{i === 0 ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button>
@@ -315,6 +315,8 @@ export default function StudentLandingPage({ onParentClick }) {
         /* Agent feature grid: 3x2 on desktop, 2x3 on mobile */
         @media (max-width: 640px) {
           .agent-feature-grid { grid-template-columns: 1fr 1fr !important; }
+          /* Full-width primary CTAs for easier thumb reach on phones */
+          .hero-cta-btn { width: 100% !important; align-self: stretch !important; }
         }
         /* Hide the page scrollbar so it doesn't appear as a UI artifact over the gradient sections */
         html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
@@ -371,9 +373,9 @@ export default function StudentLandingPage({ onParentClick }) {
 
             {/* Eyebrow badge */}
             {mounted && (
-              <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: '12px 28px', marginBottom: 32 }}>
+              <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: 'clamp(8px, 2.5vw, 12px) clamp(14px, 4vw, 28px)', marginBottom: 'clamp(20px, 5vw, 32px)' }}>
                 <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em' }}>INTERNSHIPS &amp; ENTRY-LEVEL JOBS FOR COLLEGE STUDENTS</span>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>INTERNSHIPS &amp; ENTRY-LEVEL JOBS FOR COLLEGE STUDENTS</span>
               </div>
             )}
 
@@ -407,7 +409,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* CTA */}
             {mounted && (
               <div className="hero-animate-5" style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
-                <button onClick={go} style={{
+                <button onClick={go} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(16px, 3.5vw, 18px)', fontWeight: 600, color: '#fff',
                   background: GRAD_INDIGO, border: 'none', borderRadius: 999,
                   padding: 'clamp(16px, 4vw, 20px) clamp(48px, 8vw, 64px)',
@@ -703,6 +705,7 @@ export default function StudentLandingPage({ onParentClick }) {
         borderTop: '1px solid rgba(109,40,217,0.12)',
         boxShadow: '0 -4px 24px rgba(15,23,42,0.08)',
         padding: 'clamp(10px, 3vw, 14px) clamp(16px, 5vw, 32px)',
+        paddingBottom: 'calc(clamp(10px, 3vw, 14px) + env(safe-area-inset-bottom, 0px))',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
         transform: showStickyCTA ? 'translateY(0)' : 'translateY(110%)',
         transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
@@ -722,7 +725,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── FOOTER ── */}
-      <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px) calc(clamp(20px, 5vw, 28px) + 76px)', textAlign: 'center', background: '#fff' }}>
+      <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', paddingBottom: 'calc(clamp(20px, 5vw, 28px) + 76px + env(safe-area-inset-bottom, 0px))', textAlign: 'center', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
           {[['Log In', null, login], ['Parents & Alumni', null, parent], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com?subject=College%20Fast%20Forward%20Support']].map(([label, href, handler]) => (
             <a key={label} href={href || undefined} onClick={!href ? (e) => { e.preventDefault(); handler && handler(); } : undefined} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s', cursor: 'pointer' }}
