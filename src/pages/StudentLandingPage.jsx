@@ -145,7 +145,9 @@ function StoriesCarousel() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
         <div style={{ display: 'flex', gap: 6 }}>
           {STORIES.map((st, i) => (
-            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 20 : 6, height: 6, borderRadius: 3, background: i === active ? st.color : '#e2e8f0', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44, transition: 'all 0.3s ease' }} />
+            <button key={i} onClick={() => goTo(i)} aria-label={`Go to story ${i + 1}`} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', minHeight: 44, minWidth: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ display: 'block', width: i === active ? 20 : 6, height: 6, borderRadius: 3, background: i === active ? st.color : '#e2e8f0', transition: 'all 0.3s ease' }} />
+            </button>
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
