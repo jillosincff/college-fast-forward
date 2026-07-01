@@ -395,7 +395,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 26px)', fontWeight: 600, color: '#334155', margin: '0 0 16px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
-                  Land the interview through a network built for you.
+                  Your AI agent does the work. You take the interviews.
                 </h2>
               </div>
             )}
@@ -404,7 +404,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-4">
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#4b5563', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
-                  Match with curated roles, auto-tailor your resume, and unlock warm alumni and parent referrals.
+                  It tailors your resume for every role, finds warm alumni &amp; parent intros at real companies, and drafts your outreach — all done for you.
                 </p>
               </div>
             )}
@@ -717,7 +717,7 @@ export default function StudentLandingPage({ onParentClick }) {
         transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
       }}>
         <span style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 700, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          See your first matches in 2 min
+          Your first application package is waiting
         </span>
         <button onClick={go} style={{
           fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 700, color: '#fff',
@@ -727,7 +727,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-        >{!isLoadingAuth && user ? 'Dashboard →' : 'Start Free →'}</button>
+        >{!isLoadingAuth && user ? 'Dashboard →' : 'Claim It Free →'}</button>
       </div>
 
       {/* ── FOOTER ── */}

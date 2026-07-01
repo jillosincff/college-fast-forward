@@ -52,12 +52,28 @@ Deno.serve(async (req) => {
     const schoolCode = resolveSchoolCode(school);
 
     if (!schoolCode) {
+      // Demand signal: log which schools visitors search that we don't cover yet
+      base44.asServiceRole.entities.AnalyticsEvent.create({
+        event_name: 'teaser_school_miss',
+        user_id: 'anonymous_visitor',
+        properties: { school_query: String(school || '').slice(0, 100), reason: 'unrecognized_school' },
+      }).catch(() => {});
       return Response.json({ found: false, count: 0 });
     }
 
     const profiles = await base44.asServiceRole.entities.ParentNetworkProfile.filter(
       { school_code: schoolCode, is_active: true }, '-created_date', 200
     );
+
+    if (profiles.length === 0) {
+      // Recognized school but no network yet — highest-value recruiting signal
+      base44.asServiceRole.entities.AnalyticsEvent.create({
+        event_name: 'teaser_school_miss',
+        user_id: 'anonymous_visitor',
+        school_code: schoolCode,
+        properties: { school_query: String(school || '').slice(0, 100), reason: 'no_network' },
+      }).catch(() => {});
+    }
 
     // Build up to 3 anonymized preview matches with real companies
     const seen = new Set();
