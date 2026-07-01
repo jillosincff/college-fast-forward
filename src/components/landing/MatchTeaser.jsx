@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Lock, Search, Sparkles, FileText, Send, CalendarClock, Check, Zap } from 'lucide-react';
 import { getLandingTeaser } from '@/functions/getLandingTeaser';
+import { base44 } from '@/api/base44Client';
+
+const track = (eventName, properties = {}) => {
+  try { base44.analytics.track({ eventName, properties }); } catch {}
+};
 
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
 const INDIGO = '#6d28d9';
@@ -62,6 +67,8 @@ export default function MatchTeaser({ go }) {
     setResult(null);
     setRevealed(false);
     setWorkingStep(0);
+    track('teaser_searched', { school: q });
+    try { localStorage.setItem('cff_teaser_school', q); } catch {}
 
     // Cycle the "agent working" steps while data loads (min ~2.8s so it feels like real work)
     stepTimer.current = setInterval(() => {
@@ -74,8 +81,10 @@ export default function MatchTeaser({ go }) {
     ]);
 
     clearInterval(stepTimer.current);
-    setResult(res.data || { found: false, count: 0 });
+    const data = res.data || { found: false, count: 0 };
+    setResult(data);
     setLoading(false);
+    track('teaser_revealed', { school: q, school_code: data.school_code || null, found: !!data.found, network_count: data.count || 0 });
     requestAnimationFrame(() => setRevealed(true));
   };
 
@@ -181,7 +190,7 @@ export default function MatchTeaser({ go }) {
             )}
 
             <div style={{ textAlign: 'center', marginTop: 18 }}>
-              <button onClick={go} style={{
+              <button onClick={() => { track('teaser_cta_clicked', { school_code: result?.school_code || null }); go(); }} style={{
                 fontFamily: SF, fontSize: 16, fontWeight: 700, color: '#fff', background: GRAD_INDIGO,
                 border: 'none', borderRadius: 999, padding: '15px 36px', cursor: 'pointer', minHeight: 52,
                 boxShadow: '0 12px 32px rgba(109,40,217,0.35)', transition: 'all 0.2s ease',

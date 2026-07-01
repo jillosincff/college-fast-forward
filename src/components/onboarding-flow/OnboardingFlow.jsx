@@ -21,7 +21,11 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [frustration, setFrustration] = useState(saved?.frustration ?? 5);
   const [seeking, setSeeking] = useState(saved?.seeking ?? '');
   const [blockers, setBlockers] = useState(saved?.blockers ?? []);
-  const [college, setCollege] = useState(saved?.college ?? '');
+  const [college, setCollege] = useState(() => {
+    if (saved?.college) return saved.college;
+    // Pre-fill from the landing page teaser search so students don't retype their school
+    try { return localStorage.getItem('cff_teaser_school') || ''; } catch { return ''; }
+  });
   const [locationPref, setLocationPref] = useState(saved?.locationPref ?? '');
   const [locationCity, setLocationCity] = useState(saved?.locationCity ?? '');
   const [citySuggestionsClosed, setCitySuggestionsClosed] = useState(false);
