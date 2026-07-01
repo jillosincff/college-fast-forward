@@ -18,6 +18,8 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
 
   const companyName = lead.company || lead.companyName || '';
   const jobTitle = lead.job_title || lead.role || '';
+  // Normalized real application URL — checked across every lead shape we ingest
+  const jobUrl = lead.job_url || lead.jobSource || lead.url || '';
   
   // Network data
   const hasAlumni = lead.alumniCount > 0;
@@ -80,6 +82,12 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
     setSubmitting(true);
     setError('');
 
+    // Open the REAL application page immediately and synchronously (so popup
+    // blockers allow it) — tracking alone is not applying.
+    if (jobUrl) {
+      window.open(jobUrl, '_blank', 'noopener');
+    }
+
     try {
       // Upload resume if manually provided
       if (resumeFile) {
@@ -94,7 +102,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
         company: companyName,
         job_title: jobTitle,
         job_description: lead.jobDescription || lead.description || '',
-        job_url: lead.job_url || lead.jobSource || '',
+        job_url: jobUrl,
         application_path: 'cold_apply',
         status: 'applied',
         status_date: new Date().toISOString(),
@@ -112,7 +120,8 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
       window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
       onSuccess?.();
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      // Surface the backend's friendly message (e.g. free pipeline limit) instead of a raw HTTP error
+      setError(err?.response?.data?.message || err.message || 'Something went wrong. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -128,9 +137,13 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
           <div className="p-8">
             <div className="text-center">
               <div className="text-4xl mb-3">🎉</div>
-              <h3 className="text-lg font-extrabold text-gray-900 mb-1">Application Tracked!</h3>
+              <h3 className="text-lg font-extrabold text-gray-900 mb-1">{jobUrl ? "You're Almost There!" : 'Application Tracked!'}</h3>
               <p className="text-sm text-gray-500 mb-2">
-                Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> has been tracked in your CFF pipeline.
+                {jobUrl ? (
+                  <>We opened the official application page for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> in a new tab — <strong>complete your application there</strong>. It's already tracked in your CFF pipeline.</>
+                ) : (
+                  <>Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> has been tracked in your CFF pipeline.</>
+                )}
               </p>
             </div>
 
@@ -150,15 +163,15 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
             )}
 
             <div className="mt-6 space-y-2">
-              {(lead.job_url || lead.url) && (
+              {jobUrl && (
                 <a
-                  href={lead.job_url || lead.url}
+                  href={jobUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer text-center"
                   style={{ minHeight: 'auto' }}
                 >
-                  🌐 Open Application Website
+                  🌐 Reopen Application Page
                 </a>
               )}
               <button
@@ -355,7 +368,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
                     <p className="text-xs font-bold text-blue-800">No resume on file yet</p>
                     <p className="text-[11px] text-blue-700 mt-0.5">Upload your resume below, or{' '}
-                      <button type="button" onClick={() => { onClose(); window.location.hash = '#ResumeTailoring'; }} className="underline font-semibold cursor-pointer" style={{ minHeight: 'auto', minWidth: 'auto' }}>
+                      <button type="button" onClick={() => { onClose(); window.location.hash = '#/ResumeTailoring'; }} className="underline font-semibold cursor-pointer" style={{ minHeight: 'auto', minWidth: 'auto' }}>
                         tailor one for this role →
                       </button>
                     </p>
@@ -395,7 +408,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   className="w-full py-3 rounded-xl font-bold text-sm text-white transition cursor-pointer disabled:opacity-60"
                   style={{ background: 'linear-gradient(135deg, #1e293b, #334155)', minHeight: 'auto' }}
                 >
-                  {submitting ? 'Submitting…' : '⚡ Submit Application via CFF'}
+                  {submitting ? 'Submitting…' : jobUrl ? '⚡ Apply Now — Opens Company Site' : '⚡ Track This Application'}
                 </button>
               )}
 
