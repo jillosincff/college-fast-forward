@@ -17,6 +17,7 @@ import EditGoalsModal from './EditGoalsModal';
 import DashboardBottomNav from './DashboardBottomNav';
 import ToolsTab from './ToolsTab';
 import ProgressTab from './ProgressTab';
+import PremiumActivationSequence from './PremiumActivationSequence';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -277,6 +278,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
+      {/* One-time premium activation moment on first visit */}
+      <PremiumActivationSequence user={user} shortName={shortName} networkCount={networkCount} companiesCount={companiesCount} />
+
       <PremiumNav user={user} onEditGoals={() => setShowGoalsModal(true)} navRef={navRef} />
 
       {/* Tab Navigation */}

@@ -302,6 +302,16 @@ export default function FreeTierDashboard() {
         {/* CLIFF Chat Widget - Floating for dashboard */}
         <CliffChatWidget mode="widget" onOpenUpgrade={triggerUpgrade} />
 
+        {/* Loss-framed reactivation header for expired trials */}
+        {isTrialExpired && (
+          <TrialEndedHeader
+            firstName={firstName}
+            user={user}
+            theme={campusTheme}
+            onReactivate={() => triggerUpgrade('Premium Reactivation')}
+          />
+        )}
+
         {/* Day-one unlocked warm connection — the "aha moment" before any paywall */}
         <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
 
