@@ -15,7 +15,8 @@ import {
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false, resumeAtScreen = null }) {
   // Load saved progress for returning users
   const saved = resumeAtScreen ? loadSavedProgress() : null;
-  const startScreen = resumeAtScreen || 1;
+  // Screen 2 (experts marketing) was removed from the flow — never resume onto it
+  const startScreen = resumeAtScreen === 2 ? 3 : (resumeAtScreen || 1);
 
   const [screen, setScreen] = useState(startScreen);
   const [analyzing, setAnalyzing] = useState(false); // analyzing loader after university
@@ -64,10 +65,13 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
   const fileRef = useRef();
 
-  const TOTAL = 13;
+  const TOTAL = 12; // 13 internal screens minus the removed experts screen (2)
+  const displayStep = screen > 2 ? screen - 1 : screen;
 
   const next = () => {
     let newScreen = screen + 1;
+    // Screen 2 (experts) is cut — it collected no data and slowed the funnel
+    if (newScreen === 2) newScreen = 3;
     // Skippers have no resume — bypass the Before/After screen (11),
     // which would otherwise render infinite "parsing" spinners.
     if (newScreen === 11 && !resumeData) newScreen = 12;
@@ -91,6 +95,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const back = () => {
     setScreen(s => {
       let prev = Math.max(1, s - 1);
+      if (prev === 2) prev = 1; // experts screen removed
       // Mirror the forward skip: no resume → screen 11 doesn't exist for this user
       if (prev === 11 && !resumeData) prev = 10;
       // Reset screen 9 sub-mode when leaving screen 9 via back
@@ -308,6 +313,8 @@ CRITICAL RULES:
           .onb-btn-primary { padding: 18px 28px !important; font-size: 16px !important; min-height: 56px !important; }
           .onb-option-btn { padding: 16px !important; min-height: 56px !important; }
           .blocker-card-list { gap: 14px !important; }
+          /* Before/After resume comparison stacks vertically on phones */
+          .onb-ba-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -325,14 +332,14 @@ CRITICAL RULES:
 
 
 
-      {/* ── Progress Bar (screens 1–8, or postAuth steps) ── */}
-      {!analyzing && screen < 10 && (
+      {/* ── Progress Bar (all screens — drop-off is highest when users can't see the finish line) ── */}
+      {!analyzing && (
         <>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#E2E8F0' }}>
-            <div style={{ height: '100%', width: `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
+            <div style={{ height: '100%', width: `${(displayStep / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
           </div>
           <div style={{ position: 'absolute', top: 18, left: 24, fontFamily: FONT, fontSize: 12, color: TEXT3, fontWeight: 600 }}>
-            {screen} / {TOTAL}
+            {displayStep} / {TOTAL}
           </div>
         </>
       )}

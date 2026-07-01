@@ -5,7 +5,7 @@ const SIZE = 140;
 const STROKE = 12;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const TARGET = 0.98;
+const TARGET = 1;
 
 export default function ATSScoreRing() {
   const [progress, setProgress] = useState(0);
@@ -71,15 +71,16 @@ export default function ATSScoreRing() {
         }}>
           <span style={{
             fontFamily: FONT, fontSize: 36, fontWeight: 900,
-            color: '#1F2937', letterSpacing: '-0.03em', lineHeight: 1,
+            color: '#10B981', letterSpacing: '-0.03em', lineHeight: 1,
+            opacity: progress > 0.9 ? 1 : 0, transition: 'opacity 0.3s ease',
           }}>
-            {Math.round(progress * 100)}%
+            ✓
           </span>
           <span style={{
             fontFamily: FONT, fontSize: 10, fontWeight: 700,
             color: '#6B7280', letterSpacing: '0.1em', textTransform: 'uppercase',
           }}>
-            ATS MATCH
+            ATS-READY
           </span>
         </div>
       </div>
@@ -91,7 +92,7 @@ export default function ATSScoreRing() {
         padding: '4px 12px',
       }}>
         <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 600, color: '#065F46' }}>
-          ✨ Top 2% of Global Applicants
+          ✨ Recruiter-Ready Formatting
         </span>
       </div>
 
@@ -100,7 +101,7 @@ export default function ATSScoreRing() {
         fontFamily: FONT, fontSize: 11, color: '#9CA3AF',
         margin: 0, textAlign: 'center', lineHeight: 1.5, maxWidth: 160,
       }}>
-        Optimized to instantly pass automated screening filters for Fortune 500 portals.
+        Structured so automated screening systems can parse every section of your resume.
       </p>
     </div>
   );

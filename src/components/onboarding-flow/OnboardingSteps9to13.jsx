@@ -60,17 +60,17 @@ export default function OnboardingSteps9to13({
                   <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: GREEN, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>BEST</span>
                 </button>
 
-                {/* LinkedIn */}
-                <button onClick={() => setDataInputMode('linkedin')}
+                {/* Quick Start — no resume needed */}
+                <button onClick={() => setDataInputMode('quickstart')}
                   style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 14, background: BLUE_LIGHT, border: `2px solid ${BLUE_BORDER}`, borderRadius: 14, padding: '18px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: `0 4px 12px rgba(0,102,255,0.08)` }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 20px rgba(0,102,255,0.14)`; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(0,102,255,0.08)`; }}
                 >
-                  <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 10, border: `1px solid ${BLUE_BORDER}` }}>💼</span>
+                  <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 10, border: `1px solid ${BLUE_BORDER}` }}>⚡</span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>Paste LinkedIn URL</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>No PDF? The Agent instantly extracts your experience, skills, and story.</p>
-                    <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic' }}>Fast, clean, and no uploading needed</p>
+                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>No resume yet? Quick Start</p>
+                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>Answer 3 quick questions and the Agent builds your Starter Profile.</p>
+                    <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic' }}>Perfect for freshmen and first-time job seekers</p>
                   </div>
                   <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: INDIGO, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>FAST</span>
                 </button>
@@ -113,50 +113,6 @@ export default function OnboardingSteps9to13({
 
               <div style={{ textAlign: 'center', marginTop: 8 }}>
                 <button onClick={back} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
-              </div>
-            </>
-          )}
-
-          {!uploading && dataInputMode === 'linkedin' && (
-            <>
-              <div style={{ width: 56, height: 56, borderRadius: 14, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, margin: '0 auto 20px', boxShadow: SHADOW }}>💼</div>
-              <h1 style={h1style}>Paste your LinkedIn URL</h1>
-              <p style={substyle}>The Agent will extract your experience and build your full profile from there.</p>
-              <InputField type="url" placeholder="https://linkedin.com/in/yourname" value={linkedinInput} onChange={e => setLinkedinInput(e.target.value)} />
-              <Btn
-                onClick={async () => {
-                  if (!linkedinInput.trim()) return;
-                  setUploading(true);
-                  try {
-                    const res = await base44.integrations.Core.InvokeLLM({
-                      prompt: `Extract professional profile data from this LinkedIn URL: ${linkedinInput}
-University: ${college || 'unknown'}. Target role type: ${seeking || 'unknown'}.
-Create a professional profile JSON as if extracted from LinkedIn.`,
-                      response_json_schema: {
-                        type: 'object', properties: {
-                          original: { type: 'object', properties: {
-                            name: { type: 'string' }, email: { type: 'string' }, linkedin: { type: 'string' },
-                            summary: { type: 'string' },
-                            education: { type: 'array', items: { type: 'object', properties: { school: { type: 'string' }, degree: { type: 'string' }, dates: { type: 'string' } } } },
-                            experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } },
-                            skills: { type: 'array', items: { type: 'string' } },
-                            activities: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' } } } }
-                          }},
-                          optimized_experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } }
-                        }
-                      }
-                    });
-                    const parsed = res.original || res;
-                    setResumeData({ original: parsed, optimized: { ...parsed, experience: res.optimized_experience || parsed.experience || [] } });
-                  } catch { /* advance anyway */ }
-                  setUploading(false);
-                  next();
-                  }}
-                  disabled={!linkedinInput.trim()}
-                style={{ display: 'block', width: '100%', marginBottom: 12, marginTop: 8 }}
-              >Extract My Profile →</Btn>
-              <div style={{ textAlign: 'center' }}>
-                <button onClick={() => setDataInputMode('choose')} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>← Back to options</button>
               </div>
             </>
           )}
@@ -262,7 +218,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
               </div>
             );
             return (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
+              <div className="onb-ba-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
                 {/* BEFORE */}
                 <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, overflow: 'hidden' }}>
                   <div style={{ background: '#F1F5F9', padding: '14px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -341,8 +297,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                   'Strengthened bullet points to focus on results and impact (recruiters love this)',
                   'Improved formatting and visual hierarchy for a modern, professional look',
                   'Made it ATS-friendly while keeping it visually standout',
-                  <span key="score">Score improved from <span style={{ textDecoration: 'line-through', color: '#EF4444', margin: '0 4px' }}>59/100</span> → <span style={{ fontWeight: 700, color: GREEN, marginLeft: 4 }}>98/100</span></span>,
-                  'Now optimized to beat the 75% auto-rejection rate most students face',
+                  'Aligned keywords with your target industries and roles',
+                  'Structured so automated screeners can read every section correctly',
                 ].map((line, i) => (
                   <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: FONT, fontSize: 13, color: TEXT, lineHeight: 1.6 }}>
                     <span style={{ color: GREEN, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
@@ -363,7 +319,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 { icon: '🧑‍💼', text: 'Your applications will finally reach human recruiters instead of getting auto-filtered' },
-                { icon: '🏆', text: "You're now in the top 2% of candidates for your target roles" },
+                { icon: '🏆', text: 'Your resume now reads like the candidates recruiters actually shortlist' },
                 { icon: '🤝', text: 'Alumni & parents will see a polished, confident version of you' },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>

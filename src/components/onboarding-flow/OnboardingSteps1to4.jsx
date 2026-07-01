@@ -80,7 +80,7 @@ export default function OnboardingSteps1to4({
           >Let's Build Your Interview Edge →</button>
 
           <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, marginBottom: 4, lineHeight: 1.6 }}>
-            This guided setup takes 8–12 minutes and is worth it — you'll have your first personalized plan by the end.
+            This guided setup takes about 5 minutes — you'll have your first personalized plan by the end.
           </p>
           <p style={{ fontFamily: FONT, fontSize: 13, color: INDIGO, fontWeight: 700, margin: '0 0 28px' }}>✨ Your first warm intro or interview is closer than you think.</p>
 
