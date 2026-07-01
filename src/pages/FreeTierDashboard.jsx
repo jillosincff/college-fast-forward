@@ -25,6 +25,8 @@ import FirstWarmMatchCard from '@/components/free-tier/FirstWarmMatchCard';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
+import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
+import FollowUpNudgeCard from '@/components/free-tier/FollowUpNudgeCard';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -311,6 +313,12 @@ export default function FreeTierDashboard() {
             onReactivate={() => triggerUpgrade('Premium Reactivation')}
           />
         )}
+
+        {/* Referral prompt at peak moments (reply received / interview landed) */}
+        <PeakMomentSharePrompt user={user} />
+
+        {/* Stalled outreach follow-up nudge with one-click AI draft */}
+        <FollowUpNudgeCard user={user} />
 
         {/* Day-one unlocked warm connection — the "aha moment" before any paywall */}
         <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
