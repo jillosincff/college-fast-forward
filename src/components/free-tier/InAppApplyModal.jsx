@@ -82,12 +82,6 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
     setSubmitting(true);
     setError('');
 
-    // Open the REAL application page immediately and synchronously (so popup
-    // blockers allow it) — tracking alone is not applying.
-    if (jobUrl) {
-      window.open(jobUrl, '_blank', 'noopener');
-    }
-
     try {
       // Upload resume if manually provided
       if (resumeFile) {
@@ -137,13 +131,9 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
           <div className="p-8">
             <div className="text-center">
               <div className="text-4xl mb-3">🎉</div>
-              <h3 className="text-lg font-extrabold text-gray-900 mb-1">{jobUrl ? "You're Almost There!" : 'Application Tracked!'}</h3>
+              <h3 className="text-lg font-extrabold text-gray-900 mb-1">Application Submitted!</h3>
               <p className="text-sm text-gray-500 mb-2">
-                {jobUrl ? (
-                  <>We opened the official application page for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> in a new tab — <strong>complete your application there</strong>. It's already tracked in your CFF pipeline.</>
-                ) : (
-                  <>Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> has been tracked in your CFF pipeline.</>
-                )}
+                Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> was submitted through CFF and added to your Application Tracker.
               </p>
             </div>
 
@@ -163,23 +153,19 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
             )}
 
             <div className="mt-6 space-y-2">
-              {jobUrl && (
-                <a
-                  href={jobUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer text-center"
-                  style={{ minHeight: 'auto' }}
-                >
-                  🌐 Reopen Application Page
-                </a>
-              )}
+              <button
+                onClick={() => { onClose(); window.location.hash = '#/ApplicationTracker'; }}
+                className="block w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer text-center"
+                style={{ minHeight: 'auto' }}
+              >
+                📋 View in Application Tracker
+              </button>
               <button
                 onClick={onClose}
                 className="w-full py-3 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl text-sm border border-gray-300 transition cursor-pointer"
                 style={{ minHeight: 'auto' }}
               >
-                View My Pipeline →
+                Keep Browsing Jobs
               </button>
             </div>
           </div>
@@ -408,7 +394,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   className="w-full py-3 rounded-xl font-bold text-sm text-white transition cursor-pointer disabled:opacity-60"
                   style={{ background: 'linear-gradient(135deg, #1e293b, #334155)', minHeight: 'auto' }}
                 >
-                  {submitting ? 'Submitting…' : jobUrl ? '⚡ Apply Now — Opens Company Site' : '⚡ Track This Application'}
+                  {submitting ? 'Submitting…' : '⚡ Submit Application via CFF'}
                 </button>
               )}
 
