@@ -7,7 +7,7 @@ import { base44 } from '@/api/base44Client';
 import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
 import AppShowcase from '@/components/landing/AppShowcase';
 import LiveJobsSection from '@/components/landing/LiveJobsSection';
-import HeroProductVisual from '@/components/landing/HeroProductVisual';
+import WarmApplyHeroDemo from '@/components/landing/WarmApplyHeroDemo';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
 import MatchTeaser from '@/components/landing/MatchTeaser';
 
@@ -455,7 +455,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <div className="hero-animate-6 hero-visual" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Soft radial glow behind the product card */}
               <div style={{ position: 'absolute', inset: '-10%', background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24, pointerEvents: 'none' }} />
-              <HeroProductVisual />
+              <WarmApplyHeroDemo />
             </div>
           )}
         </div>
