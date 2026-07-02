@@ -218,12 +218,12 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
               ) : scanning ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontSize: 12 }}>
                   <span style={{ width: 13, height: 13, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  Scanning {schoolAbbr || 'your'} network at {companyName}…
+                  CLIFF's agent is searching the web for {schoolAbbr || 'your school'} alumni at {companyName}…
                 </div>
               ) : scanned ? (
                 <>
                   <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
-                    No verified {schoolAbbr || 'network'} connections at {companyName} yet — CLIFF can still help you find a backdoor in. Use <strong>Find Connection</strong> below to scout cold contacts.
+                    CLIFF's agent searched the web and couldn't find verified {schoolAbbr || 'school'} alumni at {companyName} — but you can still get a backdoor in. Use <strong>Find Connection</strong> to have CLIFF scout the best cold contact (like the hiring manager) instead.
                   </p>
                   <button
                     onClick={handleFindConnection}
@@ -247,7 +247,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
               ) : (
                 <>
                   <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
-                    See if anyone from your school can champion your application here.
+                    Have CLIFF's agent search the web for {schoolAbbr || 'your school'} alumni working at {companyName} who can champion your application.
                   </p>
                   <button
                     onClick={handleScanNetwork}
@@ -265,7 +265,7 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                       boxShadow: '0 2px 8px rgba(124,58,237,0.25)',
                     }}
                   >
-                    🔍 Scan {schoolAbbr || 'my'} network at {companyName.charAt(0).toUpperCase() + companyName.slice(1).toLowerCase()}
+                    🔍 Find {schoolAbbr || 'my school'} alumni at {companyName.charAt(0).toUpperCase() + companyName.slice(1).toLowerCase()}
                   </button>
                 </>
               )}
