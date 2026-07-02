@@ -12,7 +12,6 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
   const [alumni, setAlumni] = useState([]);
   const [loadingAlumni, setLoadingAlumni] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
-  const [networkDismissed, setNetworkDismissed] = useState(false);
 
   const companyName = lead.company || lead.companyName || '';
   const jobTitle = lead.job_title || lead.role || '';
@@ -47,7 +46,6 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
     setAlumni([]);
     setScanned(false);
     setScanning(false);
-    setNetworkDismissed(false);
     setLoadingAlumni(true);
     scoutCompanyBackdoor({ jobId: companyName, companyName, cacheOnly: true })
       .then(res => {
@@ -167,176 +165,148 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
         </button>
       </div>
 
-      {/* Zone B: Network Advantage — always shown so the search is visible */}
-      {!networkDismissed && (
+      {/* Zone B: Network Advantage — compact strip that expands only when connections are found */}
       <div style={{
-          position: 'relative',
-          padding: '16px 24px',
-          background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)',
-          borderBottom: '1px solid #e9d5ff',
-        }}>
-              <button
-                onClick={() => setNetworkDismissed(true)}
-                aria-label="Close network advantage"
-                style={{
-                  position: 'absolute',
-                  top: 10,
-                  right: 12,
-                  background: 'none',
-                  border: 'none',
-                  color: '#7c3aed',
-                  fontSize: 16,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  lineHeight: 1,
-                  padding: 4,
-                  minHeight: 'auto',
-                  minWidth: 'auto',
-                }}
-              >
-                ✕
-              </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, paddingRight: 24 }}>
-                <svg style={{ width: 18, height: 18, color: '#6d28d9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <h4 style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#6d28d9', margin: 0 }}>
-                  Network Advantage
-                </h4>
-              </div>
-              <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+        padding: '10px 24px',
+        background: '#f5f3ff',
+        borderBottom: '1px solid #ede9fe',
+      }}>
+        <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
-              {loadingAlumni ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontSize: 12 }}>
-                  <span style={{ width: 13, height: 13, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  Checking your network for connections at {companyName}…
-                </div>
-              ) : alumni.length > 0 ? (
-                <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
-                  We found <strong>{alumni.length}</strong> {alumni.length === 1 ? 'connection' : 'connections'} who can champion your application at {companyName}.
-                </p>
-              ) : scanning ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontSize: 12 }}>
-                  <span style={{ width: 13, height: 13, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  CLIFF's agent is searching the web for {schoolAbbr || 'your school'} alumni at {companyName}…
-                </div>
-              ) : scanned ? (
-                <>
-                  <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
-                    CLIFF's agent searched the web and couldn't find verified {schoolAbbr || 'school'} alumni at {companyName} — but you can still get a backdoor in. Use <strong>Find Connection</strong> to have CLIFF scout the best cold contact (like the hiring manager) instead.
-                  </p>
-                  <button
-                    onClick={handleFindConnection}
-                    style={{
-                      fontFamily: dm,
-                      fontSize: 12,
-                      fontWeight: 800,
-                      color: '#fff',
-                      background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-                      border: 'none',
-                      borderRadius: 10,
-                      padding: '10px 16px',
-                      cursor: 'pointer',
-                      width: '100%',
-                      boxShadow: '0 2px 8px rgba(124,58,237,0.25)',
-                    }}
-                  >
-                    🎯 Find Connection
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
-                    Have CLIFF's agent search the web for {schoolAbbr || 'your school'} alumni working at {companyName} who can champion your application.
-                  </p>
-                  <button
-                    onClick={handleScanNetwork}
-                    style={{
-                      fontFamily: dm,
-                      fontSize: 12,
-                      fontWeight: 800,
-                      color: '#fff',
-                      background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-                      border: 'none',
-                      borderRadius: 10,
-                      padding: '10px 16px',
-                      cursor: 'pointer',
-                      width: '100%',
-                      boxShadow: '0 2px 8px rgba(124,58,237,0.25)',
-                    }}
-                  >
-                    🔍 Find {schoolAbbr || 'my school'} alumni at {companyName.charAt(0).toUpperCase() + companyName.slice(1).toLowerCase()}
-                  </button>
-                </>
-              )}
-
-              {/* Alumni List */}
-              {!loadingAlumni && alumni.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {alumni.map((a, i) => (
-                    <div key={i} style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      background: '#fff',
-                      borderRadius: 8,
-                      padding: '8px 10px',
-                      border: '1px solid #e9d5ff',
-                    }}>
-                      <div style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+        {loadingAlumni ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontFamily: dm, fontSize: 12 }}>
+            <span style={{ width: 12, height: 12, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+            Checking your network at {companyName}…
+          </div>
+        ) : scanning ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontFamily: dm, fontSize: 12 }}>
+            <span style={{ width: 12, height: 12, border: '2px solid #d8b4fe', borderTop: '2px solid #6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+            CLIFF's agent is searching the web for {schoolAbbr || 'your school'} alumni at {companyName}…
+          </div>
+        ) : alumni.length > 0 ? (
+          <div>
+            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#5b21b6', margin: '0 0 8px' }}>
+              🎓 {alumni.length} {alumni.length === 1 ? 'connection' : 'connections'} who can champion your application at {companyName}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {alumni.map((a, i) => (
+                <div key={i} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  background: '#fff',
+                  borderRadius: 8,
+                  padding: '6px 10px',
+                  border: '1px solid #e9d5ff',
+                }}>
+                  <div style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    flexShrink: 0,
+                  }}>
+                    {a.name?.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {a.name}
+                    </p>
+                    {a.role_title && (
+                      <p style={{ fontFamily: dm, fontSize: 9, color: '#6b7280', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {a.role_title}
+                      </p>
+                    )}
+                  </div>
+                  {a.linkedin_url && (
+                    <a
+                      href={a.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: 6,
+                        background: '#0077b5',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: '#fff',
-                        fontSize: 11,
+                        fontSize: 9,
                         fontWeight: 800,
+                        textDecoration: 'none',
                         flexShrink: 0,
-                      }}>
-                        {a.name?.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {a.name}
-                        </p>
-                        {a.role_title && (
-                          <p style={{ fontFamily: dm, fontSize: 9, color: '#6b7280', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {a.role_title}
-                          </p>
-                        )}
-                      </div>
-                      {a.linkedin_url && (
-                        <a
-                          href={a.linkedin_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: 6,
-                            background: '#0077b5',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#fff',
-                            fontSize: 9,
-                            fontWeight: 800,
-                            textDecoration: 'none',
-                            flexShrink: 0,
-                          }}
-                        >
-                          in
-                        </a>
-                      )}
-                    </div>
-                  ))}
+                        minHeight: 'auto',
+                        minWidth: 'auto',
+                      }}
+                    >
+                      in
+                    </a>
+                  )}
                 </div>
-              ) : null}
+              ))}
+            </div>
+          </div>
+        ) : scanned ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: 0, lineHeight: 1.4, flex: 1, minWidth: 180 }}>
+              No {schoolAbbr || 'school'} alumni found at {companyName} — scout a cold contact instead.
+            </p>
+            <button
+              onClick={handleFindConnection}
+              style={{
+                fontFamily: dm,
+                fontSize: 11,
+                fontWeight: 800,
+                color: '#fff',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                border: 'none',
+                borderRadius: 999,
+                padding: '7px 14px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                minHeight: 'auto',
+                minWidth: 'auto',
+              }}
+            >
+              🎯 Find Connection
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: 0, lineHeight: 1.4, flex: 1, minWidth: 180 }}>
+              🎓 Anyone from {schoolAbbr || 'your school'} at {companyName}? Let CLIFF's agent check.
+            </p>
+            <button
+              onClick={handleScanNetwork}
+              style={{
+                fontFamily: dm,
+                fontSize: 11,
+                fontWeight: 800,
+                color: '#fff',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                border: 'none',
+                borderRadius: 999,
+                padding: '7px 14px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                minHeight: 'auto',
+                minWidth: 'auto',
+              }}
+            >
+              🔍 Find alumni
+            </button>
+          </div>
+        )}
       </div>
-      )}
 
       {/* Zone C: Job Details */}
       <div style={{
