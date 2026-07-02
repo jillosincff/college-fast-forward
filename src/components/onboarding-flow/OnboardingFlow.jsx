@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 import { processReferralMilestone } from '@/functions/processReferralMilestone';
@@ -67,6 +67,42 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
 
   const TOTAL = 12; // 13 internal screens minus the removed experts screen (2)
   const displayStep = screen > 2 ? screen - 1 : screen;
+
+  // ── Abandonment event tracking ──────────────────────────────────────────
+  const screenRef = useRef(startScreen);
+  screenRef.current = screen;
+  const completedRef = useRef(false); // set when saveAndAuth runs — never an abandonment
+  const abandonLoggedRef = useRef(false); // log at most once per flow instance
+
+  const logAbandonment = (reason) => {
+    if (completedRef.current || abandonLoggedRef.current) return;
+    abandonLoggedRef.current = true;
+    try {
+      // Stable anonymous id — most students aren't authenticated during onboarding
+      let anonId = localStorage.getItem('cff_anon_id');
+      if (!anonId) {
+        anonId = Math.random().toString(36).slice(2, 12);
+        localStorage.setItem('cff_anon_id', anonId);
+      }
+      const s = screenRef.current;
+      base44.functions.invoke('logAnalyticsEvent', {
+        event_name: 'onboarding_step_abandoned',
+        anonymous_id: anonId,
+        properties: {
+          screen: s,
+          step: s > 2 ? s - 1 : s, // matches the "X / 12" progress display
+          reason,
+        },
+      }).catch(() => {});
+    } catch {}
+  };
+
+  useEffect(() => {
+    // pagehide = real navigation away / tab close (does NOT fire on tab switch)
+    const onPageHide = () => logAbandonment('left_page');
+    window.addEventListener('pagehide', onPageHide);
+    return () => window.removeEventListener('pagehide', onPageHide);
+  }, []);
 
   const next = () => {
     let newScreen = screen + 1;
@@ -199,6 +235,8 @@ CRITICAL RULES:
   };
 
   const saveAndAuth = async (planType) => {
+    // Mark completed BEFORE any redirect — the OAuth round-trip fires pagehide
+    completedRef.current = true;
     try {
       localStorage.setItem('pending_invite_role', 'student');
       sessionStorage.setItem('cff_onboarding_type', 'student');
@@ -330,7 +368,7 @@ CRITICAL RULES:
       `}</style>
 
       {/* ── Close Button ── */}
-      <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW }}>✕</button>
+      <button onClick={() => { logAbandonment('closed_flow'); if (onClose) onClose(); }} style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW }}>✕</button>
 
       {/* Welcome back banner intentionally removed */}
 
