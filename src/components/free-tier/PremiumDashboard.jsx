@@ -20,6 +20,7 @@ import ProgressTab from './ProgressTab';
 import PremiumActivationSequence from './PremiumActivationSequence';
 import PeakMomentSharePrompt from './PeakMomentSharePrompt';
 import FollowUpNudgeCard from './FollowUpNudgeCard';
+import WarmApplyBar from './WarmApplyBar';
 import { Wrench, LogOut, Bot, FileText, Users, MessageCircle, GraduationCap, Building2 } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -476,6 +477,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         <div style={{ display: 'grid', gridTemplateColumns: showSidebar ? 'minmax(0, 1fr) 340px' : '1fr', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
           {/* Left Column - Job Feed */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
+            {/* Primary action: paste a job → warm connection → outreach → tracked */}
+            <WarmApplyBar user={user} />
+
             {/* Stalled outreach follow-up nudge with one-click AI draft */}
             <div><FollowUpNudgeCard user={user} /></div>
 

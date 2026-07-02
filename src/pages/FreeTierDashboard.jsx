@@ -27,6 +27,7 @@ import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
 import FollowUpNudgeCard from '@/components/free-tier/FollowUpNudgeCard';
+import WarmApplyBar from '@/components/free-tier/WarmApplyBar';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -281,6 +282,11 @@ export default function FreeTierDashboard() {
 
         {/* Referral prompt at peak moments (reply received / interview landed) */}
         <PeakMomentSharePrompt user={user} />
+
+        {/* Primary action: paste a job → warm connection → outreach → tracked */}
+        <div style={{ marginBottom: 20 }}>
+          <WarmApplyBar user={user} />
+        </div>
 
         {/* Stalled outreach follow-up nudge with one-click AI draft */}
         <FollowUpNudgeCard user={user} />
