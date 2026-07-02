@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { findParentsAtCompany } from '@/functions/findParentsAtCompany';
+import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { Users, Copy, Check, Loader2, FileText, ClipboardList } from 'lucide-react';
 
@@ -19,6 +20,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
 
   const [contacts, setContacts] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [searchPhase, setSearchPhase] = useState('verified'); // 'verified' | 'ai'
   const [contact, setContact] = useState(null); // chosen contact or null (cold)
 
   const [message, setMessage] = useState('');
@@ -50,15 +52,32 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
   const searchNetwork = async () => {
     setStep('network');
     setSearching(true);
+    setSearchPhase('verified');
+    let found = [];
+    // 1) Verified CFF network first (parents + alumni who joined)
     try {
       const res = await findParentsAtCompany({ companyName: company.trim() });
       const data = res?.data || res;
-      setContacts(data?.parents || []);
-    } catch {
-      setContacts([]);
-    } finally {
-      setSearching(false);
+      found = data?.parents || [];
+    } catch {}
+    // 2) Fallback: the AI alumni scout (same engine the feed cards use)
+    if (found.length === 0) {
+      setSearchPhase('ai');
+      try {
+        const res = await scoutCompanyBackdoor({ jobId: company.trim(), companyName: company.trim() });
+        const data = res?.data || res;
+        found = (data?.alumni || []).slice(0, 5).map(a => ({
+          name: a.name,
+          role_title: a.role_title || null,
+          company: a.company || company.trim(),
+          linkedin_url: a.linkedin_url || null,
+          persona: 'alumni',
+          ai_found: true,
+        }));
+      } catch {}
     }
+    setContacts(found);
+    setSearching(false);
   };
 
   // Feed cards pass the job in — skip confirm and search the network immediately
@@ -103,7 +122,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
         alumni_name: contact?.name || null,
         alumni_role: contact?.role_title || null,
         alumni_linkedin: contact?.linkedin_url || null,
-        alumni_source: contact ? 'top_match' : 'manual',
+        alumni_source: contact ? (contact.ai_found ? 'fastiq' : 'top_match') : 'manual',
         notes: message ? `Outreach draft:\n${message}` : null,
       });
       const result = res?.data || res;
@@ -180,7 +199,14 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
               <div style={{ textAlign: 'center', padding: '28px 0' }}>
                 <Loader2 size={26} color="#7c3aed" style={{ animation: 'spin 1s linear infinite' }} />
                 <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#374151', margin: '12px 0 2px' }}>Searching {school} parents & alumni at {company}…</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: '#374151', margin: '12px 0 2px' }}>
+                  {searchPhase === 'ai'
+                    ? `CLIFF is scanning the web for ${school} alumni at ${company}…`
+                    : `Searching ${school} parents & alumni at ${company}…`}
+                </p>
+                {searchPhase === 'ai' && (
+                  <p style={{ fontSize: 12, color: '#9ca3af', margin: '4px 0 0' }}>No verified match yet — going deeper. This can take a moment.</p>
+                )}
               </div>
             ) : contacts.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -188,7 +214,11 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
                   <p style={{ fontSize: 13, fontWeight: 800, color: '#5b21b6', margin: 0 }}>
                     🔥 {contacts.length} warm connection{contacts.length > 1 ? 's' : ''} at {company}
                   </p>
-                  <p style={{ fontSize: 12, color: '#7c3aed', margin: '3px 0 0' }}>Pick one and CLIFF writes your intro instantly.</p>
+                  <p style={{ fontSize: 12, color: '#7c3aed', margin: '3px 0 0' }}>
+                    {contacts[0]?.ai_found
+                      ? 'CLIFF found these alumni on the web — verify on LinkedIn before reaching out.'
+                      : 'Pick one and CLIFF writes your intro instantly.'}
+                  </p>
                 </div>
                 {contacts.map((c, i) => (
                   <button key={i} onClick={() => draftMessage(c)}
