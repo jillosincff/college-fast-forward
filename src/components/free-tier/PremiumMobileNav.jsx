@@ -2,14 +2,14 @@ import { useState } from 'react';
 import PremiumHiringChat from './PremiumHiringChat';
 import { navigate } from '@/components/utils/navigation';
 
-const dm = "'DM Sans', system-ui, sans-serif";
+const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 const TABS = [
   {
     key: 'dashboard',
     label: 'Dashboard',
     icon: ({ active }) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#E85D20' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="7" height="7" rx="1" />
         <rect x="14" y="3" width="7" height="7" rx="1" />
         <rect x="14" y="14" width="7" height="7" rx="1" />
@@ -21,7 +21,7 @@ const TABS = [
     key: 'pipeline',
     label: 'Tracker',
     icon: ({ active }) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#E85D20' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
         <rect x="8" y="2" width="8" height="4" rx="1" />
         <path d="M9 12l2 2 4-4" />
@@ -32,7 +32,7 @@ const TABS = [
     key: 'cliff',
     label: 'CliFF',
     icon: ({ active }) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#E85D20' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         <path d="M9 10h.01" />
         <path d="M13 10h.01" />
@@ -44,7 +44,7 @@ const TABS = [
     key: 'profile',
     label: 'Profile',
     icon: ({ active }) => (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#E85D20' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#6d28d9' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </svg>
@@ -120,7 +120,7 @@ export default function PremiumMobileNav({ user }) {
                     fontFamily: dm,
                     fontSize: 10,
                     fontWeight: isActive ? 800 : 600,
-                    color: isActive ? '#E85D20' : '#9ca3af',
+                    color: isActive ? '#6d28d9' : '#9ca3af',
                     transition: 'color 0.15s',
                   }}>
                     {tab.label}

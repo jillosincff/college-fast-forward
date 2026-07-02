@@ -28,8 +28,9 @@ import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
 import FollowUpNudgeCard from '@/components/free-tier/FollowUpNudgeCard';
 import WarmApplyBar from '@/components/free-tier/WarmApplyBar';
+import DashboardWelcomeHeader from '@/components/free-tier/DashboardWelcomeHeader';
 
-const dm = "'DM Sans', system-ui, sans-serif";
+const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 function FirstVisitToast({ firstName, onDismiss }) {
   return (
@@ -68,6 +69,16 @@ export default function FreeTierDashboard() {
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const navRef = useRef(null);
+
+  // Load Satoshi font for brand consistency with the landing/marketing pages
+  useEffect(() => {
+    if (!document.getElementById('slp-satoshi')) {
+      const l = document.createElement('link');
+      l.id = 'slp-satoshi'; l.rel = 'stylesheet';
+      l.href = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap';
+      document.head.appendChild(l);
+    }
+  }, []);
 
   // Listen for goals modal open event from child components
   useEffect(() => {
@@ -214,7 +225,7 @@ export default function FreeTierDashboard() {
     },
     resume: {
       title: "Hey {name}, beating corporate ATS resume bots is a broken game.",
-      subtitle: "Drop a job description on the right to run your free match check — and see exactly what to fix. CLiFF will optimize your resume to beat the bots and catch human eyes.",
+      subtitle: "Head to the Tools tab to run your free ATS match check — and see exactly what to fix. CLiFF will optimize your resume to beat the bots and catch human eyes.",
       badge: "ATS Crusher Mode",
       cta: 'Fix My Resume Instantly',
       feature: 'Resume Wow Rewrite',
@@ -249,7 +260,7 @@ export default function FreeTierDashboard() {
   try { localStorage.setItem('cff_ftd_seen', '1'); } catch {}
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
       <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} navRef={navRef} />
 
       {/* Tab Navigation (desktop top tabs + mobile bottom nav) */}
@@ -259,6 +270,8 @@ export default function FreeTierDashboard() {
       {activeTab === 'tools' && (
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }}>
           <ToolsTab user={user} onUpgrade={triggerUpgrade} />
+          {/* Free AI-powered ATS resume check */}
+          <div style={{ marginTop: 20 }}><AtsMatcher user={user} /></div>
           {/* CLIFF Chat Widget - Embedded for tools section */}
           <CliffChatWidget mode="embedded" onOpenUpgrade={triggerUpgrade} />
         </div>
@@ -283,6 +296,17 @@ export default function FreeTierDashboard() {
         {/* Referral prompt at peak moments (reply received / interview landed) */}
         <PeakMomentSharePrompt user={user} />
 
+        {/* Personalized pain-point welcome header (hidden when the expired-trial header shows) */}
+        {!isTrialExpired && (
+          <DashboardWelcomeHeader
+            badge={painConfig.badge}
+            title={formattedTitle}
+            subtitle={painConfig.subtitle}
+            ctaLabel={painConfig.cta}
+            onCta={() => triggerUpgrade(painConfig.feature)}
+          />
+        )}
+
         {/* Day-one unlocked warm connection — the FIRST thing a new student sees */}
         <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
 
@@ -291,14 +315,9 @@ export default function FreeTierDashboard() {
           <WarmApplyBar user={user} />
         </div>
 
-        {/* Stalled outreach follow-up nudge with one-click AI draft */}
-        <FollowUpNudgeCard user={user} />
-
-        {/* Daily digest: today's 3 actions from the student's real pipeline */}
+        {/* Today: daily actions first, then any stalled-outreach nudge */}
         <TodaysActionsCard user={user} />
-
-        {/* Real AI-powered ATS resume check (free tool) */}
-        <AtsMatcher user={user} />
+        <FollowUpNudgeCard user={user} />
 
         {/* Daily Drop Feed - Job Opportunities */}
         <div id="cff-daily-feed">

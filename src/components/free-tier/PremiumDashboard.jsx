@@ -21,9 +21,9 @@ import PremiumActivationSequence from './PremiumActivationSequence';
 import PeakMomentSharePrompt from './PeakMomentSharePrompt';
 import FollowUpNudgeCard from './FollowUpNudgeCard';
 import WarmApplyBar from './WarmApplyBar';
-import { Wrench, LogOut, Bot, FileText, Users, MessageCircle, GraduationCap, Building2 } from 'lucide-react';
+import { Wrench, LogOut, Rocket, FileText, Users, MessageCircle, GraduationCap, Building2 } from 'lucide-react';
 
-const dm = "'DM Sans', system-ui, sans-serif";
+const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 function PremiumNav({ user, onEditGoals, navRef }) {
   const { logout } = useAuth();
@@ -98,12 +98,13 @@ function PremiumNav({ user, onEditGoals, navRef }) {
   );
 }
 
-function StatPill({ icon: Icon, label, value, sublabel, theme, isLoading, warning, isMobile }) {
+function StatPill({ icon: Icon, label, value, sublabel, theme, isLoading, warning, isMobile, onClick }) {
   // On mobile, a pill with a sublabel (the wide "Active Connections" one) takes a
   // full row so its value + sublabel never get crushed/clipped off the edge.
   const flexBasis = isMobile ? (sublabel ? '100%' : 'calc(50% - 6px)') : '1 1 0';
   return (
-    <div style={{
+    <div onClick={onClick} style={{
+      cursor: onClick ? 'pointer' : 'default',
       display: 'flex',
       alignItems: 'center',
       gap: 10,
@@ -205,7 +206,16 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const [showKanbanModal, setShowKanbanModal] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [pipelineCount, setPipelineCount] = useState(null);
   const navRef = useRef(null);
+
+  // Count of tracked applications for the header stat
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.NetworkingPipeline.filter({ user_email: user.email })
+      .then(rows => setPipelineCount(rows?.length ?? 0))
+      .catch(() => setPipelineCount(0));
+  }, [user?.email]);
 
   // Listen for goals modal open event from child components
   useEffect(() => {
@@ -275,9 +285,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const networkCount = alumniCount + parentsCount;
   const hasResume = !!(user?.resume_filename || user?.resume_url);
   const stats = [
-    { icon: Bot, label: 'Agent Status', value: 'ACTIVE' },
+    { icon: Rocket, label: 'In Your Pipeline', value: `${pipelineCount ?? 0}`, isLoading: pipelineCount === null },
     { icon: FileText, label: 'Resume', value: hasResume ? 'On File' : 'Not Uploaded', warning: !hasResume },
-    { icon: Users, label: 'Active Connections', value: `${networkCount}`, sublabel: `${alumniCount} Alumni • ${parentsCount} Parents` },
+    { icon: Users, label: 'Active Connections · tap for details', value: `${networkCount}`, sublabel: `${alumniCount} Alumni • ${parentsCount} Parents`, onClick: () => setShowNetworkModal(true) },
   ];
 
   return (
@@ -406,28 +416,28 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       <>
       {/* ── Premium Welcome Banner ── */}
       <div style={{
-        background: `linear-gradient(135deg, #0A0A0A 0%, #0d1a3a 50%, ${t.primary}33 100%)`,
+        background: 'linear-gradient(135deg, #1e1b4b 0%, #4c1d95 55%, #6d28d9 100%)',
         padding: isMobile ? '20px 16px 24px' : '28px 24px 32px',
         position: 'relative',
         overflow: 'hidden',
       }}>
         {/* Subtle glow */}
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: `${t.primary}22`, filter: 'blur(60px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(167,139,250,0.28)', filter: 'blur(60px)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(30,41,59,0.4)', border: '1px solid rgba(51,65,85,1)', borderRadius: 100, padding: '4px 12px', marginBottom: 16 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(139,92,246,0.35)', borderRadius: 100, padding: '4px 12px', marginBottom: 16 }}>
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Premium Account</span>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Premium Account</span>
           </div>
 
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: isMobile ? 20 : 28, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: isMobile ? 1.25 : 1.2, letterSpacing: '-0.01em' }}>
+          <h1 style={{ fontFamily: dm, fontSize: isMobile ? 20 : 28, fontWeight: 800, color: '#fff', margin: '0 0 10px', lineHeight: isMobile ? 1.25 : 1.2, letterSpacing: '-0.01em' }}>
             Let's get locked in and get you hired, {firstName}
           </h1>
           <p style={{ fontFamily: dm, fontSize: isMobile ? 13 : 14, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: 680 }}>
             Your career agent is live and working 24/7 — scouting roles that match your goals and mapping your{' '}
             <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{shortName}</strong> alumni backdoor channels.{' '}
-            <strong style={{ color: '#E85D20' }}>Let's go get this offer.</strong>
+            <strong style={{ color: '#c4b5fd' }}>Let's go get this offer.</strong>
           </p>
 
           {/* Stats row */}
@@ -469,9 +479,10 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
       {/* ── Main Content ── */}
       {(() => {
-        // Only show once the real count is loaded — rendering while parentCount
-        // is still null caused the widget to flash and then disappear.
-        const showSidebar = parentCount !== null && parentCount >= 20;
+        // Reserve the sidebar column while the parent count is loading so the
+        // grid doesn't reflow — show a skeleton until the real widget is ready.
+        const sidebarUnlocked = parentCount !== null && parentCount >= 20;
+        const showSidebar = parentCount === null || sidebarUnlocked;
         return (
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
         <div style={{ display: 'grid', gridTemplateColumns: showSidebar ? 'minmax(0, 1fr) 340px' : '1fr', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
@@ -506,7 +517,13 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
               maxHeight: 'calc(100vh - 48px)',
               overflowY: 'auto',
             }} className="desktop-only">
-              <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
+              {sidebarUnlocked ? (
+                <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
+              ) : (
+                <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, height: 280, animation: 'sidebarPulse 1.4s ease-in-out infinite' }}>
+                  <style>{`@keyframes sidebarPulse { 0%,100%{opacity:1} 50%{opacity:0.55} }`}</style>
+                </div>
+              )}
             </aside>
           )}
         </div>

@@ -1,7 +1,7 @@
 import { Home, Wrench, TrendingUp, User } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 
-const dm = "'DM Sans', system-ui, sans-serif";
+const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', Icon: Home },
