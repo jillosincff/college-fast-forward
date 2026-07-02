@@ -8,6 +8,7 @@ import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
 import EmailParserTestPanel from '@/components/tracker/EmailParserTestPanel';
+import StatusCheckBanner from '@/components/tracker/StatusCheckBanner';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -187,6 +188,20 @@ export default function ApplicationTracker() {
 
       {/* Search & Filters */}
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 20px' }}>
+        {/* "Did you hear back?" status check for stale applications */}
+        <StatusCheckBanner
+          applications={applications}
+          onRespond={async (app, newStatus) => {
+            await base44.entities.NetworkingPipeline.update(app.id, {
+              status: TRACKER_STATUS_TO_PIPELINE[newStatus] || 'identified',
+              status_date: new Date().toISOString(),
+            });
+            setApplications(prev => prev.map(a => a.id === app.id
+              ? { ...a, status: newStatus, nextAction: newStatus === 'interviewing' ? 'Prep for interview' : newStatus === 'offered' ? 'Review offer' : newStatus === 'rejected' ? '—' : 'Wait for response' }
+              : a));
+          }}
+        />
+
         {/* Connect Email Button */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>

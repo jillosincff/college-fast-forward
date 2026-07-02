@@ -116,6 +116,14 @@ export default function ToolsTab({ user, onUpgrade }) {
               e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
               e.currentTarget.style.transform = 'translateY(0)';
             }}
+            onTouchStart={e => {
+              e.currentTarget.style.transform = 'scale(0.98)';
+              e.currentTarget.style.background = '#fafafa';
+            }}
+            onTouchEnd={e => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.background = '#fff';
+            }}
           >
             {/* Icon + Title */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

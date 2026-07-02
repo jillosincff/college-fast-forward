@@ -18,7 +18,7 @@ import PipelineImpactBar from '@/components/free-tier/PipelineImpactBar';
 import ApplicationPipeline from '@/components/free-tier/ApplicationPipeline';
 import PendingTailoringWidget from '@/components/free-tier/PendingTailoringWidget';
 import ToolsTab from '@/components/free-tier/ToolsTab';
-import ProgressTab from '@/components/free-tier/ProgressTab';
+import TodaysActionsCard from '@/components/free-tier/TodaysActionsCard';
 import DashboardBottomNav from '@/components/free-tier/DashboardBottomNav';
 import CliffChatWidget from '@/components/free-tier/CliffChatWidget';
 import AtsMatcher from '@/components/free-tier/AtsMatcher';
@@ -292,13 +292,6 @@ export default function FreeTierDashboard() {
         </div>
       )}
 
-      {/* Progress Tab */}
-      {activeTab === 'progress' && (
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }}>
-          <ProgressTab user={user} onUpgrade={triggerUpgrade} />
-        </div>
-      )}
-
       {/* Dashboard Tab (default) */}
       {activeTab === 'dashboard' && (
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }} className="main-dashboard-container">
@@ -321,6 +314,9 @@ export default function FreeTierDashboard() {
         {/* Stalled outreach follow-up nudge with one-click AI draft */}
         <FollowUpNudgeCard user={user} />
 
+        {/* Daily digest: today's 3 actions from the student's real pipeline */}
+        <TodaysActionsCard user={user} />
+
         {/* Day-one unlocked warm connection — the "aha moment" before any paywall */}
         <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
 
@@ -328,7 +324,9 @@ export default function FreeTierDashboard() {
         <AtsMatcher user={user} />
 
         {/* Daily Drop Feed - Job Opportunities */}
-        <CliffPrioritizedFeed user={user} schoolAbbr={schoolAbbr} onUpgrade={triggerUpgrade} />
+        <div id="cff-daily-feed">
+          <CliffPrioritizedFeed user={user} schoolAbbr={schoolAbbr} onUpgrade={triggerUpgrade} />
+        </div>
       </div>
       )}
 

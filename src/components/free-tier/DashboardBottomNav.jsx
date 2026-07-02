@@ -14,6 +14,8 @@ const ALL_TABS = [...TABS, { id: 'profile', label: 'Profile', Icon: User }];
 export default function DashboardBottomNav({ activeTab, onTabChange }) {
   const handleTabClick = (tabId) => {
     if (tabId === 'profile') { navigate('Profile'); return; }
+    // Unified tracker: the Application Tracker tab always opens the real tracker page
+    if (tabId === 'progress') { navigate('ApplicationTracker'); return; }
     onTabChange(tabId);
   };
 
