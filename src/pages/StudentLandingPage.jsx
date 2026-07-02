@@ -386,7 +386,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-2">
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#030712', margin: '0 0 8px' }}>
-                  Stop applying into the void.
+                  Mass applying doesn’t work.
                 </h1>
               </div>
             )}
@@ -395,7 +395,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 26px)', fontWeight: 600, color: '#334155', margin: '0 0 16px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
-                  Your AI agent finds warm intros, tailors your resume, and drafts your outreach. You just show up to interviews.
+                  Warm intros do. Your AI agent finds them — you just show up to interviews.
                 </h2>
               </div>
             )}
