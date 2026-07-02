@@ -12,11 +12,13 @@ Deno.serve(async (req) => {
     const desiredIndustry = user.target_industry || user.desired_industry || user.industry;
     const schoolCode = (user.school_code || '').toUpperCase();
 
-    if (!desiredIndustry || !schoolCode) {
+    // School is required; industry only improves ranking — new students without a
+    // target industry still get their first warm match from the full school pool.
+    if (!schoolCode) {
       return Response.json({ match_found: false });
     }
 
-    const industryLower = desiredIndustry.toLowerCase();
+    const industryLower = (desiredIndustry || '').toLowerCase();
 
     // Seniority keywords ordered by priority — highest first
     const SENIOR_KEYWORDS = ['ceo', 'cto', 'coo', 'cfo', 'chief', 'president', 'vp', 'vice president', 'svp', 'evp', 'partner', 'director', 'head', 'principal', 'senior manager', 'manager'];

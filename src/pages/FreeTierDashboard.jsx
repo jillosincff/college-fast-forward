@@ -283,6 +283,9 @@ export default function FreeTierDashboard() {
         {/* Referral prompt at peak moments (reply received / interview landed) */}
         <PeakMomentSharePrompt user={user} />
 
+        {/* Day-one unlocked warm connection — the FIRST thing a new student sees */}
+        <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
+
         {/* Primary action: paste a job → warm connection → outreach → tracked */}
         <div style={{ marginBottom: 20 }}>
           <WarmApplyBar user={user} />
@@ -293,9 +296,6 @@ export default function FreeTierDashboard() {
 
         {/* Daily digest: today's 3 actions from the student's real pipeline */}
         <TodaysActionsCard user={user} />
-
-        {/* Day-one unlocked warm connection — the "aha moment" before any paywall */}
-        <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
 
         {/* Real AI-powered ATS resume check (free tool) */}
         <AtsMatcher user={user} />

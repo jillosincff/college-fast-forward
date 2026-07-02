@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import BackdoorOpportunityCard from './BackdoorOpportunityCard';
 import ATSScoreRing from './ATSScoreRing';
@@ -6,6 +6,8 @@ import FunnelProgress from './FunnelProgress';
 import OpportunityHub from './OpportunityHub';
 import PremiumPaywallModal from './PremiumPaywallModal';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { getLandingTeaser } from '@/functions/getLandingTeaser';
+import PlanComparisonTable from './PlanComparisonTable';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -74,98 +76,6 @@ function MiniLinkedInCard({ name, college }) {
   );
 }
 
-/* ── 14-Day Plan Roadmap ── */
-function SprintRoadmap({ targetRole, location, schoolName }) {
-  const days = [
-    {
-      day: 'Day 1',
-      color: BLUE,
-      bgColor: BLUE_LIGHT,
-      borderColor: BLUE_BORDER,
-      icon: '🚀',
-      title: 'Deploy to Sarah K.',
-      tasks: [
-        'Send AI-crafted alumni intro DM to Sarah K. at Nexo Agency',
-        'Agent monitors her LinkedIn for a reply signal',
-        'Apply to 2 verified "active hiring" roles from your Feed',
-      ],
-    },
-    {
-      day: 'Day 2',
-      color: '#7c3aed',
-      bgColor: '#f5f3ff',
-      borderColor: '#ddd6fe',
-      icon: '🔍',
-      title: 'Run Hiring Signal Scan',
-      tasks: [
-        'Agent scans Nexo Agency + 2 adjacent companies for new openings',
-        'Get notified if Sarah K. views your profile',
-        'Deploy follow-up message if no reply within 24 hrs',
-      ],
-    },
-    {
-      day: 'Day 3',
-      color: GREEN,
-      bgColor: GREEN_LIGHT,
-      borderColor: GREEN_BORDER,
-      icon: '📅',
-      title: 'Interview Prep Mode',
-      tasks: [
-        'If Sarah K. replies → Agent generates your interview brief',
-        'Practice 5 predicted questions with AI feedback',
-        'CRM auto-updates with interview status & next steps',
-      ],
-    },
-  ];
-
-  return (
-    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', marginBottom: 24 }}>
-      <div style={{ padding: '18px 22px 14px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 16 }}>⚡</span>
-        <div>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>Your 14-Day Plan Roadmap</p>
-          <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>Exactly what to do — and the Agent handles the rest.</p>
-        </div>
-      </div>
-      <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {days.map((d, i) => (
-          <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', position: 'relative', paddingBottom: i < days.length - 1 ? 14 : 0 }}>
-            {i < days.length - 1 && (
-              <div style={{ position: 'absolute', left: 18, top: 38, bottom: 0, width: 2, background: `linear-gradient(to bottom, ${d.borderColor}, ${days[i + 1].borderColor})` }} />
-            )}
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: d.bgColor, border: `1.5px solid ${d.borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>
-              {d.icon}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: d.color, background: d.bgColor, border: `1px solid ${d.borderColor}`, borderRadius: 100, padding: '2px 10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.day}</span>
-                <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT }}>{d.title}</span>
-              </div>
-              {/* Blurred task list — gated behind premium */}
-              <div style={{ position: 'relative' }}>
-                <div style={{ filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
-                  {d.tasks.map((t, ti) => (
-                    <div key={ti} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 4 }}>
-                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: d.color, flexShrink: 0, marginTop: 6 }} />
-                      <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.55 }}>{t}</p>
-                    </div>
-                  ))}
-                </div>
-                {/* Frosted overlay */}
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(2px)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: d.color, background: d.bgColor, border: `1px solid ${d.borderColor}`, borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>
-                    🔒 Premium Action Plan Feature
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ── Old Way vs Fast Forward ── */
 function ComparisonTable() {
   const rows = [
@@ -212,6 +122,18 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
+
+  // REAL network data for this student's school — no fabricated counts or names.
+  // getLandingTeaser is the public, PII-free endpoint (company + role only).
+  const [teaser, setTeaser] = useState(null);
+  useEffect(() => {
+    getLandingTeaser({ school: college || '' })
+      .then(res => setTeaser(res?.data || { count: 0, matches: [] }))
+      .catch(() => setTeaser({ count: 0, matches: [] }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const networkCount = teaser?.count || 0;
+  const teaserMatches = teaser?.matches || [];
 
   // Launch real Stripe checkout — saves onboarding data first, then redirects
   const launchCheckout = async () => {
@@ -321,8 +243,10 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           <span style={{ color: BLUE }}>and start interviewing.</span>
         </h1>
         <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.65, margin: '0 auto', maxWidth: 560 }}>
-          CLiFF has already <strong style={{ color: TEXT }}>rebuilt your resume + LinkedIn</strong>, found{' '}
-          <strong style={{ color: BLUE }}>3 verified {schoolName} alumni connections</strong>, and unlocked hidden internal tracks.{' '}
+          {resumeData ? <>CLiFF has already <strong style={{ color: TEXT }}>rebuilt your resume + LinkedIn</strong> and </> : <>CLiFF has </>}
+          {networkCount > 0
+            ? <>found <strong style={{ color: BLUE }}>{networkCount} verified {schoolName} connection{networkCount === 1 ? '' : 's'}</strong> ready to open doors.</>
+            : <>armed its <strong style={{ color: BLUE }}>AI alumni scout</strong> to find {schoolName} insiders at every company you target.</>}{' '}
           <strong style={{ color: GREEN }}>You're no longer playing the numbers game.</strong>
         </p>
       </div>
@@ -335,55 +259,68 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
           <span style={{ fontSize: 20 }}>🔥</span>
           <div>
-            <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 800, color: '#1e1b4b', margin: 0, letterSpacing: '-0.01em' }}>Inside Track Found</p>
-            <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>CLiFF bypassed public job boards and opened active internal pipelines.</p>
+            <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 800, color: '#1e1b4b', margin: 0, letterSpacing: '-0.01em' }}>Your Inside Track</p>
+            <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>Real parents &amp; alumni from the verified CFF network.</p>
           </div>
           <div style={{ marginLeft: 'auto', background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>
             <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#ef4444', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Live</span>
           </div>
         </div>
         <p style={{ fontFamily: dm, fontSize: 13, color: '#4b5563', margin: '0 0 18px', lineHeight: 1.6 }}>
-          Here are your hidden opportunities with verified <strong style={{ color: BLUE }}>{schoolName} alumni</strong>:
+          {teaserMatches.length > 0
+            ? <>Real professionals in the verified <strong style={{ color: BLUE }}>{schoolName}</strong> network right now:</>
+            : <>How CLiFF finds <strong style={{ color: BLUE }}>{schoolName}</strong> insiders for you:</>}
         </p>
 
-        {/* Teaser cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
-          {[
-            { role: 'Senior Product Manager', company: '████████', dept: 'Product & Strategy', badge: `1 ${schoolName.split(' ').slice(-2).join(' ')} Alum Found` },
-            { role: 'Investment Banking Analyst', company: '███████ ██████', dept: 'Finance & Banking', badge: `1 ${schoolName.split(' ').slice(-2).join(' ')} Alum Found` },
-            { role: 'Marketing Director', company: '████', dept: 'Marketing & Growth', badge: `1 ${schoolName.split(' ').slice(-2).join(' ')} Alum Found` },
-          ].map((card, i) => (
-            <div key={i} style={{
-              background: i === 0 ? '#fff' : 'rgba(255,255,255,0.6)',
-              border: i === 0 ? `1px solid ${BLUE_BORDER}` : '1px solid #e5e7eb',
-              borderRadius: 12, padding: '14px 16px',
-              display: 'flex', alignItems: 'center', gap: 12,
-              filter: i > 0 ? 'blur(2.5px)' : 'none',
-              opacity: i === 0 ? 1 : i === 1 ? 0.7 : 0.45,
-              userSelect: i > 0 ? 'none' : 'auto',
-            }}>
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>
-                {['👩‍💼', '👨‍💼', '👩‍💻'][i]}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 2px' }}>{card.role}</p>
-                <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '0 0 5px', letterSpacing: '0.03em' }}>{card.company} · {card.dept}</p>
-                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: GREEN, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>✓ {card.badge}</span>
-              </div>
-              {i === 0 && (
-                <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '6px 12px', flexShrink: 0 }}>
-                  <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, margin: 0, whiteSpace: 'nowrap' }}>Ready to Intro →</p>
-                </div>
-              )}
-            </div>
-          ))}
-          {/* Fade overlay on locked cards */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to bottom, transparent, rgba(245,243,255,0.95))', borderRadius: 12, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 14, pointerEvents: 'none' }}>
-            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '6px 18px' }}>
-              🔒 2 more alumni connections unlock with your plan
-            </span>
+        {/* Teaser cards — REAL network data (company + role, no names pre-signup) */}
+        {teaser === null ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '18px 16px' }}>
+            <span style={{ width: 14, height: 14, border: '2px solid #ddd6fe', borderTop: '2px solid #7c3aed', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+            <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>Checking the verified {schoolName} network…</p>
           </div>
-        </div>
+        ) : teaserMatches.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
+            {teaserMatches.map((card, i) => (
+              <div key={i} style={{
+                background: i === 0 ? '#fff' : 'rgba(255,255,255,0.6)',
+                border: i === 0 ? `1px solid ${BLUE_BORDER}` : '1px solid #e5e7eb',
+                borderRadius: 12, padding: '14px 16px',
+                display: 'flex', alignItems: 'center', gap: 12,
+                filter: i > 0 ? 'blur(2.5px)' : 'none',
+                opacity: i === 0 ? 1 : i === 1 ? 0.7 : 0.45,
+                userSelect: i > 0 ? 'none' : 'auto',
+              }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>
+                  {card.persona === 'Alum' ? '🎓' : '🤝'}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 2px' }}>{card.role}</p>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>{card.company}</p>
+                  <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: GREEN, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>✓ Verified {schoolName.split(' ').slice(-2).join(' ')} {card.persona}</span>
+                </div>
+                {i === 0 && (
+                  <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '6px 12px', flexShrink: 0 }}>
+                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, margin: 0, whiteSpace: 'nowrap' }}>Ready to Intro →</p>
+                  </div>
+                )}
+              </div>
+            ))}
+            {networkCount > 1 && (
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to bottom, transparent, rgba(245,243,255,0.95))', borderRadius: 12, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 14, pointerEvents: 'none' }}>
+                <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '6px 18px' }}>
+                  🔒 {networkCount - 1} more verified connection{networkCount - 1 === 1 ? '' : 's'} unlock with your plan
+                </span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '16px 18px' }}>
+            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>🛰️ AI Alumni Scout — armed for {schoolName}</p>
+            <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
+              The verified {schoolName} network is still growing, so CLiFF searches the web live for {schoolName} alumni at every company you target — real people you can verify on LinkedIn before reaching out.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* ─────────────────────────────────────────────────────
@@ -486,8 +423,8 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           </div>
           <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, alignSelf: 'stretch' }}>
             <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT, margin: 0, textAlign: 'center' }}>Resume Optimized</p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: GREEN, fontWeight: 700, margin: 0, textAlign: 'center' }}>98% ATS Match (Top 2%)</p>
-            <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 10px', textAlign: 'center' }}>Top 2% of Global Applicants</p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: GREEN, fontWeight: 700, margin: 0, textAlign: 'center' }}>ATS-Ready Formatting ✓</p>
+            <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 10px', textAlign: 'center' }}>Bullets rewritten for results &amp; keywords</p>
             <ATSScoreRing />
           </div>
         </div>
@@ -501,6 +438,16 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           Why the old way is failing you
         </p>
         <ComparisonTable />
+      </div>
+
+      {/* ─────────────────────────────────────────────────────
+          6.5 FREE vs PREMIUM — one scannable comparison
+      ───────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 28 }}>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
+          What you get on each plan
+        </p>
+        <PlanComparisonTable networkCount={networkCount} />
       </div>
 
       {/* ─────────────────────────────────────────────────────
@@ -524,8 +471,8 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         {/* Live metrics strip */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 22, flexWrap: 'wrap' }}>
           {[
-            { label: 'Resume Optimization', value: '98% ATS Approved', color: GREEN },
-            { label: 'Alumni Matrix', value: '3 Warm Tracks Isolated', color: BLUE },
+            { label: 'Resume Optimization', value: 'ATS-Ready ✓', color: GREEN },
+            { label: 'Warm Network', value: networkCount > 0 ? `${networkCount} Verified Connection${networkCount === 1 ? '' : 's'}` : 'AI Scout Active', color: BLUE },
           ].map((m, i) => (
             <div key={i} style={{ flex: 1, minWidth: 140, background: '#fff', border: `1px solid ${BLUE_BORDER}`, borderRadius: 12, padding: '12px 14px' }}>
               <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{m.label}</p>
