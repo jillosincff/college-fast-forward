@@ -386,7 +386,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-2">
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#030712', margin: '0 0 8px' }}>
-                  Mass applying doesn’t work.
+                  Stop applying into the void.
                 </h1>
               </div>
             )}
@@ -395,7 +395,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 26px)', fontWeight: 600, color: '#334155', margin: '0 0 16px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
-                  Your AI agent does the work. You take the interviews.
+                  Your AI agent finds warm intros, tailors your resume, and drafts your outreach. You just show up to interviews.
                 </h2>
               </div>
             )}
@@ -404,7 +404,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-4">
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#4b5563', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
-                  It tailors your resume for every role, finds warm alumni &amp; parent intros at real companies, and drafts your outreach — all done for you.
+                  Paste any job link and CFF finds alumni &amp; parents who can get you in the door at that company — with a ready-to-send message and a tailored resume.
                 </p>
               </div>
             )}
