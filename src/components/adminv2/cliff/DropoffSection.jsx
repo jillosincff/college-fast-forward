@@ -18,7 +18,7 @@ export default function DropoffSection({ dropoff }) {
   return (
     <section>
       <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">📉 Student Drop-Off Journey</h2>
-      <div className="flex gap-2 flex-wrap items-stretch">
+      <div className="flex gap-2 items-stretch overflow-x-auto pb-2 scrollbar-hide">
         <Stage label="Signed Up" value={dropoff.signedUp} pctOfPrev={null} dropCount={0} />
         <Stage label="Completed Onboarding" value={dropoff.onboarded} pctOfPrev={pct(dropoff.onboarded, dropoff.signedUp)} dropCount={dropoff.signedUp - dropoff.onboarded} />
         <Stage label="Built a Pipeline" value={dropoff.builtPipeline} pctOfPrev={pct(dropoff.builtPipeline, dropoff.onboarded)} dropCount={dropoff.onboarded - dropoff.builtPipeline} />

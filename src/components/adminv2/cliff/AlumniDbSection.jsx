@@ -5,14 +5,14 @@ export default function AlumniDbSection({ alumniDb, schools }) {
   return (
     <section>
       <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">🎓 Alumni Database & Schools</h2>
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
         <MetricTile label="Alumni Discovered" value={alumniDb?.total} />
         <MetricTile label="Verified" value={alumniDb?.verified} accent="text-green-400" />
         <MetricTile label="Unresolved Search Misses" value={alumniDb?.unresolvedMisses} sub="seeding priority" accent="text-red-400" />
       </div>
       {schools?.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto">
+          <table className="w-full min-w-[420px] text-sm">
             <thead>
               <tr className="text-slate-500 text-xs uppercase border-b border-slate-800">
                 <th className="text-left p-3">School</th>

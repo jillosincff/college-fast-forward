@@ -64,9 +64,9 @@ export default function AdminV2() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 lg:p-10 space-y-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 lg:p-10 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
           <p className="text-slate-500 text-sm mt-1">CliFF · Live Metrics</p>

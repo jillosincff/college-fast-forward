@@ -15,7 +15,7 @@ export default function FunnelSection({ funnel, activation }) {
   return (
     <section>
       <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">🎯 Outreach Funnel (All Time)</h2>
-      <div className="flex gap-2 flex-wrap items-stretch">
+      <div className="flex gap-2 items-stretch overflow-x-auto pb-2 scrollbar-hide">
         <Stage label="Contacts Identified" value={funnel.identified} pctOfPrev={null} />
         <Stage label="Reached Out" value={funnel.reachedOut} pctOfPrev={pct(funnel.reachedOut, funnel.identified)} />
         <Stage label="Replied" value={funnel.replied} pctOfPrev={pct(funnel.replied, funnel.reachedOut)} />
