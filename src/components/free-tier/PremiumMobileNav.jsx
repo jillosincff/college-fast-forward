@@ -19,13 +19,12 @@ const TABS = [
   },
   {
     key: 'pipeline',
-    label: 'Pipeline',
+    label: 'Tracker',
     icon: ({ active }) => (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#E85D20' : '#9ca3af'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 3h7v7H3z" />
-        <path d="M14 3h7v7h-7z" />
-        <path d="M14 14h7v7h-7z" />
-        <path d="M3 14h7v7H3z" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        <rect x="8" y="2" width="8" height="4" rx="1" />
+        <path d="M9 12l2 2 4-4" />
       </svg>
     ),
   },
