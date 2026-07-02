@@ -8,7 +8,6 @@ import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
 // CareerAssetsCard removed — resume management moved to nav dropdown
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
-import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
 import CliffPrioritizedFeed from '@/components/free-tier/CliffPrioritizedFeed';
 import LockedAlumniTeaser from '@/components/free-tier/LockedAlumniTeaser';
 import NetworkPulseStrip from '@/components/free-tier/NetworkPulseStrip';
@@ -65,7 +64,6 @@ export default function FreeTierDashboard() {
   const [parentCount, setParentCount] = useState(null);
   const [showWelcomeToast, setShowWelcomeToast] = useState(false);
   const [showOutreachToast, setShowOutreachToast] = useState(false);
-  const [showEmailSyncModal, setShowEmailSyncModal] = useState(false);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const navRef = useRef(null);
@@ -189,33 +187,6 @@ export default function FreeTierDashboard() {
       return stored ? JSON.parse(stored)[0] : null;
     } catch { return null; }
   })();
-
-  const handleEmailSync = async () => {
-    try {
-      const res = await base44.functions.invoke('getEmailOAuthUrl', {});
-      const oauthUrl = res?.data?.url || res?.url;
-      if (oauthUrl) {
-        window.open(oauthUrl, '_blank', 'width=600,height=800');
-        // Poll for completion
-        const checkInterval = setInterval(async () => {
-          try {
-            const updatedUser = await base44.auth.me();
-            if (updatedUser?.is_email_synced) {
-              clearInterval(checkInterval);
-              setUser(updatedUser);
-              // Trigger banner hide
-              window.dispatchEvent(new CustomEvent('cff:email-synced'));
-            }
-          } catch {}
-        }, 1000);
-        // Stop polling after 2 minutes
-        setTimeout(() => clearInterval(checkInterval), 120000);
-      }
-    } catch (err) {
-      console.error('Failed to get OAuth URL:', err);
-      alert('Email sync is temporarily unavailable. Please try again later.');
-    }
-  };
 
   // Psychological Blueprint: "They Heard Me" - Dynamic emotional matching
   const PAIN_POINT_CONFIG = {

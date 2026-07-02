@@ -6,7 +6,6 @@ import { navigate } from '@/components/utils/navigation';
 import ColdInroadScout from '@/components/free-tier/ColdInroadScout';
 import AutomatedAlumniActionPanel from '@/components/free-tier/AutomatedAlumniActionPanel';
 import { findPipelineMatch } from '@/components/pipeline/findPipelineMatch';
-import GmailConnectNudge from '@/components/free-tier/GmailConnectNudge';
 
 const CONTEXTS = [
   { id: 'alumni_search', label: 'Alumni Outreach', icon: '🔍', desc: 'Reaching out to a UF alumni you found' },
@@ -621,9 +620,6 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             + New Draft
           </button>
         </div>
-
-        {/* Gmail connect nudge — enables automatic reply detection */}
-        <GmailConnectNudge user={user} />
 
         {/* Follow-up nudge */}
         {nudgeBanner}
