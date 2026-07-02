@@ -233,6 +233,17 @@ CRITICAL RULES:
               school_code: (deriveSchoolCode(college) || '').toUpperCase(),
               career_blockers: blockers,
             });
+          // Event tracking: student profile onboarding completion (fire-and-forget)
+          base44.functions.invoke('logAnalyticsEvent', {
+            event_name: 'student_onboarding_completed',
+            properties: {
+              school: college || '',
+              plan_type: planType || '',
+              seeking: seeking || '',
+              blockers_count: blockers.length,
+              has_resume: !!resumeUrl,
+            },
+          }).catch(() => {});
         }
       } catch (updateErr) {
         console.warn('Failed to update user persona during onboarding:', updateErr);
