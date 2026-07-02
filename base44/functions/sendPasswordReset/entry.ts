@@ -18,13 +18,14 @@ Deno.serve(async (req) => {
     const emailLower = email.toLowerCase().trim();
     const base44 = createClientFromRequest(req);
 
-    // Check user exists and has a custom password
+    // Check user exists — accounts without a password (e.g. Google sign-ups)
+    // can still use this flow to SET a password.
     const users = await base44.asServiceRole.entities.User.filter({ email: emailLower });
     const user = users?.[0];
 
     // Always return success to prevent email enumeration
-    if (!user?.hashed_password) {
-      console.log('No custom password found for:', emailLower, '— returning success silently');
+    if (!user) {
+      console.log('No account found for:', emailLower, '— returning success silently');
       return Response.json({ success: true }, { headers: corsHeaders });
     }
 
