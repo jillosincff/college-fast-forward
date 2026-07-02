@@ -107,13 +107,17 @@ Deno.serve(async (req) => {
       ? Math.round((activeStudentEmails.size / students.length) * 100)
       : null;
 
-    // ── Weekly active students (approx) ──────────────────────────────────
-    // Union of: user record touched in last 7d, pipeline activity in last 7d,
-    // resume tailoring in last 7d. Proxy — no dedicated login tracking exists.
+    // ── Weekly active students ───────────────────────────────────────────
+    // Union of genuine activity signals only: analytics events, pipeline
+    // activity, resume tailoring in last 7d. Deliberately excludes
+    // user.updated_date — bulk backend jobs touch user records and inflate it.
     const activeThisWeek = new Set();
-    for (const s of students) {
-      if (s.updated_date >= day7) activeThisWeek.add(s.email);
-    }
+    try {
+      const recentEvents = await base44.asServiceRole.entities.AnalyticsEvent.filter({ created_date: { $gte: day7 } }, '-created_date', 2000);
+      for (const e of recentEvents) {
+        if (e.user_email && studentEmails.has(e.user_email)) activeThisWeek.add(e.user_email);
+      }
+    } catch (_) {}
     for (const p of pipeline) {
       if ((p.updated_date || p.created_date) >= day7 && studentEmails.has(p.user_email)) activeThisWeek.add(p.user_email);
     }
