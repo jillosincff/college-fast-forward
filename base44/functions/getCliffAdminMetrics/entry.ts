@@ -82,13 +82,16 @@ Deno.serve(async (req) => {
       offers: pipeline.filter(p => p.status === 'offer').length,
     };
 
-    const reached30 = pipeline.filter(p => reachedStatuses.includes(p.status) && (p.reached_out_date || p.created_date) >= day30);
+    // Effective outreach date — many records have a reached-out status but no
+    // reached_out_date stamped, so fall back to status_date then created_date.
+    const outDate = (p) => p.reached_out_date || p.status_date || p.created_date;
+    const reached30 = pipeline.filter(p => reachedStatuses.includes(p.status) && outDate(p) >= day30);
     const replied30 = reached30.filter(p => repliedStatuses.includes(p.status));
     const replyRate30 = reached30.length > 0
       ? Math.round((replied30.length / reached30.length) * 100)
       : null;
-    const outreachThisWeek = pipeline.filter(p => p.reached_out_date && p.reached_out_date >= day7).length;
-    const outreachLastWeek = pipeline.filter(p => p.reached_out_date && p.reached_out_date >= day14 && p.reached_out_date < day7).length;
+    const outreachThisWeek = pipeline.filter(p => reachedStatuses.includes(p.status) && outDate(p) >= day7).length;
+    const outreachLastWeek = pipeline.filter(p => reachedStatuses.includes(p.status) && outDate(p) >= day14 && outDate(p) < day7).length;
 
     // Active trials who actually engaged (have pipeline activity = logged in and used it)
     const pipelineEmails = new Set(pipeline.map(p => p.user_email));
@@ -104,10 +107,31 @@ Deno.serve(async (req) => {
       ? Math.round((activeStudentEmails.size / students.length) * 100)
       : null;
 
+    // ── Weekly active students (approx) ──────────────────────────────────
+    // Union of: user record touched in last 7d, pipeline activity in last 7d,
+    // resume tailoring in last 7d. Proxy — no dedicated login tracking exists.
+    const activeThisWeek = new Set();
+    for (const s of students) {
+      if (s.updated_date >= day7) activeThisWeek.add(s.email);
+    }
+    for (const p of pipeline) {
+      if ((p.updated_date || p.created_date) >= day7 && studentEmails.has(p.user_email)) activeThisWeek.add(p.user_email);
+    }
+    try {
+      const recentTailored = await base44.asServiceRole.entities.TailoredResume.filter({ created_date: { $gte: day7 } }, '-created_date', 1000);
+      for (const t of recentTailored) {
+        if (studentEmails.has(t.user_email)) activeThisWeek.add(t.user_email);
+      }
+    } catch (_) {}
+
     // ── Student drop-off journey ──────────────────────────────────────────
+    // Users with no persona never finished signup classification — they still
+    // signed up, so include them in the top of the journey.
+    const unclassified = allUsers.filter(u => !u.persona?.trim()).length;
     const studentsOnboarded = students.filter(u => u.onboarding_completed === true).length;
     const dropoff = {
-      signedUp: students.length,
+      signedUp: students.length + unclassified,
+      unclassified,
       onboarded: studentsOnboarded,
       builtPipeline: activeStudentEmails.size,
       reachedOut: outreachStudentEmails.size,
@@ -159,13 +183,15 @@ Deno.serve(async (req) => {
         expiredTrials: expiredTrials.length,
         trialsStartedThisWeek,
         trialConversionPct,
-        weeklyMRR: Math.round(paidBreakdown.stripeActive * 4.99 * 100) / 100,
+        // Actual Stripe plan is "Pro Monthly" at $19.96/month
+        mrr: Math.round(paidBreakdown.stripeActive * 19.96 * 100) / 100,
       },
       activation: {
         totalStudents: students.length,
         studentsWithPipeline: activeStudentEmails.size,
         studentsWhoReachedOut: outreachStudentEmails.size,
         activationPct,
+        weeklyActiveStudents: activeThisWeek.size,
       },
       dropoff,
       funnel: {

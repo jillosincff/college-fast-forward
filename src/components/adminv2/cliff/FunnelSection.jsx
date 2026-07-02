@@ -22,7 +22,7 @@ export default function FunnelSection({ funnel, activation }) {
         <Stage label="Interviews" value={funnel.interviews} pctOfPrev={pct(funnel.interviews, funnel.replied)} />
         <Stage label="Offers" value={funnel.offers} pctOfPrev={pct(funnel.offers, funnel.interviews)} />
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-3">
         <MetricTile
           label="Reply Rate (30d)"
           value={funnel.replyRate30 !== null ? `${funnel.replyRate30}%` : '—'}
@@ -45,6 +45,12 @@ export default function FunnelSection({ funnel, activation }) {
               label="Students Reached Out"
               value={activation.studentsWhoReachedOut}
               sub="sent ≥1 outreach"
+            />
+            <MetricTile
+              label="Weekly Active Students"
+              value={activation.weeklyActiveStudents ?? '—'}
+              sub="any activity in last 7 days"
+              accent="text-green-400"
             />
           </>
         )}

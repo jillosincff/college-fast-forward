@@ -24,7 +24,10 @@ export default function DropoffSection({ dropoff }) {
         <Stage label="Built a Pipeline" value={dropoff.builtPipeline} pctOfPrev={pct(dropoff.builtPipeline, dropoff.onboarded)} dropCount={dropoff.onboarded - dropoff.builtPipeline} />
         <Stage label="Sent Outreach" value={dropoff.reachedOut} pctOfPrev={pct(dropoff.reachedOut, dropoff.builtPipeline)} dropCount={dropoff.builtPipeline - dropoff.reachedOut} />
       </div>
-      <p className="text-xs text-slate-600 mt-2">Red % = biggest leak. Each stage shows conversion from the previous stage and how many students dropped.</p>
+      <p className="text-xs text-slate-600 mt-2">
+        Red % = biggest leak. Each stage shows conversion from the previous stage and how many students dropped.
+        {dropoff.unclassified > 0 && ` "Signed Up" includes ${dropoff.unclassified} accounts that never got classified as a student or parent.`}
+      </p>
     </section>
   );
 }
