@@ -50,6 +50,7 @@ export default function ParentProfileEdit() {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Any edit to the form clears the saved confirmation so the button
   // accurately reflects whether there are unsaved changes.
@@ -94,6 +95,7 @@ export default function ParentProfileEdit() {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError('');
     try {
       await base44.auth.updateMe({
         full_name: form.fullName.trim(),
@@ -111,6 +113,8 @@ export default function ParentProfileEdit() {
       if (refreshUser) refreshUser().catch(() => {});
       try { sessionStorage.removeItem('directoryDataCache'); } catch (e) { /* ok */ }
       setSaved(true);
+    } catch (e) {
+      setSaveError('Something went wrong saving your profile. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -318,6 +322,15 @@ export default function ParentProfileEdit() {
           >
             {saved ? '✓ Saved!' : saving ? 'Saving...' : 'Save Changes'}
           </button>
+
+          {saveError && (
+            <p style={{
+              fontFamily: SF, fontSize: 13, fontWeight: 600, color: '#dc2626',
+              textAlign: 'center', margin: '-4px 0 0', lineHeight: 1.5,
+            }}>
+              {saveError}
+            </p>
+          )}
 
           {saved && (
             <p style={{
