@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Search, Filter, Plus, MapPin, Calendar, Mail } from 'lucide-react';
+import { Search, Filter, Plus, MapPin, Calendar } from 'lucide-react';
 import AddApplicationModal from '@/components/tracker/AddApplicationModal';
-import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
@@ -99,7 +98,6 @@ export default function ApplicationTracker() {
   const [selectedApp, setSelectedApp] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showEmailModal, setShowEmailModal] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [followUpApp, setFollowUpApp] = useState(null);
   const [showReminderModal, setShowReminderModal] = useState(false);
@@ -200,25 +198,6 @@ export default function ApplicationTracker() {
           }}
         />
 
-        {/* Connect Email Button */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <button 
-              onClick={() => setShowEmailModal(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: '#fff5f0', border: '1.5px solid #E85D20',
-                color: '#E85D20', padding: '12px 20px', borderRadius: 8,
-                fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                fontFamily: dm, minHeight: 'auto',
-              }}
-            >
-              <Mail size={16} />
-              Connect Email for Auto-Import
-            </button>
-          </div>
-        </div>
-
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
           {/* Search */}
           <div style={{ flex: 1, minWidth: 200, position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -282,14 +261,11 @@ export default function ApplicationTracker() {
               No applications tracked yet
             </h3>
             <p style={{ fontSize: 14, color: '#666', maxWidth: 380, margin: '0 auto 24px', lineHeight: 1.6 }}>
-              Once you apply or connect your email, applications will appear here automatically.
+              Applications you track will appear here — add your first one to get started.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button onClick={() => setShowAddModal(true)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
-                + Add Application Manually
-              </button>
-              <button onClick={() => setShowEmailModal(true)} style={{ background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
-                Connect Email for Auto-Import
+                + Add Application
               </button>
             </div>
           </div>
@@ -470,15 +446,6 @@ export default function ApplicationTracker() {
         onClose={() => setShowAddModal(false)} 
         onSuccess={(newApp) => {
           setApplications([newApp, ...applications]);
-        }}
-      />
-
-      {/* Email Connection Modal */}
-      <EmailConnectionModal 
-        isOpen={showEmailModal} 
-        onClose={() => setShowEmailModal(false)} 
-        onSuccess={() => {
-          // Optional: could trigger a success toast or refetch applications here
         }}
       />
 
