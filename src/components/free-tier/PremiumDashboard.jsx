@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompanies';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { CliffLogo } from '@/components/brand/CliffLogo';
-import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
+import PremiumResumeCard from './PremiumResumeCard';
 import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
 import MobileBottomNav from './PremiumMobileNav';
@@ -479,10 +479,10 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
       {/* ── Main Content ── */}
       {(() => {
-        // Reserve the sidebar column while the parent count is loading so the
-        // grid doesn't reflow — show a skeleton until the real widget is ready.
+        // Sidebar column is always reserved — Resume Corner (real data) fills it,
+        // and the parent network widget joins once its count is unlocked.
         const sidebarUnlocked = parentCount !== null && parentCount >= 20;
-        const showSidebar = parentCount === null || sidebarUnlocked;
+        const showSidebar = true;
         return (
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
         <div style={{ display: 'grid', gridTemplateColumns: showSidebar ? 'minmax(0, 1fr) 340px' : '1fr', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
@@ -517,12 +517,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
               maxHeight: 'calc(100vh - 48px)',
               overflowY: 'auto',
             }} className="desktop-only">
-              {sidebarUnlocked ? (
+              <PremiumResumeCard user={user} />
+              {sidebarUnlocked && (
                 <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
-              ) : (
-                <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, height: 280, animation: 'sidebarPulse 1.4s ease-in-out infinite' }}>
-                  <style>{`@keyframes sidebarPulse { 0%,100%{opacity:1} 50%{opacity:0.55} }`}</style>
-                </div>
               )}
             </aside>
           )}
