@@ -306,7 +306,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob, f
                   // Simple markdown parsing for bold and links
                   const parts = line.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\))/g);
                   return (
-                    <p key={idx} style={{ margin: '0 0 4px' }}>
+                    <p key={idx} style={{ margin: '0 0 4px', color: m.role === 'user' ? '#fff' : '#111827' }}>
                       {parts.map((part, i) => {
                         if (part.startsWith('**') && part.endsWith('**')) {
                           return <strong key={i}>{part.slice(2, -2)}</strong>;
