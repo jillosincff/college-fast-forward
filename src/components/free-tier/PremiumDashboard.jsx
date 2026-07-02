@@ -468,7 +468,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
       {/* ── Main Content ── */}
       {(() => {
-        const showSidebar = parentCount === null || parentCount >= 20;
+        // Only show once the real count is loaded — rendering while parentCount
+        // is still null caused the widget to flash and then disappear.
+        const showSidebar = parentCount !== null && parentCount >= 20;
         return (
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
         <div style={{ display: 'grid', gridTemplateColumns: showSidebar ? 'minmax(0, 1fr) 340px' : '1fr', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
