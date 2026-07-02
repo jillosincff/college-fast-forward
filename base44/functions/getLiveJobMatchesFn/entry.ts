@@ -147,10 +147,13 @@ Deno.serve(async (req) => {
     if (isRemote) params.set('work_from_home', 'true');
 
     // Hard timeout so a hanging upstream provider doesn't stall the student's request.
+    // Fail fast (6s) when we have stale cached leads to fall back on — better to
+    // show slightly old jobs quickly than make the student wait 15s for a slow provider.
+    const timeoutMs = cached?.length > 0 ? 6000 : 15000;
     let apiRes;
     {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
       try {
         apiRes = await fetch(`${JSEARCH_BASE}/search?${params.toString()}`, {
           method: 'GET',
@@ -159,15 +162,15 @@ Deno.serve(async (req) => {
         });
       } catch (e) {
         if (e.name === 'AbortError') {
-          console.error('[getLiveJobMatchesFn] Jobs API timed out (15s)');
-          // Backup source: scrape BuiltIn directly
-          const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking);
-          if (backup) return backup;
-          // Ride out the outage: serve last cached leads (even if >24h old) if we have any.
+          console.error(`[getLiveJobMatchesFn] Jobs API timed out (${timeoutMs / 1000}s)`);
+          // Serve last cached leads immediately (even if >24h old) if we have any.
           if (cached?.length > 0) {
             console.log(`[getLiveJobMatchesFn] Timeout — serving ${cached.length} stale cached leads`);
             return Response.json({ companies: cached, from_cache: true, stale: true });
           }
+          // Backup source: scrape BuiltIn directly
+          const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking);
+          if (backup) return backup;
           return Response.json({ error: 'The job provider is taking too long to respond. Please try again in a moment.', upstream_timeout: true }, { status: 503 });
         }
         throw e;

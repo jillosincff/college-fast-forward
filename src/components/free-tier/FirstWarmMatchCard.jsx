@@ -27,6 +27,9 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
 
   const { parent, total_pool, school_code } = match;
   const initial = (parent.first_name || '?')[0].toUpperCase();
+  // Many imported contacts only have a placeholder title — hide it rather than
+  // showing a meaningless "Professional at X" line.
+  const hasRealTitle = parent.role_title && !/^(professional|n\/a|unknown)$/i.test(parent.role_title.trim());
   const lockedCount = Math.max(0, (total_pool || 1) - 1);
 
   return (
@@ -47,7 +50,7 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
             {parent.first_name}
           </p>
           <p style={{ fontFamily: dm, fontSize: 12, color: '#4b5563', margin: 0 }}>
-            {parent.role_title} at <strong style={{ color: '#111827' }}>{parent.company_name}</strong>
+            {hasRealTitle ? <>{parent.role_title} at </> : <>Works at </>}<strong style={{ color: '#111827' }}>{parent.company_name}</strong>
           </p>
           <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '2px 0 0' }}>
             {school_code} parent network — willing to help students like you

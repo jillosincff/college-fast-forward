@@ -8,6 +8,7 @@ import PremiumPaywallModal from './PremiumPaywallModal';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { getLandingTeaser } from '@/functions/getLandingTeaser';
 import PlanComparisonTable from './PlanComparisonTable';
+import FreeExitNudge from './FreeExitNudge';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -115,6 +116,18 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
   const [showPaywall, setShowPaywall] = useState(false);
   const [commitment, setCommitment] = useState(null);
   const [showCommitmentRequired, setShowCommitmentRequired] = useState(false);
+  const [showExitNudge, setShowExitNudge] = useState(false);
+  const [nudgeShown, setNudgeShown] = useState(false);
+
+  // First "continue free" click → one-time outcome-framed nudge; second click passes through.
+  const handleContinueFree = () => {
+    if (!nudgeShown) {
+      setNudgeShown(true);
+      setShowExitNudge(true);
+      return;
+    }
+    saveAndAuth?.('free');
+  };
 
   const openPaywall = () => {
     setShowPaywall(true);
@@ -536,7 +549,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ── Free-tier exit — clear next step for users who don't upgrade now ── */}
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <button
-          onClick={() => saveAndAuth?.('free')}
+          onClick={handleContinueFree}
           style={{ width: '100%', maxWidth: 520, margin: '0 auto', fontFamily: dm, fontSize: 15, fontWeight: 700, color: TEXT, background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 14, padding: '16px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', transition: 'all 0.18s' }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.08)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; }}
@@ -551,6 +564,16 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
         <button onClick={handleBack} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
       </div>
+
+      {/* ── Free-exit nudge — shown once before letting students take the free path ── */}
+      {showExitNudge && (
+        <FreeExitNudge
+          networkCount={networkCount}
+          onUpgrade={() => { setShowExitNudge(false); launchCheckout(); }}
+          onContinueFree={() => { setShowExitNudge(false); saveAndAuth?.('free'); }}
+          onClose={() => setShowExitNudge(false)}
+        />
+      )}
 
       {/* ── Paywall Modal ── */}
       {showPaywall && (
