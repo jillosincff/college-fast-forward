@@ -4,8 +4,8 @@ export default function PlanComparisonTable({ networkCount = 0 }) {
   const rows = [
     ['Daily job matches', '5 per day', 'Unlimited'],
     ['Warm connections', '1 unlocked', networkCount > 1 ? `All ${networkCount} + AI scout` : 'Unlimited + AI scout'],
-    ['Resume tailoring', '24-hour queue', 'Instant'],
-    ['AI outreach drafts', 'Basic drafts', 'Unlimited + auto follow-ups'],
+    ['Resume tailoring', '1 instant, then 24h queue', 'Always instant'],
+    ['AI outreach drafts', 'Drafts included', 'Drafts + automatic follow-ups'],
     ['14-day sprint plan', '—', 'Included'],
     ['Application tracker', 'Included', 'Included'],
   ];
