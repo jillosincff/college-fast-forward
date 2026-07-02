@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { resetPasswordWithToken } from '@/functions/resetPasswordWithToken';
+import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
 const playfair = "'Playfair Display', Georgia, serif";
@@ -16,9 +16,11 @@ export default function ResetPassword() {
   useEffect(() => {
     const hashPart = window.location.hash.split('?')[1] || '';
     const params = new URLSearchParams(hashPart);
-    const t = params.get('token');
-    if (!t || !t.startsWith('pr_')) {
+    const t = params.get('token') || new URLSearchParams(window.location.search).get('token');
+    if (!t) {
       setError('Invalid or missing reset token. Please request a new password reset link.');
+    } else if (t.startsWith('pr_')) {
+      setError('This reset link is from our old system and no longer works. Please request a new password reset link.');
     } else {
       setToken(t);
     }
@@ -32,15 +34,13 @@ export default function ResetPassword() {
 
     setIsLoading(true);
     try {
-      const { data } = await resetPasswordWithToken({ token, new_password: password });
-      if (data?.success) {
-        setSuccess(true);
-        setTimeout(() => navigate('GetStarted'), 2500);
-      } else {
-        setError(data?.error || 'Reset failed. Please try again.');
-      }
+      // Platform-native reset — this updates the SAME password the Sign In form checks.
+      await base44.auth.resetPassword({ resetToken: token, newPassword: password });
+      setSuccess(true);
+      setTimeout(() => navigate('GetStarted'), 2500);
     } catch (err) {
-      setError(err?.response?.data?.error || 'Reset failed. Please try again.');
+      const detail = err?.response?.data?.detail || err?.response?.data?.message || err?.response?.data?.error;
+      setError(detail || 'Reset failed. The link may have expired — please request a new one.');
     } finally {
       setIsLoading(false);
     }

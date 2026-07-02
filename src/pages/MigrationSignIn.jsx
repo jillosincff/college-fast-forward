@@ -8,7 +8,6 @@ import { registerUser } from '@/functions/registerUser';
 import { signInWithPassword } from '@/functions/signInWithPassword';
 import { sendMagicLink } from '@/functions/sendMagicLink';
 import { verifyMagicLink } from '@/functions/verifyMagicLink';
-import { sendPasswordReset } from '@/functions/sendPasswordReset';
 import { base44 } from '@/api/base44Client';
 
 const playfair = "'Playfair Display', Georgia, serif";
@@ -181,9 +180,9 @@ export default function MigrationSignIn() {
             if (!forgotEmail) { setError('Please enter your email.'); return; }
             setIsLoading(true);
             try {
-              const { data } = await sendPasswordReset({ email: forgotEmail });
-              if (data?.success) setInfo('If an account exists, a reset link has been sent. Check your inbox.');
-              else setError(data?.error || 'Could not send reset email.');
+              // Platform-native reset — sets the same password the Sign In form checks.
+              await base44.auth.resetPasswordRequest(forgotEmail.trim().toLowerCase());
+              setInfo('If an account exists, a reset link has been sent. Check your inbox.');
             } catch { setError('Could not send reset email. Please try again.'); }
             finally { setIsLoading(false); }
           }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

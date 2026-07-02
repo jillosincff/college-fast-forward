@@ -239,6 +239,15 @@ function App() {
   // Capture parent referral code (?pref=CODE) from student-shared links
   useEffect(() => {
     try {
+      // Platform password-reset emails link to path-based URLs — forward them into hash routes
+      if (window.location.pathname === '/reset-password') {
+        window.location.replace(window.location.origin + '/#/ResetPassword' + window.location.search);
+        return;
+      }
+      if (window.location.pathname === '/forgot-password') {
+        window.location.replace(window.location.origin + '/#/MigrationSignIn?forgot=true');
+        return;
+      }
       const searchParams = new URLSearchParams(window.location.search);
       const hashQuery = window.location.hash.split('?')[1] || '';
       const hashParams = new URLSearchParams(hashQuery);
