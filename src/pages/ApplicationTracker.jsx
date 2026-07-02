@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Search, Filter, Plus, MapPin, Calendar } from 'lucide-react';
+import { Search, Filter, Plus, MapPin, Calendar, ArrowLeft } from 'lucide-react';
+import { navigate } from '@/components/utils/navigation';
 import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
@@ -153,6 +154,14 @@ export default function ApplicationTracker() {
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '32px 20px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <button
+            onClick={() => navigate('FreeTierDashboard')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#666', fontSize: 14, fontWeight: 600, fontFamily: dm, cursor: 'pointer', padding: 0, marginBottom: 12, minHeight: 'auto', minWidth: 'auto' }}
+            onMouseEnter={e => e.currentTarget.style.color = '#E85D20'}
+            onMouseLeave={e => e.currentTarget.style.color = '#666'}
+          >
+            <ArrowLeft size={16} /> Back to Dashboard
+          </button>
           <h1 style={{ fontFamily: pf, fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
             Application Tracker
           </h1>
