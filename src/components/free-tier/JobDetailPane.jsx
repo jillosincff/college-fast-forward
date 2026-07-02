@@ -221,9 +221,29 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                   Scanning {schoolAbbr || 'your'} network at {companyName}…
                 </div>
               ) : scanned ? (
-                <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: 0, lineHeight: 1.5 }}>
-                  No verified {schoolAbbr || 'network'} connections at {companyName} yet — CLIFF can still help you find a backdoor in. Use <strong>Find Connection</strong> below to scout cold contacts.
-                </p>
+                <>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>
+                    No verified {schoolAbbr || 'network'} connections at {companyName} yet — CLIFF can still help you find a backdoor in. Use <strong>Find Connection</strong> below to scout cold contacts.
+                  </p>
+                  <button
+                    onClick={handleFindConnection}
+                    style={{
+                      fontFamily: dm,
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: '#fff',
+                      background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                      border: 'none',
+                      borderRadius: 10,
+                      padding: '10px 16px',
+                      cursor: 'pointer',
+                      width: '100%',
+                      boxShadow: '0 2px 8px rgba(124,58,237,0.25)',
+                    }}
+                  >
+                    🎯 Find Connection
+                  </button>
+                </>
               ) : (
                 <>
                   <p style={{ fontFamily: dm, fontSize: 12, color: '#5b21b6', margin: '0 0 12px', lineHeight: 1.5 }}>

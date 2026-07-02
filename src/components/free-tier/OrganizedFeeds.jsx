@@ -396,7 +396,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     pinLead(lead);
     const company = lead.company || lead.companyName || '';
     const role = lead.role || lead.title || '';
-    window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`;
+    window.location.hash = `#/OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`;
   };
 
   const handleSelectLead = (lead) => {
