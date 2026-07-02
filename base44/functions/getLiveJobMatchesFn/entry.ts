@@ -60,6 +60,25 @@ function jobMatchesLocation(locText, city, stateAbbr) {
   return false;
 }
 
+// When the primary provider is down, try the BuiltIn scraper as a live backup.
+// Returns a Response with fresh backup jobs, or null if the backup found nothing.
+async function tryBuiltinBackup(base44, searchTerm, isRemote, seeking) {
+  try {
+    console.log('[getLiveJobMatchesFn] Primary down — trying BuiltIn backup scraper');
+    const res = await base44.functions.invoke('scrapeBuiltinJobs', {
+      query: searchTerm, remote: isRemote, seeking,
+    });
+    const companies = res?.data?.companies || [];
+    if (companies.length > 0) {
+      console.log(`[getLiveJobMatchesFn] BuiltIn backup returned ${companies.length} jobs`);
+      return Response.json({ companies, from_cache: false, from_backup: true });
+    }
+  } catch (e) {
+    console.error('[getLiveJobMatchesFn] BuiltIn backup failed:', e.message);
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   try {
     // Lightweight health-check: uptime monitors ping with GET (or HEAD) and no
@@ -139,6 +158,9 @@ Deno.serve(async (req) => {
       } catch (e) {
         if (e.name === 'AbortError') {
           console.error('[getLiveJobMatchesFn] Jobs API timed out (15s)');
+          // Backup source: scrape BuiltIn directly
+          const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking);
+          if (backup) return backup;
           // Ride out the outage: serve last cached leads (even if >24h old) if we have any.
           if (cached?.length > 0) {
             console.log(`[getLiveJobMatchesFn] Timeout — serving ${cached.length} stale cached leads`);
@@ -154,6 +176,9 @@ Deno.serve(async (req) => {
     if (!apiRes.ok) {
       const errText = await apiRes.text();
       console.error(`[getLiveJobMatchesFn] Jobs API error ${apiRes.status}: ${errText.slice(0, 300)}`);
+      // Backup source: scrape BuiltIn directly
+      const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking);
+      if (backup) return backup;
       // Ride out the outage: serve last cached leads (even if >24h old) if we have any.
       if (cached?.length > 0) {
         console.log(`[getLiveJobMatchesFn] Upstream ${apiRes.status} — serving ${cached.length} stale cached leads`);
