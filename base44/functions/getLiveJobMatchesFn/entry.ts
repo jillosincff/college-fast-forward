@@ -65,7 +65,9 @@ function jobMatchesLocation(locText, city, stateAbbr) {
 async function tryBuiltinBackup(base44, searchTerm, isRemote, seeking) {
   try {
     console.log('[getLiveJobMatchesFn] Primary down — trying BuiltIn backup scraper');
-    const res = await base44.functions.invoke('scrapeBuiltinJobs', {
+    // Service-role invoke: the user-scoped token gets 403 on function-to-function
+    // calls. Caller has already verified auth, so the elevation is safe here.
+    const res = await base44.asServiceRole.functions.invoke('scrapeBuiltinJobs', {
       query: searchTerm, remote: isRemote, seeking,
     });
     const companies = res?.data?.companies || [];
