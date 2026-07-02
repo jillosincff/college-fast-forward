@@ -9,8 +9,8 @@ import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
 import StatusCheckBanner from '@/components/tracker/StatusCheckBanner';
 
-const dm = "'DM Sans', system-ui, sans-serif";
-const pf = "'Playfair Display', Georgia, serif";
+const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
+const pf = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // Tracker status key → NetworkingPipeline status (for saving edits back)
 const TRACKER_STATUS_TO_PIPELINE = {
@@ -150,14 +150,14 @@ export default function ApplicationTracker() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f8f8', fontFamily: dm }}>
+    <div style={{ minHeight: '100vh', background: '#f8f9ff', fontFamily: dm }}>
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '32px 20px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <button
             onClick={() => navigate('FreeTierDashboard')}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#666', fontSize: 14, fontWeight: 600, fontFamily: dm, cursor: 'pointer', padding: 0, marginBottom: 12, minHeight: 'auto', minWidth: 'auto' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#E85D20'}
+            onMouseEnter={e => e.currentTarget.style.color = '#6d28d9'}
             onMouseLeave={e => e.currentTarget.style.color = '#666'}
           >
             <ArrowLeft size={16} /> Back to Dashboard
@@ -183,7 +183,7 @@ export default function ApplicationTracker() {
               <p style={{ fontSize: 12, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>
                 {stat.label}
               </p>
-              <p style={{ fontSize: 28, fontWeight: 700, color: '#E85D20', margin: 0 }}>
+              <p style={{ fontSize: 28, fontWeight: 700, color: '#6d28d9', margin: 0 }}>
                 {stat.value}
               </p>
             </div>
@@ -258,7 +258,7 @@ export default function ApplicationTracker() {
         {/* Loading State */}
         {loading ? (
           <div style={{ background: '#fff', borderRadius: 12, padding: '60px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
-            <span style={{ display: 'inline-block', width: 28, height: 28, border: '3px solid #F0E5DE', borderTopColor: '#E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <span style={{ display: 'inline-block', width: 28, height: 28, border: '3px solid #ede9fe', borderTopColor: '#6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             <p style={{ fontSize: 14, color: '#888', marginTop: 16 }}>Loading your applications…</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
@@ -273,7 +273,7 @@ export default function ApplicationTracker() {
               Applications you track will appear here — add your first one to get started.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => setShowAddModal(true)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
+              <button onClick={() => setShowAddModal(true)} style={{ background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: dm, minHeight: 'auto', boxShadow: '0 8px 24px rgba(109,40,217,0.30)' }}>
                 + Add Application
               </button>
             </div>
@@ -289,7 +289,7 @@ export default function ApplicationTracker() {
             </p>
             <button
               onClick={() => { setSearchTerm(''); setFilterStatus('all'); }}
-              style={{ background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}
+              style={{ background: '#f5f3ff', color: '#6d28d9', border: '1.5px solid #6d28d9', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}
             >
               Clear search & filters
             </button>
@@ -333,7 +333,7 @@ export default function ApplicationTracker() {
                 {app.nextAction === 'Send follow-up' && (
                   <button
                     onClick={e => { e.stopPropagation(); setFollowUpApp(app); setShowFollowUpModal(true); }}
-                    style={{ marginTop: 12, width: '100%', background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '10px', borderRadius: 8, fontFamily: dm }}
+                    style={{ marginTop: 12, width: '100%', background: '#f5f3ff', border: '1px solid #6d28d9', color: '#6d28d9', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '10px', borderRadius: 8, fontFamily: dm }}
                   >
                     Send follow-up →
                   </button>
@@ -396,7 +396,7 @@ export default function ApplicationTracker() {
                       {app.nextAction === 'Send follow-up' ? (
                         <button
                           onClick={e => { e.stopPropagation(); setFollowUpApp(app); setShowFollowUpModal(true); }}
-                          style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '5px 12px', borderRadius: 100, fontFamily: dm, minHeight: 'auto', whiteSpace: 'nowrap' }}
+                          style={{ background: '#f5f3ff', border: '1px solid #6d28d9', color: '#6d28d9', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '5px 12px', borderRadius: 100, fontFamily: dm, minHeight: 'auto', whiteSpace: 'nowrap' }}
                         >
                           Send follow-up
                         </button>
@@ -439,8 +439,8 @@ export default function ApplicationTracker() {
           onClick={() => setShowAddModal(true)}
           style={{
             position: 'fixed', bottom: 32, right: 32, width: 56, height: 56, borderRadius: '50%',
-            background: '#E85D20', color: '#fff', border: 'none', fontSize: 24, cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(232, 93, 32, 0.3)', transition: 'all 0.2s', minHeight: 'auto',
+            background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', fontSize: 24, cursor: 'pointer',
+            boxShadow: '0 8px 24px rgba(109,40,217,0.35)', transition: 'all 0.2s', minHeight: 'auto',
           }}
           onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
           onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
