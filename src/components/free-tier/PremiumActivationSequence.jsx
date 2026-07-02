@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Check, Sparkles } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -8,10 +9,18 @@ const STEP_MS = 1400;
 // Peak-end rule: makes minute one of premium feel like a concierge switching on.
 export default function PremiumActivationSequence({ user, shortName, networkCount, companiesCount }) {
   const storageKey = `cff_premium_activated_${user?.email || 'anon'}`;
+  // Seen flag lives on the user account (works across devices/browsers),
+  // with localStorage as a fast local backup.
   const [visible, setVisible] = useState(() => {
+    if (user?.premium_activation_seen) return false;
     try { return !localStorage.getItem(storageKey); } catch { return false; }
   });
   const [stepsDone, setStepsDone] = useState(0);
+
+  // If the user record loads/refreshes with the flag already set, hide immediately
+  useEffect(() => {
+    if (user?.premium_activation_seen) setVisible(false);
+  }, [user?.premium_activation_seen]);
 
   const steps = [
     'Activating your 24/7 career agent',
@@ -32,6 +41,8 @@ export default function PremiumActivationSequence({ user, shortName, networkCoun
   const dismiss = () => {
     try { localStorage.setItem(storageKey, '1'); } catch {}
     setVisible(false);
+    // Persist on the account so it never shows again on any device
+    base44.auth.updateMe({ premium_activation_seen: true }).catch(() => {});
   };
 
   return (
