@@ -75,16 +75,10 @@ export default function CliffChatPage({ onOpenUpgrade }) {
     try {
       const res = await base44.functions.invoke('cliffCareerAgent', {
         message: userMessage,
-        conversationHistory: messages.slice(-5),
-        userContext: {
-          major: user?.major,
-          graduationYear: user?.graduation_year,
-          targetRoles: user?.career_goals?.target_roles,
-          targetIndustries: user?.career_goals?.target_industries,
-        },
+        history: messages.slice(-6),
       });
 
-      const aiMessage = res?.data?.message || "I'm here to help with your job search! What would you like to know?";
+      const aiMessage = res?.data?.response || res?.data?.message || "I'm here to help with your job search! What would you like to know?";
       setMessages(prev => [...prev, { role: 'assistant', content: aiMessage }]);
     } catch (e) {
       console.error('Chat failed:', e);

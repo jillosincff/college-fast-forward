@@ -64,8 +64,9 @@ export default function CliffChatWidget({ onOpenUpgrade, embedded = false }) {
     setLoading(true);
 
     try {
+      const historyText = messages.slice(-6).map(m => `${m.role === 'user' ? 'Student' : 'CLIFF'}: ${m.content}`).join('\n');
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are CLIFF, a friendly and knowledgeable career coach for college students. Help students with job search advice, resume tips, interview prep, networking strategies, and career guidance. Be encouraging, practical, and specific. Current user context: ${user?.major || 'student'} interested in ${user?.career_goals?.target_roles?.[0] || 'their career'}. Keep responses concise and actionable.`,
+        prompt: `You are CLIFF, a friendly and knowledgeable career coach for college students. Help students with job search advice, resume tips, interview prep, networking strategies, and career guidance. Be encouraging, practical, and specific. Current user context: ${user?.major || 'student'} interested in ${user?.career_goals?.target_roles?.[0] || 'their career'}. Keep responses concise and actionable.\n\n${historyText ? `Conversation so far:\n${historyText}\n\n` : ''}Student: ${userMessage.content}\n\nCLIFF:`,
         model: 'claude_sonnet_4_6',
       });
 
