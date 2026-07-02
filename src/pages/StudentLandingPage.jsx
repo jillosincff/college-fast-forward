@@ -4,7 +4,8 @@ import { GraduationCap, Users, Target, FileText, Rocket, Check, X, Zap, ChevronL
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
-import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
+import Reveal from '@/components/landing/Reveal';
+import PricingComparison from '@/components/landing/PricingComparison';
 import AppShowcase from '@/components/landing/AppShowcase';
 import LiveJobsSection from '@/components/landing/LiveJobsSection';
 import WarmApplyHeroDemo from '@/components/landing/WarmApplyHeroDemo';
@@ -13,7 +14,6 @@ import MatchTeaser from '@/components/landing/MatchTeaser';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
-const FONT = SF;
 
 // Page backgrounds
 const BG   = '#f8f9ff';
@@ -65,21 +65,8 @@ const SHADOW    = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
 const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
 const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
 
-// Aliases for backward compat (CampusVaultWidget passes these as props)
-const MINT        = INDIGO;
-const MINT_DIM    = INDIGO_DIM;
-const MINT_DARK   = INDIGO_DIM;
-const MINT_LIGHT  = INDIGO_LIGHT;
-const MINT_BORDER = INDIGO_BORDER;
-const GREEN       = TEAL;
-const GREEN_LIGHT = TEAL_LIGHT;
-const GREEN_BORDER= TEAL_BORDER;
-const BLUE        = INDIGO;
-const BLUE_LIGHT  = INDIGO_LIGHT;
-const BLUE_BORDER = INDIGO_BORDER;
-const R = 16;
 
-const PRO_FEATURES = ['Unlimited AI Agent', 'Advanced tailoring + modern templates', 'Smart reminders + interview prep', 'Most students upgrade once they see results'];
+
 const PROOF_CALLOUTS = [
   { text: 'Upload once — get perfectly tailored resume versions for every job you target' },
   { text: 'Surfaces curated roles matched to your goals and school' },
@@ -171,19 +158,6 @@ export default function StudentLandingPage({ onParentClick }) {
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const { user, isLoadingAuth } = useAuth();
 
-  const launchWithSchool = (schoolName) => {
-    if (!user) {
-      try {
-        if (schoolName) localStorage.setItem('cff_college', schoolName);
-        localStorage.removeItem('cff_onboarding_screen');
-        localStorage.removeItem('cff_seeking');
-        localStorage.removeItem('cff_blockers');
-      } catch {}
-      setFunnelStartScreen(null);
-      setShowFunnel(true);
-    }
-  };
-
   useEffect(() => {
     setMounted(true);
     try {
@@ -250,14 +224,16 @@ export default function StudentLandingPage({ onParentClick }) {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const SectionLabel = ({ text, color = INDIGO }) => (
-    <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
+  const SectionLabel = ({ text }) => (
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 100, padding: '6px 16px', fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{text}</span>
+    </div>
   );
 
   const CTAButton = ({ label = 'Start Free →', onClick = go, fullWidth = false, style: extra = {} }) => (
     <button onClick={onClick} style={{
       fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 700, color: '#fff',
-      background: GRAD_INDIGO, border: 'none', borderRadius: 14,
+      background: GRAD_INDIGO, border: 'none', borderRadius: 999,
       padding: 'clamp(14px, 4vw, 17px) clamp(28px, 6vw, 40px)',
       cursor: 'pointer', minHeight: 52,
       boxShadow: `0 8px 28px rgba(109,40,217,0.30)`,
@@ -315,9 +291,11 @@ export default function StudentLandingPage({ onParentClick }) {
         @media (min-width: 769px) {
           .hero-section { min-height: auto !important; }
         }
-        /* Agent feature grid: 3x2 on desktop, 2x3 on mobile */
+        /* How-it-works steps: stack on mobile */
+        @media (max-width: 760px) {
+          .hiw-steps { grid-template-columns: 1fr !important; }
+        }
         @media (max-width: 640px) {
-          .agent-feature-grid { grid-template-columns: 1fr 1fr !important; }
           /* Full-width primary CTAs for easier thumb reach on phones */
           .hero-cta-btn { width: 100% !important; align-self: stretch !important; }
         }
@@ -350,7 +328,7 @@ export default function StudentLandingPage({ onParentClick }) {
           )}
           <button onClick={go} className="nav-cta-btn" style={{
             fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
-            background: GRAD_INDIGO, border: 'none', borderRadius: 10,
+            background: GRAD_INDIGO, border: 'none', borderRadius: 999,
             padding: '10px 20px', cursor: 'pointer', minHeight: 44, whiteSpace: 'nowrap',
             boxShadow: '0 4px 14px rgba(109,40,217,0.35)', transition: 'all 0.15s',
           }}
@@ -364,7 +342,7 @@ export default function StudentLandingPage({ onParentClick }) {
       <div className="hero-section" style={{
         minHeight: '90vh', display: 'flex', alignItems: 'center',
         padding: 'clamp(80px, 12vw, 112px) clamp(20px, 5vw, 40px) clamp(48px, 7vw, 64px)',
-        background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden',
+        background: GRAD_HERO, position: 'relative', overflow: 'hidden',
       }}>
         {/* Subtle radial glow */}
         <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.12) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
@@ -442,7 +420,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   </div>
                   <div>
                     <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.01em' }}>2,400+ students on CFF</p>
-                    <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '1px 0 0', fontWeight: 500 }}>Landing interviews through warm intros</p>
+                    <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '1px 0 0', fontWeight: 500 }}>Backed by 4,100+ parents & alumni in the network</p>
                   </div>
                 </div>
 
@@ -461,24 +439,6 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
       </div>
 
-      {/* ── TRUST BAR ── */}
-      <div id="stats" style={{ background: '#fff', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '20px clamp(16px, 5vw, 32px)', scrollMarginTop: 80 }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'clamp(12px, 4vw, 32px)', justifyContent: 'center', alignItems: 'center' }}>
-          {[
-            { icon: GraduationCap, stat: '2,400+', label: 'Students on CFF' },
-            { icon: Users, stat: '4,100+', label: 'Parents in the network' },
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px' }}>
-              <item.icon size={20} color={INDIGO} style={{ flexShrink: 0 }} />
-              <div>
-                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>{item.stat}</p>
-                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: 0, fontWeight: 500 }}>{item.label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ── INTERACTIVE MATCH TEASER ── */}
       <MatchTeaser go={go} />
 
@@ -490,8 +450,8 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── OLD WAY VS SMART WAY ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <SectionLabel text="Stop playing a losing game" color={VIOLET} />
+        <Reveal><div style={{ maxWidth: 860, margin: '0 auto' }}>
+          <SectionLabel text="Stop playing a losing game" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 44px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
             The Old Way vs.<br />
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The Smart Way</span>
@@ -562,46 +522,46 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
             ))}
           </div>
-        </div>
+        </div></Reveal>
       </div>
 
       {/* ── APP SHOWCASE ── */}
       <AppShowcase />
 
-      {/* ── CAMPUS VAULT WIDGET ── */}
-      <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG2} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
-
       {/* ── HOW IT WORKS ── */}
       <div id="how-it-works" style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
-        <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          <SectionLabel text="What the Agent does for you" color={TEAL_DARK} />
-          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(24px, 6vw, 40px)', textAlign: 'center' }}>
-            One scan. Your entire edge,{' '}
-            <span style={{ background: 'linear-gradient(90deg, #06b6d4, #4f46e5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>unlocked.</span>
+        <Reveal><div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <SectionLabel text="How it works" />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 7vw, 48px)', textAlign: 'center' }}>
+            Three steps to your{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>warm intro.</span>
           </h2>
-          <div className="agent-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 28 }}>
+          <div className="hiw-steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
-              { icon: Target, title: 'Target Matches', sub: 'Your curated feed', color: INDIGO },
-              { icon: FileText, title: 'ATS Optimizer', sub: 'Your resume tailor', color: VIOLET },
-              { icon: Users, title: 'Warm Intros', sub: 'Your parent & alumni connection', color: TEAL_DARK },
-              { icon: Rocket, title: 'Application Tracker', sub: 'Your automated pipeline dashboard', color: PINK },
-            ].map((item, i) => (
-              <div key={i} style={{ background: '#fff', borderRadius: 18, padding: 'clamp(18px, 4vw, 26px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: `${item.color}14`, border: `1px solid ${item.color}2e`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}><item.icon size={22} color={item.color} /></div>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.5vw, 19px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.2, letterSpacing: '-0.02em' }}>{item.title}</p>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 600, color: item.color, margin: 0, lineHeight: 1.4 }}>{item.sub}</p>
+              { n: '1', icon: Target, title: 'Paste a job link', sub: 'Drop in any posting — CFF reads the role, the company, and what they\u2019re looking for.' },
+              { n: '2', icon: Users, title: 'We find your warm intro', sub: 'Alumni & parents at that company surface instantly, with a ready-to-send message.' },
+              { n: '3', icon: Rocket, title: 'You send & track', sub: 'A tailored resume, personalized outreach, and automatic pipeline tracking.' },
+            ].map((s, i) => (
+              <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 'clamp(20px, 4vw, 28px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', transition: 'all 0.25s ease' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = SHADOW_MD; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = SHADOW; e.currentTarget.style.borderColor = '#f1f5f9'; }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: GRAD_INDIGO, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontSize: 15, fontWeight: 800, flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}>{s.n}</div>
+                  <s.icon size={20} color={INDIGO} />
+                </div>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>{s.title}</p>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 500, color: TEXT2, margin: 0, lineHeight: 1.55 }}>{s.sub}</p>
               </div>
             ))}
           </div>
-        </div>
+        </div></Reveal>
       </div>
 
       {/* ── SOCIAL PROOF ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.20)', borderRadius: 100, padding: '6px 16px', marginBottom: 16 }}>
-            <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: VIOLET, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Student Stories</span>
-          </div>
+        <Reveal><div style={{ maxWidth: 680, margin: '0 auto' }}>
+          <SectionLabel text="Student Stories" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
             Real results.<br />
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block' }}>Real students.</span>
@@ -610,15 +570,13 @@ export default function StudentLandingPage({ onParentClick }) {
           <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textAlign: 'center', margin: 'clamp(16px, 4vw, 24px) 0 0', lineHeight: 1.6 }}>
             Students use CFF to stay organized, reduce stress, and move through the search with more traction.
           </p>
-        </div>
+        </div></Reveal>
       </div>
 
       {/* ── PRICING ── */}
       <div id="pricing" style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
-        <div style={{ maxWidth: 540, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(109,40,217,0.08)', border: '1px solid rgba(109,40,217,0.20)', borderRadius: 100, padding: '6px 16px', marginBottom: 16 }}>
-            <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Simple Pricing</span>
-          </div>
+        <Reveal><div style={{ maxWidth: 560, margin: '0 auto' }}>
+          <SectionLabel text="Simple Pricing" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
             One focused sprint.<br />
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block' }}>Real results.</span>
@@ -654,26 +612,17 @@ export default function StudentLandingPage({ onParentClick }) {
               That's just <span style={{ color: TEXT, fontWeight: 800 }}>$19.96/month</span> — billed monthly, cancel in 1 tap anytime.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 'clamp(24px, 5vw, 32px)' }}>
-              {PRO_FEATURES.map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                    <span style={{ fontSize: 10, color: '#fff', fontWeight: 800 }}>✓</span>
-                  </div>
-                  <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: TEXT, margin: 0, lineHeight: 1.5, flex: 1 }}>{f}</p>
-                </div>
-              ))}
-            </div>
+            <PricingComparison />
 
-            <CTAButton label="Find My Warm Intros →" fullWidth />
+            <CTAButton label="Find My Warm Intros →" fullWidth style={{ marginTop: 'clamp(24px, 5vw, 32px)' }} />
           </div>
-        </div>
+        </div></Reveal>
       </div>
 
       {/* ── FINAL CTA ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 100px) clamp(20px, 5vw, 40px)', textAlign: 'center', background: 'linear-gradient(160deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 540, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <Reveal><div style={{ maxWidth: 540, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>Ready to escape the black hole?</p>
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(28px, 7vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 16px' }}>
             Search Smarter,<br />Not Harder.
@@ -683,7 +632,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </p>
           <button onClick={go} style={{
             fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: '#fff',
-            background: '#0f172a', border: 'none', borderRadius: 14,
+            background: '#0f172a', border: 'none', borderRadius: 999,
             padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
             cursor: 'pointer', minHeight: 56,
             boxShadow: '0 14px 44px rgba(15,23,42,0.45), 0 0 0 4px rgba(255,255,255,0.20)',
@@ -701,7 +650,7 @@ export default function StudentLandingPage({ onParentClick }) {
               onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)'}
             >Join as a Parent or Alum →</button>
           </p>
-        </div>
+        </div></Reveal>
       </div>
 
       {/* ── STICKY CTA BAR ── */}
@@ -721,7 +670,7 @@ export default function StudentLandingPage({ onParentClick }) {
         </span>
         <button onClick={go} style={{
           fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 700, color: '#fff',
-          background: GRAD_INDIGO, border: 'none', borderRadius: 12,
+          background: GRAD_INDIGO, border: 'none', borderRadius: 999,
           padding: '12px clamp(20px, 5vw, 32px)', cursor: 'pointer', minHeight: 48, flexShrink: 0,
           boxShadow: '0 6px 20px rgba(109,40,217,0.35)', transition: 'all 0.15s', whiteSpace: 'nowrap',
         }}
