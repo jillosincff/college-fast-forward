@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { PartyPopper, Copy, Check } from 'lucide-react';
+import { PartyPopper, Copy, Check, ImageDown } from 'lucide-react';
+import { shareWinImage } from '@/components/free-tier/shareWinImage';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -10,6 +11,7 @@ export default function PeakMomentSharePrompt({ user }) {
   const storageKey = `cff_celebrated_${user?.email || 'anon'}`;
   const [moment, setMoment] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -73,6 +75,17 @@ export default function PeakMomentSharePrompt({ user }) {
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: dm, fontSize: 13.5, fontWeight: 700, color: '#fff', background: copied ? '#16a34a' : 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 12, padding: '13px 20px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10, transition: 'background 0.2s' }}
         >
           {copied ? <><Check size={15} /> Link copied — send it to a friend</> : <><Copy size={15} /> Copy my invite link</>}
+        </button>
+        <button
+          disabled={sharing}
+          onClick={async () => {
+            setSharing(true);
+            try { await shareWinImage({ type, company, shareUrl }); } catch {}
+            setSharing(false);
+          }}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: dm, fontSize: 13.5, fontWeight: 700, color: '#6d28d9', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 12, padding: '13px 20px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10, opacity: sharing ? 0.6 : 1 }}
+        >
+          <ImageDown size={15} /> {sharing ? 'Creating your card…' : 'Share my win as an image'}
         </button>
         <button
           onClick={() => setMoment(null)}
