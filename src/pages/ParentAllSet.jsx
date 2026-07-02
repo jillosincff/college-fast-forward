@@ -117,6 +117,22 @@ export default function ParentAllSet() {
           </button>
         </div>
 
+        {/* Edit profile link — all parents */}
+        <a
+          href="#/ParentProfileEdit"
+          style={{
+            display: 'inline-block', fontFamily: SF, fontSize: 15, fontWeight: 700,
+            color: INDIGO, background: 'transparent',
+            border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12,
+            padding: '13px 24px', textDecoration: 'none', cursor: 'pointer',
+            minHeight: 50, marginBottom: 28, transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+        >
+          Edit my profile →
+        </a>
+
         {/* Student dashboard link — josinoff@gmail.com only */}
         {user?.email === 'josinoff@gmail.com' && (
         <a
