@@ -7,7 +7,6 @@ import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
-import EmailParserTestPanel from '@/components/tracker/EmailParserTestPanel';
 import StatusCheckBanner from '@/components/tracker/StatusCheckBanner';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -104,7 +103,6 @@ export default function ApplicationTracker() {
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [followUpApp, setFollowUpApp] = useState(null);
   const [showReminderModal, setShowReminderModal] = useState(false);
-  const [showParserTest, setShowParserTest] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -218,20 +216,6 @@ export default function ApplicationTracker() {
               <Mail size={16} />
               Connect Email for Auto-Import
             </button>
-            {user?.role === 'admin' && (
-              <button
-                onClick={() => setShowParserTest(true)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  background: '#F5F3FF', border: '1.5px solid #7C3AED',
-                  color: '#7C3AED', padding: '12px 20px', borderRadius: 8,
-                  fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                  fontFamily: dm, minHeight: 'auto',
-                }}
-              >
-                🧪 Test Email Parser
-              </button>
-            )}
           </div>
         </div>
 
@@ -504,29 +488,6 @@ export default function ApplicationTracker() {
         onClose={() => { setShowFollowUpModal(false); setFollowUpApp(null); }} 
         application={followUpApp || selectedApp}
       />
-
-      {/* Email Parser Test Panel */}
-      {showParserTest && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
-            zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end',
-          }}
-          onClick={() => setShowParserTest(false)}
-        >
-          <div
-            style={{
-              width: '100%', maxWidth: 600, height: '100vh', background: '#fff',
-              overflowY: 'auto', padding: 24,
-              animation: 'slideInRight 0.3s ease',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            <EmailParserTestPanel onClose={() => setShowParserTest(false)} />
-          </div>
-          <style>{`@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
-        </div>
-      )}
 
       {/* Follow-up Reminder Modal */}
       <FollowUpReminderModal 
