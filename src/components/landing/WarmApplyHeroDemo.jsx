@@ -7,20 +7,34 @@ const INDIGO = '#6d28d9';
 const GRAD = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 
 const JOB_URL = 'linkedin.com/jobs/nike-apm-4381';
-const MESSAGE = 'Hi Sarah — fellow Gator here! I just applied to the APM role on your team and would love 15 min to hear about your path from UF to Nike…';
+
+// A different school each loop — this works for any campus
+const SCENES = [
+  { school: 'UF', name: 'Sarah M.', initials: 'SM', line: 'UF Alum · Product Manager at Nike', message: 'Hi Sarah — fellow Gator here! I just applied to the APM role on your team and would love 15 min to hear about your path from UF to Nike…' },
+  { school: 'Penn State', name: 'David K.', initials: 'DK', line: 'Penn State Alum · Sr. Analyst at Nike', message: 'Hi David — fellow Nittany Lion here! I just applied to the APM role and would love 15 min to hear about your path from Penn State to Nike…' },
+  { school: 'USC', name: 'Priya R.', initials: 'PR', line: 'USC Alum · Marketing Lead at Nike', message: 'Hi Priya — fellow Trojan here! I just applied to the APM role and would love 15 min to hear about your path from USC to Nike…' },
+  { school: 'Ohio State', name: 'Marcus T.', initials: 'MT', line: 'Ohio State Alum · Program Manager at Nike', message: 'Hi Marcus — fellow Buckeye here! I just applied to the APM role and would love 15 min to hear about your path from Ohio State to Nike…' },
+];
 
 // Looping demo: paste job link → warm connection found → intro drafted → tracked
 export default function WarmApplyHeroDemo() {
   const [phase, setPhase] = useState(0); // 0 typing url, 1 searching, 2 match, 3 message
+  const [sceneIdx, setSceneIdx] = useState(0);
   const [typed, setTyped] = useState('');
   const [msgTyped, setMsgTyped] = useState('');
+  const scene = SCENES[sceneIdx];
+  const MESSAGE = scene.message;
 
   // Phase clock
   useEffect(() => {
     const durations = [2600, 1800, 2200, 5200];
     const t = setTimeout(() => {
       setPhase(p => (p + 1) % 4);
-      if (phase === 3) { setTyped(''); setMsgTyped(''); }
+      if (phase === 3) {
+        setTyped('');
+        setMsgTyped('');
+        setSceneIdx(i => (i + 1) % SCENES.length);
+      }
     }, durations[phase]);
     return () => clearTimeout(t);
   }, [phase]);
@@ -78,7 +92,7 @@ export default function WarmApplyHeroDemo() {
           <motion.div key="search" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '20px 4px' }}>
             <div style={{ width: 18, height: 18, border: '2.5px solid rgba(109,40,217,0.2)', borderTopColor: INDIGO, borderRadius: '50%', animation: 'wa-spin 0.7s linear infinite', flexShrink: 0 }} />
-            <p style={{ fontSize: 13, fontWeight: 700, color: '#475569', margin: 0 }}>Searching UF alumni &amp; parents at Nike…</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#475569', margin: 0 }}>Searching {scene.school} alumni &amp; parents at Nike…</p>
           </motion.div>
         )}
 
@@ -91,11 +105,11 @@ export default function WarmApplyHeroDemo() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 11, background: '#f8f9ff', border: '1px solid rgba(109,40,217,0.15)', borderRadius: 14, padding: '12px 14px' }}>
               <div style={{ width: 40, height: 40, borderRadius: '50%', background: GRAD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>SM</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{scene.initials}</span>
               </div>
               <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0 }}>Sarah M.</p>
-                <p style={{ fontSize: 12, color: '#64748b', margin: '1px 0 0' }}>UF Alum · Product Manager at Nike</p>
+                <p style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0 }}>{scene.name}</p>
+                <p style={{ fontSize: 12, color: '#64748b', margin: '1px 0 0' }}>{scene.line}</p>
               </div>
             </div>
           </motion.div>
