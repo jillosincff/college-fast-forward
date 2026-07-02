@@ -3,7 +3,7 @@ import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
 import useParentCompanies from '@/hooks/useParentCompanies';
 import { getStandoutInsight } from '@/functions/getStandoutInsight';
-import InAppApplyModal from './InAppApplyModal';
+import WarmApplyFlow from './WarmApplyFlow';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
@@ -360,16 +360,13 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
         </div>
       </div>
 
-      {/* In-App Apply Modal */}
+      {/* Unified warm-apply flow: connection → outreach → tracked → tailor.
+          The flow writes to the pipeline itself — no extra tracking call. */}
       {showApplyModal && (
-        <InAppApplyModal
-          lead={lead}
+        <WarmApplyFlow
+          job={{ company: companyName, role: jobTitle, jobUrl }}
           user={user}
           onClose={() => setShowApplyModal(false)}
-          onSuccess={() => {
-            handleTrackOnly('cold_apply');
-            setTimeout(() => setShowApplyModal(false), 2500);
-          }}
         />
       )}
 

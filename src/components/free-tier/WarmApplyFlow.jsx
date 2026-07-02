@@ -5,15 +5,17 @@ import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { Users, Copy, Check, Loader2, FileText, ClipboardList } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
-const isUrl = (s) => /^https?:\/\//i.test(s.trim());
+const isUrl = (s) => /^https?:\/\//i.test((s || '').trim());
 
 // Guided flow: confirm job → find warm connection → draft outreach → track → tailor.
-export default function WarmApplyFlow({ rawInput, user, onClose }) {
-  const [step, setStep] = useState('confirm'); // confirm | network | message | done
-  const [company, setCompany] = useState(isUrl(rawInput) ? '' : rawInput);
-  const [role, setRole] = useState('');
-  const [jobUrl] = useState(isUrl(rawInput) ? rawInput : '');
-  const [parsing, setParsing] = useState(isUrl(rawInput));
+// Pass `job` ({ company, role, jobUrl }) to skip the confirm step (feed cards).
+export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
+  const fromJob = !!job?.company;
+  const [step, setStep] = useState(fromJob ? 'network' : 'confirm'); // confirm | network | message | done
+  const [company, setCompany] = useState(fromJob ? job.company : (isUrl(rawInput) ? '' : (rawInput || '')));
+  const [role, setRole] = useState(fromJob ? (job.role || '') : '');
+  const [jobUrl] = useState(fromJob ? (job.jobUrl || '') : (isUrl(rawInput) ? rawInput : ''));
+  const [parsing, setParsing] = useState(!fromJob && isUrl(rawInput));
 
   const [contacts, setContacts] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -31,7 +33,7 @@ export default function WarmApplyFlow({ rawInput, user, onClose }) {
 
   // If a URL was pasted, extract company + role from the live posting
   useEffect(() => {
-    if (!isUrl(rawInput)) return;
+    if (fromJob || !isUrl(rawInput)) return;
     let cancelled = false;
     base44.integrations.Core.InvokeLLM({
       prompt: `This is a link to a job posting: ${rawInput}\nLook up the posting and extract the employer company name and the job title. If you cannot determine a field, return an empty string for it.`,
@@ -58,6 +60,12 @@ export default function WarmApplyFlow({ rawInput, user, onClose }) {
       setSearching(false);
     }
   };
+
+  // Feed cards pass the job in — skip confirm and search the network immediately
+  useEffect(() => {
+    if (fromJob) searchNetwork();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const draftMessage = async (chosen) => {
     setContact(chosen || null);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getStandoutInsight } from '@/functions/getStandoutInsight';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
-import InAppApplyModal from './InAppApplyModal';
+import WarmApplyFlow from './WarmApplyFlow';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -425,18 +425,13 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
             )}
       </div>
 
-      {/* In-App Application Modal */}
+      {/* Unified warm-apply flow: connection → outreach → tracked → tailor.
+          The flow writes to the pipeline itself — no extra onAddToPipeline call. */}
       {showApplyModal && (
-        <InAppApplyModal
-          lead={lead}
+        <WarmApplyFlow
+          job={{ company: companyName, role: jobTitle, jobUrl }}
           user={user}
-          schoolAbbr={schoolAbbr}
-          standoutTip={insight?.standout_tip || ''}
           onClose={() => setShowApplyModal(false)}
-          onSuccess={() => {
-            // Keep the modal open so the "Application Tracked!" success screen is visible.
-            onAddToPipeline?.(lead);
-          }}
         />
       )}
     </div>
