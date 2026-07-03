@@ -138,14 +138,25 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     const detectApplyHandoff = () => {
       const hashQuery = window.location.hash.split('?')[1] || '';
       const params = new URLSearchParams(hashQuery || window.location.search);
-      if (params.get('from') !== 'apply_modal') return;
-      const ctx = {
-        company: params.get('company') || '',
-        role: params.get('role') || '',
-        jd: params.get('jd') || '',
-        jobUrl: params.get('job_url') || '',
-        location: params.get('location') || '',
-      };
+      let ctx = null;
+      if (params.get('from') === 'apply_modal') {
+        ctx = {
+          company: params.get('company') || '',
+          role: params.get('role') || '',
+          jd: params.get('jd') || '',
+          jobUrl: params.get('job_url') || '',
+          location: params.get('location') || '',
+        };
+      }
+      // Fallback: the apply modal also stashes the context in sessionStorage —
+      // recovers pre-fill if the URL params were lost (remount, cleaned hash).
+      if (!ctx || (!ctx.company && !ctx.role)) {
+        try {
+          const stored = sessionStorage.getItem('cff_apply_tailor_ctx');
+          if (stored) ctx = JSON.parse(stored);
+        } catch {}
+      }
+      if (!ctx) return;
       setApplyContext(ctx);
       setCompanyName(ctx.company);
       setJobTitle(ctx.role);
@@ -524,7 +535,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         onJobTitleChange={setJobTitle}
         onJobDescriptionChange={setJobDescription}
         onTailor={handleDoTailor}
-        onCancel={() => navigate('FreeTierDashboard')}
+        onCancel={() => { try { sessionStorage.removeItem('cff_apply_tailor_ctx'); } catch {} navigate('FreeTierDashboard'); }}
       />
     );
   }

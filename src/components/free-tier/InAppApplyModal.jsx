@@ -65,6 +65,17 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
 
   // Redirect straight to ResumeTailoring with this job's context
   const goToTailoring = () => {
+    // Belt-and-braces: stash the context in sessionStorage too, so the tailoring
+    // screen still pre-fills even if the URL params get lost in the handoff.
+    try {
+      sessionStorage.setItem('cff_apply_tailor_ctx', JSON.stringify({
+        company: companyName,
+        role: jobTitle,
+        jd: lead.jobDescription || lead.job_description || '',
+        jobUrl: lead.job_url || lead.jobSource || lead.url || '',
+        location: lead.location || '',
+      }));
+    } catch {}
     const params = new URLSearchParams({
       company: companyName,
       role: jobTitle,
