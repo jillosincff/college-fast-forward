@@ -10,9 +10,10 @@ const isUrl = (s) => /^https?:\/\//i.test((s || '').trim());
 
 // Guided flow: confirm job → find warm connection → draft outreach → track → tailor.
 // Pass `job` ({ company, role, jobUrl }) to skip the confirm step (feed cards).
-export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
+export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly = false }) {
   const fromJob = !!job?.company;
-  const [step, setStep] = useState(fromJob ? 'network' : 'confirm'); // confirm | network | message | done
+  // applyOnly: straight to the apply/track step — no network scan (that's the "Find alumni" action)
+  const [step, setStep] = useState(applyOnly ? 'apply' : (fromJob ? 'network' : 'confirm')); // apply | confirm | network | message | done
   const [company, setCompany] = useState(fromJob ? job.company : (isUrl(rawInput) ? '' : (rawInput || '')));
   const [role, setRole] = useState(fromJob ? (job.role || '') : '');
   const [jobUrl] = useState(fromJob ? (job.jobUrl || '') : (isUrl(rawInput) ? rawInput : ''));
@@ -82,7 +83,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
 
   // Feed cards pass the job in — skip confirm and search the network immediately
   useEffect(() => {
-    if (fromJob) searchNetwork();
+    if (fromJob && !applyOnly) searchNetwork();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -150,6 +151,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '18px 20px 14px', borderBottom: '1px solid #f1f5f9' }}>
           <div>
             <p style={{ fontSize: 15, fontWeight: 900, color: '#111827', margin: 0 }}>
+              {step === 'apply' && '📋 Apply & track it'}
               {step === 'confirm' && '🎯 Let\u2019s find your way in'}
               {step === 'network' && `🔍 Your ${school} network`}
               {step === 'message' && '✍️ Your outreach, written'}
@@ -163,6 +165,32 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose }) {
         </div>
 
         <div style={{ padding: 20 }}>
+
+          {/* ── Apply-only step: open posting → tailor resume → log it ── */}
+          {step === 'apply' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <p style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.6 }}>
+                Submit your application, then log it here so CLIFF tracks your follow-ups.
+              </p>
+              {jobUrl && (
+                <a href={jobUrl} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', fontFamily: dm, fontSize: 14, fontWeight: 800, textDecoration: 'none', minHeight: 48, boxSizing: 'border-box' }}>
+                  🔗 Open the application
+                </a>
+              )}
+              <button onClick={goToTailoring}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px', borderRadius: 12, border: '1.5px solid #ddd6fe', background: '#faf5ff', color: '#6d28d9', fontFamily: dm, fontSize: 14, fontWeight: 800, cursor: 'pointer', minHeight: 48 }}>
+                <FileText size={16} /> Tailor my resume for this role
+              </button>
+              {trackError && (
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#dc2626', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '8px 12px', margin: 0 }}>{trackError}</p>
+              )}
+              <button onClick={trackIt} disabled={tracking}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '12px', borderRadius: 12, border: '1.5px solid #e5e7eb', background: '#fff', color: '#374151', fontFamily: dm, fontSize: 13, fontWeight: 700, cursor: tracking ? 'default' : 'pointer', opacity: tracking ? 0.7 : 1, minHeight: 44 }}>
+                <ClipboardList size={15} /> {tracking ? 'Saving…' : '✓ I applied — add to my tracker'}
+              </button>
+            </div>
+          )}
 
           {/* ── Step 1: Confirm job ── */}
           {step === 'confirm' && (

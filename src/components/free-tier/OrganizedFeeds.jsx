@@ -16,6 +16,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const [selectedLead, setSelectedLead] = useState(null);
   const [isKanbanOpen, setIsKanbanOpen] = useState(false);
   const isMobile = useIsMobile(768);
+  // iPads/tablets: touch can't escape nested scroll panes, so use the
+  // single-column page-flow layout with the full-screen detail overlay.
+  const isCoarsePointer = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)')?.matches;
+  const flowMode = isMobile || isCoarsePointer;
   const [showDetailPane, setShowDetailPane] = useState(false);
   const queryClient = useQueryClient();
 
@@ -432,24 +436,24 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     <div onWheel={handleWheelEscape} style={{
       display: 'flex',
       flexDirection: 'column',
-      height: 'calc(100vh - 200px)',
-      maxHeight: '900px',
+      height: flowMode ? 'auto' : 'calc(100vh - 200px)',
+      maxHeight: flowMode ? 'none' : '900px',
       background: '#f8f9fc',
-      overflow: 'hidden',
+      overflow: flowMode ? 'visible' : 'hidden',
     }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       {/* Split-View Container — left list always fixed ~32%, right workspace fills the rest */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(280px, 32%) minmax(0, 1fr)',
+        gridTemplateColumns: flowMode ? '1fr' : 'minmax(280px, 32%) minmax(0, 1fr)',
         gap: 0,
         flex: 1,
-        overflow: 'hidden',
+        overflow: flowMode ? 'visible' : 'hidden',
       }}>
         {/* LEFT COLUMN: Condensed Feed */}
         <div style={{
-          overflowY: 'auto',
-          borderRight: '1px solid #e5e7eb',
+          overflowY: flowMode ? 'visible' : 'auto',
+          borderRight: flowMode ? 'none' : '1px solid #e5e7eb',
         }}>
           <div style={{ maxWidth: '100%', padding: '16px 20px' }}>
             {/* Feed Header */}
@@ -527,8 +531,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Workspace — desktop only; on mobile the detail opens as a full-screen overlay */}
-        {!isMobile && (
+        {/* RIGHT COLUMN: Workspace — desktop only; on mobile/tablet the detail opens as a full-screen overlay */}
+        {!flowMode && (
         <div style={{
           overflowY: 'auto',
           background: '#fff',
@@ -558,8 +562,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         )}
       </div>
 
-      {/* MOBILE: Full-screen job detail overlay */}
-      {isMobile && showDetailPane && selectedLead && (
+      {/* MOBILE/TABLET: Full-screen job detail overlay */}
+      {flowMode && showDetailPane && selectedLead && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#fff', display: 'flex', flexDirection: 'column' }}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',

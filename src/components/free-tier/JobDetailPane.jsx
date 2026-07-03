@@ -415,12 +415,13 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
             )}
       </div>
 
-      {/* Unified warm-apply flow: connection → outreach → tracked → tailor.
-          The flow writes to the pipeline itself — no extra onAddToPipeline call. */}
+      {/* Apply flow: open posting → tailor resume → log to tracker.
+          Network scanning is triggered separately via the "Find alumni" strip. */}
       {showApplyModal && (
         <WarmApplyFlow
           job={{ company: companyName, role: jobTitle, jobUrl }}
           user={user}
+          applyOnly
           onClose={() => setShowApplyModal(false)}
         />
       )}
