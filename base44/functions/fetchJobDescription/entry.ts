@@ -11,28 +11,73 @@ Deno.serve(async (req) => {
     const { url } = await req.json();
     if (!url) return Response.json({ success: false, error: 'url is required' }, { status: 400 });
 
-    // Scrape the posting page (markdown) via Firecrawl directly
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
+    // Pages behind bot detection serve junk to headless scrapers, so try a
+    // direct fetch with a real browser identity first, then fall back to Firecrawl.
     let content = null;
+
+    // 1) Direct HTML fetch (captures server-rendered pages + JSON-LD job data)
     try {
-      const resp = await fetch('https://api.firecrawl.dev/v1/scrape', {
-        method: 'POST',
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12000);
+      const resp = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${Deno.env.get('FIRECRAWL_API_KEY')}`,
-          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
         },
-        body: JSON.stringify({ url, formats: ['markdown'] }),
         signal: controller.signal,
       });
-      if (resp.ok) {
-        const data = await resp.json();
-        content = data?.data?.markdown || null;
-      }
-    } catch (_e) {
-      // timed out or fetch failed — handled below
-    } finally {
       clearTimeout(timer);
+      if (resp.ok) {
+        const html = await resp.text();
+        // Prefer the JSON-LD JobPosting block when present — it carries the full JD
+        const ldMatches = html.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi) || [];
+        for (const block of ldMatches) {
+          try {
+            const json = JSON.parse(block.replace(/<script[^>]*>/i, '').replace(/<\/script>/i, ''));
+            const items = Array.isArray(json) ? json : [json];
+            const posting = items.find(i => i && (i['@type'] === 'JobPosting' || (Array.isArray(i['@type']) && i['@type'].includes('JobPosting'))));
+            if (posting?.description) {
+              content = String(posting.description);
+              break;
+            }
+          } catch (_e) { /* malformed block — keep looking */ }
+        }
+        // Otherwise strip the HTML down to visible text
+        if (!content) {
+          const text = html
+            .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+            .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+          if (text.length > 500) content = text;
+        }
+      }
+    } catch (_e) { /* fall through to Firecrawl */ }
+
+    // 2) Firecrawl fallback for JS-rendered pages
+    if (!content || content.length < 500) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 15000);
+        const resp = await fetch('https://api.firecrawl.dev/v1/scrape', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${Deno.env.get('FIRECRAWL_API_KEY')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url, formats: ['markdown'], onlyMainContent: true, waitFor: 3000 }),
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+        if (resp.ok) {
+          const data = await resp.json();
+          const md = data?.data?.markdown || '';
+          if (md.length > (content?.length || 0)) content = md;
+        }
+      } catch (_e) { /* handled below */ }
     }
     if (!content || content.length < 100) {
       return Response.json({ success: false, error: 'Could not read the job posting page' });
