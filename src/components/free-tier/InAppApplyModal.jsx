@@ -96,14 +96,19 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
     setError('');
 
     try {
-      // Upload resume if manually provided
+      // Upload resume if manually provided — keep the link so it's attached to the record
+      let uploadedResumeUrl = '';
       if (resumeFile) {
-        await base44.integrations.Core.UploadFile({ file: resumeFile });
+        const up = await base44.integrations.Core.UploadFile({ file: resumeFile });
+        uploadedResumeUrl = up?.file_url || '';
       }
 
       const resumeLabel = resumeChoice === 'submit_current' && activeResume
         ? (activeResume.name || activeResume.original_file_name || 'Current Resume')
         : resumeFile?.name || null;
+      const resumeLink = resumeChoice === 'submit_current'
+        ? (activeResume?.original_file_url || '')
+        : uploadedResumeUrl;
 
       const res = await addPipelineEntry({
         company: companyName,
@@ -114,7 +119,11 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
         status: 'applied',
         status_date: new Date().toISOString(),
         location: lead.location || '',
-        notes: [note, resumeLabel ? `Resume submitted: ${resumeLabel}` : null].filter(Boolean).join('\n') || null,
+        notes: [
+          note,
+          resumeLabel ? `Resume: ${resumeLabel}` : null,
+          resumeLink ? `Resume file: ${resumeLink}` : null,
+        ].filter(Boolean).join('\n') || null,
       });
 
       const result = res?.data || res;
@@ -143,17 +152,43 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
         {submitted ? (
           <div className="p-8">
             <div className="text-center">
-              <div className="text-4xl mb-3">🎉</div>
-              <h3 className="text-lg font-extrabold text-gray-900 mb-1">Application Submitted!</h3>
+              <div className="text-4xl mb-3">✅</div>
+              <h3 className="text-lg font-extrabold text-gray-900 mb-1">Saved to Your Tracker!</h3>
               <p className="text-sm text-gray-500 mb-2">
-                Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> was submitted through CFF and added to your Application Tracker.
+                {jobUrl ? (
+                  <>One last step — complete your application for <strong>{jobTitle}</strong> on <strong>{companyName}</strong>'s official site. Your resume is ready to attach.</>
+                ) : (
+                  <>Your application for <strong>{jobTitle}</strong> at <strong>{companyName}</strong> is now tracked in your Application Tracker.</>
+                )}
               </p>
             </div>
 
             <div className="mt-6 space-y-2">
+              {jobUrl && (
+                <a
+                  href={jobUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer text-center"
+                  style={{ minHeight: 'auto' }}
+                >
+                  🚀 Complete Application on {companyName}'s Site →
+                </a>
+              )}
+              {activeResume?.original_file_url && resumeChoice === 'submit_current' && (
+                <a
+                  href={activeResume.original_file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full py-3 bg-white hover:bg-gray-50 text-purple-700 font-bold rounded-xl text-sm border border-purple-300 transition cursor-pointer text-center"
+                  style={{ minHeight: 'auto' }}
+                >
+                  📄 Download Your Resume
+                </a>
+              )}
               <button
                 onClick={() => { onClose(); window.location.hash = '#/ApplicationTracker'; }}
-                className="block w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer text-center"
+                className={`block w-full py-3 font-bold rounded-xl text-sm transition cursor-pointer text-center ${jobUrl ? 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300' : 'bg-purple-600 hover:bg-purple-700 text-white'}`}
                 style={{ minHeight: 'auto' }}
               >
                 📋 View in Application Tracker
@@ -407,7 +442,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   className="w-full py-3 rounded-xl font-bold text-sm text-white transition cursor-pointer disabled:opacity-60"
                   style={{ background: 'linear-gradient(135deg, #1e293b, #334155)', minHeight: 'auto' }}
                 >
-                  {submitting ? 'Submitting…' : '⚡ Submit Application via CFF'}
+                  {submitting ? 'Saving…' : (jobUrl ? '⚡ Track & Continue to Application' : '⚡ Add to My Tracker')}
                 </button>
               )}
 
@@ -416,7 +451,9 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
               )}
 
               <p className="text-[10px] text-center text-gray-400">
-                Your application will be tracked in your CFF pipeline.
+                {jobUrl
+                  ? "We'll save this to your CFF tracker, then send you to the official application to finish."
+                  : 'Your application will be tracked in your CFF pipeline.'}
               </p>
             </form>
             )}

@@ -22,6 +22,10 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
   // resume, then sends them back to the job listing.
   const handleSubmitApplication = async () => {
     setSubmitting(true);
+    // Open the real job posting synchronously (before any await) so popup
+    // blockers allow it — the student finishes applying on the official site.
+    const jobUrl = applyContext.jobUrl || '';
+    if (jobUrl) window.open(jobUrl, '_blank', 'noopener');
     try {
       await addPipelineEntry({
         company: applyContext.company || companyName,
@@ -37,7 +41,9 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
       // Clear the handoff context so revisiting this page doesn't re-enter the apply flow
       try { sessionStorage.removeItem('cff_apply_tailor_ctx'); } catch {}
       window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
-      toast.success('Application submitted and added to your tracker!');
+      toast.success(jobUrl
+        ? 'Saved to your tracker — finish applying on the company site (opened in a new tab). Download your tailored resume to attach it.'
+        : 'Saved to your Application Tracker!');
       navigate('ApplicationTracker');
     } catch (e) {
       toast.error('Could not submit. Please try again.');
@@ -102,7 +108,7 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
               ✨ Your tailored resume is ready — one step left
             </p>
             <p style={{ fontFamily: dmSans, fontSize: 12.5, color: '#7c3aed', margin: 0, lineHeight: 1.5 }}>
-              Review the changes below, then hit <strong>Submit Application</strong> at the bottom of the screen to finish applying to {applyContext.company || companyName}.
+              Review the changes, download your tailored resume, then hit <strong>Finish Applying</strong> below — we'll track it and open {applyContext.company || companyName}'s official application.
             </p>
           </div>
         )}
@@ -170,7 +176,9 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
                 Applying to {applyContext.role || jobTitle || 'this role'} · {applyContext.company || companyName}
               </p>
               <p style={{ fontFamily: dmSans, fontSize: 11.5, color: '#888', margin: 0 }}>
-                Your tailored resume will be attached and tracked automatically.
+                {applyContext.jobUrl
+                  ? "We'll track it and open the official application — have your tailored resume downloaded."
+                  : "We'll save this application to your tracker."}
               </p>
             </div>
             <button
@@ -184,7 +192,7 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
                 boxShadow: '0 4px 12px rgba(124,58,237,0.35)', flexShrink: 0,
               }}
             >
-              {submitting ? 'Submitting…' : '⚡ Submit Application →'}
+              {submitting ? 'Saving…' : (applyContext.jobUrl ? '⚡ Finish Applying →' : '⚡ Add to Tracker →')}
             </button>
           </div>
         </div>
