@@ -55,6 +55,16 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     }
   }, [phase, user?.email]);
 
+  // iPad/iOS fix: arriving here from the full-screen apply overlay could leave a
+  // stale body scroll lock behind, making the page unscrollable. Clear it and
+  // reset scroll on every phase change.
+  useEffect(() => {
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    document.body.style.position = '';
+    window.scrollTo(0, 0);
+  }, [phase]);
+
   // Auto-activate trial when user first lands on this page
   useEffect(() => {
     if (!trialAttempted && user && !isFastIQ) {
