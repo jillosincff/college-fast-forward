@@ -33,7 +33,28 @@ import DashboardWelcomeHeader from '@/components/free-tier/DashboardWelcomeHeade
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
-function FirstVisitToast({ firstName, onDismiss }) {
+function FirstVisitToast({ firstName, onDismiss, focusMode }) {
+  if (focusMode) {
+    return (
+      <div style={{
+        position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+        zIndex: 9999, background: '#111827', color: '#fff', borderRadius: 16,
+        padding: '14px 20px', boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+        display: 'flex', alignItems: 'center', gap: 12, maxWidth: 420, width: 'calc(100% - 40px)',
+        animation: 'toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
+      }}>
+        <style>{`@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`}</style>
+        <Sparkles size={18} color="#a78bfa" style={{ flexShrink: 0 }} />
+        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', margin: 0 }}>
+          Welcome, {firstName}! Your first application package is ready above 👆
+        </p>
+        <button
+          onClick={onDismiss}
+          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 18, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: 0, flexShrink: 0, lineHeight: 1 }}
+        >×</button>
+      </div>
+    );
+  }
   return (
     <div style={{
       position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
@@ -70,6 +91,17 @@ export default function FreeTierDashboard() {
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const navRef = useRef(null);
+
+  // First-session focus mode: while the Done-For-You package is pending, strip
+  // the dashboard down to ONE action — no upgrade banner, no competing cards.
+  const [focusMode, setFocusMode] = useState(() => {
+    try { return localStorage.getItem('cff_first_draft_pending') === 'true'; } catch { return false; }
+  });
+  useEffect(() => {
+    const exitFocus = () => setFocusMode(false);
+    window.addEventListener('cff:first-package-done', exitFocus);
+    return () => window.removeEventListener('cff:first-package-done', exitFocus);
+  }, []);
 
   // Load Satoshi font for brand consistency with the landing/marketing pages
   useEffect(() => {
@@ -295,10 +327,11 @@ export default function FreeTierDashboard() {
         )}
 
         {/* Referral prompt at peak moments (reply received / interview landed) */}
-        <PeakMomentSharePrompt user={user} />
+        {!focusMode && <PeakMomentSharePrompt user={user} />}
 
-        {/* Personalized pain-point welcome header (hidden when the expired-trial header shows) */}
-        {!isTrialExpired && (
+        {/* Personalized pain-point welcome header (hidden when the expired-trial header shows,
+            and during first-session focus — the upgrade pitch lands after the first win) */}
+        {!isTrialExpired && !focusMode && (
           <DashboardWelcomeHeader
             badge={painConfig.badge}
             title={formattedTitle}
@@ -311,17 +344,22 @@ export default function FreeTierDashboard() {
         {/* Done-For-You activation moment — a finished application package for one real job */}
         <FirstApplicationPackageCard user={user} />
 
-        {/* Day-one unlocked warm connection */}
-        <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
+        {/* Everything below competes with the package card — hidden during first-session focus */}
+        {!focusMode && (
+          <>
+            {/* Day-one unlocked warm connection */}
+            <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
 
-        {/* Primary action: paste a job → warm connection → outreach → tracked */}
-        <div style={{ marginBottom: 20 }}>
-          <WarmApplyBar user={user} />
-        </div>
+            {/* Primary action: paste a job → warm connection → outreach → tracked */}
+            <div style={{ marginBottom: 20 }}>
+              <WarmApplyBar user={user} />
+            </div>
 
-        {/* Today: daily actions first, then any stalled-outreach nudge */}
-        <TodaysActionsCard user={user} />
-        <FollowUpNudgeCard user={user} />
+            {/* Today: daily actions first, then any stalled-outreach nudge */}
+            <TodaysActionsCard user={user} />
+            <FollowUpNudgeCard user={user} />
+          </>
+        )}
 
         {/* Daily Drop Feed - Job Opportunities */}
         <div id="cff-daily-feed">
@@ -331,7 +369,7 @@ export default function FreeTierDashboard() {
       )}
 
       {showWelcomeToast && (
-        <FirstVisitToast firstName={firstName} onDismiss={() => setShowWelcomeToast(false)} />
+        <FirstVisitToast firstName={firstName} focusMode={focusMode} onDismiss={() => setShowWelcomeToast(false)} />
       )}
 
       {showOutreachToast && (

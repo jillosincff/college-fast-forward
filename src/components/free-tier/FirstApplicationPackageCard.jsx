@@ -33,8 +33,10 @@ export default function FirstApplicationPackageCard({ user }) {
       .then(res => {
         const companies = (res?.data || res)?.companies || [];
         if (!cancelled && companies.length > 0) setJob(companies[0]);
+        // No job available → release the dashboard from focus mode so it isn't empty
+        else if (!cancelled) window.dispatchEvent(new CustomEvent('cff:first-package-done'));
       })
-      .catch(() => {})
+      .catch(() => { if (!cancelled) window.dispatchEvent(new CustomEvent('cff:first-package-done')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [dismissed]);
@@ -44,6 +46,7 @@ export default function FirstApplicationPackageCard({ user }) {
   const clear = () => {
     try { localStorage.removeItem('cff_first_draft_pending'); } catch {}
     setDismissed(true);
+    window.dispatchEvent(new CustomEvent('cff:first-package-done'));
   };
 
   const openPackage = () => {
