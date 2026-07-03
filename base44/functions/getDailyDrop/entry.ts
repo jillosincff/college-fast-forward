@@ -846,7 +846,14 @@ Deno.serve(async (req) => {
     // Live-job repeat guard: block only exact company+role pairs already shown
     // in the last 14 days. A new role at a previously-seen company is still fresh —
     // the company-only cooldown was starving the live feed.
+    // HARD SEEKING FILTER: internship seekers NEVER see full-time jobs, and
+    // full-time seekers NEVER see internships. Not a ranking nudge — a hard cut.
+    const isInternJob = (j) =>
+      /\bintern(ship)?s?\b|\bco[- ]?op\b/.test(((j.job_title || '') + ' ' + (j.employment_type || '')).toLowerCase());
+
     const eligibleJobs = allJobs.filter(j => {
+      if (seeking === 'internship' && !isInternJob(j)) return false;
+      if (seeking === 'fulltime' && isInternJob(j)) return false;
       const ck = (j.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const rk = (j.job_title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       return !seenPairs.has(ck + '|' + rk);
@@ -886,10 +893,6 @@ Deno.serve(async (req) => {
         if (ageDays >= 0 && ageDays <= 7) score += 15;
         else if (ageDays <= 14) score += 8;
       }
-      // Seeking intent: internship seekers want intern roles, and vice versa
-      const isInternTitle = /\bintern(ship)?\b/.test(title);
-      if (seeking === 'internship' && isInternTitle) score += 20;
-      if (seeking === 'fulltime' && isInternTitle) score -= 20;
       if (j.salary_range) score += 3;
       return { score, roleHits };
     };
