@@ -110,9 +110,10 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      height: '100%',
+      width: '100%',
+      maxWidth: 760,
+      margin: '0 auto',
       background: '#fff',
-      overflow: 'hidden',
     }}>
       {/* Zone A: Action Header */}
       <div style={{
@@ -308,10 +309,8 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
         )}
       </div>
 
-      {/* Zone C: Job Details */}
+      {/* Zone C: Job Details — scrolls with the parent pane, no nested scroller */}
       <div style={{
-        flex: 1,
-        overflowY: 'auto',
         padding: '20px 24px',
         background: '#faf5ff',
       }}>
