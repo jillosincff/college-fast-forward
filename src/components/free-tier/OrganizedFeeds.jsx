@@ -404,13 +404,32 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     setShowDetailPane(true);
   };
 
+  // Scroll-escape: browsers "latch" wheel gestures to the inner feed panes, which
+  // trapped users unable to scroll the page back up. When scrolling up and the
+  // inner pane under the cursor is already at its top, hand the scroll to the page.
+  const handleWheelEscape = (e) => {
+    if (e.deltaY >= 0) return;
+    let el = e.target;
+    while (el && el !== e.currentTarget) {
+      if (el.scrollHeight > el.clientHeight + 1) {
+        const oy = window.getComputedStyle(el).overflowY;
+        if (oy === 'auto' || oy === 'scroll') {
+          if (el.scrollTop > 0) return; // inner pane still has room — let it scroll
+          break;
+        }
+      }
+      el = el.parentElement;
+    }
+    window.scrollBy(0, e.deltaY);
+  };
+
   const noGoals = !target_industries?.length && !effectiveRole;
   // Only block the feed on the primary (fast, cached) job source. The slower
   // alumni-verified Exa leads merge in as they arrive without holding up the list.
   const anyLoading = isLoading;
 
   return (
-    <div style={{
+    <div onWheel={handleWheelEscape} style={{
       display: 'flex',
       flexDirection: 'column',
       height: 'calc(100vh - 200px)',
@@ -431,7 +450,6 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         <div style={{
           overflowY: 'auto',
           borderRight: '1px solid #e5e7eb',
-          scrollBehavior: 'smooth',
         }}>
           <div style={{ maxWidth: '100%', padding: '16px 20px' }}>
             {/* Feed Header */}
