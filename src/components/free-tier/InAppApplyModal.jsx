@@ -150,21 +150,6 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
               </p>
             </div>
 
-            {/* CLIFF Standout Tip — moved here as the grand finale */}
-            {standoutTip && (
-              <div className="mt-5 rounded-xl p-4 text-left" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '1px solid #fbbf24' }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">✨</span>
-                  <h4 className="text-xs font-extrabold uppercase tracking-wide" style={{ color: '#92400e', margin: 0 }}>
-                    Your CLIFF Standout Tip
-                  </h4>
-                </div>
-                <p className="text-[13px] leading-relaxed" style={{ color: '#78350f', margin: 0 }}>
-                  {standoutTip}
-                </p>
-              </div>
-            )}
-
             <div className="mt-6 space-y-2">
               <button
                 onClick={() => { onClose(); window.location.hash = '#/ApplicationTracker'; }}
@@ -303,6 +288,21 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
               </div>
             ) : (
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
+              {/* CLIFF Standout Tip — shown BEFORE submitting so the student can act on it */}
+              {standoutTip && (
+                <div className="rounded-xl p-4" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '1px solid #fbbf24' }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">✨</span>
+                    <h4 className="text-xs font-extrabold uppercase tracking-wide" style={{ color: '#92400e', margin: 0 }}>
+                      Before you submit — CLIFF's Standout Tip
+                    </h4>
+                  </div>
+                  <p className="text-[13px] leading-relaxed" style={{ color: '#78350f', margin: 0 }}>
+                    {standoutTip}
+                  </p>
+                </div>
+              )}
+
               {/* Applicant info */}
               {(user?.full_name || user?.email) && (
                 <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3">
