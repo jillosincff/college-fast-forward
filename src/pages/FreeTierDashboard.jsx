@@ -22,6 +22,7 @@ import DashboardBottomNav from '@/components/free-tier/DashboardBottomNav';
 import CliffChatWidget from '@/components/free-tier/CliffChatWidget';
 import AtsMatcher from '@/components/free-tier/AtsMatcher';
 import FirstWarmMatchCard from '@/components/free-tier/FirstWarmMatchCard';
+import FirstApplicationPackageCard from '@/components/free-tier/FirstApplicationPackageCard';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
@@ -307,7 +308,10 @@ export default function FreeTierDashboard() {
           />
         )}
 
-        {/* Day-one unlocked warm connection — the FIRST thing a new student sees */}
+        {/* Done-For-You activation moment — a finished application package for one real job */}
+        <FirstApplicationPackageCard user={user} />
+
+        {/* Day-one unlocked warm connection */}
         <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
 
         {/* Primary action: paste a job → warm connection → outreach → tracked */}
