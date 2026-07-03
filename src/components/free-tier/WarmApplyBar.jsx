@@ -54,7 +54,7 @@ export default function WarmApplyBar({ user }) {
                 color: '#fff', border: 'none', borderRadius: 12, padding: '13px 20px',
                 fontFamily: dm, fontSize: 14, fontWeight: 800, cursor: input.trim() ? 'pointer' : 'default',
                 boxShadow: input.trim() ? '0 6px 18px rgba(249,115,22,0.4)' : 'none',
-                transition: 'all 0.2s', whiteSpace: 'nowrap',
+                transition: 'all 0.2s', whiteSpace: 'nowrap', flex: '1 1 auto',
               }}
             >
               Find my way in <ArrowRight size={16} />

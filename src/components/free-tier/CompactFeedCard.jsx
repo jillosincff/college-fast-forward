@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { findParentsAtCompany } from '@/functions/findParentsAtCompany';
+import decodeEntities from '@/utils/decodeEntities';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -19,10 +20,10 @@ function getLogoPlaceholder(companyName) {
 }
 
 export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr }) {
-  const companyName = lead.company || lead.companyName || '';
-  const jobTitle = lead.job_title || lead.role || '';
-  const location = lead.location || lead.location_text || '';
-  const jobDesc = lead.hiring_description || lead.description || lead.jobDescription || '';
+  const companyName = decodeEntities(lead.company || lead.companyName || '');
+  const jobTitle = decodeEntities(lead.job_title || lead.role || '');
+  const location = decodeEntities(lead.location || lead.location_text || '');
+  const jobDesc = decodeEntities(lead.hiring_description || lead.description || lead.jobDescription || '');
   const logoData = getLogoPlaceholder(companyName);
 
   // Up-front parent lookup so the network pill appears as students scan the list,
@@ -160,8 +161,10 @@ export default function CompactFeedCard({ lead, isSelected, onClick, schoolAbbr 
           margin: 0,
           lineHeight: 1.3,
           overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          wordBreak: 'break-word',
         }}>{jobTitle}</h4>
 
         {/* Location & Type */}

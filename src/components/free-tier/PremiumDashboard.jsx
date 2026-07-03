@@ -144,7 +144,7 @@ function StatPill({ icon: Icon, label, value, sublabel, theme, isLoading, warnin
             </>
           )}
         </p>
-        <p style={{ fontFamily: dm, fontSize: 10, color: warning ? 'rgba(251,191,36,0.8)' : 'rgba(255,255,255,0.55)', margin: 0, whiteSpace: 'nowrap' }}>{label}</p>
+        <p style={{ fontFamily: dm, fontSize: 10, color: warning ? 'rgba(251,191,36,0.8)' : 'rgba(255,255,255,0.55)', margin: 0, whiteSpace: isMobile ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</p>
         {sublabel && (
           <p style={{ fontFamily: dm, fontSize: 9, color: 'rgba(255,255,255,0.7)', margin: '3px 0 0' }}>{sublabel}</p>
         )}
@@ -484,8 +484,8 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         const sidebarUnlocked = parentCount !== null && parentCount >= 20;
         const showSidebar = true;
         return (
-      <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
-        <div style={{ display: 'grid', gridTemplateColumns: showSidebar ? 'minmax(0, 1fr) 340px' : '1fr', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
+      <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px', overflowX: 'hidden' }} className="premium-dashboard-container">
+        <div style={{ display: 'grid', gridTemplateColumns: (showSidebar && !isMobile) ? 'minmax(0, 1fr) 340px' : 'minmax(0, 1fr)', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
           {/* Left Column - Job Feed */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
             {/* Primary action: paste a job → warm connection → outreach → tracked */}
@@ -505,7 +505,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           </div>
 
           {/* Right Column (Desktop Only) - Sticky sidebar, only when Parent Network is unlocked */}
-          {showSidebar && (
+          {showSidebar && !isMobile && (
             <aside style={{ 
               display: 'flex', 
               flexDirection: 'column', 
