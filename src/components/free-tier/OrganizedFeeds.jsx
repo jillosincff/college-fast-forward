@@ -569,6 +569,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
             paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
             borderBottom: '1px solid #e5e7eb', background: '#fff', flexShrink: 0,
+            // Keep the back header above the apply sheet's fixed backdrop (z-50)
+            position: 'relative', zIndex: 60,
           }}>
             <button
               onClick={() => { setShowDetailPane(false); setSelectedLead(null); }}
