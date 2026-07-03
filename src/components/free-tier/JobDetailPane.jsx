@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getStandoutInsight } from '@/functions/getStandoutInsight';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
-import WarmApplyFlow from './WarmApplyFlow';
+import InAppApplyModal from './InAppApplyModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -414,13 +414,15 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
             )}
       </div>
 
-      {/* Apply flow: open posting → tailor resume → log to tracker.
-          Network scanning is triggered separately via the "Find alumni" strip. */}
+      {/* In-app apply: application stays on CFF — resume choice/tailoring + cover note,
+          submitted and tracked internally. Alumni scanning stays on "Find alumni". */}
       {showApplyModal && (
-        <WarmApplyFlow
-          job={{ company: companyName, role: jobTitle, jobUrl }}
+        <InAppApplyModal
+          lead={lead}
           user={user}
-          applyOnly
+          schoolAbbr={schoolAbbr}
+          standoutTip={insight?.standout_tip}
+          startAtResume
           onClose={() => setShowApplyModal(false)}
         />
       )}

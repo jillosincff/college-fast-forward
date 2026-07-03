@@ -3,8 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { findParentsAtCompany } from '@/functions/findParentsAtCompany';
 
-export default function InAppApplyModal({ lead, user, onClose, onSuccess, schoolAbbr, standoutTip }) {
-  const [step, setStep] = useState('network'); // 'network' | 'resume' | 'submit'
+export default function InAppApplyModal({ lead, user, onClose, onSuccess, schoolAbbr, standoutTip, startAtResume = false }) {
+  const [step, setStep] = useState(startAtResume ? 'resume' : 'network'); // 'network' | 'resume' | 'submit'
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
