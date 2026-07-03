@@ -17,6 +17,7 @@ export default function ApplyTailorStep({
   jobDescription,
   resumeText,
   error,
+  jdLoading,
   onCompanyChange,
   onJobTitleChange,
   onJobDescriptionChange,
@@ -81,6 +82,16 @@ export default function ApplyTailorStep({
       {error && (
         <div style={{ background: 'rgba(229,57,53,0.08)', border: '1px solid rgba(229,57,53,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 20 }}>
           <p style={{ fontFamily: dmSans, fontSize: 13, color: '#e53935', margin: 0 }}>{error}</p>
+        </div>
+      )}
+
+      {jdLoading && !jobDescription && (
+        <div style={{ background: '#f5f3ff', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ width: 16, height: 16, border: '2px solid rgba(124,58,237,0.25)', borderTopColor: '#7c3aed', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          <p style={{ fontFamily: dmSans, fontSize: 13, color: '#7c3aed', margin: 0 }}>
+            Grabbing the job description from the posting for you…
+          </p>
         </div>
       )}
 

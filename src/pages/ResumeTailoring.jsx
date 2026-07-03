@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { tailorResume } from '@/functions/tailorResume';
+import { fetchJobDescription } from '@/functions/fetchJobDescription';
 import JobDescriptionStep from '@/components/resume-tailor/JobDescriptionStep';
 import ResumeBuilderStep from '@/components/fast-track-pro/ResumeBuilderStep';
 import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
@@ -44,6 +45,25 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   // When arriving from the job-application "Yes, tailor it first" flow, we carry
   // the job context so we can return to the listing and submit once done.
   const [applyContext, setApplyContext] = useState(null);
+  const [jdFetching, setJdFetching] = useState(false);
+
+  // When the apply handoff carried a job URL but no job description, fetch the
+  // real posting text and pre-fill the JD field automatically.
+  useEffect(() => {
+    if (!applyContext || applyContext.jd || !applyContext.jobUrl) return;
+    let cancelled = false;
+    setJdFetching(true);
+    fetchJobDescription({ url: applyContext.jobUrl })
+      .then(res => {
+        const data = res?.data || res;
+        if (!cancelled && data?.success && data.jobDescription) {
+          setJobDescription(prev => prev || data.jobDescription);
+        }
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setJdFetching(false); });
+    return () => { cancelled = true; };
+  }, [applyContext]);
 
   // Churn tracking — lifted above conditional render to satisfy rules-of-hooks
   const queuedViewTracked = useRef(false);
@@ -531,6 +551,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         jobDescription={jobDescription}
         resumeText={resumeText}
         error={error}
+        jdLoading={jdFetching}
         onCompanyChange={setCompanyName}
         onJobTitleChange={setJobTitle}
         onJobDescriptionChange={setJobDescription}
