@@ -293,7 +293,21 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   <div className="space-y-2">
                     <button
                       type="button"
-                      onClick={() => setStep('resume')}
+                      onClick={() => {
+                        // Take them straight to CLIFF's outreach drafter with the connection pre-filled
+                        const first = parents[0];
+                        const params = new URLSearchParams({
+                          context: 'alumni_search',
+                          company: companyName,
+                          jobTitle,
+                          alumniName: alumniName || first?.name || '',
+                          alumniRole: alumniRole || first?.role_title || '',
+                          alumniLinkedin: alumniLinkedin || first?.linkedin_url || '',
+                          skipForm: '1',
+                        });
+                        onClose();
+                        window.location.hash = `#/OutreachDrafts?${params.toString()}`;
+                      }}
                       className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer shadow-lg shadow-purple-200"
                       style={{ minHeight: 'auto' }}
                     >

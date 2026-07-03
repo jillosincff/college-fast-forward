@@ -74,6 +74,11 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
     setShowApplyModal(true);
   };
 
+  // Open CLIFF's outreach drafter pre-filled with this alumnus + job context
+  const draftIntroTo = (a) => {
+    window.location.hash = `#/OutreachDrafts?context=alumni_search&company=${encodeURIComponent(companyName)}&jobTitle=${encodeURIComponent(jobTitle)}&alumniName=${encodeURIComponent(a.name || '')}&alumniRole=${encodeURIComponent(a.role_title || '')}&alumniLinkedin=${encodeURIComponent(a.linkedin_url || '')}&skipForm=1`;
+  };
+
   const handleFindConnection = () => {
     if (alumni.length > 0) {
       const firstAlumni = alumni[0];
@@ -250,9 +255,32 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
                       in
                     </a>
                   )}
+                  <button
+                    onClick={() => draftIntroTo(a)}
+                    style={{
+                      fontFamily: dm,
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: '#fff',
+                      background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                      border: 'none',
+                      borderRadius: 999,
+                      padding: '6px 10px',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
+                      minHeight: 'auto',
+                      minWidth: 'auto',
+                    }}
+                  >
+                    ✉️ Draft intro
+                  </button>
                 </div>
               ))}
             </div>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#7c3aed', margin: '8px 0 0', lineHeight: 1.5 }}>
+              Tap <strong>Draft intro</strong> and CLIFF writes a short outreach message for you — send it before you apply so your name rings a bell.
+            </p>
           </div>
         ) : scanned ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
