@@ -15,14 +15,21 @@ const STEPS = [
   'Hang on a few seconds, finalizing finishing touches...',
 ];
 
-export default function TailoringLoader() {
+export default function TailoringLoader({ onCancel }) {
   const [visibleLines, setVisibleLines] = useState(0);
+  const [showEscape, setShowEscape] = useState(false);
 
   useEffect(() => {
     if (visibleLines >= STEPS.length) return;
     const t = setTimeout(() => setVisibleLines(v => v + 1), 800);
     return () => clearTimeout(t);
   }, [visibleLines]);
+
+  // After 45s, offer a way out so nobody gets stuck on this screen
+  useEffect(() => {
+    const t = setTimeout(() => setShowEscape(true), 45000);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div style={{
@@ -77,6 +84,24 @@ export default function TailoringLoader() {
             );
           })}
         </div>
+
+        {showEscape && onCancel && (
+          <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #F1F5F9' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: '#94A3B8', margin: '0 0 10px' }}>
+              Taking longer than usual…
+            </p>
+            <button
+              onClick={onCancel}
+              style={{
+                fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: violet,
+                background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.25)',
+                borderRadius: 999, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto',
+              }}
+            >
+              ← Go back and try again
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -327,13 +327,15 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     setPhase('tailoring');
     setError(null);
     try {
-      const res = await tailorResume({
+      // Hard timeout so a stalled request can never leave the user stuck on the loader
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 120000));
+      const res = await Promise.race([timeout, tailorResume({
         resumeText: effectiveResumeText,
         jobTitle: jobTitle.trim(),
         companyName: companyName.trim(),
         jobDescription: jobDescription.trim(),
         sourceResumeId: resumeId || '',
-      });
+      })]);
       const failPhase = applyContext ? 'applyTailor' : 'tailor';
       if (res.data?.upgrade_required) {
         setError(res.data.message || 'Upgrade to unlock full resume tailoring.');
@@ -353,7 +355,9 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         setPhase(failPhase);
       }
     } catch (e) {
-      setError('Something went wrong. Please try again.');
+      setError(e?.message === 'timeout'
+        ? 'This is taking longer than expected. Please try again.'
+        : 'Something went wrong. Please try again.');
       setPhase(applyContext ? 'applyTailor' : 'tailor');
     }
   };
@@ -491,7 +495,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   }
 
   // ── PHASE: tailoring loader ──────────────────────────────────────────────
-  if (phase === 'tailoring') return <TailoringLoader />;
+  if (phase === 'tailoring') return <TailoringLoader onCancel={() => { setError(null); setPhase(applyContext ? 'applyTailor' : (hasResumes ? 'hub' : 'entry')); }} />;
 
   // ── PHASE: applyTailor (arrived from job-application "tailor it first") ────
   if (phase === 'applyTailor') {
