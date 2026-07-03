@@ -679,8 +679,9 @@ Deno.serve(async (req) => {
     // ── 2. Generate a fresh daily drop ────────────────────────────────────
     console.log(`[getDailyDrop] Generating fresh drop for ${user.email} on ${dropDate}`);
 
-    // Track ALL companies shown to user in last 14 days for deduplication (COMPANY-LEVEL ONLY)
-    const seenCompanies = new Map(); // companyKey -> last seen timestamp
+    // Track ALL companies shown to user in last 14 days for deduplication
+    const seenCompanies = new Map(); // companyKey -> last seen timestamp (curated cooldown)
+    const seenPairs = new Set(); // companyKey|roleKey (live-job repeat guard)
     const fourteenDaysAgo = new Date();
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
     
@@ -696,6 +697,9 @@ Deno.serve(async (req) => {
           if (!seenCompanies.has(companyKey)) {
             seenCompanies.set(companyKey, dropDate.getTime());
           }
+          // Track exact company+role pairs — live jobs are only "recycled" if the
+          // SAME posting repeats; a new role at a seen company is still fresh.
+          seenPairs.add(companyKey + '|' + (s.role || '').toLowerCase().replace(/[^a-z0-9]/g, ''));
         }
       }
       console.log('[getDailyDrop] Dedup: %d companies blocked in last 14 days', seenCompanies.size);
@@ -738,18 +742,11 @@ Deno.serve(async (req) => {
     const USE_FANTASTIC_JOBS = false;
     const fantasticApiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
     
-    // ROTATE ROLE QUERIES for variety - alternate between exact role and broader terms
-    const roleVariants = [
-      targetRole || (targetIndustries.length > 0 ? `${targetIndustries[0]} analyst` : 'analyst'),
-      'marketing',
-      'business analyst',
-      'coordinator',
-    ];
-    const today = new Date().getDate();
-    const roleIndex = today % roleVariants.length; // Different role each day
-    const role = roleVariants[roleIndex];
+    // Always search the student's ACTUAL target role — rotating to generic terms
+    // ('marketing', 'coordinator') produced irrelevant results most days.
+    const role = targetRole || (targetIndustries.length > 0 ? `${targetIndustries[0]} analyst` : 'analyst');
 
-    console.log(`[getDailyDrop] Fetching jobs: role=${role} (variant ${roleIndex + 1}/4), location=${location}, seeking=${seeking}`);
+    console.log(`[getDailyDrop] Fetching jobs: role=${role}, location=${location}, seeking=${seeking}`);
     
     let freshJobs = [];
     let modifiedJobs = [];
@@ -775,25 +772,24 @@ Deno.serve(async (req) => {
         }
       }
 
-      // BACKUP LIVE SOURCE: if OpenWeb Ninja is throttled/timed out and returned
-      // too few live jobs, pull from Coresignal so students still get REAL jobs
-      // instead of dropping straight to the curated filler pool.
-      const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
-      if (freshJobs.length < dailyLimit && coresignalApiKey) {
-        try {
-          console.log('[getDailyDrop] OpenWeb Ninja sparse (%d) — trying Coresignal backup...', freshJobs.length);
-          const csJobs = await Promise.race([
-            fetchCoresignalJobs({ role, location, seeking, apiKey: coresignalApiKey, maxResults: dailyLimit }),
-            new Promise((resolve) => setTimeout(() => {
-              console.error('[getDailyDrop] Coresignal TIMEOUT after 20s');
-              resolve([]);
-            }, 20000)),
-          ]);
-          console.log('[getDailyDrop] Coresignal backup returned %d jobs', csJobs?.length || 0);
-          freshJobs = freshJobs.concat(csJobs || []);
-        } catch (e) {
-          console.error('[getDailyDrop] Coresignal backup failed:', e.message);
-        }
+      // BACKUP LIVE SOURCE #1: reuse the student's cached live-jobs pool from the
+      // Target Matches feed (getLiveJobMatchesFn) — real verified postings that
+      // were already fetched and cached in the last 24h. Zero API cost, instant.
+      if (freshJobs.length < dailyLimit && Array.isArray(user.job_leads_cache) && user.job_leads_cache.length > 0) {
+        const poolJobs = user.job_leads_cache
+          .map(c => ({
+            name: c.name,
+            job_title: c.job_title,
+            hiring_description: (c.hiring_description || `${c.name} is hiring for ${c.job_title}`).slice(0, 600),
+            job_url: c.job_url,
+            location: c.location || '',
+            posted_date: c.posted_date || null,
+            salary_range: c.salary_range || null,
+            source: 'jsearch_pool',
+          }))
+          .filter(j => j.name && j.job_title && j.job_url);
+        console.log('[getDailyDrop] Sparse (%d) — adding %d live jobs from Target Matches pool', freshJobs.length, poolJobs.length);
+        freshJobs = freshJobs.concat(poolJobs);
       }
 
       // FINAL LIVE BACKUP: if both paid providers are still throttled/sparse,
@@ -847,8 +843,14 @@ Deno.serve(async (req) => {
       ...(backfillJobs || []),
     ];
     
-    // Filter out companies in 14-day cooldown
-    const eligibleJobs = allJobs.filter(j => !isCompanyInCooldown(j.name));
+    // Live-job repeat guard: block only exact company+role pairs already shown
+    // in the last 14 days. A new role at a previously-seen company is still fresh —
+    // the company-only cooldown was starving the live feed.
+    const eligibleJobs = allJobs.filter(j => {
+      const ck = (j.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const rk = (j.job_title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return !seenPairs.has(ck + '|' + rk);
+    });
     
     console.log('[getDailyDrop] All sources: fresh=%d, modified=%d, backfill=%d, total=%d, eligible=%d', 
       freshJobs?.length || 0, modifiedJobs?.length || 0, backfillJobs?.length || 0, allJobs.length, eligibleJobs.length);
@@ -915,23 +917,11 @@ Deno.serve(async (req) => {
     // Assemble final slots — merged results from both sources
     let slots = allLiveSlots.slice(0, dailyLimit).map(enrichWithAlumni);
 
-    // FALLBACK-HEAVY: if live results are sparse OR if we're getting repeats, use more fallback
-    const FALLBACK_HEAVY_MODE = needsMoreFromFallback || allLiveSlots.length < dailyLimit;
-    
-    // FORCE VARIETY: If > 50% of slots are from fallback already, go 100% fallback for this drop
-    const liveCount = slots.filter(s => s.isLiveResult).length;
-    const fallbackRatio = (slots.length - liveCount) / slots.length;
-    const FORCE_FULL_FALLBACK = fallbackRatio > 0.5 && slots.length >= 5;
-    
-    if (FALLBACK_HEAVY_MODE) {
-      console.log('[getDailyDrop] FALLBACK-HEAVY MODE: Filling %d slots from %d live results', dailyLimit - slots.length, allLiveSlots.length);
-    }
-    if (FORCE_FULL_FALLBACK) {
-      console.log('[getDailyDrop] FORCE FULL FALLBACK: %d%% fallback ratio detected, using curated pool for variety', (fallbackRatio * 100).toFixed(0));
-    }
-    
-    // Ensure at least 10 slots — pad from fallback if needed
-    if (slots.length < Math.min(dailyLimit, 10) || FORCE_FULL_FALLBACK) {
+    // LIVE-FIRST POLICY: live jobs are the norm. Curated filler is a LAST RESORT,
+    // used ONLY when every live source returned nothing — and even then capped at 5
+    // cards. A shorter feed of real postings beats a padded feed of generic cards.
+    if (slots.length === 0) {
+      console.log('[getDailyDrop] ZERO live jobs from all sources — using curated last-resort pool (max 5)');
       // MASSIVELY expanded fallback pool with 150+ companies across industries
       const internFallbackSlots = [
         { company: 'Deloitte', role: 'Summer Scholar Intern', jobDescription: 'Consulting and advisory internship program across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
@@ -1104,9 +1094,8 @@ Deno.serve(async (req) => {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
       
-      // FALLBACK-HEAVY MODE: prioritize filling from fallback pool when live results are sparse
-      // FORCE FULL FALLBACK: when live results are repetitive, use 100% curated pool
-      const targetSlots = FORCE_FULL_FALLBACK ? dailyLimit : (FALLBACK_HEAVY_MODE ? dailyLimit : Math.min(dailyLimit, slots.length + Math.ceil((dailyLimit - slots.length) * 0.5)));
+      // Last resort only: cap at 5 curated cards regardless of tier
+      const targetSlots = Math.min(dailyLimit, 5);
       
       // Filter out companies already in slots or in 14-day cooldown
       const existingCompanyKeys = new Set(slots.map(s => s.company.toLowerCase().replace(/[^a-z0-9]/g, '')));
