@@ -405,6 +405,9 @@ button {
 /* Disable iOS rubber-banding on body */
 html, body {
   overscroll-behavior-y: none;
+  /* Prevent scroll anchoring from pinning the page while async feeds load —
+     this caused the "can't scroll back up" bug on the dashboard */
+  overflow-anchor: none;
 }
 
 /* Prevent accidental text selection on nav bars */

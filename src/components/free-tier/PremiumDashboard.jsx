@@ -514,8 +514,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
               flexShrink: 0,
               position: 'sticky',
               top: 24,
-              maxHeight: 'calc(100vh - 48px)',
-              overflowY: 'auto',
             }} className="desktop-only">
               <PremiumResumeCard user={user} />
               {sidebarUnlocked && (
