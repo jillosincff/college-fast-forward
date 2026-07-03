@@ -9,6 +9,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
   const [roles, setRoles] = useState(effectiveGoals?.target_roles || []);
   const [industries, setIndustries] = useState(effectiveGoals?.target_industries || []);
   const [companySize, setCompanySize] = useState(effectiveGoals?.company_size_preference || 'all');
+  const [seeking, setSeeking] = useState(effectiveGoals?.seeking || 'both');
   const [location, setLocation] = useState(user?.location || '');
   const [roleInput, setRoleInput] = useState('');
   const [industryInput, setIndustryInput] = useState('');
@@ -61,6 +62,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           target_roles: finalRoles,
           target_industries: finalIndustries,
           company_size_preference: companySize,
+          seeking,
           location_preference: location.trim() || undefined,
           saved_at: new Date().toISOString()
         }
@@ -120,6 +122,27 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           ) : null}
 
           {error && <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', padding: '10px 12px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>{error}</div>}
+
+          {/* Seeking: internship vs full-time — controls which job types appear in the feed */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A', display: 'block', marginBottom: 8 }}>I'M LOOKING FOR</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              {[
+                { key: 'internship', emoji: '🎓', label: 'Internships' },
+                { key: 'fulltime', emoji: '💼', label: 'Full-time' },
+                { key: 'both', emoji: '🎯', label: 'Both' },
+              ].map(opt => (
+                <button
+                  key={opt.key}
+                  onClick={() => setSeeking(opt.key)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '10px 6px', borderRadius: 10, border: `1.5px solid ${seeking === opt.key ? '#6d28d9' : '#E0E0E0'}`, background: seeking === opt.key ? '#F5F3FF' : '#fff', cursor: 'pointer', minHeight: 'auto' }}
+                >
+                  <span style={{ fontSize: 16 }}>{opt.emoji}</span>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: seeking === opt.key ? 700 : 500, color: seeking === opt.key ? '#6d28d9' : '#1A1A1A' }}>{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Target Roles */}
           <div style={{ marginBottom: 20 }}>

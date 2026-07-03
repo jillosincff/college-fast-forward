@@ -4,6 +4,7 @@ import { navigate, useParams } from '@/components/utils/navigation';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileFooter from '@/components/profile/ProfileFooter';
 import ProfileCard from '@/components/profile/ProfileCard';
+import CareerGoalsSnapshot from '@/components/profile/CareerGoalsSnapshot';
 import { base44 } from '@/api/base44Client';
 
 function readOnboardingData() {
@@ -161,6 +162,7 @@ export default function Profile() {
           onboardingData={onboardingData}
           isMyProfile={isMyProfile}
         />
+        {isMyProfile && <CareerGoalsSnapshot user={profileUser} />}
       </main>
 
       <ProfileFooter />
