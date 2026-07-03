@@ -855,10 +855,57 @@ Deno.serve(async (req) => {
     console.log('[getDailyDrop] All sources: fresh=%d, modified=%d, backfill=%d, total=%d, eligible=%d', 
       freshJobs?.length || 0, modifiedJobs?.length || 0, backfillJobs?.length || 0, allJobs.length, eligibleJobs.length);
     
-    // PRESERVE quality order: the OpenWeb Ninja fetcher already sorts direct-employer
-    // listings to the top, so we keep that order rather than re-shuffling — this is
-    // what guarantees the first jobs a free-tier student sees are the highest-signal.
-    const orderedEligible = eligibleJobs;
+    // ── FIT SCORING: rank every eligible job against the student's actual goals ──
+    // A student who sees 12 irrelevant jobs never comes back. Every job gets a
+    // relevance score; jobs with ZERO connection to their target role are cut,
+    // and the rest are ranked best-fit-first.
+    const STOPWORDS = new Set(['and', 'or', 'of', 'the', 'a', 'an', 'in', 'for', 'to', 'entry', 'level']);
+    const roleWords = [...new Set(
+      (targetRole + ' ' + targetIndustries.join(' '))
+        .toLowerCase().split(/[^a-z0-9]+/)
+        .filter(w => w.length >= 3 && !STOPWORDS.has(w))
+    )];
+    const locCity = (location || '').toLowerCase().split(',')[0].trim();
+    const nowMs = Date.now();
+
+    const scoreJob = (j) => {
+      const title = (j.job_title || '').toLowerCase();
+      const desc = (j.hiring_description || j.description || '').toLowerCase();
+      let score = 0;
+      let roleHits = 0;
+      for (const w of roleWords) {
+        if (title.includes(w)) { score += 30; roleHits++; }
+        else if (desc.includes(w)) { score += 8; roleHits++; }
+      }
+      // Location fit: their city or remote
+      const jl = (j.location || '').toLowerCase();
+      if (locCity && (jl.includes(locCity) || jl.includes('remote') || title.includes('remote'))) score += 15;
+      // Recency: fresher postings rank higher
+      if (j.posted_date) {
+        const ageDays = (nowMs - new Date(j.posted_date).getTime()) / 86400000;
+        if (ageDays >= 0 && ageDays <= 7) score += 15;
+        else if (ageDays <= 14) score += 8;
+      }
+      // Seeking intent: internship seekers want intern roles, and vice versa
+      const isInternTitle = /\bintern(ship)?\b/.test(title);
+      if (seeking === 'internship' && isInternTitle) score += 20;
+      if (seeking === 'fulltime' && isInternTitle) score -= 20;
+      if (j.salary_range) score += 3;
+      return { score, roleHits };
+    };
+
+    const scored = eligibleJobs.map(j => ({ job: j, ...scoreJob(j) }));
+    // QUALITY BAR: cut jobs with no connection to the student's target role at all —
+    // unless that leaves fewer than 5, in which case top up with the best of the rest.
+    let relevant = scored.filter(s => roleWords.length === 0 || s.roleHits > 0);
+    if (relevant.length < 5) {
+      const rest = scored.filter(s => !relevant.includes(s)).sort((a, b) => b.score - a.score);
+      relevant = relevant.concat(rest.slice(0, 5 - relevant.length));
+    }
+    relevant.sort((a, b) => b.score - a.score);
+    console.log('[getDailyDrop] Fit scoring: %d eligible → %d passed relevance bar (roleWords: %s)',
+      eligibleJobs.length, relevant.length, roleWords.join(','));
+    const orderedEligible = relevant.map(s => s.job);
     
     for (const job of orderedEligible) {
       const companyKey = job.name.toLowerCase().replace(/[^a-z0-9]/g, '');
