@@ -68,7 +68,9 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
     const params = new URLSearchParams({
       company: companyName,
       role: jobTitle,
-      jd: lead.jobDescription || lead.description || '',
+      // Only pass a real job description — lead.description/hiring_description is
+      // a company-level blurb that would contaminate the tailoring prompt.
+      jd: lead.jobDescription || lead.job_description || '',
       job_url: lead.job_url || lead.jobSource || lead.url || '',
       location: lead.location || '',
       from: 'apply_modal',

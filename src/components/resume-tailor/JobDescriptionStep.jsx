@@ -123,7 +123,7 @@ export default function JobDescriptionStep({ companyName, jobTitle, jobDescripti
         disabled={!canTailor}
         style={{
           width: '100%', padding: '14px 0', borderRadius: 100, border: 'none',
-          background: canTailor ? orange : 'rgba(0,0,0,0.06)',
+          background: canTailor ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : 'rgba(0,0,0,0.06)',
           color: canTailor ? '#fff' : 'rgba(0,0,0,0.3)',
           fontFamily: dmSans, fontSize: 15, fontWeight: 500,
           cursor: canTailor ? 'pointer' : 'not-allowed', minHeight: 48,

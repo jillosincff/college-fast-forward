@@ -24,7 +24,10 @@ export default function ApplyTailorStep({
   onCancel,
 }) {
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
+    // Own fixed scroll container — guarantees scrolling on iPad regardless of
+    // any body-level scroll state left behind by the apply overlay.
+    <div style={{ position: 'fixed', inset: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch', background: '#fff', zIndex: 40 }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px 120px' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');`}</style>
 
       <button
@@ -91,6 +94,7 @@ export default function ApplyTailorStep({
         onJobDescriptionChange={onJobDescriptionChange}
         onTailor={onTailor}
       />
+    </div>
     </div>
   );
 }
