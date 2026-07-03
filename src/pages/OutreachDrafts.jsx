@@ -109,6 +109,18 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         // Trigger auto-generation
         setTimeout(async () => {
           try {
+            // First, try to find their direct email (Hunter.io / RocketReach)
+            try {
+              const domain = decodeURIComponent(company).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9.]/g, '') + '.com';
+              const emailRes = await base44.functions.invoke('findContactEmail', {
+                contactName: formData.recipientName,
+                companyDomain: domain,
+              });
+              if (emailRes?.data?.email) {
+                formData.recipientEmail = emailRes.data.email;
+                setForm(prev => ({ ...prev, recipientEmail: emailRes.data.email }));
+              }
+            } catch {}
             const isLinkedInRoute = !formData.recipientEmail;
             const res = await base44.functions.invoke('generateOutreachMessage', {
               context: 'alumni_search',
@@ -883,6 +895,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           generating={generating}
           onBack={() => setPhase('new')}
           onGenerate={handleGenerate}
+          onEmailFound={(email) => setForm(p => ({ ...p, recipientEmail: email }))}
         />
       );
     }
@@ -1085,7 +1098,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
                 border: '1px solid #86EFAC',
                 fontFamily: "'DM Sans', sans-serif",
               }}>
-                📧 Email verified
+                📧 {form.recipientEmail}
               </span>
             ) : (
               <span style={{
@@ -1219,6 +1232,30 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             {copyToast === 'compose' ? 'Copied ✓ — Saved!' : 'Copy & Mark Sent →'}
           </button>
         </div>
+
+        {/* Explicit "how to send" step so students always know what to do next */}
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888',
+          margin: '14px 0 0', textAlign: 'center', lineHeight: 1.6,
+        }}>
+          {form.recipientEmail
+            ? <>Copy your message, then email it to <strong>{form.recipientEmail}</strong> — or use the button below.</>
+            : <>No email found for them — copy your message, open their LinkedIn, and paste it into a connection request or InMail.</>}
+        </p>
+
+        {form.recipientEmail && (
+          <a
+            href={`mailto:${form.recipientEmail}?subject=${encodeURIComponent(draftSubject)}&body=${encodeURIComponent(draftBody)}`}
+            style={{
+              display: 'block', textAlign: 'center',
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 12, color: '#166534',
+              marginTop: 10, textDecoration: 'none', fontWeight: 600,
+            }}
+          >
+            ✉️ Open Email to {form.recipientName?.split(' ')[0] || 'them'} →
+          </a>
+        )}
 
         {form.recipientLinkedinUrl && (
           <a

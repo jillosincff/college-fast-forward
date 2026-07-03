@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
-export default function AutomatedAlumniActionPanel({ lead, user, onGenerate, onBack, generating }) {
+export default function AutomatedAlumniActionPanel({ lead, user, onGenerate, onBack, generating, onEmailFound }) {
   const [emailEnriching, setEmailEnriching] = useState(false);
   const [enrichedEmail, setEnrichedEmail] = useState(lead?.recipientEmail || '');
   const [emailConfidence, setEmailConfidence] = useState(null);
@@ -22,15 +22,16 @@ export default function AutomatedAlumniActionPanel({ lead, user, onGenerate, onB
         const lastName = (lead.recipientName || '').split(' ').pop().toLowerCase();
 
         const res = await base44.functions.invoke('findContactEmail', {
-          fullName: lead.recipientName,
-          domain: domain,
-          firstName,
-          lastName,
+          contactName: lead.recipientName,
+          companyDomain: domain,
         });
 
         if (res?.data?.email) {
           setEnrichedEmail(res.data.email);
-          setEmailConfidence(res.data.confidence || 'high');
+          setEmailConfidence(res.data.score ? `${res.data.score}%` : 'high');
+          // Feed the found email back into the outreach flow so the draft
+          // switches from LinkedIn-mode to direct-email mode
+          onEmailFound?.(res.data.email);
         }
       } catch (err) {
         console.log('Email enrichment skipped:', err.message);
