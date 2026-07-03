@@ -50,10 +50,11 @@ export default function FirstApplicationPackageCard({ user }) {
   };
 
   const openPackage = () => {
+    const role = job.job_title.replace(/\s+job at\s+.*$/i, '').trim() || job.job_title;
     try {
       sessionStorage.setItem('cff_apply_tailor_ctx', JSON.stringify({
         company: job.name,
-        role: job.job_title,
+        role,
         jd: job.hiring_description || '',
         jobUrl: job.job_url || '',
         location: job.location || '',
@@ -61,7 +62,7 @@ export default function FirstApplicationPackageCard({ user }) {
     } catch {}
     const params = new URLSearchParams({
       company: job.name,
-      role: job.job_title,
+      role,
       jd: job.hiring_description || '',
       job_url: job.job_url || '',
       location: job.location || '',
@@ -85,6 +86,8 @@ export default function FirstApplicationPackageCard({ user }) {
   if (!job) return null;
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
+  // Some aggregators append "Job at Company in City" to titles — strip it for display
+  const cleanTitle = job.job_title.replace(/\s+job at\s+.*$/i, '').trim() || job.job_title;
 
   return (
     <div style={{
@@ -105,7 +108,7 @@ export default function FirstApplicationPackageCard({ user }) {
         {firstName}, while you were signing up, CLIFF built this for you:
       </p>
       <p style={{ fontFamily: dm, fontSize: 14, color: '#374151', margin: '0 0 14px' }}>
-        <strong>{job.job_title}</strong> at <strong>{job.name}</strong>
+        <strong>{cleanTitle}</strong> at <strong>{job.name}</strong>
         {job.location ? <span style={{ color: '#6b7280' }}> · {job.location}</span> : null}
       </p>
 
