@@ -713,14 +713,6 @@ Deno.serve(async (req) => {
       return seenCompanies.has(companyKey);
     };
 
-    // Clear any stale drops for today (force refresh / duplicates) so the cache stays clean
-    try {
-      const staleToday = await base44.entities.UserDailyDrop.filter({ user_id: user.id, drop_date: dropDate });
-      for (const d of staleToday || []) await base44.entities.UserDailyDrop.delete(d.id);
-    } catch (e) {
-      console.warn('[getDailyDrop] Could not clear stale drops:', e.message);
-    }
-
     const goals = user.career_goals || {};
     const targetIndustries = (goals.target_industries || goals.industries || []).filter(Boolean).map(i => i.toLowerCase());
     const targetRole = (Array.isArray(goals.target_roles) ? goals.target_roles[0] : goals.target_roles) || goals.role || '';
@@ -753,24 +745,29 @@ Deno.serve(async (req) => {
     let backfillJobs = [];
     
     if (!TEST_FALLBACK_ONLY) {
-      // PRIMARY: OpenWeb Ninja (Real-Time Jobs) — live, dynamic entry-level roles.
+      // SPEED: run OpenWeb Ninja (primary) and BuiltIn (backup) IN PARALLEL with
+      // tighter timeouts. The old serial flow waited up to 25s on the primary and
+      // THEN up to 14s on the backup — worst case ~39s. Now worst case is ~12s.
+      const withTimeout = (p, ms, label) => Promise.race([
+        p.catch((e) => { console.error(`[getDailyDrop] ${label} failed:`, e.message); return []; }),
+        new Promise((resolve) => setTimeout(() => {
+          console.error(`[getDailyDrop] ${label} TIMEOUT after ${ms}ms`);
+          resolve([]);
+        }, ms)),
+      ]);
+
       if (!openWebNinjaApiKey) {
         console.warn('[getDailyDrop] No OpenWeb Ninja API key — falling back to curated pool');
-      } else {
-        try {
-          console.log('[getDailyDrop] Fetching LIVE jobs from OpenWeb Ninja...');
-          freshJobs = await Promise.race([
-            fetchOpenWebNinjaJobs({ role, location, seeking, apiKey: openWebNinjaApiKey, maxResults: dailyLimit * 4 }),
-            new Promise((resolve) => setTimeout(() => {
-              console.error('[getDailyDrop] OpenWeb Ninja TIMEOUT after 25s');
-              resolve([]);
-            }, 25000)),
-          ]);
-          console.log('[getDailyDrop] OpenWeb Ninja result: %d companies', freshJobs?.length || 0);
-        } catch (e) {
-          console.error('[getDailyDrop] OpenWeb Ninja fetch failed:', e.message);
-        }
       }
+      console.log('[getDailyDrop] Fetching LIVE jobs (OpenWeb Ninja + BuiltIn in parallel)...');
+      const [ownJobs, builtInJobs] = await Promise.all([
+        openWebNinjaApiKey
+          ? withTimeout(fetchOpenWebNinjaJobs({ role, location, seeking, apiKey: openWebNinjaApiKey, maxResults: dailyLimit * 4 }), 12000, 'OpenWeb Ninja')
+          : Promise.resolve([]),
+        withTimeout(fetchBuiltInJobs({ role, location, seeking, maxResults: dailyLimit }), 10000, 'BuiltIn'),
+      ]);
+      freshJobs = ownJobs || [];
+      console.log('[getDailyDrop] OpenWeb Ninja result: %d companies, BuiltIn: %d', freshJobs.length, builtInJobs?.length || 0);
 
       // BACKUP LIVE SOURCE #1: reuse the student's cached live-jobs pool from the
       // Target Matches feed (getLiveJobMatchesFn) — real verified postings that
@@ -796,24 +793,11 @@ Deno.serve(async (req) => {
         freshJobs = freshJobs.concat(poolJobs);
       }
 
-      // FINAL LIVE BACKUP: if both paid providers are still throttled/sparse,
-      // scrape BuiltIn (no API key, no quota) so students get REAL startup/tech
-      // jobs instead of dropping to the curated filler pool.
-      if (freshJobs.length < dailyLimit) {
-        try {
-          console.log('[getDailyDrop] Still sparse (%d) — trying BuiltIn scrape...', freshJobs.length);
-          const builtInJobs = await Promise.race([
-            fetchBuiltInJobs({ role, location, seeking, maxResults: dailyLimit }),
-            new Promise((resolve) => setTimeout(() => {
-              console.error('[getDailyDrop] BuiltIn TIMEOUT after 14s');
-              resolve([]);
-            }, 14000)),
-          ]);
-          console.log('[getDailyDrop] BuiltIn backup returned %d jobs', builtInJobs?.length || 0);
-          freshJobs = freshJobs.concat(builtInJobs || []);
-        } catch (e) {
-          console.error('[getDailyDrop] BuiltIn backup failed:', e.message);
-        }
+      // FINAL LIVE BACKUP: BuiltIn results were already fetched in parallel above —
+      // append them only when the feed is still sparse (zero extra wait).
+      if (freshJobs.length < dailyLimit && builtInJobs?.length) {
+        console.log('[getDailyDrop] Still sparse (%d) — appending %d BuiltIn jobs', freshJobs.length, builtInJobs.length);
+        freshJobs = freshJobs.concat(builtInJobs);
       }
 
       // DEPRECATED: legacy Fantastic Jobs fetches (fresh/modified/backfill).
