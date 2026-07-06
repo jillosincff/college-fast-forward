@@ -776,7 +776,11 @@ Deno.serve(async (req) => {
       // Target Matches feed (getLiveJobMatchesFn) — real verified postings that
       // were already fetched and cached in the last 24h. Zero API cost, instant.
       if (freshJobs.length < dailyLimit && Array.isArray(user.job_leads_cache) && user.job_leads_cache.length > 0) {
+        // FRESHNESS GUARD: never serve pool jobs older than 30 days (undated allowed —
+        // the pool itself is refreshed every 24h so undated entries are recent fetches).
+        const thirtyDaysAgoMs = Date.now() - 30 * 86400000;
         const poolJobs = user.job_leads_cache
+          .filter(c => !c.posted_date || new Date(c.posted_date).getTime() >= thirtyDaysAgoMs)
           .map(c => ({
             name: c.name,
             job_title: c.job_title,
