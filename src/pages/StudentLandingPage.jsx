@@ -11,6 +11,7 @@ import LiveJobsSection from '@/components/landing/LiveJobsSection';
 import WarmApplyHeroDemo from '@/components/landing/WarmApplyHeroDemo';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
 import MatchTeaser from '@/components/landing/MatchTeaser';
+import JourneySection from '@/components/landing/JourneySection';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -524,6 +525,9 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
         </div></Reveal>
       </div>
+
+      {/* ── JOURNEY: FROM DOOM-SCROLLING TO DONE-FOR-YOU ── */}
+      <JourneySection />
 
       {/* ── APP SHOWCASE ── */}
       <AppShowcase />
