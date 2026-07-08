@@ -300,9 +300,6 @@ export default function StudentLandingPage({ onParentClick }) {
           /* Full-width primary CTAs for easier thumb reach on phones */
           .hero-cta-btn { width: 100% !important; align-self: stretch !important; }
         }
-        /* Hide the page scrollbar so it doesn't appear as a UI artifact over the gradient sections */
-        html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none !important; }
-        html, body { scrollbar-width: none !important; -ms-overflow-style: none !important; }
       `}</style>
 
       {/* ── NAV ── */}
