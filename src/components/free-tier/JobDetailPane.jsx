@@ -3,6 +3,7 @@ import { getStandoutInsight } from '@/functions/getStandoutInsight';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
 import InAppApplyModal from './InAppApplyModal';
+import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -147,9 +148,9 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
           }}>{companyName.charAt(0).toUpperCase() + companyName.slice(1).toLowerCase()}</p>
         </div>
 
-        {/* Single Primary CTA */}
+        {/* Primary CTA: CLIFF's one-workflow preparation */}
         <button
-          onClick={handleApply}
+          onClick={() => openCliffWorkspace({ company: companyName, role: jobTitle, jobDescription: jobDesc, jobUrl, location, salary, alumniCount: lead.alumniCount || 0 })}
           style={{
             fontFamily: dm,
             fontSize: 14,
@@ -166,6 +167,24 @@ export default function JobDetailPane({ lead, user, onAddToPipeline, onColdInroa
           }}
           onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
           onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          ✨ Let CLIFF Handle This
+        </button>
+        <button
+          onClick={handleApply}
+          style={{
+            fontFamily: dm,
+            fontSize: 12,
+            fontWeight: 800,
+            color: '#6d28d9',
+            background: '#fff',
+            border: '2px solid #ddd6fe',
+            borderRadius: 12,
+            padding: '10px 24px',
+            cursor: 'pointer',
+            width: '100%',
+            marginTop: 8,
+          }}
         >
           📋 Apply & Track via CLIFF
         </button>

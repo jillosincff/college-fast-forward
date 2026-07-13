@@ -17,7 +17,6 @@ import PipelineImpactBar from '@/components/free-tier/PipelineImpactBar';
 import ApplicationPipeline from '@/components/free-tier/ApplicationPipeline';
 import PendingTailoringWidget from '@/components/free-tier/PendingTailoringWidget';
 import ToolsTab from '@/components/free-tier/ToolsTab';
-import TodaysActionsCard from '@/components/free-tier/TodaysActionsCard';
 import DashboardBottomNav from '@/components/free-tier/DashboardBottomNav';
 import CliffChatWidget from '@/components/free-tier/CliffChatWidget';
 import AtsMatcher from '@/components/free-tier/AtsMatcher';
@@ -27,9 +26,9 @@ import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
-import FollowUpNudgeCard from '@/components/free-tier/FollowUpNudgeCard';
 import WarmApplyBar from '@/components/free-tier/WarmApplyBar';
-import DashboardWelcomeHeader from '@/components/free-tier/DashboardWelcomeHeader';
+import GoalHeader from '@/components/free-tier/GoalHeader';
+import CliffRecommendedActions from '@/components/free-tier/CliffRecommendedActions';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -329,15 +328,12 @@ export default function FreeTierDashboard() {
         {/* Referral prompt at peak moments (reply received / interview landed) */}
         {!focusMode && <PeakMomentSharePrompt user={user} />}
 
-        {/* Personalized pain-point welcome header (hidden when the expired-trial header shows,
-            and during first-session focus — the upgrade pitch lands after the first win) */}
+        {/* Goal-oriented header: greeting + employment goal + Edit Goal */}
         {!isTrialExpired && !focusMode && (
-          <DashboardWelcomeHeader
-            badge={painConfig.badge}
-            title={formattedTitle}
-            subtitle={painConfig.subtitle}
-            ctaLabel={painConfig.cta}
-            onCta={() => triggerUpgrade(painConfig.feature)}
+          <GoalHeader
+            user={user}
+            firstName={firstName}
+            onEditGoal={() => setShowGoalsModal(true)}
           />
         )}
 
@@ -355,9 +351,8 @@ export default function FreeTierDashboard() {
               <WarmApplyBar user={user} />
             </div>
 
-            {/* Today: daily actions first, then any stalled-outreach nudge */}
-            <TodaysActionsCard user={user} />
-            <FollowUpNudgeCard user={user} />
+            {/* CLIFF's prioritized actions + outcome-framed discoveries */}
+            <CliffRecommendedActions user={user} />
           </>
         )}
 
