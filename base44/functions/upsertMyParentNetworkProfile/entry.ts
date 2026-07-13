@@ -38,6 +38,10 @@ Deno.serve(async (req) => {
       school_code: schoolCode,
       persona,
       is_active: user.visible_in_directory !== false,
+      // Connection settings: my_school_only (default) | any_school (explicit opt-in) | unavailable
+      help_scope: ['my_school_only', 'any_school', 'unavailable'].includes(user.help_scope)
+        ? user.help_scope
+        : 'my_school_only',
     };
 
     // Find this member's existing profile within their school ecosystem.

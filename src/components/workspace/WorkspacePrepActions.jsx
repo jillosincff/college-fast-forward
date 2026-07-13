@@ -35,7 +35,6 @@ export default function WorkspacePrepActions({ job, user }) {
 
   const actions = [
     { icon: '📄', title: 'Prepare my application', desc: 'CLIFF tailors your resume for this exact role and walks you through applying.', cta: 'Start', go: () => setShowApplyFlow(true), primary: true },
-    { icon: '🎓', title: 'Find warm connections', desc: `CLIFF scans alumni and parents at ${company} and drafts your outreach message.`, cta: 'Find & draft', go: () => { window.location.hash = `#/OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`; } },
     { icon: '🎤', title: 'Practice the interview', desc: 'Run a mock interview tuned to this kind of role before you talk to anyone.', cta: 'Practice', go: () => { window.location.hash = '#/MockInterview'; } },
     { icon: '📌', title: tracked ? 'Tracking this application' : 'Track this application', desc: tracked ? 'CLIFF is watching this one — follow-up reminders included.' : 'Add it to your pipeline so CLIFF reminds you when to follow up.', cta: tracked ? 'Tracked ✓' : tracking ? 'Adding…' : 'Track', go: trackApplication, done: tracked },
   ];

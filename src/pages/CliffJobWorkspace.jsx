@@ -4,6 +4,8 @@ import { analyzeJobFit } from '@/functions/analyzeJobFit';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import JobFitCard from '@/components/workspace/JobFitCard';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
+import WorkspaceConnectionsCard from '@/components/workspace/WorkspaceConnectionsCard';
+import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import decodeEntities from '@/utils/decodeEntities';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -83,6 +85,10 @@ export default function CliffJobWorkspace() {
         </div>
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
+
+        {user && <WorkspaceConnectionsCard job={job} user={user} />}
+
+        <CompanyPrepCard job={job} />
 
         {user && <WorkspacePrepActions job={job} user={user} />}
       </div>

@@ -43,6 +43,16 @@
       "type": "boolean",
       "default": true,
       "description": "Whether this parent is actively opted in to help students"
+    },
+    "help_scope": {
+      "type": "string",
+      "enum": [
+        "my_school_only",
+        "any_school",
+        "unavailable"
+      ],
+      "default": "my_school_only",
+      "description": "Who this member is willing to help: only students from their own school (default), students from any CFF school (explicit opt-in), or not currently available to help."
     }
   },
   "required": [

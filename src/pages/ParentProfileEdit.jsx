@@ -36,6 +36,12 @@ const INTRO_OPTIONS = [
   { value: 'not_now', label: 'Not right now' },
 ];
 
+const HELP_SCOPE_OPTIONS = [
+  { value: 'my_school_only', label: 'My school only' },
+  { value: 'any_school', label: 'Any CFF school' },
+  { value: 'unavailable', label: 'Not currently available' },
+];
+
 export default function ParentProfileEdit() {
   const { user, refreshUser, isLoadingAuth } = useAuth();
 
@@ -45,6 +51,7 @@ export default function ParentProfileEdit() {
     careerBackground: '',
     industry: '',
     introWillingness: 'yes',
+    helpScope: 'my_school_only',
     directoryVisible: true,
     linkedinUrl: '',
   });
@@ -87,6 +94,7 @@ export default function ParentProfileEdit() {
         careerBackground: user.career_background || '',
         industry: user.industry || '',
         introWillingness: user.intro_willingness || 'yes',
+        helpScope: user.help_scope || 'my_school_only',
         directoryVisible: user.visible_in_directory !== false,
         linkedinUrl: user.linkedin_url || '',
       });
@@ -104,6 +112,7 @@ export default function ParentProfileEdit() {
         career_background: form.careerBackground.trim(),
         industry: form.industry,
         intro_willingness: form.introWillingness,
+        help_scope: form.helpScope,
         visible_in_directory: form.directoryVisible,
         ...(form.linkedinUrl.trim() ? { linkedin_url: form.linkedinUrl.trim() } : {}),
       });
@@ -220,6 +229,41 @@ export default function ParentProfileEdit() {
                 );
               })}
             </div>
+          </div>
+
+          {/* Help Scope — which students can CLIFF surface this member to */}
+          <div>
+            <FieldLabel>Which students can I help?</FieldLabel>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+              {HELP_SCOPE_OPTIONS.map(opt => {
+                const selected = form.helpScope === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => updateForm(f => ({ ...f, helpScope: opt.value }))}
+                    style={{
+                      flex: 1, minWidth: 110, padding: '10px 12px', borderRadius: 100,
+                      fontFamily: SF, fontSize: 13, fontWeight: 600,
+                      cursor: 'pointer', transition: 'all 0.2s',
+                      minHeight: 'auto', whiteSpace: 'nowrap', textAlign: 'center',
+                      background: selected ? GRAD_INDIGO : 'transparent',
+                      color: selected ? '#fff' : INDIGO,
+                      border: `1.5px solid ${selected ? 'transparent' : INDIGO_BORDER}`,
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, marginTop: 8, lineHeight: 1.5 }}>
+              {form.helpScope === 'any_school'
+                ? 'Students from any CFF school may see you as a possible connection.'
+                : form.helpScope === 'unavailable'
+                  ? "You won't be suggested to any students for now."
+                  : 'Only students from your school can see you as a possible connection.'}
+            </p>
           </div>
 
           {/* LinkedIn URL + Photo Import */}
