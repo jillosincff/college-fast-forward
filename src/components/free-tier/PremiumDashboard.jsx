@@ -22,7 +22,9 @@ import PeakMomentSharePrompt from './PeakMomentSharePrompt';
 import FollowUpNudgeCard from './FollowUpNudgeCard';
 import WarmApplyBar from './WarmApplyBar';
 import CliffRecommendedActions from './CliffRecommendedActions';
-import { Wrench, LogOut, Rocket, FileText, Users, MessageCircle, GraduationCap, Building2 } from 'lucide-react';
+import ProgressSinceLastVisit from './ProgressSinceLastVisit';
+import JobWorkspaceCard from './JobWorkspaceCard';
+import { Wrench, LogOut, Rocket, FileText, Users, MessageCircle, GraduationCap, Building2, CalendarCheck, Clock } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -210,12 +212,26 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const [pipelineCount, setPipelineCount] = useState(null);
   const navRef = useRef(null);
 
-  // Count of tracked applications for the header stat
+  // Outcome stats for the hero: applications ready, jobs to apply to, interviews, follow-ups
+  const [outcome, setOutcome] = useState(null);
   useEffect(() => {
     if (!user?.email) return;
-    base44.entities.NetworkingPipeline.filter({ user_email: user.email })
-      .then(rows => setPipelineCount(rows?.length ?? 0))
-      .catch(() => setPipelineCount(0));
+    const today = new Date().toISOString().slice(0, 10);
+    Promise.all([
+      base44.entities.NetworkingPipeline.filter({ user_email: user.email }).catch(() => []),
+      base44.entities.TailoredResume.filter({ user_email: user.email }, '-created_date', 50).catch(() => []),
+      base44.entities.UserDailyDrop.filter({ user_email: user.email, drop_date: today }).catch(() => []),
+    ]).then(([rows, resumes, drops]) => {
+      setPipelineCount(rows?.length ?? 0);
+      const daysSince = r => (Date.now() - new Date(r.status_date || r.created_date).getTime()) / 86400000;
+      const drop = (drops || [])[0];
+      setOutcome({
+        appsReady: (resumes || []).filter(r => r.status === 'completed' && !r.downloaded_at).length,
+        jobsToApply: drop ? (drop.slots || []).filter(s => !(drop.actioned_keys || []).includes(s.key)).length : 0,
+        interviews: (rows || []).filter(r => r.status === 'interview').length,
+        followUps: (rows || []).filter(r => ['reached_out', 'messaged'].includes(r.status) && daysSince(r) >= 5).length,
+      });
+    });
   }, [user?.email]);
 
   // Listen for goals modal open event from child components
@@ -284,11 +300,11 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const parentsCount = networkStats?.parents || 0;
   const companiesCount = networkStats?.companies || 0;
   const networkCount = alumniCount + parentsCount;
-  const hasResume = !!(user?.resume_filename || user?.resume_url);
   const stats = [
-    { icon: Rocket, label: 'In Your Pipeline', value: `${pipelineCount ?? 0}`, isLoading: pipelineCount === null },
-    { icon: FileText, label: 'Resume', value: hasResume ? 'On File' : 'Not Uploaded', warning: !hasResume },
-    { icon: Users, label: 'Active Connections · tap for details', value: `${networkCount}`, sublabel: `${alumniCount} Alumni • ${parentsCount} Parents`, onClick: () => setShowNetworkModal(true) },
+    { icon: FileText, label: 'Applications Ready', value: `${outcome?.appsReady ?? 0}`, isLoading: outcome === null },
+    { icon: Rocket, label: 'Jobs Worth Applying To', value: `${outcome?.jobsToApply ?? 0}`, isLoading: outcome === null },
+    { icon: CalendarCheck, label: 'Interviews Scheduled', value: `${outcome?.interviews ?? 0}`, isLoading: outcome === null },
+    { icon: Clock, label: 'Follow-Ups Due', value: `${outcome?.followUps ?? 0}`, isLoading: outcome === null },
   ];
 
   return (
@@ -433,13 +449,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           </div>
 
           <h1 style={{ fontFamily: dm, fontSize: isMobile ? 20 : 28, fontWeight: 800, color: '#fff', margin: '0 0 10px', lineHeight: isMobile ? 1.25 : 1.2, letterSpacing: '-0.01em' }}>
-            Let's get locked in and get you hired, {firstName}
+            CLIFF made progress while you were away, {firstName}
           </h1>
-          <p style={{ fontFamily: dm, fontSize: isMobile ? 13 : 14, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: 680 }}>
-            Your career agent is live and working 24/7 — scouting roles that match your goals and mapping your{' '}
-            <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{shortName}</strong> alumni backdoor channels.{' '}
-            <strong style={{ color: '#c4b5fd' }}>Let's go get this offer.</strong>
-          </p>
+          <ProgressSinceLastVisit user={user} />
 
           {/* Stats row */}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -519,7 +531,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
               position: 'sticky',
               top: 24,
             }} className="desktop-only">
-              <PremiumResumeCard user={user} />
+              <JobWorkspaceCard user={user} />
               {sidebarUnlocked && (
                 <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
               )}

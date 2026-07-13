@@ -95,7 +95,7 @@ export default function CliffRecommendedActions({ user }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {actions.map((a, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f8f9fc', borderRadius: 10, padding: '10px 14px' }}>
-            <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#f5f3ff', color: '#7c3aed', fontFamily: dm, fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</span>
+            <span style={{ width: 22, height: 22, borderRadius: '50%', background: i < 3 ? 'transparent' : '#f5f3ff', color: '#7c3aed', fontFamily: dm, fontSize: i < 3 ? 16 : 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{['🥇', '🥈', '🥉'][i] || i + 1}</span>
             <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, flex: 1, lineHeight: 1.4 }}>{a.text}</p>
             <button
               onClick={a.go}
