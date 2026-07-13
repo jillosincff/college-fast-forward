@@ -1,0 +1,178 @@
+{
+  "name": "JobPursuit",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the student pursuing this job"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student \u2014 used for lookups and RLS"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Source job identifier from the feed, if any"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Job title / role"
+    },
+    "job_url": {
+      "type": "string",
+      "description": "Link to the original job posting"
+    },
+    "location": {
+      "type": "string",
+      "description": "Job location"
+    },
+    "fit_level": {
+      "type": "string",
+      "description": "CLIFF's qualitative fit label, e.g. Strong Match"
+    },
+    "fit_explanation": {
+      "type": "string",
+      "description": "Why CLIFF assessed this fit level"
+    },
+    "cliff_recommendation": {
+      "type": "string",
+      "description": "CLIFF's overall recommendation for this pursuit"
+    },
+    "resume_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "generating",
+        "ready_for_review",
+        "approved",
+        "complete"
+      ],
+      "default": "not_started",
+      "description": "Tailored resume material status"
+    },
+    "cover_letter_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "generating",
+        "ready_for_review",
+        "approved",
+        "complete"
+      ],
+      "default": "not_started",
+      "description": "Cover letter material status"
+    },
+    "company_research_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "generating",
+        "ready_for_review",
+        "approved",
+        "complete"
+      ],
+      "default": "not_started",
+      "description": "Company preparation status"
+    },
+    "connection_search_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "generating",
+        "ready_for_review",
+        "approved",
+        "complete"
+      ],
+      "default": "not_started",
+      "description": "Internal + external connection search status"
+    },
+    "outreach_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "drafted",
+        "sent",
+        "replied"
+      ],
+      "default": "not_started",
+      "description": "Warm outreach status for this job"
+    },
+    "application_status": {
+      "type": "string",
+      "enum": [
+        "recommended",
+        "preparing",
+        "ready_to_apply",
+        "applied",
+        "follow_up_due",
+        "interviewing",
+        "offer",
+        "rejected",
+        "withdrawn",
+        "archived"
+      ],
+      "default": "preparing",
+      "description": "Overall application status"
+    },
+    "interview_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "scheduled",
+        "completed"
+      ],
+      "default": "none",
+      "description": "Interview status"
+    },
+    "next_action": {
+      "type": "string",
+      "description": "CLIFF's recommended next step for the student"
+    },
+    "next_action_due_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the next action is due, if time-sensitive"
+    }
+  },
+  "required": [
+    "user_email",
+    "company_name",
+    "job_title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

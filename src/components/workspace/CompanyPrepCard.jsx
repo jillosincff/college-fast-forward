@@ -13,7 +13,7 @@ const Section = ({ title, children }) => (
 
 // CLIFF's company preparation brief: summary, values, JD language, strategy,
 // likely interview questions, and reliable recent news when available.
-export default function CompanyPrepCard({ job }) {
+export default function CompanyPrepCard({ job, onPrepared }) {
   const [prep, setPrep] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -26,8 +26,10 @@ export default function CompanyPrepCard({ job }) {
     try {
       const res = await getCompanyPrep({ company, role: job.role || job.job_title, jobDescription: job.jobDescription || '' });
       const data = res?.data || res;
-      if (data?.prep) setPrep(data.prep);
-      else setError(true);
+      if (data?.prep) {
+        setPrep(data.prep);
+        if (onPrepared) onPrepared();
+      } else setError(true);
     } catch { setError(true); }
     setLoading(false);
   };

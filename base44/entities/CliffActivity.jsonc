@@ -1,0 +1,125 @@
+{
+  "name": "CliffActivity",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the student this activity belongs to"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student \u2014 used for lookups and RLS"
+    },
+    "job_pursuit_id": {
+      "type": "string",
+      "description": "Linked JobPursuit record, if job-specific"
+    },
+    "activity_type": {
+      "type": "string",
+      "enum": [
+        "new_job_match",
+        "application_ready",
+        "resume_review_required",
+        "connection_found",
+        "outreach_ready",
+        "follow_up_due",
+        "interview_preparation",
+        "application_update"
+      ],
+      "description": "Type of CLIFF activity/recommendation"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short student-facing headline"
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-line context, e.g. 'Marketing Intern at Nike'"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why CLIFF is recommending this"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Display priority on the dashboard"
+    },
+    "action_label": {
+      "type": "string",
+      "description": "CTA button label"
+    },
+    "action_route": {
+      "type": "string",
+      "description": "Where the CTA leads: 'workspace' or a hash route like '#/ResumeTailoring'"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company for workspace routing"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Role for workspace routing"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "viewed",
+        "started",
+        "completed",
+        "dismissed",
+        "expired"
+      ],
+      "default": "new",
+      "description": "Current status of this activity"
+    },
+    "expires_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this activity should stop being shown"
+    }
+  },
+  "required": [
+    "user_email",
+    "activity_type",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

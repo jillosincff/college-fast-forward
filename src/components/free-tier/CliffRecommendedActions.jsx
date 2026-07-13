@@ -17,12 +17,34 @@ export default function CliffRecommendedActions({ user }) {
     Promise.all([
       base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 100).catch(() => []),
       base44.entities.TailoredResume.filter({ user_email: user.email }, '-created_date', 20).catch(() => []),
-    ]).then(([pipeline, resumes]) => {
+      base44.entities.CliffActivity.filter({ user_email: user.email }, '-created_date', 20).catch(() => []),
+    ]).then(([pipeline, resumes, activities]) => {
       if (cancelled) return;
       const now = Date.now();
       const daysSince = r => (now - new Date(r.status_date || r.created_date).getTime()) / 86400000;
       const list = [];
       const discoveries = [];
+
+      // 0. Active CLIFF activities — per-pursuit next actions (skip ones the
+      // resume-review item below already covers)
+      const readyResumeCompany = ((resumes || []).find(r => r.status === 'completed' && !r.downloaded_at)?.company_name || '').toLowerCase();
+      const activeActs = (activities || [])
+        .filter(a => ['new', 'viewed'].includes(a.status))
+        .filter(a => (a.company_name || '').toLowerCase() !== readyResumeCompany)
+        .slice(0, 2);
+      for (const a of activeActs) {
+        list.push({
+          text: a.summary ? `${a.title} — ${a.summary}` : a.title,
+          cta: 'Open',
+          go: () => {
+            if (a.action_route === 'workspace' && a.company_name) {
+              openCliffWorkspace({ company: a.company_name, role: a.job_title || '' });
+            } else if (a.action_route && a.action_route.startsWith('#/')) {
+              window.location.hash = a.action_route;
+            }
+          },
+        });
+      }
 
       // 1. Resume CLIFF already tailored, not yet downloaded → review it
       const readyResume = (resumes || []).find(r => r.status === 'completed' && !r.downloaded_at);

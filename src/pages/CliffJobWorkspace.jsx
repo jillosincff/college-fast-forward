@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { analyzeJobFit } from '@/functions/analyzeJobFit';
+import { syncJobPursuit } from '@/functions/syncJobPursuit';
+import PursuitStatusCard from '@/components/workspace/PursuitStatusCard';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import JobFitCard from '@/components/workspace/JobFitCard';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
@@ -17,6 +19,26 @@ export default function CliffJobWorkspace() {
   const [fit, setFit] = useState(null);
   const [fitLoading, setFitLoading] = useState(true);
   const [fitError, setFitError] = useState(false);
+  const [pursuit, setPursuit] = useState(null);
+
+  // Keep the unified JobPursuit record in sync with what CLIFF has prepared
+  const syncPursuit = (extra = {}) => {
+    if (!job) return;
+    syncJobPursuit({
+      company: job.company,
+      role: job.role || job.job_title,
+      jobId: job.id || '',
+      jobUrl: job.jobUrl || job.job_url || '',
+      location: job.location || '',
+      connectionsSearched: true,
+      ...extra,
+    })
+      .then(res => {
+        const data = res?.data || res;
+        if (data?.pursuit) setPursuit(data.pursuit);
+      })
+      .catch(() => {});
+  };
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => base44.auth.redirectToLogin('/#/CliffJobWorkspace'));
@@ -42,6 +64,15 @@ export default function CliffJobWorkspace() {
       .finally(() => { if (!cancelled) setFitLoading(false); });
     return () => { cancelled = true; };
   }, []);
+
+  // Sync the pursuit once the fit assessment settles (fit fields included when available)
+  useEffect(() => {
+    if (!job || fitLoading) return;
+    syncPursuit({
+      fitLevel: fit?.fit_label || fit?.label || '',
+      fitExplanation: fit?.recommendation || fit?.summary || '',
+    });
+  }, [fitLoading]);
 
   const goBack = () => { window.location.hash = '#/FreeTierDashboard'; };
 
@@ -86,9 +117,11 @@ export default function CliffJobWorkspace() {
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
 
+        {pursuit && <PursuitStatusCard pursuit={pursuit} />}
+
         {user && <WorkspaceConnectionsCard job={job} user={user} />}
 
-        <CompanyPrepCard job={job} />
+        <CompanyPrepCard job={job} onPrepared={() => syncPursuit({ companyResearched: true })} />
 
         {user && <WorkspacePrepActions job={job} user={user} />}
       </div>
