@@ -60,6 +60,7 @@ import CliffChat from '@/pages/CliffChat';
 import CliffJobWorkspace from '@/pages/CliffJobWorkspace';
 import CliffMemory from '@/pages/CliffMemory';
 import Stats from '@/pages/Stats';
+import CliffWins from '@/pages/CliffWins';
 import BlogAICareerTools from '@/pages/BlogAICareerTools';
 
 const { Pages, Layout } = pagesConfig;
@@ -219,6 +220,7 @@ const AuthenticatedApp = () => {
       <Route path="/CliffJobWorkspace" element={<OnboardingGuard><CliffJobWorkspace /></OnboardingGuard>} />
       <Route path="/CliffMemory" element={<OnboardingGuard><CliffMemory /></OnboardingGuard>} />
       <Route path="/stats" element={<Stats />} />
+      <Route path="/cliff-wins" element={<CliffWins />} />
 
       {/* Main routes */}
       <Route path="/" element={<StudentLandingPage />} />

@@ -9,6 +9,7 @@ import JobFitCard from '@/components/workspace/JobFitCard';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
+import TrustPanel from '@/components/workspace/TrustPanel';
 import decodeEntities from '@/utils/decodeEntities';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -124,6 +125,9 @@ export default function CliffJobWorkspace() {
         {user && <ReadyToApplyCard job={job} pursuit={pursuit} user={user} />}
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
+
+        {/* CLIFF Trust Engine: why this, why not others, confidence, what changed, outcome timeline */}
+        {user && <TrustPanel job={job} />}
 
         {user && <WorkspacePrepActions job={job} user={user} />}
 
