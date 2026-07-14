@@ -114,7 +114,8 @@ Deno.serve(async (req) => {
         if (m.category === 'target_companies') return (s.company || '').toLowerCase().includes(v);
         return (s.role || s.title || '').toLowerCase().includes(v);
       });
-      const best = passes.sort((a, b) => (prefHit(b) ? 1 : 0) - (prefHit(a) ? 1 : 0))[0];
+      passes.sort((a, b) => (prefHit(b) ? 1 : 0) - (prefHit(a) ? 1 : 0));
+      const best = passes[0];
       if (best) {
         const pref = prefHit(best);
         const reasons = ['Strong match for your goals, and it recently opened — early applicants stand out'];
@@ -126,6 +127,7 @@ Deno.serve(async (req) => {
           reasons, time: '5 min', action_label: 'Apply',
           action: { type: 'workspace', company: best.company, role: best.role || best.title || '', jobUrl: best.jobUrl || best.job_url || '', location: best.location || '' },
           company: best.company,
+          runner_up: passes[1]?.company || '',
         });
       }
     }
@@ -155,6 +157,28 @@ Deno.serve(async (req) => {
       const { score: _score, ...move } = c; // confidence is advice, not a number — never expose scores
       moves.push(move);
     }
+
+    // "Why This, Not That?" — explain each pick against what it beat
+    const EDGE = {
+      interview: 'your interview is time-sensitive — nothing on your plate matters more today',
+      apply: 'your resume there is already prepared, so applying costs you almost nothing',
+      followup: 'this follow-up window is closing — other opportunities will still be there tomorrow',
+      discovery: 'it changes what your best next step is right now',
+      newjob: 'it matches your goals and preferences more closely',
+      complete: "you've already invested in it — finishing beats starting something new",
+    };
+    const label = (c) => c.kind === 'interview' ? `practicing for ${c.company}` : c.kind === 'followup' ? `following up with ${c.company}` : (c.company || c.title);
+    const chosen = new Set(moves.map(m => m.title));
+    const passedOver = candidates.filter(c => !chosen.has(c.title));
+    moves.forEach((m, i) => {
+      const whyNot = [];
+      const alt = passedOver.find(c => (c.company || '').toLowerCase() !== (m.company || '').toLowerCase());
+      if (alt) whyNot.push(`I also looked at ${label(alt)}, but ${EDGE[m.kind] || 'this is the better use of your time today'}.`);
+      else if (moves[i + 1]) whyNot.push(`I put this ahead of ${label(moves[i + 1])} because ${EDGE[m.kind] || 'it moves you forward fastest'}.`);
+      if (m.kind === 'newjob' && m.runner_up) whyNot.push(`${m.runner_up} is also open, but you have no clear edge there right now — ${m.company} gives you a stronger starting position.`);
+      m.why_not = whyNot.slice(0, 2);
+      delete m.runner_up;
+    });
 
     return Response.json({ moves, all_done: moves.length === 0 });
   } catch (error) {

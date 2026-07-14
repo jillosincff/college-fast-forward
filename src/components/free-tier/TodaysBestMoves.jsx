@@ -14,8 +14,9 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
   const [state, setState] = useState(null); // { moves, done: [bool] }
   const [loading, setLoading] = useState(true);
   const [draftTask, setDraftTask] = useState(null);
+  const [whyOpen, setWhyOpen] = useState(null); // index of the move showing "Why this, not that?"
   const today = new Date().toISOString().slice(0, 10);
-  const storageKey = `cliff_best_moves_${user?.email}_${today}`;
+  const storageKey = `cliff_best_moves_v2_${user?.email}_${today}`;
 
   useEffect(() => {
     if (!user?.email) return;
@@ -106,6 +107,21 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
                       ))}
                       {!done && i === 0 && (
                         <p style={{ fontFamily: dm, fontSize: 11, fontStyle: 'italic', color: '#7c3aed', margin: '6px 0 0' }}>I think this is your best use of time today.</p>
+                      )}
+                      {!done && m.why_not?.length > 0 && (
+                        <>
+                          <button onClick={() => setWhyOpen(whyOpen === i ? null : i)}
+                            style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: 8, minHeight: 'auto', minWidth: 'auto', textDecoration: 'underline', display: 'block' }}>
+                            {whyOpen === i ? 'Hide' : 'Why this, not something else?'}
+                          </button>
+                          {whyOpen === i && (
+                            <div style={{ background: '#f5f3ff', border: '1px solid #ede9fe', borderRadius: 10, padding: '10px 12px', marginTop: 6 }}>
+                              {m.why_not.map((w, j) => (
+                                <p key={j} style={{ fontFamily: dm, fontSize: 12, color: '#4c1d95', margin: j === 0 ? 0 : '6px 0 0', lineHeight: 1.5 }}>{w}</p>
+                              ))}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
