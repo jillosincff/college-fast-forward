@@ -1,0 +1,106 @@
+{
+  "name": "StudentMemory",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student this memory belongs to"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "preferred_industries",
+        "disliked_industries",
+        "preferred_locations",
+        "excluded_locations",
+        "target_companies",
+        "avoided_companies",
+        "preferred_work_style",
+        "salary_goals",
+        "internship_vs_fulltime",
+        "remote_preference",
+        "networking_comfort",
+        "interview_confidence",
+        "application_habits",
+        "resume_preferences",
+        "career_priorities"
+      ],
+      "description": "What kind of preference this memory captures"
+    },
+    "value": {
+      "type": "string",
+      "description": "The remembered value, lowercase (e.g. 'sales', 'florida', 'remote')"
+    },
+    "confidence": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100. Explicit statements = 100; repeated behavior builds up gradually."
+    },
+    "signal_count": {
+      "type": "number",
+      "default": 1,
+      "description": "How many behavioral signals support this memory"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "explicit",
+        "behavior"
+      ],
+      "default": "behavior",
+      "description": "Whether the student said this directly or CLIFF inferred it from behavior"
+    },
+    "pinned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Student pinned this memory so it always applies"
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Only active memories influence recommendations. Behavioral memories activate at confidence >= 50."
+    },
+    "expires_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional expiry for time-bound memories"
+    }
+  },
+  "required": [
+    "user_email",
+    "category",
+    "value"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

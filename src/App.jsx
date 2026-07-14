@@ -58,6 +58,7 @@ import JillOsinoffDashboard from '@/pages/JillOsinoffDashboard';
 import CompanyIntelDashboard from '@/pages/CompanyIntelDashboard';
 import CliffChat from '@/pages/CliffChat';
 import CliffJobWorkspace from '@/pages/CliffJobWorkspace';
+import CliffMemory from '@/pages/CliffMemory';
 import Stats from '@/pages/Stats';
 import BlogAICareerTools from '@/pages/BlogAICareerTools';
 
@@ -216,6 +217,7 @@ const AuthenticatedApp = () => {
       <Route path="/company-intel" element={<OnboardingGuard><CompanyIntelDashboard /></OnboardingGuard>} />
       <Route path="/cliff-chat" element={<OnboardingGuard><CliffChat /></OnboardingGuard>} />
       <Route path="/CliffJobWorkspace" element={<OnboardingGuard><CliffJobWorkspace /></OnboardingGuard>} />
+      <Route path="/CliffMemory" element={<OnboardingGuard><CliffMemory /></OnboardingGuard>} />
       <Route path="/stats" element={<Stats />} />
 
       {/* Main routes */}

@@ -7,6 +7,7 @@ import AllCaughtUpCard from './AllCaughtUpCard';
 import EmptyMatchesState from './EmptyMatchesState';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { recordMemorySignal } from '@/functions/recordMemorySignal';
 import { RefreshCw } from 'lucide-react';
 
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp, onUpgrade }) {
@@ -18,6 +19,15 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
   const queryClient = useQueryClient();
+
+  // CLIFF memory: active high-confidence "avoid" memories quietly filter the feed
+  const [memories, setMemories] = useState([]);
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.StudentMemory.filter({ user_email: user.email, active: true }, '-confidence', 100)
+      .then(rows => setMemories(rows || []))
+      .catch(() => {});
+  }, [user?.email]);
 
   const queryKey = ['dailyDrop', user?.id];
   
@@ -91,6 +101,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
 
   // Called when user explicitly saves/swipes — marks card as actioned and removes it from feed
   const handleAddToPipeline = async (lead, applicationPath = 'cold_apply') => {
+    recordMemorySignal({ event: 'job_saved', company: lead.company, role: lead.role, location: lead.location || '' }).catch(() => {});
     try {
       await writeToPipeline(lead, applicationPath);
       handleAction(lead); // removes card from feed
@@ -108,7 +119,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
     }
   };
 
-  const handleDismiss = (lead) => handleAction(lead);
+  const handleDismiss = (lead) => {
+    recordMemorySignal({ event: 'job_dismissed', company: lead.company, role: lead.role, location: lead.location || '' }).catch(() => {});
+    handleAction(lead);
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -130,7 +144,23 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
     return bScore - aScore;
   });
 
-  const visibleSlots = sortedSlots.filter(s => !actionedKeys.has(`${s.company}||${s.role}`));
+  // Apply memory: only high-confidence active "avoid" memories filter jobs out
+  const avoids = memories.filter(m => (m.confidence ?? 0) >= 70 && ['disliked_industries', 'avoided_companies', 'excluded_locations'].includes(m.category));
+  const hitAvoid = (s) => avoids.find(m => {
+    const v = (m.value || '').toLowerCase();
+    if (!v) return false;
+    if (m.category === 'avoided_companies') return (s.company || '').toLowerCase().includes(v);
+    if (m.category === 'excluded_locations') return (s.location || '').toLowerCase().includes(v);
+    return (s.role || '').toLowerCase().includes(v);
+  });
+  const memoryHits = [];
+  const visibleSlots = sortedSlots.filter(s => {
+    if (actionedKeys.has(`${s.company}||${s.role}`)) return false;
+    const hit = hitAvoid(s);
+    if (hit) { memoryHits.push(hit); return false; }
+    return true;
+  });
+  const memoryRef = memoryHits[0];
   const allActioned = slots.length > 0 && visibleSlots.length === 0;
   const noGoals = !target_industries?.length && !effectiveRole;
   const paginatedSlots = visibleSlots.slice(0, visibleCount);
@@ -182,6 +212,14 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
       {!noGoals && !isLoading && visibleSlots.length > 0 && (
         <p className="text-[11px] text-gray-400 font-medium italic">
           ✨ These are hand-picked matches based on your profile. Tap any role for more options.
+        </p>
+      )}
+
+      {/* One memory reference per session — CLIFF shows it's listening */}
+      {!isLoading && memoryRef && (
+        <p className="text-[11px] text-purple-600 font-semibold">
+          🧠 I filtered out {memoryRef.value} {memoryRef.category === 'avoided_companies' ? 'jobs' : memoryRef.category === 'excluded_locations' ? 'locations' : 'roles'} {memoryRef.source === 'explicit' ? 'like you asked' : "based on what you've been skipping"}.{' '}
+          <button onClick={() => { window.location.hash = '#/CliffMemory'; }} className="underline cursor-pointer bg-transparent border-0 p-0 text-purple-600" style={{ minHeight: 'auto', minWidth: 'auto' }}>Manage</button>
         </p>
       )}
 

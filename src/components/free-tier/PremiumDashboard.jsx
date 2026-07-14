@@ -85,6 +85,15 @@ function PremiumNav({ user, onEditGoals, navRef }) {
                 )}
 
                 <button
+                  onClick={() => { setDropdownOpen(false); navigate('CliffMemory'); }}
+                  style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  🧠 What CLIFF Knows About You
+                </button>
+
+                <button
                   onClick={() => { setDropdownOpen(false); logout(); }}
                   style={{ fontFamily: dm, fontSize: 13, color: '#ef4444', background: 'none', border: 'none', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
                   onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
