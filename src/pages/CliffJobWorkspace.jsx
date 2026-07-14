@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { analyzeJobFit } from '@/functions/analyzeJobFit';
 import { syncJobPursuit } from '@/functions/syncJobPursuit';
 import ReadyToApplyCard from '@/components/workspace/ReadyToApplyCard';
+import WorkspaceNextStep from '@/components/workspace/WorkspaceNextStep';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import JobFitCard from '@/components/workspace/JobFitCard';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
@@ -116,7 +117,10 @@ export default function CliffJobWorkspace() {
           </div>
         </div>
 
-        {/* Hierarchy: 1) Prepare application 2) Interview prep 3) Tracker 4) Networking (optional, last) */}
+        {/* One Next Step: CLIFF's single strongest recommendation leads the workspace */}
+        {user && <WorkspaceNextStep job={job} pursuit={pursuit} fit={fit} fitLoading={fitLoading} user={user} />}
+
+        {/* Supporting detail: 1) Application readiness 2) Fit 3) Prep 4) Networking (optional, last) */}
         {user && <ReadyToApplyCard job={job} pursuit={pursuit} user={user} />}
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
