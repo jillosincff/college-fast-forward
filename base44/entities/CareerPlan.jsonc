@@ -1,0 +1,132 @@
+{
+  "name": "CareerPlan",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student this plan belongs to"
+    },
+    "goal_text": {
+      "type": "string",
+      "description": "Exactly what the student typed, e.g. 'I want to work at Nike'"
+    },
+    "goal_summary": {
+      "type": "string",
+      "description": "CLIFF's one-line interpretation, e.g. 'Marketing internships in Florida'"
+    },
+    "target_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Roles CLIFF inferred from the goal"
+    },
+    "industries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Preferred industries"
+    },
+    "locations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Preferred locations, or 'Remote'"
+    },
+    "companies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Specific companies the student named or CLIFF suggests"
+    },
+    "employment_type": {
+      "type": "string",
+      "enum": [
+        "internship",
+        "entry_level",
+        "either"
+      ],
+      "default": "either",
+      "description": "What kind of position the student is after"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "specific",
+        "exploring",
+        "unsure"
+      ],
+      "default": "exploring",
+      "description": "How clear the student's goal is \u2014 drives CLIFF's coaching tone"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active",
+      "description": "Only one plan is active at a time"
+    },
+    "opportunities": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "The 3 best opportunities CLIFF selected for this plan"
+    },
+    "skipped_note": {
+      "type": "string",
+      "description": "CLIFF's explanation of what it filtered out and why"
+    },
+    "plan_built_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the opportunities were last selected"
+    }
+  },
+  "required": [
+    "user_email",
+    "goal_text"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -26,7 +26,7 @@ import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
-import WarmApplyBar from '@/components/free-tier/WarmApplyBar';
+import GoalHero from '@/components/free-tier/GoalHero';
 import GoalHeader from '@/components/free-tier/GoalHeader';
 import CliffRecommendedActions from '@/components/free-tier/CliffRecommendedActions';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
@@ -350,10 +350,8 @@ export default function FreeTierDashboard() {
             {/* Day-one unlocked warm connection */}
             <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
 
-            {/* Primary action: paste a job → warm connection → outreach → tracked */}
-            <div style={{ marginBottom: 20 }}>
-              <WarmApplyBar user={user} />
-            </div>
+            {/* Primary entry point: Goal Search — the student states the goal, CLIFF builds the plan */}
+            <GoalHero user={user} />
 
             {/* CLIFF's prioritized actions + outcome-framed discoveries */}
             <CliffRecommendedActions user={user} />
