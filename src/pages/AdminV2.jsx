@@ -8,6 +8,7 @@ import FunnelSection from '@/components/adminv2/cliff/FunnelSection';
 import AlumniDbSection from '@/components/adminv2/cliff/AlumniDbSection';
 import DropoffSection from '@/components/adminv2/cliff/DropoffSection';
 import EmailStatsSection from '@/components/adminv2/cliff/EmailStatsSection';
+import TtfmpSection from '@/components/adminv2/cliff/TtfmpSection';
 
 export default function AdminV2() {
   const [user, setUser] = useState(null);
@@ -92,6 +93,7 @@ export default function AdminV2() {
       {data && (
         <>
           <RevenueSection revenue={data.revenue} />
+          <TtfmpSection />
           <DropoffSection dropoff={data.dropoff} />
           <FunnelSection funnel={data.funnel} activation={data.activation} />
           <EmailStatsSection />

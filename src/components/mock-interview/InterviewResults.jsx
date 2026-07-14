@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { logMeaningfulEvent } from '@/functions/logMeaningfulEvent';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -41,6 +42,14 @@ export default function InterviewResults({ session, onPracticeAgain, onViewHisto
   const [expandedQ, setExpandedQ] = useState(null);
   const overallScore = session.overall_score || 0;
   const questions = session.questions || [];
+
+  // TTFMP: a completed practice session with ≥3 answered questions counts (idempotent by session id)
+  useEffect(() => {
+    const answered = questions.filter(q => !q.skipped).length;
+    if (session?.id && answered >= 3) {
+      logMeaningfulEvent({ event_name: 'interview_practice_completed', related_record_id: session.id, company_name: session.company_name || '', source_feature: 'Mock Interview', delivery_channel: 'In App' }).catch(() => {});
+    }
+  }, [session?.id]);
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#0d1117', zIndex: 100, overflow: 'auto' }}>

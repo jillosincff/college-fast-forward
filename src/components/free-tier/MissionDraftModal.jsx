@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { logMeaningfulEvent } from '@/functions/logMeaningfulEvent';
 import { Copy, Check, Loader2 } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -30,6 +31,8 @@ export default function MissionDraftModal({ task, user, onClose, onSent }) {
 
   const markSent = async () => {
     setSaving(true);
+    // TTFMP: "I sent it" is the completed action (idempotent server-side)
+    logMeaningfulEvent({ event_name: 'follow_up_sent', related_record_id: task.pipelineId || `${task.company}-followup`, company_name: task.company || '', source_feature: "Today's Mission", delivery_channel: 'Manually Confirmed' }).catch(() => {});
     if (task.pipelineId) {
       await base44.entities.NetworkingPipeline.update(task.pipelineId, {
         follow_up_date: new Date().toISOString(),

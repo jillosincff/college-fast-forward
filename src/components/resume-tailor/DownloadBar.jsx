@@ -3,6 +3,7 @@ import { Download, Save, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import { base44 } from '@/api/base44Client';
+import { logMeaningfulEvent } from '@/functions/logMeaningfulEvent';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const orange = '#E85D20';
@@ -58,6 +59,8 @@ export default function DownloadBar({ tailoredContent, acceptedCount, totalChang
 
       if (tailoredResumeId) {
         base44.entities.TailoredResume.update(tailoredResumeId, { downloaded_at: new Date().toISOString() }).catch(() => {});
+        // TTFMP: downloading the tailored resume is the completed action (idempotent server-side)
+        logMeaningfulEvent({ event_name: 'tailored_resume_completed', related_record_id: tailoredResumeId, company_name: companyName || '', source_feature: 'Resume Tailor', delivery_channel: 'In App' }).catch(() => {});
       }
       toast.success('PDF downloaded!');
     } catch (e) {

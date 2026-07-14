@@ -1,0 +1,83 @@
+{
+  "name": "StudentAnalyticsEvent",
+  "type": "object",
+  "properties": {
+    "student_id": {
+      "type": "string",
+      "description": "User id of the student"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "event_name": {
+      "type": "string",
+      "enum": [
+        "tailored_resume_completed",
+        "application_submitted",
+        "outreach_sent",
+        "interview_practice_completed",
+        "follow_up_sent"
+      ],
+      "description": "Which meaningful completed action this records"
+    },
+    "event_key": {
+      "type": "string",
+      "description": "Idempotency key: student_id + event_name + related_record_id. A completed action is never counted twice."
+    },
+    "event_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the action was actually completed"
+    },
+    "related_record_id": {
+      "type": "string",
+      "description": "Id of the underlying record (TailoredResume, NetworkingPipeline row, MockInterviewSession, ...)"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company the action relates to, if any"
+    },
+    "source_feature": {
+      "type": "string",
+      "description": "Feature that produced the completion, e.g. Resume Tailor, Today's Mission, Mock Interview"
+    },
+    "delivery_channel": {
+      "type": "string",
+      "description": "In App, Email, LinkedIn, External Application, Manually Confirmed, Integration Verified"
+    },
+    "metadata": {
+      "type": "object",
+      "default": {},
+      "description": "Event-specific context"
+    },
+    "is_meaningful_progress": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this event qualifies as meaningful job-search progress"
+    },
+    "historically_backfilled": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when reconstructed from trustworthy historical records rather than live tracking"
+    }
+  },
+  "required": [
+    "student_id",
+    "event_name",
+    "event_key",
+    "event_timestamp"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

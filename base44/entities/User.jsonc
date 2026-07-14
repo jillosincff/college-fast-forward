@@ -66,6 +66,37 @@
       "type": "string",
       "format": "date-time",
       "description": "When the LinkedIn optimization was generated"
+    },
+    "exclude_from_analytics": {
+      "type": "boolean",
+      "default": false,
+      "description": "Admins set true for test / seeded / internal accounts so they never affect TTFMP metrics"
+    },
+    "first_meaningful_progress_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the student's first completed meaningful job-search action. Permanent \u2014 never overwritten."
+    },
+    "first_meaningful_progress_type": {
+      "type": "string",
+      "description": "Which event type created first meaningful progress"
+    },
+    "first_meaningful_progress_event_id": {
+      "type": "string",
+      "description": "Id of the StudentAnalyticsEvent that created first meaningful progress"
+    },
+    "ttfmp_seconds": {
+      "type": "number",
+      "description": "Exact seconds between account creation and first meaningful progress"
+    },
+    "ttfmp_under_10_minutes": {
+      "type": "boolean",
+      "description": "True when ttfmp_seconds <= 600"
+    },
+    "ttfmp_backfilled": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when TTFMP was reconstructed from historical records rather than live-tracked"
     }
   },
   "required": [
