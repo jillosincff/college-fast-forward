@@ -636,18 +636,18 @@ export default function StudentLandingPage({ onParentClick }) {
         <Reveal><div style={{ maxWidth: 900, margin: '0 auto' }}>
           <SectionLabel text="Simple Pricing" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
-            Start with direction.<br />
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Upgrade when you want CLIFF to do the work.</span>
+            Choose how much of your job search<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>you want to manage yourself.</span>
           </h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(16px, 4vw, 24px)', alignItems: 'stretch' }}>
             {/* CFF Free — guidance */}
             <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(24px, 5vw, 32px)', border: '1px solid #e2e8f0', boxShadow: SHADOW, display: 'flex', flexDirection: 'column' }}>
               <p style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: TEXT, margin: '0 0 4px' }}>CFF Free</p>
-              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: TEXT2, margin: '0 0 4px' }}>See what CLIFF recommends.</p>
-              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 18px', fontStyle: 'italic' }}>For students who want a smarter place to start.</p>
+              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: TEXT2, margin: '0 0 4px' }}>You drive. CLIFF helps.</p>
+              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 18px', fontStyle: 'italic' }}>You decide what to work on. CLIFF helps you execute.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {['Personalized job recommendations', "Today's Best Moves", 'Career Momentum', 'Application tracking', 'Basic CLIFF access', 'One CLIFF-powered application preview'].map(t => (
+                {['Personalized opportunities & rankings', "Today's Best Moves & CLIFF's Verdict", 'Career Timeline & Application History', 'Career Momentum', 'One complete CLIFF-powered application', 'Weekly career summary'].map(t => (
                   <div key={t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
                     <Check size={14} color="#64748b" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
                     <span style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 500, color: TEXT2, lineHeight: 1.5 }}>{t}</span>
@@ -661,29 +661,29 @@ export default function StudentLandingPage({ onParentClick }) {
 
             {/* CLIFF Pro — execution */}
             <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(24px, 5vw, 32px)', border: `2px solid ${INDIGO}`, boxShadow: SHADOW_MD, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-              <span style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: GRAD_INDIGO, color: '#fff', fontFamily: SF, fontSize: 11, fontWeight: 800, borderRadius: 100, padding: '4px 14px', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>LET CLIFF DO THE WORK</span>
+              <span style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: GRAD_INDIGO, color: '#fff', fontFamily: SF, fontSize: 11, fontWeight: 800, borderRadius: 100, padding: '4px 14px', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>CLIFF KEEPS WORKING</span>
               <p style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: INDIGO, margin: '0 0 4px' }}>CLIFF Pro</p>
-              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: TEXT2, margin: '0 0 4px' }}>Let CLIFF do the work.</p>
-              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 12px', fontStyle: 'italic' }}>For students actively trying to get hired.</p>
+              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: TEXT2, margin: '0 0 4px' }}>CLIFF keeps working — even when you're not.</p>
+              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 12px', fontStyle: 'italic' }}>The value isn't more tools. It's less thinking.</p>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 14 }}>
                 <span style={{ fontFamily: SF, fontSize: 34, fontWeight: 900, color: TEXT, letterSpacing: '-0.03em' }}>$4.99</span>
                 <span style={{ fontFamily: SF, fontSize: 14, fontWeight: 600, color: TEXT3 }}>/week · cancel anytime</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {['Unlimited tailored applications', 'Full Job Workspaces', 'Connection discovery', 'Outreach and follow-ups', 'Unlimited interview practice', 'Proactive discoveries', 'Unlimited CLIFF support', 'Weekly Career Brief'].map(t => (
+                {['Everything in Free', 'Unlimited CLIFF-powered applications', 'Unlimited resume, interview & company prep', 'Unlimited outreach & follow-up drafting', 'Full Job Workspace & Timeline', 'CLIFF works proactively in the background', 'Finds better opportunities & watches deadlines', 'Brings you back only when something matters'].map(t => (
                   <div key={t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
                     <Check size={14} color={INDIGO} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
                     <span style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 600, color: TEXT, lineHeight: 1.5 }}>{t}</span>
                   </div>
                 ))}
               </div>
-              <CTAButton label="Start CLIFF Pro" fullWidth style={{ marginTop: 'auto' }} />
+              <CTAButton label="Keep CLIFF Working" fullWidth style={{ marginTop: 'auto' }} />
             </div>
           </div>
 
           <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 4vw, 16px)', fontWeight: 800, color: TEXT, textAlign: 'center', margin: 'clamp(24px, 6vw, 32px) 0 0' }}>
-            Free tells you what to do.{' '}
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pro helps you get it done.</span>
+            Free helps you make progress.{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pro makes sure you never lose momentum.</span>
           </p>
         </div></Reveal>
       </div>

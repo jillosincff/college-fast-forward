@@ -16,7 +16,7 @@ export default function PricingComparison() {
       <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', background: '#f5f3ff' }}>
         <span style={cell} />
         <span style={{ ...cell, fontWeight: 800, color: '#334155', textAlign: 'center' }}>Free</span>
-        <span style={{ ...cell, fontWeight: 800, color: INDIGO, textAlign: 'center' }}>Premium</span>
+        <span style={{ ...cell, fontWeight: 800, color: INDIGO, textAlign: 'center' }}>CLIFF Pro</span>
       </div>
       {ROWS.map(([feature, free, premium], i) => (
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', borderTop: '1px solid #f1f5f9' }}>

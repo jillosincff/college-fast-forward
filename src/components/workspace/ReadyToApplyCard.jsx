@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
+import CliffProPaywall from '@/components/pro/CliffProPaywall';
 import useAccessPlan from '@/hooks/useAccessPlan';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -8,6 +9,7 @@ const isDone = s => ['ready_for_review', 'approved', 'complete'].includes(s || '
 // Action-first workspace header: can I apply, and what's ready?
 export default function ReadyToApplyCard({ job, pursuit, user }) {
   const [showApply, setShowApply] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const { isPro, magicMomentAvailable, magicMomentCompleted, excludePrompts } = useAccessPlan(user);
   const company = job?.company || '';
   const role = job?.role || job?.job_title || '';
@@ -55,10 +57,16 @@ export default function ReadyToApplyCard({ job, pursuit, user }) {
         </p>
       )}
       {!isPro && !excludePrompts && magicMomentCompleted && (
-        <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '10px 0 0', textAlign: 'center' }}>
-          Free plan: resume tailoring is queued (~24h). CLIFF Pro is instant.
-        </p>
+        <div style={{ marginTop: 12, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 12, padding: '12px 14px', textAlign: 'center' }}>
+          <p style={{ fontFamily: dm, fontSize: 12.5, fontWeight: 700, color: '#4c1d95', margin: '0 0 8px', lineHeight: 1.5 }}>
+            You just experienced what CLIFF can do. CLIFF Pro does this for every opportunity worth pursuing — and keeps working while you're away.
+          </p>
+          <button onClick={() => setShowPaywall(true)} style={{ fontFamily: dm, fontSize: 12.5, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '10px 20px', cursor: 'pointer', minHeight: 40, minWidth: 'auto' }}>
+            Keep CLIFF Working
+          </button>
+        </div>
       )}
+      {showPaywall && <CliffProPaywall onClose={() => setShowPaywall(false)} trigger="magic_moment_completed_workspace" />}
 
       {showApply && (
         <WarmApplyFlow job={{ company, role, jobUrl }} user={user} applyOnly onClose={() => setShowApply(false)} />

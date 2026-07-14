@@ -77,10 +77,10 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
           </div>
 
           <h3 style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-            Unlock the Inside Track
+            Let CLIFF take it from here.
           </h3>
           <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.65, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
-            Referred candidates are <strong style={{ color: '#0f172a' }}>~9x more likely to get hired</strong> than cold applicants. CLIFF Pro does that work for you.
+            CLIFF Pro keeps working <strong style={{ color: '#0f172a' }}>even when you're not</strong> — finding better opportunities, preparing applications, and watching every deadline.
           </p>
         </div>
 
@@ -148,7 +148,7 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(5,150,105,0.45)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(5,150,105,0.30)'; }}
           >
-            Start CLIFF Pro — $4.99/wk →
+            Keep CLIFF Working — $4.99/wk →
           </button>
 
           <p style={{ fontFamily: dm, fontSize: 10, color: '#94a3b8', fontWeight: 500, margin: 0 }}>
