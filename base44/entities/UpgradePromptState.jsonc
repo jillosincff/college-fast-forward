@@ -1,0 +1,61 @@
+{
+  "name": "UpgradePromptState",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Student this prompt state belongs to"
+    },
+    "last_prompt_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When any Pro prompt was last shown"
+    },
+    "last_trigger": {
+      "type": "string",
+      "description": "Most recent trigger type shown or acted on"
+    },
+    "trigger_counts": {
+      "type": "object",
+      "default": {},
+      "description": "Times each trigger type has been shown"
+    },
+    "total_shown": {
+      "type": "number",
+      "default": 0,
+      "description": "Total Pro prompts shown"
+    },
+    "total_dismissed": {
+      "type": "number",
+      "default": 0,
+      "description": "Total dismissals (including explicit 'Continue with Free')"
+    },
+    "suppressed_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Non-essential prompts hidden until this time (7 days after 'Continue with Free')"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

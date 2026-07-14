@@ -32,6 +32,7 @@ import WhileYouWereAway from '@/components/free-tier/WhileYouWereAway';
 import CliffingWelcome from '@/components/free-tier/CliffingWelcome';
 import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
+import PostMagicMomentFlow from '@/components/conversion/PostMagicMomentFlow';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -87,6 +88,7 @@ export default function FreeTierDashboard() {
   const [user, setUser] = useState(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState('');
+  const [upgradeTrigger, setUpgradeTrigger] = useState('dashboard_pro_card');
   const [parentCount, setParentCount] = useState(null);
   const [showWelcomeToast, setShowWelcomeToast] = useState(false);
   const [showOutreachToast, setShowOutreachToast] = useState(false);
@@ -222,8 +224,9 @@ export default function FreeTierDashboard() {
 
   const isTrialExpired = checkIsTrialExpired(user);
 
-  const triggerUpgrade = (featureName) => {
+  const triggerUpgrade = (featureName, trigger) => {
     setUpgradeFeature(featureName);
+    setUpgradeTrigger(trigger || 'dashboard_pro_card');
     setShowUpgrade(true);
   };
 
@@ -297,6 +300,9 @@ export default function FreeTierDashboard() {
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
       <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} navRef={navRef} />
+
+      {/* Conversion Engine: one-time post-Magic-Moment reflection → next move → Pro offer */}
+      <PostMagicMomentFlow user={user} onUpgrade={triggerUpgrade} />
 
       {/* Tab Navigation (desktop top tabs + mobile bottom nav) */}
       <DashboardBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
@@ -398,6 +404,11 @@ export default function FreeTierDashboard() {
               base44.auth.redirectToLogin('/#FreeTierDashboard');
               return;
             }
+            // Conversion attribution: record which trigger led to this checkout
+            base44.functions.invoke('conversionEngine', {
+              action: 'log', event_name: 'checkout_started', once: false,
+              trigger: upgradeTrigger, device: window.innerWidth < 768 ? 'mobile' : 'desktop',
+            }).catch(() => {});
             try {
               const res = await base44.functions.invoke('createCheckoutSession', {
                 plan: 'pro_monthly',

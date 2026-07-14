@@ -1,0 +1,87 @@
+{
+  "name": "ConversionEvent",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Student user id"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Student email"
+    },
+    "event_name": {
+      "type": "string",
+      "enum": [
+        "magic_moment_offered",
+        "magic_moment_started",
+        "magic_moment_completed",
+        "reflection_viewed",
+        "next_action_displayed",
+        "pro_offer_viewed",
+        "pro_cta_clicked",
+        "checkout_started",
+        "prompt_shown",
+        "prompt_dismissed",
+        "continue_free",
+        "subscription_activated"
+      ],
+      "description": "Conversion funnel step this event records"
+    },
+    "event_key": {
+      "type": "string",
+      "description": "Idempotency key \u2014 one-time funnel steps are never double counted"
+    },
+    "trigger": {
+      "type": "string",
+      "description": "Attribution: which contextual trigger produced this event (e.g. post_magic_moment, second_application, connection_found)"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Job context \u2014 company"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Job context \u2014 role"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "Student's school at event time"
+    },
+    "device": {
+      "type": "string",
+      "description": "mobile or desktop"
+    },
+    "plan_at_event": {
+      "type": "string",
+      "description": "Plan before the event (free/pro)"
+    },
+    "days_since_signup": {
+      "type": "number",
+      "description": "Whole days between signup and this event"
+    },
+    "metadata": {
+      "type": "object",
+      "default": {},
+      "description": "Event-specific context"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email",
+    "event_name",
+    "event_key"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
