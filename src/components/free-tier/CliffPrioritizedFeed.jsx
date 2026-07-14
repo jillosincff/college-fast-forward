@@ -10,6 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { recordMemorySignal } from '@/functions/recordMemorySignal';
 import { RefreshCw } from 'lucide-react';
 import useAccessPlan from '@/hooks/useAccessPlan';
+import { computeCliffVerdict } from '@/lib/cliffVerdict';
 
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp, onUpgrade }) {
   const [selectedLead, setSelectedLead] = useState(null);
@@ -163,12 +164,13 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
     }
   };
 
-  // Sort: alumni-network slots first, then live, then curated
-  const sortedSlots = [...slots].sort((a, b) => {
-    const aScore = (a.hasAlumni ? 2 : 0) + (a.slotType === 'live' ? 1 : 0);
-    const bScore = (b.hasAlumni ? 2 : 0) + (b.slotType === 'live' ? 1 : 0);
-    return bScore - aScore;
-  });
+  // CLIFF Confidence Engine: opinionated verdict per job, then rank best-first
+  const verdictMap = new Map(slots.map(s => [
+    `${s.company}||${s.role}`,
+    computeCliffVerdict(s, { memories, careerGoals: user?.career_goals || {}, pursuit: findPursuit(s) }),
+  ]));
+  const verdictOf = (s) => verdictMap.get(`${s.company}||${s.role}`);
+  const sortedSlots = [...slots].sort((a, b) => (verdictOf(b)?.score || 0) - (verdictOf(a)?.score || 0));
 
   // Apply memory: only high-confidence active "avoid" memories filter jobs out
   const avoids = memories.filter(m => (m.confidence ?? 0) >= 70 && ['disliked_industries', 'avoided_companies', 'excluded_locations'].includes(m.category));
@@ -318,6 +320,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
                     user={user}
                     access={access}
                     pursuit={findPursuit(lead)}
+                    verdict={verdictOf(lead)}
                     rank={idx}
                     onUpgrade={onUpgrade}
                     compact
@@ -359,6 +362,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
                     user={user}
                     access={access}
                     pursuit={findPursuit(lead)}
+                    verdict={verdictOf(lead)}
                     rank={idx}
                     onUpgrade={onUpgrade}
                   />

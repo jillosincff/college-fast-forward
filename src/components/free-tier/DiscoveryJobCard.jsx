@@ -5,10 +5,11 @@ import useParentCompanies from '@/hooks/useParentCompanies';
 import { getStandoutInsight } from '@/functions/getStandoutInsight';
 import WarmApplyFlow from './WarmApplyFlow';
 import JobCardPlanCTA from './JobCardPlanCTA';
+import CliffVerdictBadge from './CliffVerdictBadge';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
-export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill, user, compact, access, pursuit, rank, onUpgrade }) {
+export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill, user, compact, access, pursuit, rank, onUpgrade, verdict }) {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [appliedExternally, setAppliedExternally] = useState(false);
@@ -216,6 +217,9 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
             {salary && <span className="flex items-center gap-0.5 truncate">💰 {salary}</span>}
           </div>
         )}
+
+        {/* CLIFF's opinionated take: opportunity tier + expandable reasoning */}
+        {verdict && <CliffVerdictBadge verdict={verdict} companyName={companyName} jobTitle={jobTitle} />}
 
         {/* Job description — single line in compact mode, boxed in full mode */}
         {jobDesc && (
