@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 // A/B testable hero headline variants. Default: A.
 // Force a variant with ?hv=a|b|c (persists for the session) — no rebuild needed.
 export const HERO_VARIANTS = {
-  a: { line1: 'From stressing', line2: 'to progressing.' },
+  a: { line1: 'You live your college life.', line2: 'CLIFF stays on top of your career.' },
   b: { line1: 'Too many jobs.', line2: 'One clear plan.' },
   c: { line1: 'From \u201CWhere do I even start?\u201D', line2: 'to \u201CI got this.\u201D' },
 };

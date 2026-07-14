@@ -7,7 +7,9 @@ import { base44 } from '@/api/base44Client';
 import Reveal from '@/components/landing/Reveal';
 import AppShowcase from '@/components/landing/AppShowcase';
 import LiveJobsSection from '@/components/landing/LiveJobsSection';
-import HeroClarityDemo from '@/components/landing/HeroClarityDemo';
+import AgentWeekDemo from '@/components/landing/AgentWeekDemo';
+import WhileAwaySection from '@/components/landing/WhileAwaySection';
+import PhilosophySection from '@/components/landing/PhilosophySection';
 import ProblemClarifier from '@/components/landing/ProblemClarifier';
 import { HERO_VARIANTS, getHeroVariant, trackHeroEvent } from '@/components/landing/heroVariants';
 import DayWithCliff from '@/components/landing/DayWithCliff';
@@ -82,9 +84,9 @@ const PROOF_CALLOUTS = [
 ];
 
 const STORIES = [
-  { quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/c2df92fac_IMG_8456.png", tag: "Landed an internship", color: INDIGO },
-  { quote: "I finally felt like I had a system instead of a mess. Before this I had 40 tabs open and no idea where anything stood.", name: "Maya R.", school: "UF '26, Business", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png", tag: "Less stress", color: VIOLET },
-  { quote: "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours.", name: "Nerissa R.", school: "USC '25, Marketing", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png", tag: "Better outreach", color: PINK },
+  { quote: "I stopped wondering what I should do every day. CLIFF always had the next move ready — and I landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/c2df92fac_IMG_8456.png", tag: "Landed an internship", color: INDIGO },
+  { quote: "CLIFF kept me on track without me constantly checking everything. I finally felt like someone was actually helping me.", name: "Maya R.", school: "UF '26, Business", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png", tag: "Off my mind", color: VIOLET },
+  { quote: "I spent less time searching and more time getting interviews. I heard back from an alumna within 48 hours.", name: "Nerissa R.", school: "USC '25, Marketing", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png", tag: "More interviews, less searching", color: PINK },
 ];
 
 function StoriesCarousel() {
@@ -365,7 +367,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: 'clamp(8px, 2.5vw, 12px) clamp(14px, 4vw, 28px)', marginBottom: 'clamp(20px, 5vw, 32px)' }}>
                 <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>YOUR AI CAREER AGENT FOR INTERNSHIPS &amp; FIRST JOBS</span>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>YOUR PROACTIVE AI CAREER AGENT FOR INTERNSHIPS &amp; FIRST JOBS</span>
               </div>
             )}
 
@@ -385,7 +387,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
-                  Tell CLIFF your career goals. It finds the right opportunities, tailors your resume, and tells you exactly what to do next to land the role you want.
+                  Tell CLIFF what you want. It finds the right opportunities, prepares stronger applications, and quietly keeps your job search moving — so you always know your next best move.
                 </h2>
               </div>
             )}
@@ -450,11 +452,14 @@ export default function StudentLandingPage({ onParentClick }) {
             <div className="hero-animate-6 hero-visual" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Soft radial glow behind the product card */}
               <div style={{ position: 'absolute', inset: '-10%', background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24, pointerEvents: 'none' }} />
-              <HeroClarityDemo />
+              <AgentWeekDemo />
             </div>
           )}
         </div>
       </div>
+
+      {/* ── WHILE YOU WERE AWAY (marketing illustration) ── */}
+      <WhileAwaySection />
 
       {/* ── PROBLEM CLARIFIER ── */}
       <ProblemClarifier />
@@ -550,6 +555,9 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── APP SHOWCASE ── */}
       <AppShowcase />
 
+      {/* ── PRODUCT PHILOSOPHY ── */}
+      <PhilosophySection />
+
       {/* ── A DAY WITH CLIFF ── */}
       <DayWithCliff />
 
@@ -559,26 +567,25 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── HOW IT WORKS ── */}
       <div id="how-it-works" style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
         <Reveal><div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <SectionLabel text="How it works" />
+          <SectionLabel text="Your agent never clocks out" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 7vw, 48px)', textAlign: 'center' }}>
-            Hiring your agent takes{' '}
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>two minutes.</span>
+            What CLIFF does{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>while you're busy.</span>
           </h2>
-          <div className="hiw-steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
             {[
-              { n: '1', icon: Target, title: 'Tell CLIFF your goal', sub: 'The kind of internship or first job you want — that\u2019s all CLIFF needs to start working.' },
-              { n: '2', icon: Zap, title: 'CLIFF does the work', sub: 'Finds opportunities, tailors your resume, researches companies, and drafts your outreach.' },
-              { n: '3', icon: Rocket, title: 'You review & apply', sub: 'Every day CLIFF hands you your best moves. You approve, apply, and keep moving.' },
+              { emoji: '🔭', title: 'Finds better opportunities', sub: 'Keeps scanning and surfaces only the ones actually worth your time.' },
+              { emoji: '🧹', title: 'Removes expired jobs', sub: 'Dead listings disappear before you waste a minute on them.' },
+              { emoji: '📄', title: 'Prepares stronger applications', sub: 'Everything you submit goes out sharper than you\u2019d send alone.' },
+              { emoji: '🗂️', title: 'Keeps your search organized', sub: 'Every application, follow-up, and interview lives in one plan.' },
+              { emoji: '🎯', title: 'Tells you exactly what matters today', sub: 'One next move, every day. You never wonder what to do next.' },
             ].map((s, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 'clamp(20px, 4vw, 28px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', transition: 'all 0.25s ease' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = SHADOW_MD; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = SHADOW; e.currentTarget.style.borderColor = '#f1f5f9'; }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: GRAD_INDIGO, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontSize: 15, fontWeight: 800, flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}>{s.n}</div>
-                  <s.icon size={20} color={INDIGO} />
-                </div>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>{s.title}</p>
+                <div style={{ fontSize: 26, marginBottom: 12 }}>{s.emoji}</div>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 800, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>{s.title}</p>
                 <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 500, color: TEXT2, margin: 0, lineHeight: 1.55 }}>{s.sub}</p>
               </div>
             ))}
