@@ -61,6 +61,20 @@ Deno.serve(async (req) => {
       const mems = await db.StudentMemory.filter({ user_email: email, category: 'preferred_industries', active: true }, '-confidence', 1);
       const focus = mems?.[0]?.value || u.career_goals?.target_industries?.[0] || null;
 
+      // "What I changed this week" — only verifiable changes CLIFF actually made
+      const changed: string[] = [];
+      const plansBuilt = await db.CareerPlan.filter({ user_email: email, plan_built_at: { $gte: weekStart } }, '-plan_built_at', 1).catch(() => []);
+      if (plansBuilt?.[0]) {
+        changed.push(`Rebuilt your plan around "${plansBuilt[0].goal_summary}" and picked your ${plansBuilt[0].opportunities?.length || 3} best opportunities.`);
+      }
+      const newMems = await db.StudentMemory.filter({ user_email: email, active: true, updated_date: { $gte: weekStart } }, '-confidence', 5).catch(() => []);
+      for (const m of newMems || []) {
+        if (m.category === 'disliked_industries') changed.push(`Stopped recommending ${m.value} roles.`);
+        else if (m.category === 'preferred_industries') changed.push(`Moved ${m.value} roles to the top — I learned you prefer them.`);
+        else if (m.category === 'excluded_locations') changed.push(`Filtered out ${m.value} jobs like you wanted.`);
+        else if (m.category === 'avoided_companies') changed.push(`Stopped surfacing ${m.value}.`);
+      }
+
       const actions = b.apps + b.followUps + b.outreach;
       const momentum = actions >= 4 ? 'Excellent' : actions >= 1 ? 'Building' : "Time for a restart";
 
@@ -81,6 +95,10 @@ Deno.serve(async (req) => {
         ? `I found ${b.discoveries} new thing${b.discoveries === 1 ? '' : 's'} worth your attention.`
         : 'I kept scanning — nothing beat what you already have.');
       if (priority) lines.push(`Your priority Monday: ${priority.job_title} at ${priority.company_name}.`);
+      if (changed.length) {
+        lines.push('', 'What I changed this week:');
+        for (const c of changed.slice(0, 5)) lines.push(`• ${c}`);
+      }
       lines.push('', `Momentum: ${momentum}.`);
       if (focus) lines.push(`Next week's focus: ${focus}.`);
       const baseUrl = Deno.env.get('APP_BASE_URL') || '';

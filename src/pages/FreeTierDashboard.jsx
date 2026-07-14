@@ -28,6 +28,7 @@ import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
 import GoalHero from '@/components/free-tier/GoalHero';
 import GoalMemoryStrip from '@/components/free-tier/GoalMemoryStrip';
+import WhileYouWereAway from '@/components/free-tier/WhileYouWereAway';
 import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
 
@@ -332,6 +333,7 @@ export default function FreeTierDashboard() {
         {/* CLIFF OS home: greeting + "What's our goal today?" + session memory */}
         {!isTrialExpired && !focusMode && (
           <>
+            <WhileYouWereAway user={user} />
             <GoalHero user={user} />
             <GoalMemoryStrip user={user} />
           </>
