@@ -5,7 +5,7 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', Icon: Home },
-  { id: 'tools', label: 'Tools', Icon: Wrench },
+  { id: 'tools', label: 'Toolbox', Icon: Wrench },
   { id: 'progress', label: 'Application Tracker', Icon: TrendingUp },
 ];
 
