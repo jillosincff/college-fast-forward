@@ -51,7 +51,14 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
     if (a.type === 'followup') { setDraftTask({ ...a, kind: 'followup', index: i }); return; }
     markDone(i);
     if (a.type === 'workspace') openCliffWorkspace({ company: a.company, role: a.role || '', jobUrl: a.jobUrl || '', location: a.location || '' });
-    else if (a.route?.startsWith('#/')) window.location.hash = a.route;
+    else if (a.route?.startsWith('#/')) {
+      let route = a.route;
+      // Keep Mission and Tracker synchronized: highlight the referenced application
+      if (a.company && route.toLowerCase().includes('applicationtracker')) {
+        route += (route.includes('?') ? '&' : '?') + 'highlight=' + encodeURIComponent(a.company);
+      }
+      window.location.hash = route;
+    }
   };
 
   if (loading) {

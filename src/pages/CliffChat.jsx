@@ -22,6 +22,17 @@ export default function CliffChatPage({ onOpenUpgrade }) {
   const [showLimitToast, setShowLimitToast] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Contextual mode: opened from a specific application ("Ask CLIFF" on a tracker card)
+  const [appCtx] = useState(() => {
+    try {
+      const p = new URLSearchParams(window.location.hash.split('?')[1] || '');
+      if (p.get('context') === 'application' && p.get('company')) {
+        return { company: p.get('company'), role: p.get('role') || '', stage: p.get('stage') || '' };
+      }
+    } catch {}
+    return null;
+  });
+
   useEffect(() => {
     if (!user?.email) return;
     const storageKey = `cliff_chat_count_${user.email}`;
@@ -67,6 +78,11 @@ export default function CliffChatPage({ onOpenUpgrade }) {
     }
 
     const userMessage = input.trim();
+    // First message of a contextual chat carries the application context so
+    // CLIFF never starts generic — it already knows the company, role, and stage.
+    const outbound = appCtx && messages.length === 0
+      ? `[Context: we're discussing my application to ${appCtx.company}${appCtx.role ? ` for the ${appCtx.role} role` : ''}${appCtx.stage ? `, currently at stage: ${appCtx.stage}` : ''}. Answer with this specific application in mind.]\n\n${userMessage}`
+      : userMessage;
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setLoading(true);
@@ -74,7 +90,7 @@ export default function CliffChatPage({ onOpenUpgrade }) {
 
     try {
       const res = await base44.functions.invoke('cliffCareerAgent', {
-        message: userMessage,
+        message: outbound,
         history: messages.slice(-6),
       });
 
@@ -148,6 +164,15 @@ export default function CliffChatPage({ onOpenUpgrade }) {
         </div>
       </div>
 
+      {/* Application context banner */}
+      {appCtx && (
+        <div style={{ background: '#f5f3ff', borderBottom: '1px solid #e9d5ff', padding: '10px 24px' }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#6d28d9', margin: 0, maxWidth: 800, marginLeft: 'auto', marginRight: 'auto' }}>
+            💬 Talking about your {appCtx.company} application{appCtx.role ? ` — ${appCtx.role}` : ''}{appCtx.stage ? ` (${appCtx.stage})` : ''}
+          </p>
+        </div>
+      )}
+
       {/* Chat area */}
       <div style={{ flex: 1, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
         {messages.length === 0 && (
@@ -174,12 +199,17 @@ export default function CliffChatPage({ onOpenUpgrade }) {
               gap: 12,
               textAlign: 'left',
             }}>
-              {[
+              {(appCtx ? [
+                { icon: '📊', q: `What are my chances at ${appCtx.company}, and how do I improve them?` },
+                { icon: '📨', q: `Help me write a follow-up message to ${appCtx.company}` },
+                { icon: '🎤', q: `What interview questions should I expect for ${appCtx.role || 'this role'} at ${appCtx.company}?` },
+                { icon: '🧭', q: `What should my next move be for this application?` },
+              ] : [
                 { icon: '📄', q: 'How do I tailor my resume for a specific job description?' },
                 { icon: '🎤', q: 'What are common behavioral interview questions and how should I answer them?' },
                 { icon: '🤝', q: 'Help me write a networking message to reach out to alumni' },
                 { icon: '🎯', q: 'What companies should I target based on my major and interests?' },
-              ].map(s => (
+              ]).map(s => (
                 <button
                   key={s.q}
                   onClick={() => setInput(s.q)}

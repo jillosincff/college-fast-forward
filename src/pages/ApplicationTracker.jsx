@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Search, Filter, Plus, MapPin, Calendar, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
-import StatusCheckBanner from '@/components/tracker/StatusCheckBanner';
+import MissionStats from '@/components/tracker/mission/MissionStats';
+import AttentionBanner from '@/components/tracker/mission/AttentionBanner';
+import MissionAppCard from '@/components/tracker/mission/MissionAppCard';
+import { deriveInsight, FILTERS } from '@/components/tracker/mission/trackerLogic';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
-const pf = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // Tracker status key → NetworkingPipeline status (for saving edits back)
 const TRACKER_STATUS_TO_PIPELINE = {
@@ -44,18 +46,6 @@ function extractResumeVersion(notes) {
   return '—';
 }
 
-// Derive a suggested next action from status + time since last activity
-function computeNextAction(record) {
-  const status = PIPELINE_STATUS_MAP[record.status] || 'applied';
-  if (status === 'offered') return 'Review offer';
-  if (status === 'interviewing') return 'Prep for interview';
-  if (status === 'rejected') return '—';
-  const lastActivity = new Date(record.status_date || record.updated_date || record.created_date);
-  const daysSince = (Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24);
-  if (daysSince >= 7) return 'Send follow-up';
-  return 'Wait for response';
-}
-
 function pipelineToApp(record) {
   return {
     id: record.id,
@@ -63,51 +53,34 @@ function pipelineToApp(record) {
     logo: (record.company?.[0] || '?').toUpperCase(),
     jobTitle: record.job_title || '—',
     dateApplied: record.created_date,
+    statusDate: record.status_date || record.updated_date || record.created_date,
+    followUpCount: record.follow_up_count || 0,
     resumeVersion: extractResumeVersion(record.notes),
     status: PIPELINE_STATUS_MAP[record.status] || 'applied',
-    nextAction: computeNextAction(record),
     notes: record.notes || '',
     location: record.location || '',
     jobUrl: record.job_url || '',
   };
 }
 
-const STATUS_COLORS = {
-  applied: '#9CA3AF',
-  in_review: '#3B82F6',
-  interviewing: '#8B5CF6',
-  offered: '#10B981',
-  rejected: '#EF4444',
-};
-
-const STATUS_LABELS = {
-  applied: 'Applied',
-  in_review: 'In Review',
-  interviewing: 'Interviewing',
-  offered: 'Offer Received',
-  rejected: 'Rejected',
-};
+// Today's Mission → Tracker sync: ?highlight=Company auto-highlights that card
+function readHighlightParam() {
+  try {
+    return (new URLSearchParams(window.location.hash.split('?')[1] || '').get('highlight') || '').toLowerCase();
+  } catch { return ''; }
+}
 
 export default function ApplicationTracker() {
   const { user } = useAuth();
-  // v2.0
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [sortBy, setSortBy] = useState('date');
+  const [filter, setFilter] = useState('attention'); // students see work first
   const [selectedApp, setSelectedApp] = useState(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [followUpApp, setFollowUpApp] = useState(null);
   const [showReminderModal, setShowReminderModal] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const [highlight] = useState(readHighlightParam);
 
   // Load the user's real tracked applications from their pipeline
   useEffect(() => {
@@ -129,286 +102,154 @@ export default function ApplicationTracker() {
     return () => { cancelled = true; };
   }, [user?.email]);
 
-  // Filter & search
-  let filtered = applications.filter(app => {
-    const matchesSearch = app.company.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          app.jobTitle.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || app.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
+  // Every application gets a health + recommendation — never a blank Next Action
+  const items = applications.map(app => ({ app, insight: deriveInsight(app) }));
 
-  // Sort
-  if (sortBy === 'date') filtered.sort((a, b) => new Date(b.dateApplied) - new Date(a.dateApplied));
-  else if (sortBy === 'company') filtered.sort((a, b) => a.company.localeCompare(b.company));
-  else if (sortBy === 'status') filtered.sort((a, b) => a.status.localeCompare(b.status));
+  const isHighlighted = (item) => highlight && item.app.company.toLowerCase().includes(highlight);
 
-  // Stats
-  const stats = {
-    total: applications.length,
-    responseRate: applications.length > 0 ? Math.round((applications.filter(a => ['in_review', 'interviewing', 'offered'].includes(a.status)).length / applications.length) * 100) : 0,
-    interviews: applications.filter(a => a.status === 'interviewing').length,
+  // Highest-priority application for the attention banner
+  const topAttention = items
+    .filter(i => i.insight.health.icon === '🔴')
+    .sort((a, b) => (isHighlighted(b) ? 1000 : b.insight.priority) - (isHighlighted(a) ? 1000 : a.insight.priority))[0] || null;
+
+  const attentionCount = items.filter(i => i.insight.group === 'attention').length;
+  const reassurance = items.length === 0
+    ? "Track your first application and I'll take it from there."
+    : attentionCount === 0
+      ? 'Everything important is under control.'
+      : "You're making good progress — a couple of things need your attention.";
+
+  const counts = FILTERS.reduce((acc, f) => {
+    acc[f.id] = items.filter(i => i.insight.group === f.id).length;
+    return acc;
+  }, {});
+
+  const visible = items
+    .filter(i => i.insight.group === filter)
+    .sort((a, b) => (isHighlighted(b) ? 1000 : b.insight.priority) - (isHighlighted(a) ? 1000 : a.insight.priority));
+
+  // Dispatch a card's next action
+  const handleAction = (item) => {
+    const type = item.insight.action?.type;
+    if (type === 'followup') { setFollowUpApp(item.app); setShowFollowUpModal(true); }
+    else if (type === 'practice') navigate('MockInterview');
+    else if (type === 'detail') setSelectedApp(item.app);
+  };
+
+  // Contextual chat — CLIFF arrives already knowing this application
+  const handleAskCliff = (item) => {
+    navigate('cliff-chat', {
+      company: item.app.company,
+      role: item.app.jobTitle !== '—' ? item.app.jobTitle : '',
+      stage: item.insight.stage,
+      context: 'application',
+    });
   };
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9ff', fontFamily: dm }}>
-      {/* Header */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '32px 20px' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      {/* Hero */}
+      <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '28px 20px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
           <button
             onClick={() => navigate('FreeTierDashboard')}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#666', fontSize: 14, fontWeight: 600, fontFamily: dm, cursor: 'pointer', padding: 0, marginBottom: 12, minHeight: 'auto', minWidth: 'auto' }}
-            onMouseEnter={e => e.currentTarget.style.color = '#6d28d9'}
-            onMouseLeave={e => e.currentTarget.style.color = '#666'}
           >
             <ArrowLeft size={16} /> Back to Dashboard
           </button>
-          <h1 style={{ fontFamily: pf, fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
-            Application Tracker
+          <h1 style={{ fontFamily: dm, fontSize: 'clamp(24px, 5vw, 34px)', fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>
+            Your Applications
           </h1>
-          <p style={{ fontSize: 15, color: '#666', margin: 0, lineHeight: 1.6 }}>
-            Stay organized. Never lose track of where you stand.
+          <p style={{ fontSize: 14.5, color: '#4b5563', margin: '0 0 6px', lineHeight: 1.6, maxWidth: 560 }}>
+            CLIFF is actively tracking every opportunity and will tell you exactly what needs attention next.
+          </p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#059669', margin: 0 }}>
+            {reassurance}
           </p>
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div style={{ background: '#fff', padding: '24px 20px', borderBottom: '1px solid #E5E5E5', marginBottom: 24 }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-          {[
-            { label: 'Total Applications', value: stats.total },
-            { label: 'Response Rate', value: `${stats.responseRate}%${stats.total > 0 ? ` (${Math.ceil(stats.total * stats.responseRate / 100)} replies)` : ''}` },
-            { label: 'Interviews Scheduled', value: stats.interviews },
-          ].map((stat, i) => (
-            <div key={i} style={{ padding: '16px', background: '#F9F9F9', borderRadius: 12, border: '1px solid #F0F0F0' }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>
-                {stat.label}
-              </p>
-              <p style={{ fontSize: 28, fontWeight: 700, color: '#6d28d9', margin: 0 }}>
-                {stat.value}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Search & Filters */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 20px' }}>
-        {/* "Did you hear back?" status check for stale applications */}
-        <StatusCheckBanner
-          applications={applications}
-          onRespond={async (app, newStatus) => {
-            await base44.entities.NetworkingPipeline.update(app.id, {
-              status: TRACKER_STATUS_TO_PIPELINE[newStatus] || 'identified',
-              status_date: new Date().toISOString(),
-            });
-            setApplications(prev => prev.map(a => a.id === app.id
-              ? { ...a, status: newStatus, nextAction: newStatus === 'interviewing' ? 'Prep for interview' : newStatus === 'offered' ? 'Review offer' : newStatus === 'rejected' ? '—' : 'Wait for response' }
-              : a));
-          }}
-        />
-
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
-          {/* Search */}
-          <div style={{ flex: 1, minWidth: 200, position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Search size={16} style={{ position: 'absolute', left: 12, color: '#999', pointerEvents: 'none' }} />
-            <input
-              type="text"
-              placeholder="Search by company or job title"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%', fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 8,
-                padding: '10px 12px 10px 36px', outline: 'none', fontFamily: dm,
-              }}
-            />
-          </div>
-
-          {/* Filter Status */}
-          <select
-            value={filterStatus}
-            onChange={e => setFilterStatus(e.target.value)}
-            style={{
-              fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 12px',
-              outline: 'none', fontFamily: dm, background: '#fff', cursor: 'pointer', minHeight: 'auto',
-            }}
-          >
-            <option value="all">All Status</option>
-            <option value="applied">Applied</option>
-            <option value="in_review">In Review</option>
-            <option value="interviewing">Interviewing</option>
-            <option value="offered">Offer Received</option>
-            <option value="rejected">Rejected</option>
-          </select>
-
-          {/* Sort */}
-          <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            style={{
-              fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 12px',
-              outline: 'none', fontFamily: dm, background: '#fff', cursor: 'pointer', minHeight: 'auto',
-            }}
-          >
-            <option value="date">Date Applied (Newest)</option>
-            <option value="company">Company</option>
-            <option value="status">Status</option>
-          </select>
-        </div>
-
-        {/* Loading State */}
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '20px 20px 80px' }}>
         {loading ? (
           <div style={{ background: '#fff', borderRadius: 12, padding: '60px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
             <span style={{ display: 'inline-block', width: 28, height: 28, border: '3px solid #ede9fe', borderTopColor: '#6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-            <p style={{ fontSize: 14, color: '#888', marginTop: 16 }}>Loading your applications…</p>
+            <p style={{ fontSize: 14, color: '#888', marginTop: 16 }}>CLIFF is checking your applications…</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
-        ) : /* Empty State */
-        applications.length === 0 ? (
+        ) : applications.length === 0 ? (
           <div style={{ background: '#fff', borderRadius: 12, padding: '60px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
-            <h3 style={{ fontFamily: pf, fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>
+            <h3 style={{ fontFamily: dm, fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>
               No applications tracked yet
             </h3>
             <p style={{ fontSize: 14, color: '#666', maxWidth: 380, margin: '0 auto 24px', lineHeight: 1.6 }}>
-              Applications you track will appear here — add your first one to get started.
+              Track your first application and CLIFF will watch it, remind you at the right moments, and tell you exactly what to do next.
             </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => setShowAddModal(true)} style={{ background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: dm, minHeight: 'auto', boxShadow: '0 8px 24px rgba(109,40,217,0.30)' }}>
-                + Add Application
-              </button>
-            </div>
-          </div>
-        ) : filtered.length === 0 ? (
-          /* No results for current search/filter */
-          <div style={{ background: '#fff', borderRadius: 12, padding: '48px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
-            <h3 style={{ fontFamily: pf, fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
-              No matching applications
-            </h3>
-            <p style={{ fontSize: 14, color: '#666', margin: '0 0 20px', lineHeight: 1.6 }}>
-              Nothing matches your current search or filter.
-            </p>
-            <button
-              onClick={() => { setSearchTerm(''); setFilterStatus('all'); }}
-              style={{ background: '#f5f3ff', color: '#6d28d9', border: '1.5px solid #6d28d9', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}
-            >
-              Clear search & filters
+            <button onClick={() => setShowAddModal(true)} style={{ background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: dm, minHeight: 'auto', boxShadow: '0 8px 24px rgba(109,40,217,0.30)' }}>
+              + Add Application
             </button>
           </div>
-        ) : isMobile ? (
-          /* Mobile Card View */
-          <div style={{ display: 'grid', gap: 12 }}>
-            {filtered.map(app => (
-              <div
-                key={app.id}
-                onClick={() => setSelectedApp(app)}
-                style={{
-                  background: '#fff', borderRadius: 12, padding: '16px 14px', border: '1px solid #E5E5E5',
-                  cursor: 'pointer', transition: 'all 0.2s', boxSizing: 'border-box',
-                }}
-              >
-                <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                  <div style={{ fontSize: 28, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {app.logo}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 style={{ fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {app.jobTitle}
-                    </h4>
-                    <p style={{ fontSize: 11, color: '#666', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {app.company} • {new Date(app.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{
-                    fontSize: 12, fontWeight: 600, color: '#fff', background: STATUS_COLORS[app.status],
-                    padding: '4px 10px', borderRadius: 100, flexShrink: 0,
-                  }}>
-                    {STATUS_LABELS[app.status]}
-                  </span>
-                  <p style={{ fontSize: 11, color: '#888', margin: 0, letterSpacing: '-0.01em' }}>
-                    {app.resumeVersion}
+        ) : (
+          <>
+            <div style={{ marginBottom: 20 }}>
+              <MissionStats items={items} />
+            </div>
+
+            <AttentionBanner item={topAttention} onAction={handleAction} />
+
+            {/* Filter pills — work first */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+              {FILTERS.map(f => {
+                const active = filter === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => setFilter(f.id)}
+                    style={{
+                      fontFamily: dm, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', minHeight: 40,
+                      color: active ? '#fff' : '#4b5563',
+                      background: active ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : '#fff',
+                      border: active ? 'none' : '1px solid #e5e7eb',
+                      borderRadius: 100, padding: '8px 16px',
+                    }}
+                  >
+                    {f.label}{counts[f.id] > 0 ? ` · ${counts[f.id]}` : ''}
+                  </button>
+                );
+              })}
+            </div>
+
+            {visible.length === 0 ? (
+              filter === 'attention' ? (
+                <div style={{ background: '#fff', borderRadius: 14, padding: '48px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
+                  <div style={{ fontSize: 44, marginBottom: 12 }}>🎉</div>
+                  <h3 style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>
+                    Everything is under control.
+                  </h3>
+                  <p style={{ fontSize: 14, color: '#6b7280', margin: 0, lineHeight: 1.6, maxWidth: 380, marginLeft: 'auto', marginRight: 'auto' }}>
+                    Nothing requires your attention today. CLIFF is monitoring your applications — come back tomorrow.
                   </p>
                 </div>
-                {app.nextAction === 'Send follow-up' && (
-                  <button
-                    onClick={e => { e.stopPropagation(); setFollowUpApp(app); setShowFollowUpModal(true); }}
-                    style={{ marginTop: 12, width: '100%', background: '#f5f3ff', border: '1px solid #6d28d9', color: '#6d28d9', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '10px', borderRadius: 8, fontFamily: dm }}
-                  >
-                    Send follow-up →
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* Desktop Table View */
-          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E5E5', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-              <thead>
-                <tr style={{ background: '#F9F9F9', borderBottom: '1px solid #E5E5E5' }}>
-                  {['Company', 'Job Title', 'Date Applied', 'Resume Version', 'Status', 'Next Action'].map(col => (
-                    <th
-                      key={col}
-                      style={{
-                        padding: '14px 16px', textAlign: 'left', fontWeight: 600, color: '#666',
-                        fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em',
-                      }}
-                    >
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map(app => (
-                  <tr
-                    key={app.id}
-                    onClick={() => setSelectedApp(app)}
-                    style={{
-                      borderBottom: '1px solid #F0F0F0', cursor: 'pointer', transition: 'background 0.2s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#FAFAFA'}
-                    onMouseLeave={e => e.currentTarget.style.background = '#fff'}
-                  >
-                    <td style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 24 }}>{app.logo}</span>
-                      <span style={{ fontWeight: 500, color: '#1A1A1A' }}>{app.company}</span>
-                    </td>
-                    <td style={{ padding: '12px 16px', color: '#555' }}>{app.jobTitle}</td>
-                    <td style={{ padding: '12px 16px', color: '#888' }}>
-                      {new Date(app.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span style={{ color: '#666', fontSize: 12, fontFamily: "'Monaco', monospace" }}>
-                        {app.resumeVersion}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span style={{
-                        fontSize: 12, fontWeight: 600, color: '#fff', background: STATUS_COLORS[app.status],
-                        padding: '4px 10px', borderRadius: 100, display: 'inline-block',
-                      }}>
-                        {STATUS_LABELS[app.status]}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      {app.nextAction === 'Send follow-up' ? (
-                        <button
-                          onClick={e => { e.stopPropagation(); setFollowUpApp(app); setShowFollowUpModal(true); }}
-                          style={{ background: '#f5f3ff', border: '1px solid #6d28d9', color: '#6d28d9', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '5px 12px', borderRadius: 100, fontFamily: dm, minHeight: 'auto', whiteSpace: 'nowrap' }}
-                        >
-                          Send follow-up
-                        </button>
-                      ) : (
-                        <span style={{ color: '#888', fontSize: 13 }}>{app.nextAction}</span>
-                      )}
-                    </td>
-                  </tr>
+              ) : (
+                <div style={{ background: '#fff', borderRadius: 14, padding: '36px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
+                  <p style={{ fontSize: 14, color: '#6b7280', margin: 0 }}>Nothing here right now.</p>
+                </div>
+              )
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
+                {visible.map(item => (
+                  <MissionAppCard
+                    key={item.app.id}
+                    item={item}
+                    highlighted={isHighlighted(item)}
+                    onAction={handleAction}
+                    onAskCliff={handleAskCliff}
+                    onOpen={setSelectedApp}
+                  />
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -420,10 +261,10 @@ export default function ApplicationTracker() {
           onUpdate={(updatedApp) => {
             setSelectedApp(updatedApp);
             setApplications(prev => prev.map(a => a.id === updatedApp.id ? updatedApp : a));
-            // Persist status & notes edits to the database (skip non-DB sample ids)
             if (updatedApp.id && !String(updatedApp.id).startsWith('app-')) {
               base44.entities.NetworkingPipeline.update(updatedApp.id, {
                 status: TRACKER_STATUS_TO_PIPELINE[updatedApp.status] || 'identified',
+                status_date: new Date().toISOString(),
                 notes: updatedApp.notes || '',
               }).catch(() => {});
             }
@@ -433,42 +274,33 @@ export default function ApplicationTracker() {
         />
       )}
 
-      {/* Floating Action Button */}
-      {!isMobile && (
-        <button
-          onClick={() => setShowAddModal(true)}
-          style={{
-            position: 'fixed', bottom: 32, right: 32, width: 56, height: 56, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', fontSize: 24, cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(109,40,217,0.35)', transition: 'all 0.2s', minHeight: 'auto',
-          }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          +
-        </button>
-      )}
-
-      {/* Add Application Modal */}
-      <AddApplicationModal 
-        isOpen={showAddModal} 
-        onClose={() => setShowAddModal(false)} 
-        onSuccess={(newApp) => {
-          setApplications([newApp, ...applications]);
+      {/* Floating add button */}
+      <button
+        onClick={() => setShowAddModal(true)}
+        style={{
+          position: 'fixed', bottom: 32, right: 32, width: 56, height: 56, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', fontSize: 24, cursor: 'pointer',
+          boxShadow: '0 8px 24px rgba(109,40,217,0.35)', minHeight: 'auto', zIndex: 50,
         }}
+      >
+        +
+      </button>
+
+      <AddApplicationModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={(newApp) => setApplications([newApp, ...applications])}
       />
 
-      {/* Follow-up Draft Modal */}
-      <FollowUpDraftModal 
-        isOpen={showFollowUpModal} 
-        onClose={() => { setShowFollowUpModal(false); setFollowUpApp(null); }} 
+      <FollowUpDraftModal
+        isOpen={showFollowUpModal}
+        onClose={() => { setShowFollowUpModal(false); setFollowUpApp(null); }}
         application={followUpApp || selectedApp}
       />
 
-      {/* Follow-up Reminder Modal */}
-      <FollowUpReminderModal 
-        isOpen={showReminderModal} 
-        onClose={() => setShowReminderModal(false)} 
+      <FollowUpReminderModal
+        isOpen={showReminderModal}
+        onClose={() => setShowReminderModal(false)}
         application={selectedApp}
       />
 
