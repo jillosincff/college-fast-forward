@@ -1,0 +1,114 @@
+{
+  "name": "CliffDiscovery",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student this discovery belongs to"
+    },
+    "discovery_key": {
+      "type": "string",
+      "description": "Stable dedupe key so the same discovery is never surfaced twice"
+    },
+    "discovery_type": {
+      "type": "string",
+      "enum": [
+        "better_job",
+        "new_connection",
+        "priority_change",
+        "resume_improvement",
+        "interview_prep",
+        "follow_up",
+        "company_news",
+        "pattern_insight"
+      ],
+      "description": "Type of proactive discovery"
+    },
+    "headline": {
+      "type": "string",
+      "description": "Coach-voice headline, e.g. 'I found a possible connection at Pfizer'"
+    },
+    "detail": {
+      "type": "string",
+      "description": "One or two sentences of context"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why this changes what the student should do next"
+    },
+    "action_label": {
+      "type": "string",
+      "description": "CTA button label, e.g. 'View Job'"
+    },
+    "action_route": {
+      "type": "string",
+      "description": "'workspace' or a hash route like '#/ApplicationTracker'"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company for workspace routing"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Role for workspace routing"
+    },
+    "job_url": {
+      "type": "string",
+      "description": "Link to the job posting if relevant"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "viewed",
+        "actioned",
+        "dismissed",
+        "expired"
+      ],
+      "default": "new",
+      "description": "Current status of this discovery"
+    },
+    "expires_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this discovery stops being shown"
+    }
+  },
+  "required": [
+    "user_email",
+    "discovery_type",
+    "headline"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

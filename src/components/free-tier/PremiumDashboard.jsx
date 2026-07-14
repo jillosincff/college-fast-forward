@@ -22,6 +22,7 @@ import PeakMomentSharePrompt from './PeakMomentSharePrompt';
 import FollowUpNudgeCard from './FollowUpNudgeCard';
 import WarmApplyBar from './WarmApplyBar';
 import CliffRecommendedActions from './CliffRecommendedActions';
+import CliffJustFound from './CliffJustFound';
 import ProgressSinceLastVisit from './ProgressSinceLastVisit';
 import JobWorkspaceCard from './JobWorkspaceCard';
 import { Wrench, LogOut, Rocket, FileText, Users, MessageCircle, GraduationCap, Building2, CalendarCheck, Clock } from 'lucide-react';
@@ -501,6 +502,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         <div style={{ display: 'grid', gridTemplateColumns: (showSidebar && !isMobile) ? 'minmax(0, 1fr) 340px' : 'minmax(0, 1fr)', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
           {/* Left Column - Job Feed */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
+            {/* Proactive high-relevance discoveries — only shows when CLIFF found something */}
+            <CliffJustFound user={user} />
+
             {/* CLIFF's per-job next actions from active pursuits + pipeline */}
             <div><CliffRecommendedActions user={user} /></div>
 
