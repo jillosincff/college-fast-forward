@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import GoogleSignInButton from '@/components/onboarding/student/GoogleSignInButton';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
 import StudentWelcomeScreen from '@/components/onboarding/student/StudentWelcomeScreen';
+import StudentMicroQuestions from '@/components/onboarding/student/StudentMicroQuestions';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
@@ -24,8 +25,6 @@ export default function StudentOnboarding() {
   // Form state
   const [firstName, setFirstName] = useState('');
   const [school, setSchool] = useState('');
-  const [parentCompany, setParentCompany] = useState('');
-  const [showCompanyFeedback, setShowCompanyFeedback] = useState(false);
 
   // Load fonts
   useEffect(() => {
@@ -119,67 +118,6 @@ export default function StudentOnboarding() {
     try {
       await base44.auth.updateMe(updateData);
 
-      // Save parent company if provided (non-blocking)
-      if (parentCompany.trim()) {
-        base44.entities.ParentNetworkProfile.create({
-          first_name: firstName.trim(),
-          last_name: user?.full_name?.split(' ').slice(1).join(' ') || 'Student',
-          company_name: parentCompany.trim(),
-          company_domain: parentCompany.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '.com',
-          role_title: 'Parent/Guardian',
-          school_code: schoolCode || '',
-          is_active: true,
-        }).catch(() => {});
-        
-        // Show instant feedback
-        setShowCompanyFeedback(true);
-        setTimeout(async () => {
-          setShowCompanyFeedback(false);
-          // Auto-link to parent if any (non-blocking)
-          base44.functions.invoke('linkStudentToParent', {
-            action: 'auto_link',
-            studentUserId: user.id,
-            studentEmailAddress: user.email,
-          }).catch(() => {});
-          // Award karma (non-blocking)
-          base44.functions.invoke('awardStudentKarma', {
-            userId: user.id, userEmail: user.email,
-            actionType: 'complete_profile', description: 'Completed student profile',
-          }).catch(() => {});
-          // Welcome email (non-blocking)
-          base44.functions.invoke('sendWelcomeEmail', {
-            userId: user.id, userEmail: user.email,
-            userName: firstName.trim(), persona: 'student',
-          }).catch(() => {});
-          // Credit ambassador referral (non-blocking)
-          if (referralCode) {
-            base44.functions.invoke('trackReferralClick', {
-              referral_code: referralCode,
-              action: 'signup_completed',
-              user_email: user.email,
-            }).catch(() => {});
-            try { sessionStorage.removeItem('pending_referral_code'); } catch (e) { /* ok */ }
-          }
-          // Claim parent referral if present (non-blocking)
-          const parentRefCode = (() => { try { return localStorage.getItem('parent_referral_code'); } catch (e) { return null; } })();
-          if (parentRefCode) {
-            fetch('https://growth-hacker-marketing-agent-101dbdc8.base44.app/functions/claimParentReferral', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ referral_code: parentRefCode }),
-              credentials: 'include',
-            }).catch(() => {});
-            try { localStorage.removeItem('parent_referral_code'); } catch (e) { /* ok */ }
-          }
-          localStorage.removeItem('pending_invite_role');
-          try { sessionStorage.removeItem('cff_onboarding_type'); } catch (e) {}
-          if (refreshUser) await refreshUser();
-          setStep(3);
-        }, 2000);
-        return; // Exit early to show feedback animation
-      }
-
-      // No parent company - proceed normally
       // Auto-link to parent if any (non-blocking)
       base44.functions.invoke('linkStudentToParent', {
         action: 'auto_link',
@@ -224,7 +162,8 @@ export default function StudentOnboarding() {
       localStorage.removeItem('pending_invite_role');
       try { sessionStorage.removeItem('cff_onboarding_type'); } catch (e) {}
       if (refreshUser) await refreshUser();
-      setStep(3);
+      // Three micro questions next — they power the job feed from day one
+      setStep(2.5);
     } catch (e) {
       console.error('Onboarding update failed:', e.message);
       setError('Something went wrong. Please try again.');
@@ -236,10 +175,16 @@ export default function StudentOnboarding() {
   const handleWelcomeComplete = useCallback(() => {
     // Generate LinkedIn optimization in background (non-blocking)
     base44.functions.invoke('generateLinkedInOptimization', {}).catch(() => {});
-    
-    // Flow B: Go to PostJoinUpsell (7-day trial offer)
-    navigate('PostJoinUpsell');
+
+    // Flow B: straight to the dashboard where the free Magic Moment application waits.
+    // Pricing comes later — after the student has experienced CLIFF working.
+    navigate('FreeTierDashboard');
   }, []);
+
+  // ── SCREEN 2.5: Three micro questions (20 seconds) — warms up the job feed ──
+  if (step === 2.5 && user) {
+    return <StudentMicroQuestions onComplete={() => setStep(3)} />;
+  }
 
   // ── SCREEN 3: Welcome Moment ──
   if (step === 3) {
@@ -305,47 +250,6 @@ export default function StudentOnboarding() {
               </p>
             </div>
 
-            {/* Parent Company - Optional */}
-            <div style={{ marginBottom: 32 }}>
-              <label style={{
-                display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-                textTransform: 'uppercase', letterSpacing: '0.1em',
-                color: '#888', marginBottom: 8,
-              }}>
-                Where do your parents or guardians work? <span style={{ color: '#555', fontWeight: 400 }}>(Optional)</span>
-              </label>
-              <input
-                value={parentCompany}
-                onChange={e => setParentCompany(e.target.value)}
-                placeholder="e.g., Google, Deloitte, Mayo Clinic"
-                style={{
-                  width: '100%', background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid #2A2A2A', borderRadius: 12, padding: '14px 16px',
-                  fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff', boxSizing: 'border-box',
-                  transition: 'border-color 0.2s',
-                }}
-                onFocus={e => { e.target.style.borderColor = ORANGE; }}
-                onBlur={e => { e.target.style.borderColor = '#2A2A2A'; }}
-              />
-              <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 8, padding: 12, marginTop: 12 }}>
-                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: '#E85D20', marginBottom: 6 }}>
-                  💡 Why do we ask this?
-                </p>
-                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888', lineHeight: 1.5, marginBottom: 6 }}>
-                  The corporate game is rigged—80% of jobs are filled through personal connections, not cold job boards.
-                </p>
-                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888', lineHeight: 1.5, marginBottom: 6 }}>
-                  College Fast Forward activates your Campus Ecosystem. By securely mapping where your family works, you help open up an Inside Track for a fellow student at your school.
-                </p>
-                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888', lineHeight: 1.5 }}>
-                  In return, you get instant access to the Inside Tracks their families and alumni have opened up for you. It's how we all bypass the resume black hole together.
-                </p>
-                <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 400, color: '#555', fontStyle: 'italic', marginTop: 8 }}>
-                  🔒 Zero Spam Guarantee: We will never email, call, or solicit your parents. This purely maps company availability to give your university ecosystem an unfair advantage.
-                </p>
-              </div>
-            </div>
-
             {/* CTA */}
             <button
               onClick={handleSubmit}
@@ -361,31 +265,6 @@ export default function StudentOnboarding() {
               {loading ? 'Setting up...' : 'Take Me In →'}
             </button>
 
-            {/* Instant Feedback Animation */}
-            {showCompanyFeedback && parentCompany && (
-              <div style={{
-                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                background: 'rgba(10,10,10,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 24, zIndex: 9999,
-              }}>
-                <div style={{
-                  background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 16,
-                  padding: '40px 32px', maxWidth: 400, width: '100%', textAlign: 'center',
-                  animation: 'fadeInUp 0.3s ease-out',
-                }}>
-                  <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
-                  <h3 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 20, color: '#fff', marginBottom: 8 }}>
-                    Boom! You just unlocked {parentCompany} network access
-                  </h3>
-                  <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888', lineHeight: 1.5 }}>
-                    The entire {school} pool now has a warm entry point at {parentCompany}. In return, I've mapped out other parents and alums to help you jump the line this week.
-                  </p>
-                  <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: ORANGE, marginTop: 16 }}>
-                    Welcome to the engine. 🐊
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

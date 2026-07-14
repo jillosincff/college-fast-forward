@@ -119,106 +119,17 @@ export default function OnboardingSteps1to4({
         />
       )}
 
-      {/* ── SCREEN 3: Frustration Slider ── */}
-      {screen === 3 && (() => {
-        const frustEmoji = frustration <= 2 ? '😌' : frustration <= 4 ? '😐' : frustration <= 6 ? '😟' : frustration <= 8 ? '😰' : '🆘';
-        const frustColor = frustration <= 3 ? GREEN : frustration <= 6 ? '#F59E0B' : '#EF4444';
-        const glowColor = frustration <= 3 ? 'rgba(16,185,129,0.08)' : frustration <= 6 ? 'rgba(245,158,11,0.09)' : 'rgba(239,68,68,0.11)';
-        const microCopy = frustration <= 3
-          ? `You're at a ${frustration}/10 — staying calm. Smart move. We'll keep that momentum going and get you ahead of the curve before things heat up.`
-          : frustration <= 5
-          ? `You're at a ${frustration}/10 — feeling the pressure but still in control. Most students hit their breakthrough right at this stage. Your Agent is ready to tip the scales.`
-          : frustration <= 7
-          ? `You're at a ${frustration}/10 — right in the danger zone. Most students feel exactly like you do before they start seeing real traction. The good news? This is where your Career Agent starts turning things around.`
-          : frustration <= 9
-          ? `You're at a ${frustration}/10 — we hear you. The black hole is real, and it's exhausting. But students at this exact level see the biggest gains fastest once the Agent kicks in. Let's go.`
-          : `You're at 10/10 — at breaking point. Let's fix this fast. Your Agent is built exactly for this moment.`;
-        const handleContinue = () => {
-          setAnalyzingFrustration(true);
-          setTimeout(() => { setAnalyzingFrustration(false); next(); }, 700);
-        };
-        const analyzing = analyzingFrustration;
-        const pct = ((frustration - 1) / 9) * 100;
-        return (
-          <div style={{ ...card, maxWidth: 520, paddingTop: 40 }}>
-            <h1 style={{ ...h1style, marginBottom: 10 }}>How frustrated are you with your job search right now?</h1>
-            <p style={{ ...substyle, marginBottom: 32 }}>Be honest — the more accurately you answer, the better your Agent can build a strategy around your exact roadblocks.</p>
-
-            <div style={{ background: CARD, border: `1.5px solid ${frustColor}33`, borderRadius: R, padding: '32px 28px 28px', marginBottom: 12, boxShadow: `0 0 40px ${glowColor}, ${SHADOW}`, transition: 'box-shadow 0.4s ease, border-color 0.4s ease' }}>
-              {/* Emoji indicator */}
-              <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                <span style={{ fontSize: 40, lineHeight: 1, transition: 'all 0.2s ease', display: 'inline-block' }}>{frustEmoji}</span>
-              </div>
-
-              {/* Labels */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, fontWeight: 600 }}>Not at all</span>
-                <span style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, fontWeight: 600 }}>I'm losing my mind</span>
-              </div>
-
-              {/* Custom styled slider */}
-              <div style={{ position: 'relative', marginBottom: 4 }}>
-                <style>{`
-                  .frustration-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 100px; outline: none; cursor: pointer; background: linear-gradient(to right, ${frustColor} 0%, ${frustColor} ${pct}%, #E2E8F0 ${pct}%, #E2E8F0 100%); transition: background 0.15s ease; }
-                  .frustration-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 2.5px solid ${frustColor}; box-shadow: 0 2px 10px rgba(0,0,0,0.16); cursor: grab; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-                  .frustration-slider::-webkit-slider-thumb:active { cursor: grabbing; box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
-                  .frustration-slider::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 2.5px solid ${frustColor}; box-shadow: 0 2px 10px rgba(0,0,0,0.16); cursor: grab; }
-                `}</style>
-                <input
-                  type="range" min="1" max="10" value={frustration}
-                  onChange={e => setFrustration(Number(e.target.value))}
-                  className="frustration-slider"
-                />
-              </div>
-
-              {/* Score display */}
-              <div style={{ textAlign: 'center', marginTop: 24 }}>
-                <span style={{ fontFamily: FONT, fontSize: 64, fontWeight: 800, color: frustColor, lineHeight: 1, letterSpacing: '-0.04em', transition: 'color 0.3s ease' }}>{frustration}</span>
-                <span style={{ fontFamily: FONT, fontSize: 18, color: TEXT3, marginLeft: 6 }}>/10</span>
-                <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, marginTop: 14, lineHeight: 1.6, minHeight: 44, transition: 'all 0.2s ease' }}>
-                  {microCopy}
-                </p>
-              </div>
-            </div>
-
-            {/* Emotional closer */}
-            <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '16px 0 0', lineHeight: 1.65, fontStyle: 'italic', textAlign: 'center' }}>
-              Every day you stay stuck in this loop is another day without interviews. Let's change that starting now.
-            </p>
-
-            {/* Continue CTA */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, marginTop: 20 }}>
-              <button
-                onClick={handleContinue}
-                disabled={analyzing}
-                style={{ width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: analyzing ? '#7c3aed' : GRAD_INDIGO, border: 'none', borderRadius: 10, padding: '16px 32px', cursor: analyzing ? 'default' : 'pointer', minHeight: 'auto', boxShadow: '0 10px 20px rgba(109,40,217,0.2)', transition: 'all 0.25s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-                         onMouseEnter={e => { if (!analyzing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 28px rgba(109,40,217,0.32)'; }}}
-                         onMouseLeave={e => { if (!analyzing) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(109,40,217,0.2)'; }}}
-              >
-                {analyzing ? (
-                  <>
-                    <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
-                    Agent analyzing your frustration level…
-                  </>
-                ) : 'Continue →'}
-              </button>
-              <button onClick={back} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 8px', textDecoration: 'underline', textUnderlineOffset: 3 }}>← Back</button>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── SCREEN 4: What Are You Looking For ── */}
+      {/* ── SCREEN 4: CLIFF's Mission ── */}
       {screen === 4 && (
         <div style={{ ...card, maxWidth: 520 }}>
           {/* Agent framing badge */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F0FDF4', border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 14px', marginBottom: 20 }}>
             <span style={{ fontSize: 11 }}>🎯</span>
-            <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Setting your career coordinates</span>
+            <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Giving CLIFF its mission</span>
           </div>
 
-          <h1 style={h1style}>What's your main focus right now?</h1>
-          <p style={{ ...substyle, marginBottom: 28 }}>This is the first key coordinate your Career Agent needs to lock in so it can prioritize the right opportunities, insiders, and tailored materials for you.</p>
+          <h1 style={h1style}>What do you want CLIFF to help you get?</h1>
+          <p style={{ ...substyle, marginBottom: 28 }}>This is CLIFF's mission. Every job it finds, every intro it surfaces, and every material it builds starts with this answer.</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 4, textAlign: 'left' }} className="blocker-card-list">
             {SEEKING_OPTIONS.map(opt => {

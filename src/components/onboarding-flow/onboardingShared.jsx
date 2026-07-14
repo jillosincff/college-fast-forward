@@ -108,6 +108,16 @@ export const BLOCKERS = [
   },
 ];
 
+// Single-select "If CLIFF could solve ONE thing today…" options.
+// Keys intentionally reuse legacy BLOCKERS keys so downstream logic keeps working.
+export const CLIFF_SOLVE = [
+  { key: 'which_jobs', icon: '🔍', label: 'Find better jobs', sub: "I'll scout and rank the roles actually worth your time — daily." },
+  { key: 'resume', icon: '📄', label: 'Improve my resume', sub: "I'll rewrite it to beat ATS filters and reach real recruiters." },
+  { key: 'interviews', icon: '🎤', label: 'Help me get interviews', sub: "I'll prepare every application so more of them convert." },
+  { key: 'outreach', icon: '🤝', label: 'Find people to contact', sub: "I'll surface parents & alumni insiders at your target companies." },
+  { key: 'disorganized', icon: '📁', label: 'Keep me organized', sub: "I'll track every application and tell you exactly when to follow up." },
+];
+
 // ── Screen 2: Built by Experts (extracted to avoid conditional hooks) ───────
 export const SCREEN2_EXPERTS = [
   { key: 'coach', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/fe0568933_image.png', name: 'Anna V.', role: 'ex-SAP, Global Early Talent', teaser: 'Built hiring pipelines at SAP. She knows exactly what recruiters look for in interns & new grads.', color: '#7C3AED', colorLight: '#F5F3FF', colorBorder: '#DDD6FE' },

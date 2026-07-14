@@ -15,8 +15,8 @@ import {
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false, resumeAtScreen = null }) {
   // Load saved progress for returning users
   const saved = resumeAtScreen ? loadSavedProgress() : null;
-  // Screen 2 (experts marketing) was removed from the flow — never resume onto it
-  const startScreen = resumeAtScreen === 2 ? 3 : (resumeAtScreen || 1);
+  // Screens 2 (experts) + 3 (frustration slider) were removed — never resume onto them
+  const startScreen = (resumeAtScreen === 2 || resumeAtScreen === 3) ? 4 : (resumeAtScreen || 1);
 
   const [screen, setScreen] = useState(startScreen);
   const [analyzing, setAnalyzing] = useState(false); // analyzing loader after university
@@ -65,8 +65,8 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
   const fileRef = useRef();
 
-  const TOTAL = 12; // 13 internal screens minus the removed experts screen (2)
-  const displayStep = screen > 2 ? screen - 1 : screen;
+  const TOTAL = 11; // 13 internal screens minus removed experts (2) and frustration (3)
+  const displayStep = screen > 3 ? screen - 2 : screen;
 
   // ── Abandonment event tracking ──────────────────────────────────────────
   const screenRef = useRef(startScreen);
@@ -106,8 +106,8 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
 
   const next = () => {
     let newScreen = screen + 1;
-    // Screen 2 (experts) is cut — it collected no data and slowed the funnel
-    if (newScreen === 2) newScreen = 3;
+    // Screens 2 (experts) + 3 (frustration) are cut from the flow
+    if (newScreen === 2 || newScreen === 3) newScreen = 4;
     // Skippers have no resume — bypass the Before/After screen (11),
     // which would otherwise render infinite "parsing" spinners.
     if (newScreen === 11 && !resumeData) newScreen = 12;
@@ -131,7 +131,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const back = () => {
     setScreen(s => {
       let prev = Math.max(1, s - 1);
-      if (prev === 2) prev = 1; // experts screen removed
+      if (prev === 3 || prev === 2) prev = 1; // experts + frustration screens removed
       // Mirror the forward skip: no resume → screen 11 doesn't exist for this user
       if (prev === 11 && !resumeData) prev = 10;
       // Reset screen 9 sub-mode when leaving screen 9 via back
@@ -143,6 +143,8 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const toggleBlocker = (key) => {
     setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
   };
+  // Single-select variant — "If CLIFF could solve ONE thing today"
+  const selectBlocker = (key) => setBlockers([key]);
 
   // Fire referral milestone when referee hits the school step
   const fireReferralMilestone = async (schoolName) => {
@@ -412,7 +414,7 @@ CRITICAL RULES:
           h1style={h1style} substyle={substyle} card={card}
           selectedIndustries={selectedIndustries} setSelectedIndustries={setSelectedIndustries}
           targetRoles={targetRoles} setTargetRoles={setTargetRoles}
-          blockers={blockers} toggleBlocker={toggleBlocker}
+          blockers={blockers} toggleBlocker={toggleBlocker} selectBlocker={selectBlocker}
           college={college} setCollege={setCollege} fireReferralMilestone={fireReferralMilestone}
           locationPref={locationPref} setLocationPref={setLocationPref}
           locationCity={locationCity} setLocationCity={setLocationCity}

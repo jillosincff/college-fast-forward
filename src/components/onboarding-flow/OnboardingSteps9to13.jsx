@@ -1,6 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import LinkedInScreen from './LinkedInScreen';
-import PlanScreen from './PlanScreen';
+import CliffCommitmentScreen from './CliffCommitmentScreen';
 import ATSScoreRing from './ATSScoreRing';
 import LiveEngineLoader from './LiveEngineLoader';
 import CliffRevealScreen from './CliffRevealScreen';
@@ -41,8 +41,8 @@ export default function OnboardingSteps9to13({
 
           {!uploading && dataInputMode === 'choose' && (
             <>
-              <h1 style={h1style}>Let's build your standout profile</h1>
-              <p style={{ ...substyle, marginBottom: 28 }}>The more your Agent knows about you, the better it can match you with alumni insiders, tailor your materials, and uncover opportunities that actually fit.</p>
+              <h1 style={h1style}>Give CLIFF something to work with.</h1>
+              <p style={{ ...substyle, marginBottom: 28 }}>The more CLIFF knows about you, the smarter its job matches, materials, and warm intros get.</p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
                 {/* Upload Resume */}
@@ -188,8 +188,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
         <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 12px' }}>
           {firstName
-            ? <>{firstName}, your resume just <span style={{ color: '#10B981' }}>leveled up.</span></>
-            : dataInputMode === 'quickstart' ? 'Your Starter Profile Is Ready' : <>Your resume just <span style={{ color: '#10B981' }}>leveled up.</span></>}
+            ? <>{firstName}, here's what CLIFF <span style={{ color: '#10B981' }}>noticed.</span></>
+            : dataInputMode === 'quickstart' ? 'Your Starter Profile Is Ready' : <>Here's what CLIFF <span style={{ color: '#10B981' }}>noticed.</span></>}
         </h1>
         {/* Personal note — mirrors back their inputs */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
@@ -225,7 +225,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                     <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                       {dataInputMode === 'quickstart' ? 'Starter Profile' : 'Your Current Resume'}
                     </span>
-                    <span style={{ fontFamily: FONT, fontSize: 10, color: TEXT3 }}>Before</span>
+                    <span style={{ fontFamily: FONT, fontSize: 10, color: TEXT3 }}>As submitted</span>
                   </div>
                   <div style={{ padding: '20px 24px', background: CARD, minHeight: 480 }}>
                     {orig ? (
@@ -288,7 +288,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           {/* Agent Feedback Card — 2-col layout */}
           <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px 28px', marginBottom: 24, border: `1px solid ${GREEN_BORDER}` }}>
             <h3 style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              ✓ Agent Feedback
+              ✓ What CLIFF Noticed
             </h3>
             <div style={{ display: 'flex', gap: 28, alignItems: 'center', flexWrap: 'wrap' }}>
               {/* Left: checklist (65%) */}
@@ -397,17 +397,15 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         />
       )}
 
-      {/* ── SCREEN 13: Your 14-Day Plan ── */}
+      {/* ── SCREEN 13: "Here's what I'm going to do." — no pricing, straight to Magic Moment ── */}
       {screen === 13 && (
-        <PlanScreen
+        <CliffCommitmentScreen
           resumeData={resumeData}
           college={college}
           seeking={seeking}
           blockers={blockers}
-          frustration={frustration}
           locationPref={locationPref}
           locationCity={locationCity}
-          quickRole={quickRole || targetRoles[0]}
           selectedIndustries={selectedIndustries}
           targetRoles={targetRoles}
           onBack={back}

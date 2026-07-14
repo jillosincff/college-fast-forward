@@ -3,7 +3,7 @@ import Screen6School from './Screen6School';
 import {
   FONT, BG, CARD, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_BORDER,
   GRAD_INDIGO, SHADOW, SHADOW_MD, R, BLUE, BLUE_LIGHT, BLUE_BORDER,
-  GREEN, GREEN_LIGHT, GREEN_BORDER, BLOCKERS, Btn, Nav, InputField,
+  GREEN, GREEN_LIGHT, GREEN_BORDER, CLIFF_SOLVE, Btn, Nav, InputField,
 } from './onboardingShared';
 
 /**
@@ -15,8 +15,8 @@ export default function OnboardingSteps5to8({
   h1style, substyle, card,
   // screen 5 (industry)
   selectedIndustries, setSelectedIndustries, targetRoles, setTargetRoles,
-  // screen 6 (blockers)
-  blockers, toggleBlocker,
+  // screen 6 (what CLIFF should solve first — single select)
+  blockers, toggleBlocker, selectBlocker,
   // screen 7 (school)
   college, setCollege, fireReferralMilestone,
   // screen 8 (location)
@@ -37,80 +37,49 @@ export default function OnboardingSteps5to8({
         />
       )}
 
-      {/* ── SCREEN 6: What's Holding You Back ── */}
+      {/* ── SCREEN 6: If CLIFF Could Solve ONE Thing Today ── */}
       {screen === 6 && (() => {
-        const activeBlocker = BLOCKERS.find(b => blockers[blockers.length - 1] === b.key);
-        const dynamicHint = activeBlocker ? `✦ We'll unlock your ${activeBlocker.tool} based on this.` : null;
-        const [limitToast, setLimitToast] = [false, () => {}]; // placeholder to avoid useState inside IIFE
-
-        const handleBlockerClick = (key) => {
-          const active = blockers.includes(key);
-          if (!active && blockers.length >= 2) {
-            // show toast by setting a temp DOM message
-            const el = document.getElementById('blocker-limit-toast');
-            if (el) { el.style.opacity = '1'; setTimeout(() => { el.style.opacity = '0'; }, 2200); }
-            return;
-          }
-          toggleBlocker(key);
-        };
-
+        const selectedKey = blockers[0] || null;
+        const selected = CLIFF_SOLVE.find(o => o.key === selectedKey);
         return (
           <div style={{ ...card, maxWidth: 540 }}>
-            {/* Limit toast */}
-            <div id="blocker-limit-toast" style={{ position: 'fixed', top: 56, left: '50%', transform: 'translateX(-50%)', background: '#1E293B', color: '#fff', fontFamily: FONT, fontSize: 13, fontWeight: 600, padding: '10px 20px', borderRadius: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.18)', zIndex: 20000, opacity: 0, transition: 'opacity 0.25s ease, transform 0.25s ease', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
-              Focusing on your top 2 priorities ensures the fastest results.
-            </div>
-
             {/* Badge */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 100, padding: '5px 14px', marginBottom: 20 }}>
-              <span style={{ fontSize: 11 }}>🩺</span>
-              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#EA580C', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Career Diagnostic</span>
+              <span style={{ fontSize: 11 }}>⚡</span>
+              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#EA580C', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your first assignment for CLIFF</span>
             </div>
 
-            <h1 style={h1style}>What's the biggest thing holding you back right now?</h1>
-            <p style={{ ...substyle, marginBottom: 20 }}>Select up to 2. Be honest — <strong style={{ color: TEXT }}>Your agent</strong> will instantly unlock the exact tools to crush these roadblocks.</p>
+            <h1 style={h1style}>If CLIFF could solve ONE thing today…</h1>
+            <p style={{ ...substyle, marginBottom: 20 }}>Pick what matters most. CLIFF starts there first — the rest follows.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }} className="blocker-card-list">
-               {BLOCKERS.map(opt => {
-                const active = blockers.includes(opt.key);
-                const maxed = blockers.length >= 2 && !active;
+              {CLIFF_SOLVE.map(opt => {
+                const active = selectedKey === opt.key;
                 return (
                   <button
                     key={opt.key}
-                    onClick={() => handleBlockerClick(opt.key)}
+                    onClick={() => selectBlocker(opt.key)}
+                    className="onb-option-btn"
                     style={{
                       display: 'flex', alignItems: 'center', gap: 14, width: '100%',
                       background: active ? GREEN_LIGHT : CARD,
-                      border: `2px solid ${active ? GREEN : maxed ? '#F1F5F9' : '#E2E8F0'}`,
-                      borderRadius: 14, padding: '16px 18px', cursor: maxed ? 'default' : 'pointer',
+                      border: `2px solid ${active ? GREEN : '#E2E8F0'}`,
+                      borderRadius: 14, padding: '16px 18px', cursor: 'pointer',
                       textAlign: 'left', minHeight: 'auto',
                       boxShadow: active
-                        ? `0 0 0 3px ${GREEN_BORDER}, 0 8px 20px rgba(16,185,129,0.12)`
-                        : maxed ? 'none' : '0 4px 12px rgba(0,0,0,0.05)',
-                      opacity: maxed ? 0.45 : 1,
+                        ? `0 0 0 3px ${GREEN_BORDER}, 0 8px 20px rgba(6,182,212,0.12)`
+                        : '0 4px 12px rgba(0,0,0,0.05)',
                       transform: active ? 'translateY(-1px)' : 'translateY(0)',
                       transition: 'all 0.18s ease',
                     }}
-                    onMouseEnter={e => { if (!active && !maxed) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = '#CBD5E1'; } }}
-                    onMouseLeave={e => { if (!active && !maxed) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E2E8F0'; } }}
+                    onMouseEnter={e => { if (!active) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = '#CBD5E1'; } }}
+                    onMouseLeave={e => { if (!active) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E2E8F0'; } }}
                   >
-                    {/* Icon box */}
-                    <span style={{
-                      fontSize: 20, flexShrink: 0, width: 42, height: 42,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: active ? 'rgba(16,185,129,0.12)' : BG,
-                      borderRadius: 10, border: `1px solid ${active ? GREEN_BORDER : '#E2E8F0'}`,
-                      filter: maxed ? 'grayscale(1)' : 'none',
-                      transition: 'all 0.18s',
-                    }}>{opt.icon}</span>
-
-                    {/* Text block */}
+                    <span style={{ fontSize: 20, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'rgba(6,182,212,0.12)' : BG, borderRadius: 10, border: `1px solid ${active ? GREEN_BORDER : '#E2E8F0'}`, transition: 'all 0.18s' }}>{opt.icon}</span>
                     <div style={{ flex: 1 }}>
-                      <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: active ? '#065F46' : TEXT, margin: '0 0 3px' }}>{opt.label}</p>
-                      <p style={{ fontFamily: FONT, fontSize: 12, color: active ? '#059669' : TEXT3, margin: 0, fontStyle: 'italic' }}>{opt.solution}</p>
+                      <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: active ? '#0E7490' : TEXT, margin: '0 0 3px' }}>{opt.label}</p>
+                      <p style={{ fontFamily: FONT, fontSize: 12, color: active ? '#0891b2' : TEXT3, margin: 0, fontStyle: 'italic' }}>{opt.sub}</p>
                     </div>
-
-                    {/* Animated checkmark circle */}
                     <div style={{
                       width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
                       border: `2px solid ${active ? GREEN : '#CBD5E1'}`,
@@ -118,7 +87,6 @@ export default function OnboardingSteps5to8({
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 11, color: '#fff', fontWeight: 800,
                       transition: 'all 0.18s ease',
-                      boxShadow: active ? '0 2px 8px rgba(16,185,129,0.35)' : 'none',
                     }}>
                       {active && '✓'}
                     </div>
@@ -127,61 +95,18 @@ export default function OnboardingSteps5to8({
               })}
             </div>
 
-            {/* Instant mirroring unlock panel */}
-            {blockers.length > 0 && (
-              <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 20, animation: 'fadeUp 0.25s ease' }}>
-                <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#065F46', margin: '0 0 6px' }}>Got it.</p>
-                <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: '0 0 12px', lineHeight: 1.6 }}>
-                  You're dealing with{' '}
-                  {blockers.map((key, idx) => {
-                    const b = BLOCKERS.find(x => x.key === key);
-                    return <span key={key}>{idx > 0 ? ' and ' : ''}<strong>"{b?.label}"</strong></span>;
-                  })}.
-                </p>
-                <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
-                  Your agent is already unlocking:
-                </p>
-                {blockers.map(key => {
-                  const b = BLOCKERS.find(x => x.key === key);
-                  if (!b) return null;
-                  return (
-                    <div key={key} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
-                      <span style={{ fontSize: 13, flexShrink: 0 }}>{b.icon}</span>
-                      <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.5 }}>
-                        <strong>{b.tool}</strong>
-                        <span style={{ display: 'inline-block', marginLeft: 8, fontFamily: FONT, fontSize: 10, fontWeight: 700, color: GREEN, background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>✓ Unlocked</span>
-                      </p>
-                    </div>
-                  );
-                })}
-                <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: '10px 0 0', lineHeight: 1.6, fontWeight: 600 }}>
-                  You're now ahead of most students who never diagnose their biggest leaks. Let's fix this.
+            {/* Instant mirroring */}
+            {selected && (
+              <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
+                <p style={{ fontFamily: FONT, fontSize: 13, color: '#0E7490', margin: 0, lineHeight: 1.6 }}>
+                  <strong>On it. "{selected.label}" is now my #1 priority.</strong><br />
+                  {selected.sub}
                 </p>
               </div>
             )}
 
-            {/* Continue button */}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 24 }}>
-              <Btn primary={false} onClick={back} small>← Back</Btn>
-              <button
-                onClick={next}
-                disabled={blockers.length === 0}
-                style={{
-                  fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
-                  background: blockers.length === 0 ? '#CBD5E1' : GRAD_INDIGO,
-                  border: 'none', borderRadius: 8, padding: '15px 36px',
-                  cursor: blockers.length === 0 ? 'not-allowed' : 'pointer',
-                  minHeight: 'auto',
-                  boxShadow: blockers.length === 0 ? 'none' : '0 4px 14px rgba(109,40,217,0.30)',
-                  transition: 'all 0.25s ease',
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                }}
-                onMouseEnter={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(109,40,217,0.40)'; }}}
-                onMouseLeave={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(109,40,217,0.30)'; }}}
-              >
-                {blockers.length === 0 ? 'Select at least 1 →' : <>Continue → <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.85 }}>Tools unlocked ✓</span></>}
-              </button>
-            </div>
+            <Nav onBack={back} onNext={next} nextDisabled={!selectedKey} />
           </div>
         );
       })()}
