@@ -29,6 +29,7 @@ import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt'
 import WarmApplyBar from '@/components/free-tier/WarmApplyBar';
 import GoalHeader from '@/components/free-tier/GoalHeader';
 import CliffRecommendedActions from '@/components/free-tier/CliffRecommendedActions';
+import PlanStateBanner from '@/components/pro/PlanStateBanner';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -336,6 +337,9 @@ export default function FreeTierDashboard() {
             onEditGoal={() => setShowGoalsModal(true)}
           />
         )}
+
+        {/* Plan state: magic moment available reminder OR post-magic-moment Pro conversion */}
+        {!focusMode && <PlanStateBanner user={user} onUpgrade={triggerUpgrade} />}
 
         {/* Done-For-You activation moment — a finished application package for one real job */}
         <FirstApplicationPackageCard user={user} />

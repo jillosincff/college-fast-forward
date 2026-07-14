@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
+import useAccessPlan from '@/hooks/useAccessPlan';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 const isDone = s => ['ready_for_review', 'approved', 'complete'].includes(s || '');
@@ -7,6 +8,7 @@ const isDone = s => ['ready_for_review', 'approved', 'complete'].includes(s || '
 // Action-first workspace header: can I apply, and what's ready?
 export default function ReadyToApplyCard({ job, pursuit, user }) {
   const [showApply, setShowApply] = useState(false);
+  const { isPro, magicMomentAvailable, magicMomentCompleted, excludePrompts } = useAccessPlan(user);
   const company = job?.company || '';
   const role = job?.role || job?.job_title || '';
   const jobUrl = job?.jobUrl || job?.job_url || '';
@@ -46,6 +48,17 @@ export default function ReadyToApplyCard({ job, pursuit, user }) {
       >
         Apply →
       </button>
+
+      {!isPro && !excludePrompts && magicMomentAvailable && (
+        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '10px 0 0', textAlign: 'center' }}>
+          🎁 Your first CLIFF-powered application is free — use it here.
+        </p>
+      )}
+      {!isPro && !excludePrompts && magicMomentCompleted && (
+        <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '10px 0 0', textAlign: 'center' }}>
+          Free plan: resume tailoring is queued (~24h). CLIFF Pro is instant.
+        </p>
+      )}
 
       {showApply && (
         <WarmApplyFlow job={{ company, role, jobUrl }} user={user} applyOnly onClose={() => setShowApply(false)} />
