@@ -26,8 +26,9 @@ export default function WhileYouWereAway({ user }) {
   const rec = data.recommendation;
 
   const go = () => {
-    if (rec.workspace) openCliffWorkspace(rec.workspace);
-    else if (rec.route) window.location.hash = rec.route;
+    const a = rec.action || {};
+    if (a.type === 'workspace') openCliffWorkspace(a.payload);
+    else if (a.type === 'route' && a.route) window.location.hash = a.route;
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -70,6 +71,16 @@ export default function WhileYouWereAway({ user }) {
               {rec.cta} <ArrowRight size={13} />
             </button>
           </div>
+        </div>
+      )}
+
+      {data.suppressed?.length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          {data.suppressed.map((s, i) => (
+            <p key={i} style={{ fontFamily: dm, fontSize: 11.5, color: '#9ca3af', margin: '0 0 3px', lineHeight: 1.5 }}>
+              🤫 {s}
+            </p>
+          ))}
         </div>
       )}
     </div>

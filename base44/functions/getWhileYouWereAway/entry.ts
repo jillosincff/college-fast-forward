@@ -48,58 +48,16 @@ Deno.serve(async (req) => {
       if (hrs > 0 && hrs <= 48) items.push(`✓ Your ${r.company} interview is ${hrs <= 24 ? 'today or tomorrow' : 'coming up in 2 days'}.`);
     }
 
-    // ── One recommendation: the single most valuable next move ──────────
-    const interviewSoon = interviews.find(r => {
-      const hrs = (new Date(r.interview_date).getTime() - now) / 3600000;
-      return hrs > 0 && hrs <= 48;
-    }) || (pipeline || []).find(r => r.status === 'interview');
-    const readyResume = (resumes || []).find(r => r.status === 'completed' && !r.downloaded_at);
-    const topOpp = plan?.opportunities?.[0];
+    // ── The one recommendation comes from a single brain: the Decision Engine ──
+    const engineRes = await base44.functions.invoke('decisionEngine', {});
+    const engine = engineRes?.data || engineRes || {};
 
-    let recommendation;
-    if (interviewSoon) {
-      recommendation = {
-        title: `Practice your ${interviewSoon.company} interview`,
-        reason: 'Your interview is the highest-stakes event on your calendar right now.',
-        time: '~15 minutes', outcome: 'Walk in with rehearsed answers instead of nerves.',
-        cta: 'Practice', route: '#/MockInterview',
-      };
-    } else if (followUpsDue[0]) {
-      recommendation = {
-        title: `Send your ${followUpsDue[0].company} follow-up`,
-        reason: `It's been ${Math.floor(daysSince(followUpsDue[0]))} days with no reply — a short nudge now keeps you on their radar.`,
-        time: '~2 minutes', outcome: 'Roughly doubles your chance of a response versus staying silent.',
-        cta: 'Send', route: '#/ApplicationTracker',
-      };
-    } else if (readyResume) {
-      recommendation = {
-        title: `Review your tailored ${readyResume.company_name} resume`,
-        reason: "I already did the tailoring — it just needs your approval before you apply.",
-        time: '~3 minutes', outcome: 'A submit-ready application for ' + readyResume.company_name + '.',
-        cta: 'Review', route: '#/ResumeTailoring',
-      };
-    } else if (topOpp) {
-      recommendation = {
-        title: `Apply to ${topOpp.company}`,
-        reason: topOpp.beat_others || `It's my top pick for "${plan.goal_summary}".`,
-        time: topOpp.effort || '~20 minutes', outcome: 'Your strongest current shot at your goal.',
-        cta: 'Continue', workspace: { company: topOpp.company, role: topOpp.role, jobUrl: topOpp.url || '', location: topOpp.location || '' },
-      };
-    } else {
-      recommendation = {
-        title: 'Tell me your goal',
-        reason: "I don't have an active plan for you yet — give me a goal and I'll line everything up.",
-        time: '~30 seconds', outcome: 'A full plan with your 3 best opportunities.',
-        cta: 'Start', route: null,
-      };
-    }
-
-    const urgent = !!interviewSoon || followUpsDue.length > 0;
     return Response.json({
       items: items.slice(0, 5),
       on_track: items.length === 0,
-      brief: urgent ? 'Today is important.' : 'Today looks simple.',
-      recommendation,
+      brief: engine.urgency === 'high' ? 'Today is important.' : 'Today looks simple.',
+      recommendation: engine.move || null,
+      suppressed: engine.suppressed || [],
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
