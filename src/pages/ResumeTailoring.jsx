@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
+import CliffProPaywall from '@/components/pro/CliffProPaywall';
 import { maybeActivateTrial } from '@/utils/trialActivation';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -94,6 +95,9 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   }, [user?.id]);
   const hasResumes = resumes.length > 0;
   const canAddMore = isFastIQ || resumes.length === 0;
+  const [showProPaywall, setShowProPaywall] = useState(false);
+  // One-time free "magic moment": first complete CLIFF-powered application is on us
+  const magicMomentAvailable = !isFastIQ && tailoredResumes.filter(t => t.status !== 'pending').length === 0;
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -564,15 +568,34 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   // ── PHASE: results ───────────────────────────────────────────────────────
   if (phase === 'results' && result) {
     return (
-      <TailoringResults
-        result={result}
-        companyName={companyName}
-        jobTitle={jobTitle}
-        originalResumeText={resumeText}
-        onStartOver={() => { setResult(null); setPhase(applyContext ? 'applyTailor' : 'hub'); }}
-        applyContext={applyContext}
-        userEmail={user.email}
-      />
+      <>
+        {result.magic_moment && (
+          <div style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, fontWeight: 600, color: '#fff', margin: 0, textAlign: 'center' }}>
+              🎁 Your first CLIFF-powered application is on us. CLIFF Pro prepares every application this way — instantly.
+            </p>
+            <button onClick={() => setShowProPaywall(true)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 800, color: '#6d28d9', background: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}>
+              Start CLIFF Pro
+            </button>
+          </div>
+        )}
+        {showProPaywall && (
+          <CliffProPaywall
+            trigger="magic_moment_results"
+            contextLine="Loved your first CLIFF-powered application? CLIFF Pro prepares every application this way."
+            onClose={() => setShowProPaywall(false)}
+          />
+        )}
+        <TailoringResults
+          result={result}
+          companyName={companyName}
+          jobTitle={jobTitle}
+          originalResumeText={resumeText}
+          onStartOver={() => { setResult(null); setPhase(applyContext ? 'applyTailor' : 'hub'); }}
+          applyContext={applyContext}
+          userEmail={user.email}
+        />
+      </>
     );
   }
 
@@ -727,6 +750,13 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     return (
       <>
         {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
+        {showProPaywall && (
+          <CliffProPaywall
+            trigger="resume_tailor_limit"
+            contextLine="You've used your free CLIFF-powered application. CLIFF Pro tailors every application this way."
+            onClose={() => setShowProPaywall(false)}
+          />
+        )}
         <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
           <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap'); @keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
@@ -760,6 +790,18 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               )}
             </div>
           </div>
+
+          {/* One-time magic moment banner */}
+          {magicMomentAvailable && hasResumes && (
+            <div style={{ background: '#f5f3ff', border: '1.5px solid #c4b5fd', borderRadius: 12, padding: '16px 20px', marginBottom: 24 }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#6b21a8', margin: '0 0 4px' }}>
+                🎁 Your first CLIFF-powered application is on us.
+              </p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#7c3aed', margin: 0, lineHeight: 1.5 }}>
+                Pick a job and CLIFF will fully tailor your resume — complete, instant, and free. This is exactly what CLIFF Pro does for every application.
+              </p>
+            </div>
+          )}
 
           {/* Free tier gate banner */}
           {!isFastIQ && resumes.length >= 1 && (
@@ -887,10 +929,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                     <button
-                      onClick={() => isFastIQ ? handleTailor(resume) : onOpenUpgrade()}
-                      style={{ background: isFastIQ ? '#E85D20' : '#F5F5F5', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: isFastIQ ? '#fff' : '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+                      onClick={() => (isFastIQ || magicMomentAvailable) ? handleTailor(resume) : setShowProPaywall(true)}
+                      style={{ background: (isFastIQ || magicMomentAvailable) ? '#E85D20' : '#F5F5F5', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: (isFastIQ || magicMomentAvailable) ? '#fff' : '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
                     >
-                      {isFastIQ ? 'Tailor →' : '🔒 Tailor'}
+                      {isFastIQ ? 'Tailor →' : magicMomentAvailable ? 'Tailor free →' : 'Tailor'}
                     </button>
                     {resume.original_file_url && (
                       <button

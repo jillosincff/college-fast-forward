@@ -50,10 +50,12 @@ Deno.serve(async (req) => {
       user.membership_tier === 'fastiq_trial' ||
       (user.fastiq_setup_complete && user.trial_status !== 'expired');
 
+    let isFreeMagicMoment = false;
     if (!isPremium && !(adminTest && user.role === 'admin')) {
       // Check if this is the user's first completed tailoring
       const existingTailored = await base44.entities.TailoredResume.filter({ user_email: user.email });
       const completedCount = (existingTailored || []).filter(t => t.status !== 'pending').length;
+      isFreeMagicMoment = completedCount === 0;
 
       if (completedCount >= 1) {
         // Not first freebie — queue it for 24 hours
@@ -213,9 +215,42 @@ Return as JSON.`;
       properties: { feature_type: 'resume_tailoring', original_score: result.original_score || 0 },
     }).catch(() => {});
 
+    // One-time free "magic moment" — record consumption in the entitlement system
+    if (isFreeMagicMoment) {
+      try {
+        const nowIso = new Date().toISOString();
+        const existing = await base44.asServiceRole.entities.FeatureUsage.filter({
+          user_id: user.id,
+          capability_name: 'resume_tailor',
+        });
+        if (existing[0]) {
+          await base44.asServiceRole.entities.FeatureUsage.update(existing[0].id, {
+            usage_count: (existing[0].usage_count || 0) + 1,
+            lifetime_count: (existing[0].lifetime_count || 0) + 1,
+            last_used_at: nowIso,
+          });
+        } else {
+          await base44.asServiceRole.entities.FeatureUsage.create({
+            user_id: user.id,
+            user_email: user.email,
+            capability_name: 'resume_tailor',
+            usage_count: 1,
+            period_type: 'lifetime',
+            period_start: '1970-01-01T00:00:00.000Z',
+            period_end: '9999-12-31T00:00:00.000Z',
+            lifetime_count: 1,
+            last_used_at: nowIso,
+          });
+        }
+      } catch (e) {
+        console.log('FeatureUsage log failed (non-critical):', e.message);
+      }
+    }
+
     return Response.json({
       success: true,
       tailoredResume,
+      magic_moment: isFreeMagicMoment,
       originalScore: result.original_score || 0,
       tailoredScore: result.tailored_score || 0,
     });
