@@ -31,7 +31,7 @@ export default function JobWorkspaceCard({ user }) {
 
       {pursuits && pursuits.length === 0 && (
         <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0, lineHeight: 1.6 }}>
-          Pick a job in your feed and tap <strong>"Let CLIFF Handle This"</strong> — your resume, connections, research, and interview prep for that job all live here.
+          Pick a job in your feed and tap <strong>"Let CLIFF Handle This"</strong> — I'll keep your resume, connections, research, and interview prep for it right here.
         </p>
       )}
 

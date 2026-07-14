@@ -109,6 +109,7 @@ export default function CliffJobWorkspace() {
           </div>
           <h1 style={{ fontFamily: dm, fontSize: 'clamp(18px, 4.5vw, 24px)', fontWeight: 900, color: '#111827', margin: '0 0 4px', lineHeight: 1.25, wordBreak: 'break-word' }}>{role}</h1>
           <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#6b7280', margin: 0 }}>{company}</p>
+          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', margin: '6px 0 0' }}>I'm on it — everything for this application lives right here.</p>
           <div style={{ display: 'flex', gap: 14, marginTop: 8, flexWrap: 'wrap' }}>
             {job.location && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>📍 {decodeEntities(job.location)}</span>}
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}

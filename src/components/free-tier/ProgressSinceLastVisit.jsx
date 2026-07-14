@@ -29,18 +29,18 @@ export default function ProgressSinceLastVisit({ user }) {
       const list = [];
       const drop = (drops || [])[0];
       const freshJobs = drop ? (drop.slots || []).filter(s => !(drop.actioned_keys || []).includes(s.key)).length : 0;
-      if (freshJobs > 0) list.push(`Found ${freshJobs} new matching job${freshJobs === 1 ? '' : 's'}`);
+      if (freshJobs > 0) list.push(`I found ${freshJobs} new matching job${freshJobs === 1 ? '' : 's'}`);
 
       const newResumes = (resumes || []).filter(r => r.status === 'completed' && new Date(r.created_date).getTime() >= since);
-      if (newResumes.length === 1) list.push(`Improved your resume for ${newResumes[0].company_name}`);
-      else if (newResumes.length > 1) list.push(`Prepared ${newResumes.length} applications`);
+      if (newResumes.length === 1) list.push(`I improved your resume for ${newResumes[0].company_name}`);
+      else if (newResumes.length > 1) list.push(`I prepared ${newResumes.length} applications`);
 
       const withConnections = (pursuits || []).find(p => ['ready_for_review', 'complete'].includes(p.connection_search_status));
-      if (withConnections) list.push(`Found a networking opportunity at ${withConnections.company_name}`);
+      if (withConnections) list.push(`I found a networking opportunity at ${withConnections.company_name}`);
 
       const withNext = (pursuits || []).find(p => p.next_action);
       if (withNext) setNextMove(`${withNext.next_action} (${withNext.company_name})`);
-      else if (freshJobs > 0) setNextMove("Check today's matches below");
+      else if (freshJobs > 0) setNextMove("Check the matches I found today — they're right below");
 
       setItems(list);
     });
@@ -53,14 +53,14 @@ export default function ProgressSinceLastVisit({ user }) {
     <div style={{ margin: '0 0 24px', maxWidth: 680 }}>
       {items.length > 0 ? (
         <>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>Since your last visit</p>
+          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>While you were away</p>
           {items.map((line, i) => (
             <p key={i} style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.85)', margin: '0 0 5px', lineHeight: 1.5 }}>✅ {line}</p>
           ))}
         </>
       ) : (
         <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.6 }}>
-          CLIFF is scouting new matches for you right now — your next opportunities land in the feed below.
+          I'm out scouting new matches for you right now — your next opportunities will land in the feed below. I've got this.
         </p>
       )}
       {nextMove && (

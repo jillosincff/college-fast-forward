@@ -49,34 +49,34 @@ export default function CliffRecommendedActions({ user }) {
       // 1. Resume CLIFF already tailored, not yet downloaded → review it
       const readyResume = (resumes || []).find(r => r.status === 'completed' && !r.downloaded_at);
       if (readyResume) {
-        list.push({ text: `Review the resume CLIFF tailored for the ${readyResume.role_title} role at ${readyResume.company_name}`, cta: 'Review', go: () => { window.location.hash = '#/ResumeTailoring'; } });
+        list.push({ text: `I tailored your resume for the ${readyResume.role_title} role at ${readyResume.company_name} — give it a look`, cta: 'Review', go: () => { window.location.hash = '#/ResumeTailoring'; } });
       }
       const preparedCount = (resumes || []).filter(r => r.status === 'completed').length;
-      if (preparedCount > 0) discoveries.push(`CLIFF prepared ${preparedCount} application${preparedCount === 1 ? '' : 's'} for you`);
+      if (preparedCount > 0) discoveries.push(`I prepared ${preparedCount} application${preparedCount === 1 ? '' : 's'} for you`);
 
       // 2. Outreach with no reply → follow up
       const needsFollowUp = (pipeline || []).filter(r => ['reached_out', 'messaged'].includes(r.status) && daysSince(r) >= 5);
       if (needsFollowUp[0]) {
         const r = needsFollowUp[0];
-        list.push({ text: `Follow up with ${r.alumni_name || r.company} — no reply in ${Math.floor(daysSince(r))} days`, cta: 'Follow up', go: () => { window.location.hash = '#/ApplicationTracker'; } });
+        list.push({ text: `${r.alumni_name || r.company} hasn't replied in ${Math.floor(daysSince(r))} days — I'd send a quick follow-up`, cta: 'Follow up', go: () => { window.location.hash = '#/ApplicationTracker'; } });
       }
       if (needsFollowUp.length > 0) discoveries.push(`${needsFollowUp.length} follow-up${needsFollowUp.length === 1 ? ' is' : 's are'} due`);
 
       // 3. Tracked job not yet prepared → let CLIFF handle it
       const unprepared = (pipeline || []).find(r => ['identified', 'matched'].includes(r.status) && !(resumes || []).some(t => (t.company_name || '').toLowerCase() === (r.company || '').toLowerCase()));
       if (unprepared) {
-        list.push({ text: `Let CLIFF prepare your ${unprepared.company} application`, cta: 'Prepare', go: () => openCliffWorkspace({ company: unprepared.company, role: unprepared.job_title, jobDescription: unprepared.job_description || '', jobUrl: unprepared.job_url || '', location: unprepared.location || '' }) });
+        list.push({ text: `Want me to prep your ${unprepared.company} application? I'll handle it`, cta: 'Prepare', go: () => openCliffWorkspace({ company: unprepared.company, role: unprepared.job_title, jobDescription: unprepared.job_description || '', jobUrl: unprepared.job_url || '', location: unprepared.location || '' }) });
       }
 
       // 4. Stale applications → check status
       const stale = (pipeline || []).find(r => r.status === 'applied' && daysSince(r) >= 7);
       if (stale) {
-        list.push({ text: `Update your ${stale.company} application — did you hear back?`, cta: 'Update', go: () => { window.location.hash = '#/ApplicationTracker'; } });
+        list.push({ text: `Did ${stale.company} get back to you? Update me and I'll plan your next move`, cta: 'Update', go: () => { window.location.hash = '#/ApplicationTracker'; } });
       }
 
       // 5. Always: today's matches
-      list.push({ text: (pipeline || []).length === 0 ? 'Pick your first job below and let CLIFF handle the prep' : "Check today's new matches CLIFF found for you", cta: 'View', go: () => document.getElementById('cff-daily-feed')?.scrollIntoView({ behavior: 'smooth' }) });
-      discoveries.push('New matched jobs are in your feed below');
+      list.push({ text: (pipeline || []).length === 0 ? "Pick your first job below — I'll handle all the prep" : "Check today's matches — I found new ones for you", cta: 'View', go: () => document.getElementById('cff-daily-feed')?.scrollIntoView({ behavior: 'smooth' }) });
+      discoveries.push('I dropped fresh matches in your feed below');
 
       setActions(list.slice(0, 5));
       setFound(discoveries.slice(0, 3));
@@ -90,7 +90,7 @@ export default function CliffRecommendedActions({ user }) {
     <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <Sparkles size={16} color="#7c3aed" />
-        <h3 style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: 0 }}>CLIFF's Recommended Actions</h3>
+        <h3 style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: 0 }}>Here's where I'd focus today</h3>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {actions.map((a, i) => (
@@ -109,7 +109,7 @@ export default function CliffRecommendedActions({ user }) {
 
       {found.length > 0 && (
         <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid #f1f5f9' }}>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>CLIFF found these for you</p>
+          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>I also spotted</p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {found.map((f, i) => (
               <span key={i} style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#5b21b6', background: '#f5f3ff', border: '1px solid #ede9fe', borderRadius: 999, padding: '6px 14px' }}>✨ {f}</span>

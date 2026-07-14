@@ -449,7 +449,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           </div>
 
           <h1 style={{ fontFamily: dm, fontSize: isMobile ? 20 : 28, fontWeight: 800, color: '#fff', margin: '0 0 10px', lineHeight: isMobile ? 1.25 : 1.2, letterSpacing: '-0.01em' }}>
-            CLIFF made progress while you were away, {firstName}
+            Let's get locked in and get you hired, {firstName}
           </h1>
           <ProgressSinceLastVisit user={user} />
 
