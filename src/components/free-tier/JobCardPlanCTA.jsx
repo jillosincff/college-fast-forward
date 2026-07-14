@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { openCliffWorkspace } from '@/lib/cliffWorkspace';
+import { recordRecommendation } from '@/functions/recordRecommendation';
 
 const isDone = s => ['ready_for_review', 'approved', 'complete'].includes(s || '');
 
@@ -19,7 +20,7 @@ const primaryStyle = { minHeight: 'auto', background: 'linear-gradient(135deg, #
 
 // Plan-aware primary CTA for a job feed card. One primary action, subtle plan cues.
 // Uses the canonical access plan (useAccessPlan upstream) — no plan logic of its own.
-export default function JobCardPlanCTA({ access, pursuit, rank = 0, onUpgrade, companyName, jobTitle, jobDesc, jobUrl, location, salary, alumniCount }) {
+export default function JobCardPlanCTA({ access, pursuit, verdict, rank = 0, onUpgrade, companyName, jobTitle, jobDesc, jobUrl, location, salary, alumniCount }) {
   const [showPreview, setShowPreview] = useState(false);
 
   const plan = access?.isPro ? 'pro' : 'free';
@@ -31,6 +32,18 @@ export default function JobCardPlanCTA({ access, pursuit, rank = 0, onUpgrade, c
     } catch {}
   };
 
+  // CLIFF Learning Engine — every recommendation becomes gradable
+  const grade = (event) => {
+    recordRecommendation({
+      company: companyName,
+      role: jobTitle,
+      event,
+      recommendation_level: verdict?.tier,
+      verdict: verdict?.verdict,
+      score: verdict?.score,
+    }).catch(() => {});
+  };
+
   // One meaningful view per card per session — repeated renders don't re-count
   useEffect(() => {
     if (access?.loading) return;
@@ -40,6 +53,7 @@ export default function JobCardPlanCTA({ access, pursuit, rank = 0, onUpgrade, c
         sessionStorage.setItem(key, '1');
         track('job_card_viewed');
         if (access?.magicMomentAvailable) track('free_magic_moment_cta_viewed');
+        grade('shown');
       }
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,6 +61,7 @@ export default function JobCardPlanCTA({ access, pursuit, rank = 0, onUpgrade, c
 
   const goWorkspace = (cta) => {
     track('job_workspace_opened', { cta });
+    grade('pursued');
     openCliffWorkspace({ company: companyName, role: jobTitle, jobDescription: jobDesc, jobUrl, location, salary, alumniCount: alumniCount || 0 });
   };
 
@@ -73,6 +88,7 @@ export default function JobCardPlanCTA({ access, pursuit, rank = 0, onUpgrade, c
   if (access.magicMomentAvailable && (jobDesc || jobUrl)) {
     const goMagic = () => {
       track('free_magic_moment_cta_clicked');
+      grade('pursued');
       const params = new URLSearchParams({ company: companyName, role: jobTitle, job_url: jobUrl || '', from: 'feed' });
       window.location.hash = `#/ResumeTailoring?${params.toString()}`;
     };

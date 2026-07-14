@@ -10,6 +10,7 @@ import DropoffSection from '@/components/adminv2/cliff/DropoffSection';
 import EmailStatsSection from '@/components/adminv2/cliff/EmailStatsSection';
 import TtfmpSection from '@/components/adminv2/cliff/TtfmpSection';
 import AccessControlSection from '@/components/adminv2/cliff/AccessControlSection';
+import CliffAccuracySection from '@/components/adminv2/cliff/CliffAccuracySection';
 
 export default function AdminV2() {
   const [user, setUser] = useState(null);
@@ -94,6 +95,7 @@ export default function AdminV2() {
       {data && (
         <>
           <AccessControlSection />
+          <CliffAccuracySection />
           <RevenueSection revenue={data.revenue} />
           <TtfmpSection />
           <DropoffSection dropoff={data.dropoff} />

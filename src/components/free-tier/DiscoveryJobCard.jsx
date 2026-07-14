@@ -6,6 +6,7 @@ import { getStandoutInsight } from '@/functions/getStandoutInsight';
 import WarmApplyFlow from './WarmApplyFlow';
 import JobCardPlanCTA from './JobCardPlanCTA';
 import CliffVerdictBadge from './CliffVerdictBadge';
+import { recordRecommendation } from '@/functions/recordRecommendation';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
@@ -84,6 +85,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
     setAppliedExternally(true);
     handleTrackOnly('cold_apply');
     try { base44.analytics.track({ eventName: 'external_apply_clicked', properties: { company: companyName, role: jobTitle, card_rank: rank ?? 0 } }); } catch {}
+    recordRecommendation({ company: companyName, role: jobTitle, event: 'applied', recommendation_level: verdict?.tier, verdict: verdict?.verdict, score: verdict?.score }).catch(() => {});
   };
 
   const handleLoadInsight = async () => {
@@ -246,6 +248,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
             <JobCardPlanCTA
               access={access}
               pursuit={pursuit}
+              verdict={verdict}
               rank={rank ?? 0}
               onUpgrade={onUpgrade}
               companyName={companyName}

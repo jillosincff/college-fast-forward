@@ -10,6 +10,7 @@ import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel'
 import MissionStats from '@/components/tracker/mission/MissionStats';
 import AttentionBanner from '@/components/tracker/mission/AttentionBanner';
 import MissionAppCard from '@/components/tracker/mission/MissionAppCard';
+import RecommendationFeedbackPrompt from '@/components/tracker/RecommendationFeedbackPrompt';
 import { deriveInsight, FILTERS } from '@/components/tracker/mission/trackerLogic';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -191,6 +192,7 @@ export default function ApplicationTracker() {
           </div>
         ) : (
           <>
+            <RecommendationFeedbackPrompt user={user} />
             <div style={{ marginBottom: 20 }}>
               <MissionStats items={items} />
             </div>
