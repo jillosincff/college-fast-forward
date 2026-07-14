@@ -109,7 +109,7 @@ export default function ApplicationTracker() {
 
   // Highest-priority application for the attention banner
   const topAttention = items
-    .filter(i => i.insight.health.icon === '🔴')
+    .filter(i => i.insight.group === 'attention' && i.insight.action?.type !== 'none')
     .sort((a, b) => (isHighlighted(b) ? 1000 : b.insight.priority) - (isHighlighted(a) ? 1000 : a.insight.priority))[0] || null;
 
   const attentionCount = items.filter(i => i.insight.group === 'attention').length;

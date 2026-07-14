@@ -4,7 +4,7 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 export default function MissionStats({ items }) {
   const inProgress = items.filter(i => i.insight.group !== 'completed').length;
   const waiting = items.filter(i => i.insight.group === 'waiting').length;
-  const attention = items.filter(i => i.insight.group === 'attention' && i.insight.health.icon !== '🟡').length;
+  const attention = items.filter(i => i.insight.group === 'attention').length;
   const interviews = items.filter(i => i.insight.group === 'interviewing').length;
 
   const stats = [
