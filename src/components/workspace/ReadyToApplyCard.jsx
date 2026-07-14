@@ -22,7 +22,7 @@ export default function ReadyToApplyCard({ job, pursuit, user }) {
     { label: 'Resume', ready: isDone(pursuit?.resume_status), action: 'Tailor now →', onClick: goTailor },
     { label: 'Cover letter', ready: isDone(pursuit?.cover_letter_status), hint: 'Drafted during Apply' },
     { label: 'Interview practice', ready: pursuit?.interview_status === 'completed', action: 'Practice →', onClick: () => { window.location.hash = '#/MockInterview'; } },
-    { label: 'Connection', ready: isDone(pursuit?.connection_search_status), hint: 'Searching your network' },
+    { label: 'Connection', ready: isDone(pursuit?.connection_search_status), hint: 'Optional advantage' },
   ];
 
   return (

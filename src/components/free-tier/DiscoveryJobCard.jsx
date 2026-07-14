@@ -384,12 +384,13 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
         </div>
       </div>
 
-      {/* Unified warm-apply flow: connection → outreach → tracked → tailor.
-          The flow writes to the pipeline itself — no extra tracking call. */}
+      {/* Application flow (applyOnly): tailor resume → apply → track.
+          Networking is optional and only starts from an explicit networking CTA. */}
       {showApplyModal && (
         <WarmApplyFlow
           job={{ company: companyName, role: jobTitle, jobUrl }}
           user={user}
+          applyOnly
           onClose={() => setShowApplyModal(false)}
         />
       )}

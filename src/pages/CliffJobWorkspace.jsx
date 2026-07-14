@@ -116,16 +116,16 @@ export default function CliffJobWorkspace() {
           </div>
         </div>
 
-        {/* Action first: can I apply, and what's ready? */}
+        {/* Hierarchy: 1) Prepare application 2) Interview prep 3) Tracker 4) Networking (optional, last) */}
         {user && <ReadyToApplyCard job={job} pursuit={pursuit} user={user} />}
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
 
-        {user && <WorkspaceConnectionsCard job={job} user={user} />}
+        {user && <WorkspacePrepActions job={job} user={user} />}
 
         <CompanyPrepCard job={job} onPrepared={() => syncPursuit({ companyResearched: true })} />
 
-        {user && <WorkspacePrepActions job={job} user={user} />}
+        {user && <WorkspaceConnectionsCard job={job} user={user} />}
       </div>
     </div>
   );

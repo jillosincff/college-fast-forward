@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
 import useAccessPlan from '@/hooks/useAccessPlan';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // One workflow, many tools: CLIFF organizes the existing prep systems for this job.
 export default function WorkspacePrepActions({ job, user }) {
-  const [showApplyFlow, setShowApplyFlow] = useState(false);
   const { isPro, magicMomentAvailable, magicMomentCompleted, excludePrompts } = useAccessPlan(user);
   const [tracked, setTracked] = useState(false);
   const [tracking, setTracking] = useState(false);
@@ -45,8 +43,15 @@ export default function WorkspacePrepActions({ job, user }) {
     ? (magicMomentAvailable ? '🎁 Free — first application' : 'Instant on Pro')
     : null;
 
+  // Application workflow first: role analysis → tailored resume → application plan.
+  // Networking never starts here — it lives in the optional Networking Advantage card.
+  const startApplicationWorkflow = () => {
+    const params = new URLSearchParams({ company, role, job_url: jobUrl, from: 'workspace' });
+    window.location.hash = `#/ResumeTailoring?${params.toString()}`;
+  };
+
   const actions = [
-    { icon: '📄', title: 'Prepare my application', desc: prepDesc, tag: prepTag, cta: 'Start', go: () => setShowApplyFlow(true), primary: true },
+    { icon: '📄', title: 'Prepare my application', desc: prepDesc, tag: prepTag, cta: 'Start', go: startApplicationWorkflow, primary: true },
     { icon: '🎤', title: 'Practice the interview', desc: 'Run a mock interview tuned to this kind of role before you talk to anyone.', cta: 'Practice', go: () => { window.location.hash = '#/MockInterview'; } },
     { icon: '📌', title: tracked ? 'Tracking this application' : 'Track this application', desc: tracked ? 'CLIFF is watching this one — follow-up reminders included.' : 'Add it to your pipeline so CLIFF reminds you when to follow up.', cta: tracked ? 'Tracked ✓' : tracking ? 'Adding…' : 'Track', go: trackApplication, done: tracked },
   ];
@@ -94,10 +99,6 @@ export default function WorkspacePrepActions({ job, user }) {
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', textDecoration: 'none', marginTop: 14 }}>
           🔗 View original posting / apply on company site ↗
         </a>
-      )}
-
-      {showApplyFlow && (
-        <WarmApplyFlow job={{ company, role, jobUrl }} user={user} onClose={() => setShowApplyFlow(false)} />
       )}
     </div>
   );

@@ -91,7 +91,7 @@ export default function WorkspaceConnectionsCard({ job, user }) {
   return (
     <div style={card}>
       <h3 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 12px' }}>
-        Your Network Advantage
+        Networking Advantage <span style={{ fontWeight: 600, textTransform: 'none', letterSpacing: 0 }}>· Optional</span>
       </h3>
 
       {loading ? (
@@ -123,14 +123,14 @@ export default function WorkspaceConnectionsCard({ job, user }) {
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.5, flex: 1, minWidth: 200 }}>
-            No parents or {school} alumni in the CFF network at {company} yet. CLIFF can search public sources for {school} alumni who work there.
+            No strong connection found yet. You can optionally search public sources for alumni who work here.
           </p>
           <button
             onClick={handleExternalScan}
             disabled={scanning}
             style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', border: 'none', borderRadius: 999, padding: '9px 18px', cursor: scanning ? 'wait' : 'pointer', flexShrink: 0, minHeight: 44, opacity: scanning ? 0.7 : 1 }}
           >
-            {scanning ? 'Searching…' : '🔍 Search externally'}
+            {scanning ? 'Searching…' : '🔍 Search for Connections'}
           </button>
         </div>
       )}
