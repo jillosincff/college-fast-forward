@@ -202,14 +202,14 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
         <div className="flex items-start justify-between gap-2">
           <div>
             <h2 className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-              🚀 Your Daily Drop
+              📚 Opportunity Library
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
               {isLoading
-                ? 'Scouting your matches…'
+                ? 'CLIFF is gathering opportunities…'
                 : allActioned
                   ? 'All caught up for today'
-                  : `${visibleSlots.length} hand-picked opportunit${visibleSlots.length === 1 ? 'y' : 'ies'} curated for you today`
+                  : `A reference shelf of ${visibleSlots.length} opportunit${visibleSlots.length === 1 ? 'y' : 'ies'} CLIFF has vetted — your plan above already has the best ones`
               }
             </p>
           </div>

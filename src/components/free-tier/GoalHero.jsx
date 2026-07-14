@@ -2,16 +2,25 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { buildCareerPlan } from '@/functions/buildCareerPlan';
 import { getPlanOpportunities } from '@/functions/getPlanOpportunities';
+import { routeGoal } from '@/functions/routeGoal';
+import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 import PlanOpportunityCard from './PlanOpportunityCard';
 import { Sparkles, Check } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
-const EXAMPLES = ['Marketing internship', 'Finance internship in NYC', 'I want to work at Nike', 'Remote UX internship', "I don't know yet"];
+const EXAMPLES = ['I found a job.', 'Help me get an internship.', "Prepare me for tomorrow's interview.", "I haven't heard back.", 'Find me something better.'];
 const BUILD_STEPS = ['Building your plan…', 'Reading opportunities…', 'Filtering low-value jobs…', 'Ranking your best opportunities…', 'Checking your existing progress…'];
 
-// Goal Search: students don't search for jobs — they tell CLIFF what they want.
-// CLIFF interprets the goal, builds a CareerPlan, and returns 3 explained picks.
+const timeGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
+};
+
+// CLIFF OS home: one question, one input, one CTA. The student states the goal
+// in any form — CLIFF classifies the intent and runs the right workflow.
 export default function GoalHero({ user }) {
   const [phase, setPhase] = useState('loading'); // loading | input | interpreting | building | plan
   const [goal, setGoal] = useState('');
@@ -19,8 +28,10 @@ export default function GoalHero({ user }) {
   const [plan, setPlan] = useState(null);
   const [stepIdx, setStepIdx] = useState(0);
   const [error, setError] = useState('');
+  const [showInput, setShowInput] = useState(false); // ask a new goal even when a plan exists
 
-  // Load the active plan — if opportunities already exist, show "Continue My Plan"
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
+
   useEffect(() => {
     if (!user?.email) return;
     base44.entities.CareerPlan.filter({ user_email: user.email, status: 'active' }, '-created_date', 1)
@@ -32,39 +43,62 @@ export default function GoalHero({ user }) {
       .catch(() => setPhase('input'));
   }, [user?.email]);
 
-  // Cycle the planning steps while CLIFF works
   useEffect(() => {
     if (phase !== 'building') return;
     const t = setInterval(() => setStepIdx(i => Math.min(i + 1, BUILD_STEPS.length - 1)), 2600);
     return () => clearInterval(t);
   }, [phase]);
 
-  const build = async (e) => {
+  const runPlanFlow = async (text) => {
+    const res = await buildCareerPlan({ goal: text });
+    const data = res?.data || res;
+    setAck(data.ack || 'Got it — building your plan.');
+    setStepIdx(0);
+    setPhase('building');
+    const oppRes = await getPlanOpportunities({ planId: data.plan?.id });
+    const oppData = oppRes?.data || oppRes;
+    setPlan({ ...data.plan, opportunities: oppData.opportunities || [], skipped_note: oppData.skipped_note || '' });
+    setShowInput(false);
+    setPhase('plan');
+  };
+
+  const submit = async (e) => {
     e?.preventDefault();
     const text = goal.trim();
     if (!text) return;
     setError('');
+    setAck('');
     setPhase('interpreting');
     try {
-      const res = await buildCareerPlan({ goal: text });
-      const data = res?.data || res;
-      setAck(data.ack || 'Got it — building your plan.');
-      setStepIdx(0);
-      setPhase('building');
-      const oppRes = await getPlanOpportunities({ planId: data.plan?.id });
-      const oppData = oppRes?.data || oppRes;
-      setPlan({ ...data.plan, opportunities: oppData.opportunities || [], skipped_note: oppData.skipped_note || '' });
-      setPhase('plan');
+      const res = await routeGoal({ goal: text });
+      const r = res?.data || res;
+      if (r.intent === 'found_job' && (r.company || r.job_url)) {
+        setAck(r.ack);
+        setTimeout(() => openCliffWorkspace({ company: r.company, role: r.role || '', jobUrl: r.job_url || '' }), 1200);
+        return;
+      }
+      if (r.intent === 'interview_prep') {
+        setAck(r.ack);
+        setTimeout(() => { window.location.hash = '#/MockInterview'; }, 1200);
+        return;
+      }
+      if (r.intent === 'no_response') {
+        setAck(r.ack);
+        setTimeout(() => { window.location.hash = '#/ApplicationTracker'; }, 1200);
+        return;
+      }
+      // new_goal / find_better → build (or rebuild) the plan
+      await runPlanFlow(text);
     } catch {
-      setError("I couldn't build your plan just now — try again in a moment.");
+      setError("I couldn't work on that just now — try again in a moment.");
       setPhase('input');
     }
   };
 
-  const changeGoal = () => { setGoal(''); setAck(''); setPhase('input'); };
+  const changeGoal = () => { setGoal(''); setAck(''); setShowInput(true); setPhase('input'); };
 
   const shell = (children) => (
-    <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 55%, #6d28d9 100%)', borderRadius: 20, padding: '24px 22px', position: 'relative', overflow: 'hidden', boxShadow: '0 8px 32px rgba(109,40,217,0.25)', marginBottom: 20 }}>
+    <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 55%, #6d28d9 100%)', borderRadius: 20, padding: '24px 22px', position: 'relative', overflow: 'hidden', boxShadow: '0 8px 32px rgba(109,40,217,0.25)', marginBottom: 16 }}>
       <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(167,139,250,0.25)', filter: 'blur(50px)', pointerEvents: 'none' }} />
       <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
     </div>
@@ -73,7 +107,7 @@ export default function GoalHero({ user }) {
   if (phase === 'loading') return null;
 
   // ── Active plan: goal + 3 best opportunities ─────────────────────────
-  if (phase === 'plan' && plan) {
+  if (phase === 'plan' && plan && !showInput) {
     return shell(
       <>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
@@ -82,7 +116,7 @@ export default function GoalHero({ user }) {
           </p>
           <button onClick={changeGoal}
             style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', minWidth: 'auto', textDecoration: 'underline' }}>
-            Change my goal
+            New goal
           </button>
         </div>
         <h2 style={{ fontFamily: dm, fontSize: 19, fontWeight: 900, color: '#fff', margin: '0 0 14px', letterSpacing: '-0.01em' }}>{plan.goal_summary}</h2>
@@ -119,16 +153,16 @@ export default function GoalHero({ user }) {
     );
   }
 
-  // ── Input: "What are you trying to get?" ─────────────────────────────
+  // ── Home: greeting + one question ────────────────────────────────────
   return shell(
     <>
-      <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#c4b5fd', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 6 }}>
-        <Sparkles size={13} /> Tell CLIFF your goal
+      <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#c4b5fd', margin: '0 0 4px' }}>
+        {timeGreeting()}, {firstName}.
       </p>
-      <h2 style={{ fontFamily: dm, fontSize: 21, fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.01em' }}>
-        What are you trying to get?
+      <h2 style={{ fontFamily: dm, fontSize: 22, fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.01em' }}>
+        What's our goal today?
       </h2>
-      <form onSubmit={build}>
+      <form onSubmit={submit}>
         <textarea
           value={goal}
           onChange={e => setGoal(e.target.value)}
@@ -146,10 +180,17 @@ export default function GoalHero({ user }) {
         </div>
         <button type="submit" disabled={!goal.trim()}
           style={{ width: '100%', background: goal.trim() ? 'linear-gradient(135deg, #f59e0b, #f97316)' : 'rgba(255,255,255,0.2)', color: '#fff', border: 'none', borderRadius: 12, padding: '14px', fontFamily: dm, fontSize: 15, fontWeight: 900, cursor: goal.trim() ? 'pointer' : 'default', boxShadow: goal.trim() ? '0 6px 18px rgba(249,115,22,0.4)' : 'none', minHeight: 48 }}>
-          Build My Plan
+          Let's Go
         </button>
       </form>
+      {ack && <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#c4b5fd', margin: '10px 0 0' }}>{ack}</p>}
       {error && <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fca5a5', margin: '10px 0 0' }}>{error}</p>}
+      {plan && showInput && (
+        <button onClick={() => { setShowInput(false); setPhase('plan'); }}
+          style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', minWidth: 'auto', textDecoration: 'underline', marginTop: 10 }}>
+          ← Back to my current plan
+        </button>
+      )}
     </>
   );
 }

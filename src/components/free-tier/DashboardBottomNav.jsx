@@ -4,9 +4,9 @@ import { navigate } from '@/components/utils/navigation';
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 const TABS = [
-  { id: 'dashboard', label: 'Dashboard', Icon: Home },
-  { id: 'tools', label: 'Toolbox', Icon: Wrench },
-  { id: 'progress', label: 'Application Tracker', Icon: TrendingUp },
+  { id: 'dashboard', label: 'Home', Icon: Home },
+  { id: 'tools', label: 'CLIFF Toolbox', Icon: Wrench },
+  { id: 'progress', label: 'Application History', Icon: TrendingUp },
 ];
 
 const ALL_TABS = [...TABS, { id: 'profile', label: 'Profile', Icon: User }];

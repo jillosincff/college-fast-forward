@@ -23,6 +23,7 @@ const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); retur
 
 export default function CliffTimeline({ user }) {
   const [items, setItems] = useState(null);
+  const [waiting, setWaiting] = useState([]);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -81,11 +82,17 @@ export default function CliffTimeline({ user }) {
 
       list.sort((a, b) => a.date - b.date);
       setItems(list.slice(0, 5));
+
+      // 👀 Waiting: applications under review — no action, CLIFF is watching
+      setWaiting((pipeline || [])
+        .filter(r => r.status === 'applied' && daysSince(r) < 7)
+        .slice(0, 2)
+        .map(r => `${r.company} application under review`));
     });
     return () => { cancelled = true; };
   }, [user?.email]);
 
-  if (!items?.length) return null;
+  if (!items?.length && !waiting.length) return null;
 
   // Group by day label, preserving order
   const groups = [];
@@ -123,6 +130,27 @@ export default function CliffTimeline({ user }) {
           </div>
         </div>
       ))}
+
+      {waiting.length > 0 && (
+        <div style={{ display: 'flex', gap: 14, marginTop: groups.length ? 0 : 4 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 10, flexShrink: 0 }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#d1d5db', marginTop: 5 }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px' }}>Waiting</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {waiting.map((w, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f8f9fc', borderRadius: 10, padding: '10px 14px' }}>
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>👀</span>
+                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', margin: 0, flex: 1, lineHeight: 1.4 }}>
+                    {w} — no action needed. I'll let you know if something changes.
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
