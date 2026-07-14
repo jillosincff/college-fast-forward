@@ -90,7 +90,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
         anonymous_id: anonId,
         properties: {
           screen: s,
-          step: s > 2 ? s - 1 : s, // matches the "X / 12" progress display
+          step: s > 3 ? s - 2 : s, // matches the "X / 11" progress display
           reason,
         },
       }).catch(() => {});

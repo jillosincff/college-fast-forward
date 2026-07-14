@@ -359,27 +359,6 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
             <button onClick={back} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
           </div>
 
-          {/* Paywall Modal */}
-          {showPaywall && (
-            <div onClick={() => setShowPaywall(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20000, padding: 24 }}>
-              <div onClick={e => e.stopPropagation()} style={{ background: CARD, borderRadius: 16, padding: '36px 28px', maxWidth: 420, width: '100%', boxShadow: '0 24px 48px rgba(0,0,0,0.12)', animation: 'fadeUp 0.25s ease' }}>
-                <h2 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, textAlign: 'center', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Unlock the Full Agent</h2>
-                <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 24px', lineHeight: 1.6 }}>Unlimited modern resumes, tailoring for any job, tracking, reminders, and more.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <button onClick={saveAndAuth} style={{ width: '100%', background: `linear-gradient(to bottom, ${GREEN}, #059669)`, border: 'none', borderRadius: R, padding: '16px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = '0.92'}
-                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                  >
-                    <div><p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff', margin: 0 }}>$4.99 / week</p><p style={{ fontFamily: FONT, fontSize: 12, color: '#D1FAE5', margin: '2px 0 0' }}>Billed monthly at $19.96 · Cancel anytime</p></div>
-                    <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff' }}>→</span>
-                  </button>
-                </div>
-                <button onClick={() => setShowPaywall(false)} style={{ width: '100%', fontFamily: FONT, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', textAlign: 'center', marginTop: 18 }}>
-                  Maybe later
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       )}
 

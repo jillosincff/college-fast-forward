@@ -187,11 +187,17 @@ export default function OnboardingSteps1to4({
               both: 'a flexible dual-track of internships and full-time roles',
               exploring: 'options that help you discover the best fit first',
             };
+            const focusMap = {
+              internship: 'internships',
+              fulltime: 'full-time roles',
+              both: 'both internships and full-time roles',
+              exploring: 'exploring your options',
+            };
             return (
               <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 12, padding: '14px 18px', marginTop: 16, display: 'flex', gap: 10, alignItems: 'flex-start', animation: 'fadeUp 0.25s ease' }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
                 <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.6 }}>
-                  <strong>Perfect. I'll focus on {selected?.label?.toLowerCase()} first.</strong><br />
+                  <strong>Perfect. I'll focus on {focusMap[seeking] || selected?.label?.toLowerCase()} first.</strong><br />
                   I'm now prioritizing <em>{mirrorMap[seeking]}</em>. Next question.
                 </p>
               </div>
