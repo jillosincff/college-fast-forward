@@ -242,9 +242,9 @@ export default function OnboardingSteps5to8({
             {isValid && (
               <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 16, textAlign: 'left', animation: 'fadeUp 0.25s ease' }}>
                 <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 10px' }}>
-                  Got it — you're targeting <strong>{mirrorLabel}</strong>.
+                  Locked in. I'll focus on <strong>{mirrorLabel}</strong>.
                 </p>
-                <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>Your Agent is now:</p>
+                <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>I'm now lining up:</p>
                 {mirrorDetails.map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                     <span style={{ fontSize: 12, color: GREEN, flexShrink: 0 }}>•</span>

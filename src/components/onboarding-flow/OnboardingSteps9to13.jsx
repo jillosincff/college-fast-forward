@@ -401,6 +401,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
       {screen === 13 && (
         <CliffCommitmentScreen
           resumeData={resumeData}
+          firstName={firstName}
           college={college}
           seeking={seeking}
           blockers={blockers}

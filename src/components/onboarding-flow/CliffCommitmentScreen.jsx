@@ -29,11 +29,11 @@ const SOLVE_MAP = {
  * where the free Magic Moment application is waiting.
  */
 export default function CliffCommitmentScreen({
-  resumeData, college, seeking, blockers = [],
+  resumeData, firstName, college, seeking, blockers = [],
   locationPref, locationCity, selectedIndustries = [], targetRoles = [],
   onBack, saveAndAuth,
 }) {
-  const [phase, setPhase] = useState('confirm'); // 'confirm' | 'planning'
+  const [phase, setPhase] = useState('confirm'); // 'confirm' | 'planning' | 'ready'
   const [stepIdx, setStepIdx] = useState(0);
   const launchedRef = useRef(false);
 
@@ -66,13 +66,63 @@ export default function CliffCommitmentScreen({
       setStepIdx(i => Math.min(i + 1, PLAN_STEPS.length - 1));
     }, 1300);
     const done = setTimeout(() => {
-      if (!launchedRef.current) {
-        launchedRef.current = true;
-        saveAndAuth('free');
-      }
+      setPhase('ready');
     }, PLAN_STEPS.length * 1300 + 900);
     return () => { clearInterval(interval); clearTimeout(done); };
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleShowPlan = () => {
+    if (launchedRef.current) return;
+    launchedRef.current = true;
+    saveAndAuth('free');
+  };
+
+  // ── PHASE 3: The emotional handoff — CLIFF says "I did the work." ──
+  if (phase === 'ready') {
+    const industriesLabel2 = selectedIndustries.slice(0, 2).join(' & ');
+    return (
+      <div style={{ textAlign: 'center', maxWidth: 500, width: '100%', paddingTop: 60, animation: 'fadeUp 0.4s ease' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '6px 16px', marginBottom: 22 }}>
+          <span style={{ fontSize: 13 }}>✓</span>
+          <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#0891b2', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Your Career Plan is Ready</span>
+        </div>
+
+        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(26px, 4.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 10px', lineHeight: 1.15 }}>
+          {firstName ? `Hi ${firstName}.` : 'Hi.'}
+        </h1>
+        <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 600, color: TEXT2, margin: '0 0 26px' }}>
+          I found a few things already.
+        </p>
+
+        <div style={{ background: CARD, border: '1px solid #E8EAF6', borderRadius: 16, padding: '22px 26px', textAlign: 'left', boxShadow: '0 4px 24px rgba(109,40,217,0.08)', marginBottom: 26 }}>
+          {[
+            industriesLabel2
+              ? `Opportunities in ${industriesLabel2} I think are worth your time — already queued.`
+              : 'A first batch of opportunities I think are worth your time — already queued.',
+            'Your first application is on me — free.',
+            "I'll explain every recommendation I make.",
+          ].map((line, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: i < 2 ? 14 : 0 }}>
+              <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>{['🎯', '🎁', '💬'][i]}</span>
+              <p style={{ fontFamily: FONT, fontSize: 14.5, fontWeight: 500, color: TEXT, margin: 0, lineHeight: 1.6 }}>{line}</p>
+            </div>
+          ))}
+        </div>
+
+        <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 16px' }}>Let's get started.</p>
+
+        <button
+          onClick={handleShowPlan}
+          className="onb-btn-primary"
+          style={{ display: 'block', width: '100%', maxWidth: 420, margin: '0 auto', fontFamily: FONT, fontSize: 16, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 12, padding: '18px 40px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 24px rgba(109,40,217,0.28)', transition: 'all 0.2s ease' }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(109,40,217,0.38)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(109,40,217,0.28)'; }}
+        >
+          Show My Plan →
+        </button>
+      </div>
+    );
+  }
 
   if (phase === 'planning') {
     return (
