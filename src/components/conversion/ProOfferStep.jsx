@@ -17,7 +17,10 @@ const PRO_ITEMS = [
 ];
 
 // Step 3: the contextual Pro offer — continuation of momentum, Free path never hidden.
-export default function ProOfferStep({ onKeepWorking, onContinueFree }) {
+// When a personalized pitch exists (built from the student's real plan and pipeline),
+// it replaces the static feature list: "Here's what I'd do for you with Pro."
+export default function ProOfferStep({ onKeepWorking, onContinueFree, pitch }) {
+  const personalized = pitch?.length >= 3;
   return (
     <div>
       <h2 style={{ fontFamily: dm, fontSize: 24, fontWeight: 900, color: '#111827', margin: '0 0 8px', lineHeight: 1.2 }}>
@@ -35,9 +38,11 @@ export default function ProOfferStep({ onKeepWorking, onContinueFree }) {
           ))}
         </div>
         <div style={{ flex: '1 1 200px', background: '#faf9ff', border: '1.5px solid #c4b5fd', borderRadius: 14, padding: '14px 16px' }}>
-          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6d28d9', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Turn on CLIFF Pro</p>
-          {PRO_ITEMS.map((t, i) => (
-            <p key={i} style={{ fontFamily: dm, fontSize: 12.5, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>• {t}</p>
+          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6d28d9', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            {personalized ? "Here's what I'd do for you with Pro" : 'Turn on CLIFF Pro'}
+          </p>
+          {(personalized ? pitch : PRO_ITEMS).map((t, i) => (
+            <p key={i} style={{ fontFamily: dm, fontSize: 12.5, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>{personalized ? '✓' : '•'} {t}</p>
           ))}
         </div>
       </div>

@@ -56,7 +56,7 @@ export default function PostMagicMomentFlow({ user, onUpgrade }) {
       <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(20px, 4vw, 32px)', maxWidth: 520, width: '100%', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.28)' }}>
         {step === 0 && <ReflectionStep data={data} onNext={goToContinuation} onClose={softClose} />}
         {step === 1 && <ContinuationStep move={data.next_move} onNext={goToOffer} onClose={softClose} />}
-        {step === 2 && <ProOfferStep onKeepWorking={keepWorking} onContinueFree={continueFree} />}
+        {step === 2 && <ProOfferStep pitch={data.pro_pitch} onKeepWorking={keepWorking} onContinueFree={continueFree} />}
       </div>
     </div>
   );

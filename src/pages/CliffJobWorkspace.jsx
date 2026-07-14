@@ -10,6 +10,7 @@ import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import TrustPanel from '@/components/workspace/TrustPanel';
+import CliffReadyCard from '@/components/conversion/CliffReadyCard';
 import decodeEntities from '@/utils/decodeEntities';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -120,6 +121,9 @@ export default function CliffJobWorkspace() {
 
         {/* One Next Step: CLIFF's single strongest recommendation leads the workspace */}
         {user && <WorkspaceNextStep job={job} pursuit={pursuit} fit={fit} fitLoading={fitLoading} user={user} />}
+
+        {/* "CLIFF Is Ready" preview — Free students post-Magic-Moment only (backend-gated) */}
+        {user && <CliffReadyCard job={job} />}
 
         {/* Supporting detail: 1) Application readiness 2) Fit 3) Prep 4) Networking (optional, last) */}
         {user && <ReadyToApplyCard job={job} pursuit={pursuit} user={user} />}

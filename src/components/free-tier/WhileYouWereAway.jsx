@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { getWhileYouWereAway } from '@/functions/getWhileYouWereAway';
 import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 import { ArrowRight, Clock, Target } from 'lucide-react';
+import { useProPrompt } from '@/components/conversion/useProPrompt';
+import ProTriggerPrompt from '@/components/conversion/ProTriggerPrompt';
+import CliffProPaywall from '@/components/pro/CliffProPaywall';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -9,6 +12,15 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 // plus the single most valuable next move. Every line is real — never invented.
 export default function WhileYouWereAway({ user }) {
   const [data, setData] = useState(null);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  // Contextual Pro prompt: only when the proactive engine found a real update.
+  // Frequency-controlled (session dedupe, 7-day suppression, never for Pro users).
+  const { eligible, dismiss, clickCta } = useProPrompt({
+    user,
+    trigger: 'proactive_discovery',
+    active: !!data && !data.on_track,
+  });
 
   useEffect(() => {
     if (!user?.email) return;
@@ -83,6 +95,18 @@ export default function WhileYouWereAway({ user }) {
           ))}
         </div>
       )}
+
+      {eligible && (
+        <div style={{ marginTop: 12, marginBottom: -8 }}>
+          <ProTriggerPrompt
+            trigger="proactive_discovery"
+            detail="CLIFF Pro keeps this running in the background and brings you back only when something matters."
+            onCta={() => { clickCta(); setShowPaywall(true); }}
+            onDismiss={() => dismiss(false)}
+          />
+        </div>
+      )}
+      {showPaywall && <CliffProPaywall trigger="proactive_discovery" onClose={() => setShowPaywall(false)} />}
     </div>
   );
 }

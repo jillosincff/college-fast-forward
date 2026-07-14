@@ -101,6 +101,27 @@ Deno.serve(async (req) => {
         move = (er?.data || er)?.move || null;
       } catch { move = null; }
 
+      // Personalized "here's what I'd do for you with Pro" — grounded in real student data
+      const [planRows, pipeline] = await Promise.all([
+        base44.entities.CareerPlan.filter({ user_email: user.email, status: 'active' }, '-created_date', 1).catch(() => []),
+        base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 50).catch(() => []),
+      ]);
+      const plan = planRows?.[0] || null;
+      const goals = user.career_goals || {};
+      const pitch = [];
+      const oppName = (o) => o?.company || o?.company_name || null;
+      const nextOpp = (plan?.opportunities || []).find(o => oppName(o) && oppName(o).toLowerCase() !== (company || '').toLowerCase()) || (plan?.opportunities || [])[0];
+      if (oppName(nextOpp)) pitch.push(`Prepare your ${oppName(nextOpp)} application`);
+      const watchCompanies = (plan?.companies?.length ? plan.companies : goals.target_companies) || [];
+      const industries = (plan?.industries?.length ? plan.industries : goals.target_industries) || [];
+      if (watchCompanies.length) pitch.push(`Monitor ${watchCompanies.slice(0, 3).join(', ')} for new openings`);
+      else if (industries.length) pitch.push(`Monitor ${industries[0]} companies you're interested in`);
+      const kind = (plan?.employment_type === 'internship' || goals.seeking === 'internship') ? 'internship' : 'opportunity';
+      pitch.push(`Alert you if a better ${kind} appears`);
+      const activeApps = (pipeline || []).filter(r => ['reached_out', 'messaged', 'applied'].includes(r.status)).length;
+      pitch.push(activeApps > 0 ? `Draft follow-ups for your ${activeApps} active application${activeApps !== 1 ? 's' : ''}` : 'Draft follow-ups after you apply');
+      pitch.push('Prepare you if you get an interview');
+
       await logEvent('reflection_viewed', { company_name: company, device: body.device });
 
       return Response.json({
@@ -110,6 +131,7 @@ Deno.serve(async (req) => {
         company_name: company,
         role_title: resume?.role_title || null,
         next_move: move,
+        pro_pitch: pitch.slice(0, 5),
       });
     }
 
