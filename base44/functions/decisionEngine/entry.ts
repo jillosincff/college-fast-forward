@@ -32,8 +32,8 @@ Deno.serve(async (req) => {
     // 🎉 Wins first — celebrate before directing
     const win = pipeline.find(r => ['replied', 'interview', 'offer'].includes(r.status) && daysSince(r) < 3);
     if (win) {
-      const msg = win.status === 'offer' ? `Congratulations — you got an offer from ${win.company}!`
-        : win.status === 'interview' ? `Congratulations — you landed an interview with ${win.company}!`
+      const msg = win.status === 'offer' ? `You got the offer from ${win.company}. You CLIFFed it. 🎉`
+        : win.status === 'interview' ? `You got the ${win.company} interview. You CLIFFed it.`
         : `${win.alumni_name || win.company} replied — momentum!`;
       timeline.push({ emoji: '🎉', date: today, text: msg, cta: 'View', action: route('#/ApplicationTracker') });
     }

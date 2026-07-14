@@ -67,7 +67,7 @@ export default function ToolsTab() {
           CLIFF's Toolbox
         </h2>
         <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-          CLIFF already uses these tools while building your plan. You can also open them directly anytime.
+          CLIFF already uses these behind the scenes while you're CLIFFing. Open one directly anytime.
         </p>
       </div>
 

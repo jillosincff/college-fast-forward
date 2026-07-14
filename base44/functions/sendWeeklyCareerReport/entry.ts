@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       const momentum = actions >= 4 ? 'Excellent' : actions >= 1 ? 'Building' : "Time for a restart";
 
       const lines: string[] = [];
-      lines.push(`Hi ${firstName},`, '', 'Your Weekly Career Report', '', 'This week:');
+      lines.push(`Hi ${firstName},`, '', 'Your Weekly Career Report', '', 'What you CLIFFed this week:');
       if (b.apps) lines.push(`✅ ${b.apps} application${b.apps === 1 ? '' : 's'} submitted`);
       if (b.resumes) lines.push(`✅ ${b.resumes} resume${b.resumes === 1 ? '' : 's'} tailored`);
       if (b.outreach) lines.push(`✅ ${b.outreach} outreach message${b.outreach === 1 ? '' : 's'} sent`);

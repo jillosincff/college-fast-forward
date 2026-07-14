@@ -10,6 +10,8 @@ import LiveJobsSection from '@/components/landing/LiveJobsSection';
 import AgentWeekDemo from '@/components/landing/AgentWeekDemo';
 import WhileAwaySection from '@/components/landing/WhileAwaySection';
 import PhilosophySection from '@/components/landing/PhilosophySection';
+import WhatIsCliffing from '@/components/landing/WhatIsCliffing';
+import RoommateSection from '@/components/landing/RoommateSection';
 import ProblemClarifier from '@/components/landing/ProblemClarifier';
 import { HERO_VARIANTS, getHeroVariant, trackHeroEvent } from '@/components/landing/heroVariants';
 import DayWithCliff from '@/components/landing/DayWithCliff';
@@ -345,7 +347,7 @@ export default function StudentLandingPage({ onParentClick }) {
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-          >{!isLoadingAuth && user ? 'Dashboard →' : 'Start Free →'}</button>
+          >{!isLoadingAuth && user ? 'Dashboard →' : 'Start CLIFFing →'}</button>
         </div>
       </nav>
 
@@ -387,7 +389,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
-                  Tell CLIFF what you want. It finds the right opportunities, prepares stronger applications, and quietly keeps your job search moving — so you always know your next best move.
+                  Tell CLIFF what you want. It finds the opportunities worth your time, prepares stronger applications, and keeps your search moving — without the endless scrolling and guessing.
                 </h2>
               </div>
             )}
@@ -410,9 +412,9 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Build My Plan
+                  Start CLIFFing
                 </button>
-                <button onClick={() => { trackHeroEvent('hero_secondary_cta_click', heroVariant); scrollToSection('how-it-works'); }} className="hero-cta-btn" style={{
+                <button onClick={() => { trackHeroEvent('hero_secondary_cta_click', heroVariant); scrollToSection('what-is-cliffing'); }} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(15px, 3.5vw, 16px)', fontWeight: 700, color: INDIGO,
                   background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999,
                   padding: 'clamp(14px, 3.5vw, 18px) clamp(28px, 6vw, 40px)',
@@ -422,7 +424,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; e.currentTarget.style.borderColor = INDIGO; }}
                   onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
                 >
-                  See How CLIFF Works
+                  See What CLIFFing Means
                 </button>
                 </div>
 
@@ -457,6 +459,9 @@ export default function StudentLandingPage({ onParentClick }) {
           )}
         </div>
       </div>
+
+      {/* ── WHAT IS CLIFFING? ── */}
+      <WhatIsCliffing go={go} />
 
       {/* ── WHILE YOU WERE AWAY (marketing illustration) ── */}
       <WhileAwaySection />
@@ -608,6 +613,9 @@ export default function StudentLandingPage({ onParentClick }) {
         </div></Reveal>
       </div>
 
+      {/* ── CAMPAIGN: YOUR ROOMMATE IS STILL JOB SEARCHING ── */}
+      <RoommateSection go={go} />
+
       {/* ── YOUR UNFAIR ADVANTAGE: PARENTS & ALUMNI ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px) 0', background: BG, borderTop: '1px solid #f1f5f9' }}>
         <Reveal><div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
@@ -702,7 +710,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.boxShadow = '0 20px 56px rgba(15,23,42,0.55), 0 0 0 4px rgba(255,255,255,0.30)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.background = '#0f172a'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(15,23,42,0.45), 0 0 0 4px rgba(255,255,255,0.20)'; }}
           >
-            Start Free →
+            Start CLIFFing →
           </button>
           <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', color: 'rgba(255,255,255,0.85)', margin: 'clamp(20px, 5vw, 28px) 0 0', lineHeight: 1.6 }}>
             Got a parent or alum who can help students land?{' '}
@@ -737,7 +745,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-        >{!isLoadingAuth && user ? 'Dashboard →' : 'Claim It Free →'}</button>
+        >{!isLoadingAuth && user ? 'Dashboard →' : 'Start CLIFFing →'}</button>
       </div>
 
       {/* ── FOOTER ── */}
