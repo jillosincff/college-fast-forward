@@ -1,0 +1,113 @@
+{
+  "name": "NetworkingRecommendation",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Student this assessment belongs to"
+    },
+    "rec_key": {
+      "type": "string",
+      "description": "Dedupe key: company||role (normalized lowercase)"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company assessed"
+    },
+    "role_title": {
+      "type": "string",
+      "description": "Role assessed"
+    },
+    "networking_value": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "NONE"
+      ],
+      "description": "Internal networking value \u2014 never shown to students as a score"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why CLIFF assigned this value"
+    },
+    "best_contact_name": {
+      "type": "string",
+      "description": "Top contact CLIFF identified, if any"
+    },
+    "contact_persona": {
+      "type": "string",
+      "description": "parent, alumni, external"
+    },
+    "contact_tier": {
+      "type": "number",
+      "description": "Relationship tier (1 = own-school CFF member, 2 = school alum, 3 = cross-school)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "assessed",
+        "contacted",
+        "replied",
+        "interview",
+        "offer",
+        "rejected",
+        "ignored"
+      ],
+      "default": "assessed",
+      "description": "Learning-engine outcome funnel"
+    },
+    "drafted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Student opened/used the prepared outreach draft"
+    },
+    "sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Student sent the outreach"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "Student's school at assessment time"
+    },
+    "major": {
+      "type": "string",
+      "description": "Student's major at assessment time"
+    },
+    "graduation_year": {
+      "type": "string",
+      "description": "Student's graduation year at assessment time"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Industry of the opportunity, if known"
+    }
+  },
+  "required": [
+    "user_email",
+    "rec_key",
+    "company_name",
+    "networking_value"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

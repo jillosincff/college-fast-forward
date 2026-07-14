@@ -7,7 +7,7 @@ import WorkspaceNextStep from '@/components/workspace/WorkspaceNextStep';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import JobFitCard from '@/components/workspace/JobFitCard';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
-import WorkspaceConnectionsCard from '@/components/workspace/WorkspaceConnectionsCard';
+import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import decodeEntities from '@/utils/decodeEntities';
 
@@ -129,7 +129,7 @@ export default function CliffJobWorkspace() {
 
         <CompanyPrepCard job={job} onPrepared={() => syncPursuit({ companyResearched: true })} />
 
-        {user && <WorkspaceConnectionsCard job={job} user={user} />}
+        {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
       </div>
     </div>
   );
