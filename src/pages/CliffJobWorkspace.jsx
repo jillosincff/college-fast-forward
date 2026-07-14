@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { analyzeJobFit } from '@/functions/analyzeJobFit';
 import { syncJobPursuit } from '@/functions/syncJobPursuit';
-import PursuitStatusCard from '@/components/workspace/PursuitStatusCard';
+import ReadyToApplyCard from '@/components/workspace/ReadyToApplyCard';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import JobFitCard from '@/components/workspace/JobFitCard';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
@@ -116,9 +116,10 @@ export default function CliffJobWorkspace() {
           </div>
         </div>
 
-        <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
+        {/* Action first: can I apply, and what's ready? */}
+        {user && <ReadyToApplyCard job={job} pursuit={pursuit} user={user} />}
 
-        {pursuit && <PursuitStatusCard pursuit={pursuit} />}
+        <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
 
         {user && <WorkspaceConnectionsCard job={job} user={user} />}
 

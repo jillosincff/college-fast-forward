@@ -52,7 +52,12 @@ export default function MomentumScore({ user }) {
       else if (appliedWk > 0) coach = `You're on pace for ~${appliedWk * 4} applications this month. Keep stacking.`;
       else coach = "Let's stack one win today — momentum compounds fast.";
 
-      setData({ score, delta, reasons: reasons.slice(0, 3), coach });
+      // Reassurance, not ranking: answers "am I doing enough?"
+      const reassure = (score >= 55 || delta > 0)
+        ? "You're making good progress. You're doing enough."
+        : "You're closer than it feels — one small step today counts.";
+
+      setData({ score, delta, reasons: reasons.slice(0, 3), coach, reassure });
     });
     return () => { cancelled = true; };
   }, [user?.email]);
@@ -75,7 +80,8 @@ export default function MomentumScore({ user }) {
       {data.reasons.map((r, i) => (
         <p key={i} style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: '0 0 4px' }}>✅ {r}</p>
       ))}
-      <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: data.reasons.length ? '10px 0 0' : 0, lineHeight: 1.5 }}>{data.coach}</p>
+      <p style={{ fontFamily: dm, fontSize: 12, fontStyle: 'italic', color: '#6b7280', margin: data.reasons.length ? '10px 0 0' : 0, lineHeight: 1.5 }}>{data.reassure}</p>
+      <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '4px 0 0', lineHeight: 1.5 }}>{data.coach}</p>
     </div>
   );
 }

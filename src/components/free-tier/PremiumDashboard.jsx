@@ -19,10 +19,7 @@ import ToolsTab from './ToolsTab';
 import ProgressTab from './ProgressTab';
 import PremiumActivationSequence from './PremiumActivationSequence';
 import PeakMomentSharePrompt from './PeakMomentSharePrompt';
-import FollowUpNudgeCard from './FollowUpNudgeCard';
 import WarmApplyBar from './WarmApplyBar';
-import CliffRecommendedActions from './CliffRecommendedActions';
-import CliffJustFound from './CliffJustFound';
 import TodaysMission from './TodaysMission';
 import MomentumScore from './MomentumScore';
 import ProgressSinceLastVisit from './ProgressSinceLastVisit';
@@ -510,19 +507,11 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             {/* Momentum score inline on mobile (sidebar is desktop-only) */}
             {isMobile && <MomentumScore user={user} />}
 
-            {/* Proactive high-relevance discoveries — only shows when CLIFF found something */}
-            <CliffJustFound user={user} />
-
-            {/* CLIFF's per-job next actions from active pursuits + pipeline */}
-            <div><CliffRecommendedActions user={user} /></div>
-
             {/* Primary action: paste a job → warm connection → outreach → tracked */}
             <WarmApplyBar user={user} />
 
-            {/* Stalled outreach follow-up nudge with one-click AI draft */}
-            <div><FollowUpNudgeCard user={user} /></div>
-
             {/* ── Three-Tier Organized Feeds ── */}
+            <div id="cff-daily-feed" />
             <OrganizedFeeds 
               key={`${JSON.stringify(user?.career_goals?.target_roles)}-${JSON.stringify(user?.career_goals?.target_industries)}-${user?.career_goals?.company_size_preference}`} 
               user={user} 
