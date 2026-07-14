@@ -44,16 +44,32 @@ export default function PipelineImpactBar({ user, theme }) {
     };
   }, []);
 
+  // Never show a zero — hide empty tiles; if everything is zero, show that CLIFF is watching.
   const tiles = [
     { label: 'Apps Sent', value: stats.appsSent, icon: '📋', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
     { label: 'Network Nudges', value: stats.networkNudges, icon: '🤝', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' },
     { label: 'Interviews', value: stats.interviews, icon: '🎤', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
-  ];
+  ].filter(t => loading || t.value > 0);
+
+  if (!loading && tiles.length === 0) {
+    return (
+      <div style={{
+        background: '#fff', border: '1px solid #ddd6fe', borderRadius: 14,
+        padding: '14px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12,
+      }}>
+        <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>👀</div>
+        <div>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#6d28d9', margin: 0 }}>CLIFF is watching opportunities for you</p>
+          <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '2px 0 0', lineHeight: 1.4 }}>I'm continuously evaluating openings — I'll only surface the ones worth your time.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
+      gridTemplateColumns: `repeat(${tiles.length}, 1fr)`,
       gap: 10,
       marginBottom: 20,
     }}>

@@ -24,7 +24,7 @@ import TodaysBestMoves from './TodaysBestMoves';
 import MomentumScore from './MomentumScore';
 import ProgressSinceLastVisit from './ProgressSinceLastVisit';
 import JobWorkspaceCard from './JobWorkspaceCard';
-import { Wrench, LogOut, Rocket, FileText, Users, MessageCircle, GraduationCap, Building2, CalendarCheck, Clock } from 'lucide-react';
+import { Wrench, LogOut, Rocket, FileText, Users, MessageCircle, GraduationCap, Building2, CalendarCheck, Clock, Eye } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -238,6 +238,8 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       setOutcome({
         appsReady: (resumes || []).filter(r => r.status === 'completed' && !r.downloaded_at).length,
         jobsToApply: drop ? (drop.slots || []).filter(s => !(drop.actioned_keys || []).includes(s.key)).length : 0,
+        // Opportunities CLIFF is actively evaluating — shown instead of a zero recommendation count
+        watched: (drop ? (drop.slots || []).length : 0) + (rows || []).filter(r => ['identified', 'matched'].includes(r.status)).length,
         interviews: (rows || []).filter(r => r.status === 'interview').length,
         followUps: (rows || []).filter(r => ['reached_out', 'messaged'].includes(r.status) && daysSince(r) >= 5).length,
       });
@@ -310,12 +312,31 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const parentsCount = networkStats?.parents || 0;
   const companiesCount = networkStats?.companies || 0;
   const networkCount = alumniCount + parentsCount;
-  const stats = [
-    { icon: FileText, label: 'Applications Ready', value: `${outcome?.appsReady ?? 0}`, isLoading: outcome === null },
-    { icon: Rocket, label: 'Jobs Worth Applying To', value: `${outcome?.jobsToApply ?? 0}`, isLoading: outcome === null },
-    { icon: CalendarCheck, label: 'Interviews Scheduled', value: `${outcome?.interviews ?? 0}`, isLoading: outcome === null },
-    { icon: Clock, label: 'Follow-Ups Due', value: `${outcome?.followUps ?? 0}`, isLoading: outcome === null },
-  ];
+  // Trust rule: never show a zero that implies CLIFF has nothing.
+  // Zero-value metrics are hidden; a zero recommendation count becomes
+  // "Opportunities Being Watched" so the dashboard always communicates progress.
+  let stats;
+  if (outcome === null) {
+    stats = [
+      { icon: FileText, label: 'Applications Ready', value: '', isLoading: true },
+      { icon: Rocket, label: 'Jobs Worth Applying To', value: '', isLoading: true },
+      { icon: CalendarCheck, label: 'Interviews Scheduled', value: '', isLoading: true },
+      { icon: Clock, label: 'Follow-Ups Due', value: '', isLoading: true },
+    ];
+  } else {
+    stats = [];
+    if (outcome.jobsToApply > 0) {
+      stats.push({ icon: Rocket, label: 'Jobs Worth Applying To', value: `${outcome.jobsToApply}` });
+    } else if (outcome.watched > 0) {
+      stats.push({ icon: Eye, label: '👀 Opportunities Being Watched', value: `${outcome.watched}`, sublabel: "I'll only recommend them when they're worth your time." });
+    }
+    if (outcome.appsReady > 0) stats.push({ icon: FileText, label: 'Applications Ready', value: `${outcome.appsReady}` });
+    if (outcome.interviews > 0) stats.push({ icon: CalendarCheck, label: 'Interviews Scheduled', value: `${outcome.interviews}` });
+    if (outcome.followUps > 0) stats.push({ icon: Clock, label: 'Follow-Ups Due', value: `${outcome.followUps}` });
+    if (stats.length === 0) {
+      stats.push({ icon: Eye, label: 'Next Opportunity', value: '👀', sublabel: "I'm scouting right now — I'll flag it the moment something is worth your time." });
+    }
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
