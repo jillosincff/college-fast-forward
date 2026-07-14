@@ -7,7 +7,9 @@ import { base44 } from '@/api/base44Client';
 import Reveal from '@/components/landing/Reveal';
 import AppShowcase from '@/components/landing/AppShowcase';
 import LiveJobsSection from '@/components/landing/LiveJobsSection';
-import CliffAgentDemo from '@/components/landing/CliffAgentDemo';
+import HeroClarityDemo from '@/components/landing/HeroClarityDemo';
+import ProblemClarifier from '@/components/landing/ProblemClarifier';
+import { HERO_VARIANTS, getHeroVariant, trackHeroEvent } from '@/components/landing/heroVariants';
 import DayWithCliff from '@/components/landing/DayWithCliff';
 import CliffTrustSection from '@/components/landing/CliffTrustSection';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
@@ -160,7 +162,13 @@ export default function StudentLandingPage({ onParentClick }) {
   const [showFunnel, setShowFunnel] = useState(false);
   const [funnelStartScreen, setFunnelStartScreen] = useState(null);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
+  const [heroVariant] = useState(() => getHeroVariant());
   const { user, isLoadingAuth } = useAuth();
+
+  // Track which hero variant was shown (once per page view)
+  useEffect(() => {
+    trackHeroEvent('hero_variant_shown', heroVariant);
+  }, [heroVariant]);
 
   useEffect(() => {
     setMounted(true);
@@ -361,11 +369,14 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
             )}
 
-            {/* Main headline */}
+            {/* Main headline — A/B testable variants (default: A) */}
             {mounted && (
               <div className="hero-animate-2">
-                <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#030712', margin: '0 0 8px' }}>
-                  You bring the ambition.<br />CLIFF brings the plan.
+                <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.08, color: '#030712', margin: '0 0 16px' }}>
+                  <span style={{ display: 'block' }}>{HERO_VARIANTS[heroVariant].line1}</span>
+                  <span style={{ display: 'block', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                    {HERO_VARIANTS[heroVariant].line2}
+                  </span>
                 </h1>
               </div>
             )}
@@ -373,30 +384,17 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Sub-headline */}
             {mounted && (
               <div className="hero-animate-3">
-                <h2 style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 26px)', fontWeight: 600, color: '#334155', margin: '0 0 16px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
-                  Tell CLIFF what you want. Then stop wondering what to do next.
+                <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
+                  Tell CLIFF your goals. It cuts through the noise, finds the opportunities worth your time, prepares your applications, and tells you exactly what to do next.
                 </h2>
-              </div>
-            )}
-
-            {/* Body */}
-            {mounted && (
-              <div className="hero-animate-4">
-                <div style={{ margin: '0 0 36px', maxWidth: 540 }}>
-                  <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 700, color: '#334155', margin: '0 0 8px' }}>Every day CLIFF:</p>
-                  {['Finds better opportunities', 'Prepares applications', 'Prioritizes your time', 'Finds networking advantages', 'Keeps you moving until you get hired'].map(item => (
-                    <p key={item} style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#4b5563', lineHeight: 1.85, margin: 0 }}>
-                      <span style={{ color: INDIGO, fontWeight: 800, marginRight: 8 }}>✓</span>{item}
-                    </p>
-                  ))}
-                </div>
               </div>
             )}
 
             {/* CTA */}
             {mounted && (
               <div className="hero-animate-5" style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
-                <button onClick={go} className="hero-cta-btn" style={{
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                <button onClick={() => { trackHeroEvent('hero_primary_cta_click', heroVariant); go(); }} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(16px, 3.5vw, 18px)', fontWeight: 600, color: '#fff',
                   background: GRAD_INDIGO, border: 'none', borderRadius: 999,
                   padding: 'clamp(16px, 4vw, 20px) clamp(48px, 8vw, 64px)',
@@ -410,16 +408,24 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Get My Career Plan →
+                  Build My Plan
                 </button>
+                <button onClick={() => { trackHeroEvent('hero_secondary_cta_click', heroVariant); scrollToSection('how-it-works'); }} className="hero-cta-btn" style={{
+                  fontFamily: SF, fontSize: 'clamp(15px, 3.5vw, 16px)', fontWeight: 700, color: INDIGO,
+                  background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999,
+                  padding: 'clamp(14px, 3.5vw, 18px) clamp(28px, 6vw, 40px)',
+                  cursor: 'pointer', minHeight: 56, transition: 'all 0.2s ease',
+                  touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; e.currentTarget.style.borderColor = INDIGO; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
+                >
+                  See How CLIFF Works
+                </button>
+                </div>
 
-                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: '8px 0 0', lineHeight: 1.5 }}>
-                  Free to start · Your first personalized career plan takes about two minutes
-                </p>
-
-                {/* Signature line */}
-                <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.2vw, 15px)', fontWeight: 700, fontStyle: 'italic', color: INDIGO, margin: '2px 0 0', lineHeight: 1.5 }}>
-                  Every morning, CLIFF wakes up thinking about your career before you do.
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                  Free to start. Your first CLIFF-powered application is on us.
                 </p>
 
                 {/* Above-the-fold social proof */}
@@ -444,11 +450,14 @@ export default function StudentLandingPage({ onParentClick }) {
             <div className="hero-animate-6 hero-visual" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Soft radial glow behind the product card */}
               <div style={{ position: 'absolute', inset: '-10%', background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24, pointerEvents: 'none' }} />
-              <CliffAgentDemo />
+              <HeroClarityDemo />
             </div>
           )}
         </div>
       </div>
+
+      {/* ── PROBLEM CLARIFIER ── */}
+      <ProblemClarifier />
 
       {/* ── SCHOOL MARQUEE ── */}
       <SchoolMarquee />
