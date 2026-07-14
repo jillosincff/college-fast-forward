@@ -116,7 +116,7 @@ export default function PremiumPaywallModal({
                 color: isDownsell ? '#c2410c' : '#4338ca',
                 letterSpacing: '0.1em', textTransform: 'uppercase',
               }}>
-                {isDownsell ? 'Session-Only Offer — 50% Off' : 'CLiFF Premium Access'}
+                {isDownsell ? 'Session-Only Offer — 50% Off' : 'CLIFF Pro Access'}
               </span>
             </div>
 
