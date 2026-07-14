@@ -72,7 +72,7 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
           }}>
             <span style={{ fontSize: 12 }}>🤖</span>
             <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#4338ca', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              CLiFF Premium Feature
+              Included with CLIFF Pro
             </span>
           </div>
 
@@ -80,7 +80,7 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
             Unlock the Inside Track
           </h3>
           <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.65, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
-            Referred candidates are <strong style={{ color: '#0f172a' }}>~9x more likely to get hired</strong> than cold applicants. Premium exists to get you referrals.
+            Referred candidates are <strong style={{ color: '#0f172a' }}>~9x more likely to get hired</strong> than cold applicants. CLIFF Pro does that work for you.
           </p>
         </div>
 
@@ -106,7 +106,7 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 84px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '8px 14px' }}>
             <span />
             <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#94a3b8', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Free</span>
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#4338ca', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Premium</span>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#4338ca', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pro</span>
           </div>
           {[
             { label: 'Daily job drop', free: '✓', prem: '✓' },
@@ -148,7 +148,7 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(5,150,105,0.45)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(5,150,105,0.30)'; }}
           >
-            Unlock Everything Instantly — $4.99/wk →
+            Start CLIFF Pro — $4.99/wk →
           </button>
 
           <p style={{ fontFamily: dm, fontSize: 10, color: '#94a3b8', fontWeight: 500, margin: 0 }}>

@@ -5,7 +5,6 @@ import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import Reveal from '@/components/landing/Reveal';
-import PricingComparison from '@/components/landing/PricingComparison';
 import AppShowcase from '@/components/landing/AppShowcase';
 import LiveJobsSection from '@/components/landing/LiveJobsSection';
 import CliffAgentDemo from '@/components/landing/CliffAgentDemo';
@@ -610,47 +609,58 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── PRICING ── */}
       <div id="pricing" style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
-        <Reveal><div style={{ maxWidth: 560, margin: '0 auto' }}>
+        <Reveal><div style={{ maxWidth: 900, margin: '0 auto' }}>
           <SectionLabel text="Simple Pricing" />
-          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
-            One focused sprint.<br />
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block' }}>Real results.</span>
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
+            Start with direction.<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Upgrade when you want CLIFF to do the work.</span>
           </h2>
 
-          <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(28px, 6vw, 40px)', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid #e2e8f0', position: 'relative' }}>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 'clamp(20px, 5vw, 28px)', flexWrap: 'wrap' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '6px 14px' }}>
-                <GraduationCap size={13} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Graduation Sprint Plan</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(16px, 4vw, 24px)', alignItems: 'stretch' }}>
+            {/* CFF Free — guidance */}
+            <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(24px, 5vw, 32px)', border: '1px solid #e2e8f0', boxShadow: SHADOW, display: 'flex', flexDirection: 'column' }}>
+              <p style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: TEXT, margin: '0 0 4px' }}>CFF Free</p>
+              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: TEXT2, margin: '0 0 4px' }}>See what CLIFF recommends.</p>
+              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 18px', fontStyle: 'italic' }}>For students who want a smarter place to start.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                {['Personalized job recommendations', "Today's Best Moves", 'Career Momentum', 'Application tracking', 'Basic CLIFF access', 'One CLIFF-powered application preview'].map(t => (
+                  <div key={t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+                    <Check size={14} color="#64748b" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
+                    <span style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 500, color: TEXT2, lineHeight: 1.5 }}>{t}</span>
+                  </div>
+                ))}
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fefce8', border: '1px solid #fde68a', borderRadius: 100, padding: '6px 14px' }}>
-                <Zap size={13} color="#854d0e" style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: '#854d0e' }}>Less than a latte a week</span>
+              <button onClick={go} style={{ marginTop: 'auto', fontFamily: SF, fontSize: 15, fontWeight: 700, color: INDIGO, background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 52, width: '100%' }}>
+                Start Free
+              </button>
+            </div>
+
+            {/* CLIFF Pro — execution */}
+            <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(24px, 5vw, 32px)', border: `2px solid ${INDIGO}`, boxShadow: SHADOW_MD, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <span style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: GRAD_INDIGO, color: '#fff', fontFamily: SF, fontSize: 11, fontWeight: 800, borderRadius: 100, padding: '4px 14px', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>LET CLIFF DO THE WORK</span>
+              <p style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: INDIGO, margin: '0 0 4px' }}>CLIFF Pro</p>
+              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: TEXT2, margin: '0 0 4px' }}>Let CLIFF do the work.</p>
+              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 12px', fontStyle: 'italic' }}>For students actively trying to get hired.</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 14 }}>
+                <span style={{ fontFamily: SF, fontSize: 34, fontWeight: 900, color: TEXT, letterSpacing: '-0.03em' }}>$4.99</span>
+                <span style={{ fontFamily: SF, fontSize: 14, fontWeight: 600, color: TEXT3 }}>/week · cancel anytime</span>
               </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                {['Unlimited tailored applications', 'Full Job Workspaces', 'Connection discovery', 'Outreach and follow-ups', 'Unlimited interview practice', 'Proactive discoveries', 'Unlimited CLIFF support', 'Weekly Career Brief'].map(t => (
+                  <div key={t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+                    <Check size={14} color={INDIGO} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
+                    <span style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 600, color: TEXT, lineHeight: 1.5 }}>{t}</span>
+                  </div>
+                ))}
+              </div>
+              <CTAButton label="Start CLIFF Pro" fullWidth style={{ marginTop: 'auto' }} />
             </div>
-
-            <div style={{ background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '14px 16px', marginBottom: 'clamp(20px, 4vw, 24px)' }}>
-              <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: INDIGO_DIM, margin: '0 0 2px', lineHeight: 1.4 }}>
-                Start completely free — no card required.
-              </p>
-              <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, margin: 0, lineHeight: 1.5 }}>
-                Upgrade to Premium only when you're ready to accelerate.
-              </p>
-            </div>
-
-            <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 8px' }}>When you upgrade</p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: SF, fontSize: 'clamp(56px, 14vw, 80px)', fontWeight: 900, color: INDIGO, letterSpacing: '-0.05em', lineHeight: 0.9 }}>$4.99</span>
-              <span style={{ fontFamily: SF, fontSize: 'clamp(18px, 5vw, 22px)', color: TEXT, fontWeight: 700 }}>/week</span>
-            </div>
-            <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 4vw, 16px)', color: TEXT2, fontWeight: 600, margin: '0 0 clamp(24px, 5vw, 32px)', lineHeight: 1.5 }}>
-              That's just <span style={{ color: TEXT, fontWeight: 800 }}>$19.96/month</span> — billed monthly, cancel in 1 tap anytime.
-            </p>
-
-            <PricingComparison />
-
-            <CTAButton label="Get My Career Plan →" fullWidth style={{ marginTop: 'clamp(24px, 5vw, 32px)' }} />
           </div>
+
+          <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 4vw, 16px)', fontWeight: 800, color: TEXT, textAlign: 'center', margin: 'clamp(24px, 6vw, 32px) 0 0' }}>
+            Free tells you what to do.{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Pro helps you get it done.</span>
+          </p>
         </div></Reveal>
       </div>
 

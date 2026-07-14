@@ -1,0 +1,76 @@
+{
+  "name": "FeatureUsage",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user this usage record belongs to"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user \u2014 used for RLS"
+    },
+    "capability_name": {
+      "type": "string",
+      "description": "Entitlement capability being metered, e.g. cliff_chat_basic, resume_tailor"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Successful uses within the current period"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": [
+        "day",
+        "week",
+        "month",
+        "lifetime"
+      ],
+      "description": "Metering window for this capability"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of the current metering period (UTC)"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "End of the current metering period (UTC)"
+    },
+    "lifetime_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total successful uses across all periods"
+    },
+    "last_used_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the capability was last successfully used"
+    }
+  },
+  "required": [
+    "user_id",
+    "capability_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

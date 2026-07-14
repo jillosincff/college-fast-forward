@@ -2,15 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { ArrowLeft, Send, Sparkles, Lock } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles } from 'lucide-react';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
+import { getUsageRemaining, consumeUsage } from '@/lib/entitlements';
+import CliffProPaywall from '@/components/pro/CliffProPaywall';
 
 const FONT = "'DM Sans', system-ui, sans-serif";
 const INDIGO = '#7c3aed';
 const VIOLET = '#6d28d9';
 const GRAD = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
-
-const FREE_LIMIT = 8;
 
 export default function CliffChatPage({ onOpenUpgrade }) {
   const { user } = useAuth();
@@ -18,8 +18,8 @@ export default function CliffChatPage({ onOpenUpgrade }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [dailyCount, setDailyCount] = useState(0);
-  const [showLimitToast, setShowLimitToast] = useState(false);
+  const [remaining, setRemaining] = useState(null); // weekly free CLIFF messages left
+  const [showPaywall, setShowPaywall] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Contextual mode: opened from a specific application ("Ask CLIFF" on a tracker card)
@@ -33,47 +33,25 @@ export default function CliffChatPage({ onOpenUpgrade }) {
     return null;
   });
 
+  // Server-tracked weekly free message allowance (entitlement system)
   useEffect(() => {
-    if (!user?.email) return;
-    const storageKey = `cliff_chat_count_${user.email}`;
-    const today = new Date().toDateString();
-    const stored = localStorage.getItem(storageKey);
-    
-    if (stored) {
-      const { date, count } = JSON.parse(stored);
-      if (date === today) {
-        setDailyCount(count || 0);
-      } else {
-        localStorage.setItem(storageKey, JSON.stringify({ date: today, count: 0 }));
-        setDailyCount(0);
-      }
-    } else {
-      localStorage.setItem(storageKey, JSON.stringify({ date: today, count: 0 }));
-    }
-  }, [user?.email]);
+    if (!user?.id || isPremium) return;
+    getUsageRemaining(user, 'cliff_chat_basic')
+      .then(res => setRemaining(res.remaining))
+      .catch(() => {});
+  }, [user?.id, isPremium]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const incrementCount = () => {
-    if (!user?.email) return;
-    const storageKey = `cliff_chat_count_${user.email}`;
-    const today = new Date().toDateString();
-    const stored = localStorage.getItem(storageKey);
-    const newCount = (stored ? JSON.parse(stored).count : 0) + 1;
-    localStorage.setItem(storageKey, JSON.stringify({ date: today, count: newCount }));
-    setDailyCount(newCount);
-  };
-
-  const canSendMessage = isPremium || dailyCount < FREE_LIMIT;
+  const canSendMessage = isPremium || remaining === null || remaining > 0;
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
-    
+
     if (!canSendMessage) {
-      setShowLimitToast(true);
-      setTimeout(() => setShowLimitToast(false), 4000);
+      setShowPaywall(true);
       return;
     }
 
@@ -86,7 +64,6 @@ export default function CliffChatPage({ onOpenUpgrade }) {
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setLoading(true);
-    incrementCount();
 
     try {
       const res = await base44.functions.invoke('cliffCareerAgent', {
@@ -96,6 +73,12 @@ export default function CliffChatPage({ onOpenUpgrade }) {
 
       const aiMessage = res?.data?.response || res?.data?.message || "I'm here to help with your job search! What would you like to know?";
       setMessages(prev => [...prev, { role: 'assistant', content: aiMessage }]);
+      // Only consume a free credit after the response completed successfully
+      if (!isPremium) {
+        consumeUsage(user, 'cliff_chat_basic')
+          .then(r => setRemaining(r.remaining))
+          .catch(() => {});
+      }
     } catch (e) {
       console.error('Chat failed:', e);
       setMessages(prev => [...prev, { 
@@ -158,7 +141,7 @@ export default function CliffChatPage({ onOpenUpgrade }) {
           <div>
             <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#1e293b', margin: 0 }}>CLIFF Career Agent</p>
             <p style={{ fontFamily: FONT, fontSize: 13, color: '#64748b', margin: 0 }}>
-              {isPremium ? '✓ Premium — Unlimited access' : `Free tier — ${FREE_LIMIT - dailyCount} messages left today`}
+              {isPremium ? '✓ CLIFF Pro — Unlimited support' : remaining === null ? 'CFF Free' : `CFF Free — ${remaining} CLIFF message${remaining === 1 ? '' : 's'} left this week`}
             </p>
           </div>
         </div>
@@ -347,7 +330,7 @@ export default function CliffChatPage({ onOpenUpgrade }) {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={canSendMessage ? "Ask CLIFF anything about your job search..." : "Daily limit reached — upgrade for unlimited access"}
+          placeholder={canSendMessage ? "Ask CLIFF anything about your job search..." : "You've used this week's free CLIFF messages"}
           rows={1}
           disabled={!canSendMessage || loading}
           style={{
@@ -388,62 +371,14 @@ export default function CliffChatPage({ onOpenUpgrade }) {
         </button>
       </div>
 
-      {/* Limit toast */}
-      {showLimitToast && (
-        <div style={{
-          position: 'fixed',
-          top: 100,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: '#fff',
-          border: '1px solid #e9d5ff',
-          borderRadius: 16,
-          padding: '20px 24px',
-          boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-          zIndex: 1000,
-          width: '90%',
-          maxWidth: 400,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
-            <div style={{
-              width: 44,
-              height: 44,
-              borderRadius: '50%',
-              background: '#fef3c7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}>
-              <Lock size={20} color='#d97706' />
-            </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#1e293b', margin: '0 0 4px' }}>
-                Daily limit reached
-              </p>
-              <p style={{ fontFamily: FONT, fontSize: 13, color: '#64748b', margin: 0 }}>
-                You've used all {FREE_LIMIT} free messages today. Upgrade for unlimited CLIFF access.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => onOpenUpgrade?.()}
-            style={{
-              background: GRAD,
-              border: 'none',
-              borderRadius: 10,
-              padding: '12px 20px',
-              fontFamily: FONT,
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#fff',
-              cursor: 'pointer',
-              width: '100%',
-            }}
-          >
-            Upgrade for Unlimited Access →
-          </button>
-        </div>
+      {/* Weekly free-message limit reached — conversation is preserved */}
+      {showPaywall && (
+        <CliffProPaywall
+          trigger="cliff_chat_limit"
+          contextLine="You've used this week's free CLIFF messages. CLIFF Pro gives you unlimited career-agent support."
+          onClose={() => setShowPaywall(false)}
+          onUpgrade={onOpenUpgrade}
+        />
       )}
 
       <style>{`@keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }`}</style>
