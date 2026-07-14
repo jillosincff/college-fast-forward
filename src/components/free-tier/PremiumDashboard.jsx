@@ -20,7 +20,7 @@ import ProgressTab from './ProgressTab';
 import PremiumActivationSequence from './PremiumActivationSequence';
 import PeakMomentSharePrompt from './PeakMomentSharePrompt';
 import WarmApplyBar from './WarmApplyBar';
-import TodaysMission from './TodaysMission';
+import TodaysBestMoves from './TodaysBestMoves';
 import MomentumScore from './MomentumScore';
 import ProgressSinceLastVisit from './ProgressSinceLastVisit';
 import JobWorkspaceCard from './JobWorkspaceCard';
@@ -219,6 +219,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const [showChat, setShowChat] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [pipelineCount, setPipelineCount] = useState(null);
+  const [showMoreJobs, setShowMoreJobs] = useState(false); // job feed is the escape hatch, not the default
   const navRef = useRef(null);
 
   // Outcome stats for the hero: applications ready, jobs to apply to, interviews, follow-ups
@@ -510,8 +511,14 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         <div style={{ display: 'grid', gridTemplateColumns: (showSidebar && !isMobile) ? 'minmax(0, 1fr) 340px' : 'minmax(0, 1fr)', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
           {/* Left Column - Job Feed */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
-            {/* CLIFF's 3 accountable tasks for today */}
-            <TodaysMission user={user} />
+            {/* The primary daily experience: CLIFF's ranked plan, not a job list */}
+            <TodaysBestMoves
+              user={user}
+              onShowMoreJobs={() => {
+                setShowMoreJobs(true);
+                setTimeout(() => document.getElementById('cff-daily-feed')?.scrollIntoView({ behavior: 'smooth' }), 100);
+              }}
+            />
 
             {/* Momentum score inline on mobile (sidebar is desktop-only) */}
             {isMobile && <MomentumScore user={user} />}
@@ -519,15 +526,17 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             {/* Primary action: paste a job → warm connection → outreach → tracked */}
             <WarmApplyBar user={user} />
 
-            {/* ── Three-Tier Organized Feeds ── */}
+            {/* ── Job feeds: escape hatch only — revealed by "Show me more jobs" ── */}
             <div id="cff-daily-feed" />
-            <OrganizedFeeds 
-              key={`${JSON.stringify(user?.career_goals?.target_roles)}-${JSON.stringify(user?.career_goals?.target_industries)}-${user?.career_goals?.company_size_preference}`} 
-              user={user} 
-              verifiedAlumniCount={alumniCount} 
-              verifiedParentsCount={parentsCount} 
-              isPremium={true}
-            />
+            {showMoreJobs && (
+              <OrganizedFeeds 
+                key={`${JSON.stringify(user?.career_goals?.target_roles)}-${JSON.stringify(user?.career_goals?.target_industries)}-${user?.career_goals?.company_size_preference}`} 
+                user={user} 
+                verifiedAlumniCount={alumniCount} 
+                verifiedParentsCount={parentsCount} 
+                isPremium={true}
+              />
+            )}
           </div>
 
           {/* Right Column (Desktop Only) - Sticky sidebar, only when Parent Network is unlocked */}

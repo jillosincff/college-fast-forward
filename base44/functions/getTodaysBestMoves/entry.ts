@@ -1,0 +1,163 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+
+// CLIFF's daily ranking engine. Answers one question:
+// "If the student only has 20 minutes today, what should they do?"
+// Returns at most 3 fully-actionable moves — never "browse" or "explore".
+
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const email = user.email;
+    const today = new Date().toISOString().slice(0, 10);
+
+    const [memories, pipeline, resumes, drops, discoveries] = await Promise.all([
+      base44.entities.StudentMemory.filter({ user_email: email, active: true }, '-confidence', 100).catch(() => []),
+      base44.entities.NetworkingPipeline.filter({ user_email: email }, '-created_date', 100).catch(() => []),
+      base44.entities.TailoredResume.filter({ user_email: email }, '-created_date', 30).catch(() => []),
+      base44.entities.UserDailyDrop.filter({ user_email: email, drop_date: today }).catch(() => []),
+      base44.entities.CliffDiscovery.filter({ user_email: email, status: 'new' }, '-created_date', 10).catch(() => []),
+    ]);
+
+    const daysSince = (r) => Math.floor((Date.now() - new Date(r.status_date || r.created_date).getTime()) / 86400000);
+    const avoids = (memories || []).filter(m => (m.confidence || 0) >= 70 && ['disliked_industries', 'avoided_companies', 'excluded_locations'].includes(m.category));
+    const prefers = (memories || []).filter(m => (m.confidence || 0) >= 50 && ['preferred_industries', 'preferred_locations', 'target_companies'].includes(m.category));
+
+    const candidates = [];
+
+    // Interview scheduled → highest leverage today
+    const interviewing = (pipeline || []).find(r => r.status === 'interview');
+    if (interviewing) {
+      candidates.push({
+        score: 100, kind: 'interview',
+        title: `Practice your ${interviewing.company} interview`,
+        reasons: [`You have an interview in play at ${interviewing.company}`, 'I prepared company-specific practice questions'],
+        time: '8 min', action_label: 'Practice',
+        action: { type: 'route', route: '#/MockInterview' },
+        company: interviewing.company,
+      });
+    }
+
+    // Resume already prepared → apply is nearly free
+    const readyResume = (resumes || []).find(r => r.status === 'completed' && !r.downloaded_at);
+    if (readyResume) {
+      const conn = (pipeline || []).find(r => (r.company || '').toLowerCase() === (readyResume.company_name || '').toLowerCase() && r.alumni_name);
+      const reasons = ['Your tailored resume is already prepared — you\'re one step from done'];
+      if ((readyResume.ats_score || 0) >= 75) reasons.unshift('Excellent fit — your resume scores strongly for this role');
+      if (conn) reasons.push(`One possible connection available: ${conn.alumni_name}`);
+      candidates.push({
+        score: 92, kind: 'apply',
+        title: `Apply to ${readyResume.company_name}`,
+        reasons, time: '6 min', action_label: 'Continue',
+        action: { type: 'workspace', company: readyResume.company_name, role: readyResume.role_title || '' },
+        company: readyResume.company_name,
+      });
+    }
+
+    // Follow-up window open, draft ready
+    const followUp = (pipeline || []).find(r =>
+      ((['reached_out', 'messaged'].includes(r.status) && daysSince(r) >= 5) || (r.status === 'applied' && daysSince(r) >= 7)) &&
+      (r.follow_up_count || 0) < 2
+    );
+    if (followUp) {
+      candidates.push({
+        score: 88, kind: 'followup',
+        title: `Follow up with ${followUp.company}`,
+        reasons: [
+          `You ${followUp.status === 'applied' ? 'applied' : 'reached out'} ${daysSince(followUp)} days ago — this is usually the right follow-up window`,
+          'Your draft is already prepared',
+        ],
+        time: '30 sec', action_label: 'Send',
+        action: { type: 'followup', company: followUp.company, role: followUp.job_title || '', contactName: followUp.alumni_name || '', pipelineId: followUp.id, followUpCount: followUp.follow_up_count || 0 },
+        company: followUp.company,
+      });
+    }
+
+    // Actionable discoveries (follow-up / interview types are already covered above)
+    for (const d of (discoveries || [])) {
+      if (['follow_up', 'interview_prep', 'company_news', 'pattern_insight'].includes(d.discovery_type)) continue;
+      candidates.push({
+        score: 72, kind: 'discovery',
+        title: d.headline,
+        reasons: [d.reason || d.detail].filter(Boolean),
+        time: '3 min', action_label: d.action_label || 'Review',
+        action: d.action_route && d.action_route !== 'workspace'
+          ? { type: 'route', route: d.action_route }
+          : { type: 'workspace', company: d.company_name || '', role: d.job_title || '', jobUrl: d.job_url || '' },
+        company: d.company_name || '',
+        discoveryId: d.id,
+      });
+    }
+
+    // One best new job from today's curated drop — memory-aware, CLIFF picks it
+    const drop = (drops || [])[0];
+    if (drop) {
+      const actioned = new Set(drop.actioned_keys || []);
+      let skippedBy = null;
+      const passes = (drop.slots || []).filter(s => {
+        if (actioned.has(s.key)) return false;
+        const hit = avoids.find(m => {
+          const v = (m.value || '').toLowerCase();
+          if (!v) return false;
+          if (m.category === 'avoided_companies') return (s.company || '').toLowerCase().includes(v);
+          if (m.category === 'excluded_locations') return (s.location || '').toLowerCase().includes(v);
+          return (s.role || s.title || '').toLowerCase().includes(v);
+        });
+        if (hit) { skippedBy = hit; return false; }
+        return true;
+      });
+      const prefHit = (s) => prefers.find(m => {
+        const v = (m.value || '').toLowerCase();
+        if (!v) return false;
+        if (m.category === 'preferred_locations') return (s.location || '').toLowerCase().includes(v);
+        if (m.category === 'target_companies') return (s.company || '').toLowerCase().includes(v);
+        return (s.role || s.title || '').toLowerCase().includes(v);
+      });
+      const best = passes.sort((a, b) => (prefHit(b) ? 1 : 0) - (prefHit(a) ? 1 : 0))[0];
+      if (best) {
+        const pref = prefHit(best);
+        const reasons = ['Strong match for your goals, and it recently opened — early applicants stand out'];
+        if (pref) reasons.push(pref.category === 'preferred_locations' ? `I prioritized ${pref.value} opportunities like you prefer` : `I know you're targeting ${pref.value}`);
+        if (skippedBy) reasons.push(`I skipped ${skippedBy.value} ${skippedBy.category === 'excluded_locations' ? 'listings' : 'roles'} because ${skippedBy.source === 'explicit' ? "you told me you're not interested" : "you keep passing on them"}`);
+        candidates.push({
+          score: 65, kind: 'newjob',
+          title: `Start your ${best.company} application`,
+          reasons, time: '5 min', action_label: 'Apply',
+          action: { type: 'workspace', company: best.company, role: best.role || best.title || '', jobUrl: best.jobUrl || best.job_url || '', location: best.location || '' },
+          company: best.company,
+        });
+      }
+    }
+
+    // Half-started application — finishing beats starting something new
+    const unprepared = (pipeline || []).find(r =>
+      ['identified', 'matched'].includes(r.status) &&
+      !(resumes || []).some(t => (t.company_name || '').toLowerCase() === (r.company || '').toLowerCase())
+    );
+    if (unprepared) {
+      candidates.push({
+        score: 55, kind: 'complete',
+        title: `Finish your ${unprepared.company} application`,
+        reasons: ['You already started this one — finishing it beats starting something new'],
+        time: '6 min', action_label: 'Complete',
+        action: { type: 'workspace', company: unprepared.company, role: unprepared.job_title || '' },
+        company: unprepared.company,
+      });
+    }
+
+    // Rank, dedupe by company, keep 3. Never pad with busywork.
+    candidates.sort((a, b) => b.score - a.score);
+    const moves = [];
+    for (const c of candidates) {
+      if (moves.length >= 3) break;
+      if (c.company && moves.some(m => (m.company || '').toLowerCase() === c.company.toLowerCase())) continue;
+      const { score: _score, ...move } = c; // confidence is advice, not a number — never expose scores
+      moves.push(move);
+    }
+
+    return Response.json({ moves, all_done: moves.length === 0 });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+});
