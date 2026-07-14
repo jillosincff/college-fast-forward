@@ -23,6 +23,8 @@ import FollowUpNudgeCard from './FollowUpNudgeCard';
 import WarmApplyBar from './WarmApplyBar';
 import CliffRecommendedActions from './CliffRecommendedActions';
 import CliffJustFound from './CliffJustFound';
+import TodaysMission from './TodaysMission';
+import MomentumScore from './MomentumScore';
 import ProgressSinceLastVisit from './ProgressSinceLastVisit';
 import JobWorkspaceCard from './JobWorkspaceCard';
 import { Wrench, LogOut, Rocket, FileText, Users, MessageCircle, GraduationCap, Building2, CalendarCheck, Clock } from 'lucide-react';
@@ -502,6 +504,12 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         <div style={{ display: 'grid', gridTemplateColumns: (showSidebar && !isMobile) ? 'minmax(0, 1fr) 340px' : 'minmax(0, 1fr)', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
           {/* Left Column - Job Feed */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
+            {/* CLIFF's 3 accountable tasks for today */}
+            <TodaysMission user={user} />
+
+            {/* Momentum score inline on mobile (sidebar is desktop-only) */}
+            {isMobile && <MomentumScore user={user} />}
+
             {/* Proactive high-relevance discoveries — only shows when CLIFF found something */}
             <CliffJustFound user={user} />
 
@@ -535,6 +543,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
               position: 'sticky',
               top: 24,
             }} className="desktop-only">
+              <MomentumScore user={user} />
               <JobWorkspaceCard user={user} />
               {sidebarUnlocked && (
                 <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
