@@ -91,7 +91,7 @@ export default function CliffCommitmentScreen({
           {firstName ? `Hi ${firstName}.` : 'Hi.'}
         </h1>
         <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 600, color: TEXT2, margin: '0 0 26px' }}>
-          I found a few things already.
+          While you were setting up your profile, I already got to work.
         </p>
 
         <div style={{ background: CARD, border: '1px solid #E8EAF6', borderRadius: 16, padding: '22px 26px', textAlign: 'left', boxShadow: '0 4px 24px rgba(109,40,217,0.08)', marginBottom: 26 }}>

@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { sendMagicLink } from '@/functions/sendMagicLink';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import OtpVerifyForm from '@/components/auth/OtpVerifyForm';
+import { deriveSchoolCode } from '@/lib/schoolNames';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -202,6 +203,43 @@ export default function GatorAuth() {
     // returns persona/onboarding_completed from the auth layer — we must ignore those
     // stale flags and treat them as a brand-new user.
     const checkAndRoute = async () => {
+      // Flow A completed BEFORE sign-in: the funnel saved every answer locally
+      // and set cff_funnel_completed right before the OAuth round-trip.
+      // Finalize the profile from those answers here — NEVER make the student
+      // redo onboarding after they've already invested 5-10 minutes.
+      let funnelDone = false;
+      try {
+        // Safari can clear localStorage during the OAuth round-trip — check both
+        funnelDone = localStorage.getItem('cff_funnel_completed') === 'true'
+          || sessionStorage.getItem('cff_funnel_completed') === 'true';
+      } catch (e) {}
+      if (funnelDone) {
+        if (user.onboarding_completed !== true) {
+          try {
+            const college = localStorage.getItem('cff_college') || '';
+            let blockers = [];
+            try { blockers = JSON.parse(localStorage.getItem('cff_blockers') || '[]'); } catch (e) {}
+            await base44.auth.updateMe({
+              persona: 'student',
+              roles: ['student'],
+              onboarding_completed: true,
+              is_new_signup: true,
+              school: college,
+              school_code: (deriveSchoolCode(college) || '').toUpperCase(),
+              career_blockers: blockers,
+            });
+            localStorage.removeItem('cff_funnel_completed');
+            try { sessionStorage.removeItem('cff_funnel_completed'); sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); } catch (e) {}
+            try { await refreshUser(); } catch (e) {}
+            window.location.hash = '#/FreeTierDashboard';
+            return;
+          } catch (e) { /* fall through to normal routing */ }
+        } else {
+          // Already onboarded — just clear the stale flag
+          try { localStorage.removeItem('cff_funnel_completed'); sessionStorage.removeItem('cff_funnel_completed'); } catch (e) {}
+        }
+      }
+
       // Check if this user's entity record actually exists.
       // If they deleted their profile but kept the auth account, auth.me() still
       // returns stale persona/onboarding_completed — we must ignore those.

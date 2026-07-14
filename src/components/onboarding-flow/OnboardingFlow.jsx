@@ -303,6 +303,9 @@ CRITICAL RULES:
       }
     } else {
       // Only unauthenticated users get routed through Google OAuth.
+      // Flag that the funnel is DONE — after OAuth, GatorAuth finalizes the
+      // profile from the saved answers instead of restarting onboarding.
+      try { localStorage.setItem('cff_funnel_completed', 'true'); sessionStorage.setItem('cff_funnel_completed', 'true'); } catch {}
       const redirectPath = planType === 'free' ? '/#/FreeTierDashboard' : '/#/GatorAuth';
       base44.auth.loginWithProvider('google', window.location.origin + redirectPath);
     }
