@@ -28,7 +28,7 @@ import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
 import GoalHero from '@/components/free-tier/GoalHero';
 import GoalHeader from '@/components/free-tier/GoalHeader';
-import CliffRecommendedActions from '@/components/free-tier/CliffRecommendedActions';
+import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -353,8 +353,8 @@ export default function FreeTierDashboard() {
             {/* Primary entry point: Goal Search — the student states the goal, CLIFF builds the plan */}
             <GoalHero user={user} />
 
-            {/* CLIFF's prioritized actions + outcome-framed discoveries */}
-            <CliffRecommendedActions user={user} />
+            {/* One timeline: CLIFF has already decided what's next — Today → Tomorrow → later */}
+            <CliffTimeline user={user} />
           </>
         )}
 
