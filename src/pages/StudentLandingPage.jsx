@@ -8,7 +8,9 @@ import Reveal from '@/components/landing/Reveal';
 import PricingComparison from '@/components/landing/PricingComparison';
 import AppShowcase from '@/components/landing/AppShowcase';
 import LiveJobsSection from '@/components/landing/LiveJobsSection';
-import WarmApplyHeroDemo from '@/components/landing/WarmApplyHeroDemo';
+import CliffAgentDemo from '@/components/landing/CliffAgentDemo';
+import DayWithCliff from '@/components/landing/DayWithCliff';
+import CliffTrustSection from '@/components/landing/CliffTrustSection';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
 import MatchTeaser from '@/components/landing/MatchTeaser';
 import JourneySection from '@/components/landing/JourneySection';
@@ -69,11 +71,13 @@ const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08
 
 
 const PROOF_CALLOUTS = [
-  { text: 'Upload once — get perfectly tailored resume versions for every job you target' },
-  { text: 'Surfaces curated roles matched to your goals and school' },
-  { text: 'Surfaces warm alumni & parent connections far more likely to actually respond' },
-  { text: 'Tracks every application automatically — smart reminders so nothing falls through' },
-  { text: 'Crafts personalized outreach messages that get real replies instead of silence' },
+  { text: 'Tailored resumes for every job you target' },
+  { text: 'Interview preparation and practice' },
+  { text: 'Smarter job prioritization — focus where you can actually win' },
+  { text: 'Warm introductions when they genuinely improve your chances' },
+  { text: 'Follow-up reminders at exactly the right time' },
+  { text: 'Career strategy that adapts as you make progress' },
+  { text: 'Networking done for you — not left up to you' },
 ];
 
 const STORIES = [
@@ -354,7 +358,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: 'clamp(8px, 2.5vw, 12px) clamp(14px, 4vw, 28px)', marginBottom: 'clamp(20px, 5vw, 32px)' }}>
                 <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>INTERNSHIPS &amp; ENTRY-LEVEL JOBS FOR COLLEGE STUDENTS</span>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>YOUR AI CAREER AGENT FOR INTERNSHIPS &amp; FIRST JOBS</span>
               </div>
             )}
 
@@ -362,7 +366,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-2">
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#030712', margin: '0 0 8px' }}>
-                  Mass applying doesn’t work.
+                  Get hired.<br />CLIFF handles the hard part.
                 </h1>
               </div>
             )}
@@ -371,7 +375,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 26px)', fontWeight: 600, color: '#334155', margin: '0 0 16px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
-                  Warm intros do. Your AI agent finds them — you just show up to interviews.
+                  Tell CLIFF what kind of internship or first job you want.
                 </h2>
               </div>
             )}
@@ -380,7 +384,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-4">
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#4b5563', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
-                  Paste any job link and CFF finds alumni &amp; parents who can get you in the door at that company — with a ready-to-send message and a tailored resume.
+                  CLIFF finds opportunities, prepares your applications, recommends where to focus, and uncovers warm connections whenever they give you an advantage.
                 </p>
               </div>
             )}
@@ -402,11 +406,11 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  See My Matches →
+                  Start With CLIFF →
                 </button>
 
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: '8px 0 0', lineHeight: 1.5 }}>
-                  Free to start · See your first matches in 2 minutes
+                  Free to start · Your first personalized career plan takes about two minutes
                 </p>
 
                 {/* Above-the-fold social proof */}
@@ -431,14 +435,11 @@ export default function StudentLandingPage({ onParentClick }) {
             <div className="hero-animate-6 hero-visual" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Soft radial glow behind the product card */}
               <div style={{ position: 'absolute', inset: '-10%', background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24, pointerEvents: 'none' }} />
-              <WarmApplyHeroDemo />
+              <CliffAgentDemo />
             </div>
           )}
         </div>
       </div>
-
-      {/* ── INTERACTIVE MATCH TEASER ── */}
-      <MatchTeaser go={go} />
 
       {/* ── SCHOOL MARQUEE ── */}
       <SchoolMarquee />
@@ -449,23 +450,24 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── OLD WAY VS SMART WAY ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
         <Reveal><div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <SectionLabel text="Stop playing a losing game" />
+          <SectionLabel text="Two ways to job hunt" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 44px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
-            The Old Way vs.<br />
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The Smart Way</span>
+            Without CLIFF vs.<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>With CLIFF</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(20px, 5vw, 28px)' }}>
             {/* Old Way - "Black Hole" box with warning state */}
             <div style={{ background: 'rgba(254,242,242,0.6)', border: `1px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: '0 1px 3px rgba(244,63,94,0.08)' }}>
-              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>The Old Way</p>
-              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Brutal Cycle</p>
+              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>Without CLIFF</p>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 20px', letterSpacing: '-0.02em' }}>You do everything alone</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
-                  { emoji: '😃', text: 'Start full of hope and optimism' },
-                  { emoji: '⏰', text: 'Spend dozens of hours mass-applying to 200+ jobs' },
-                  { emoji: '😶', text: 'Get automated rejections or total silence' },
-                  { emoji: '😟', text: 'Slowly lose confidence and question your worth' },
-                  { emoji: '💔', text: 'Feel discouraged, anxious, stuck in the void' },
+                  { emoji: '🔍', text: 'Browse hundreds of jobs' },
+                  { emoji: '📄', text: 'Rewrite your resume for every application' },
+                  { emoji: '🏢', text: 'Research every company yourself' },
+                  { emoji: '🤔', text: 'Figure out who to contact' },
+                  { emoji: '⏰', text: 'Remember to follow up' },
+                  { emoji: '🤞', text: 'Hope something works' },
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                     <X size={15} color={CORAL} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
@@ -480,15 +482,16 @@ export default function StudentLandingPage({ onParentClick }) {
 
             {/* Smart Way - elevated with soft glow */}
             <div style={{ background: 'rgba(245,243,255,0.8)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: SHADOW_MD }}>
-              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>The CFF Way</p>
-              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: INDIGO, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Smart Path</p>
+              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>With CLIFF</p>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: INDIGO, margin: '0 0 20px', letterSpacing: '-0.02em' }}>CLIFF does the work</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
-                  { emoji: '🔥', text: 'Start strategic and confident with CFF' },
-                  { emoji: '🔍', text: 'Get matched to roles tailored to your profile' },
-                  { emoji: '🤝', text: 'Warm intros from alumni & parents who actually want to help' },
-                  { emoji: '🚀', text: 'Move quickly from application to real interviews' },
-                  { emoji: '🎉', text: 'Get hired through human connections, not algorithms' },
+                  { emoji: '🎯', text: 'Tell CLIFF your goal' },
+                  { emoji: '✨', text: "Review today's best moves" },
+                  { emoji: '✅', text: 'Approve applications' },
+                  { emoji: '🎤', text: 'Practice interviews' },
+                  { emoji: '📬', text: 'Follow up at the right time' },
+                  { emoji: '🏁', text: 'Stay on track until you get hired' },
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                     <Check size={15} color={INDIGO} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
@@ -507,8 +510,8 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}><Zap size={18} color="#fff" /></div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>Here's what CFF does for you</p>
-                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>From your first scan onward</p>
+                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>CLIFF uses every advantage available</p>
+                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>The network supports the promise — it isn't the promise</p>
               </div>
             </div>
             {PROOF_CALLOUTS.map((item, i) => (
@@ -529,19 +532,25 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── APP SHOWCASE ── */}
       <AppShowcase />
 
+      {/* ── A DAY WITH CLIFF ── */}
+      <DayWithCliff />
+
+      {/* ── WHY STUDENTS TRUST CLIFF ── */}
+      <CliffTrustSection />
+
       {/* ── HOW IT WORKS ── */}
       <div id="how-it-works" style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
         <Reveal><div style={{ maxWidth: 900, margin: '0 auto' }}>
           <SectionLabel text="How it works" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 7vw, 48px)', textAlign: 'center' }}>
-            Three steps to your{' '}
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>warm intro.</span>
+            Hiring your agent takes{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>two minutes.</span>
           </h2>
           <div className="hiw-steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
-              { n: '1', icon: Target, title: 'Paste a job link', sub: 'Drop in any posting — CFF reads the role, the company, and what they\u2019re looking for.' },
-              { n: '2', icon: Users, title: 'We find your warm intro', sub: 'Alumni & parents at that company surface instantly, with a ready-to-send message.' },
-              { n: '3', icon: Rocket, title: 'You send & track', sub: 'A tailored resume, personalized outreach, and automatic pipeline tracking.' },
+              { n: '1', icon: Target, title: 'Tell CLIFF your goal', sub: 'The kind of internship or first job you want — that\u2019s all CLIFF needs to start working.' },
+              { n: '2', icon: Zap, title: 'CLIFF does the work', sub: 'Finds opportunities, tailors your resume, researches companies, and drafts your outreach.' },
+              { n: '3', icon: Rocket, title: 'You review & apply', sub: 'Every day CLIFF hands you your best moves. You approve, apply, and keep moving.' },
             ].map((s, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 'clamp(20px, 4vw, 28px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', transition: 'all 0.25s ease' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = SHADOW_MD; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
@@ -573,6 +582,21 @@ export default function StudentLandingPage({ onParentClick }) {
           </p>
         </div></Reveal>
       </div>
+
+      {/* ── YOUR UNFAIR ADVANTAGE: PARENTS & ALUMNI ── */}
+      <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px) 0', background: BG, borderTop: '1px solid #f1f5f9' }}>
+        <Reveal><div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
+          <SectionLabel text="Parents & Alumni" />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 14px' }}>
+            Your unfair{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>advantage.</span>
+          </h2>
+          <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 4vw, 16px)', color: TEXT2, margin: '0 auto', maxWidth: 540, lineHeight: 1.65 }}>
+            Unlike LinkedIn or Indeed, CLIFF can uncover trusted parents, alumni and mentors — and brings them in when they genuinely improve your chances.
+          </p>
+        </div></Reveal>
+      </div>
+      <MatchTeaser go={go} />
 
       {/* ── PRICING ── */}
       <div id="pricing" style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
@@ -615,7 +639,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
             <PricingComparison />
 
-            <CTAButton label="Find My Warm Intros →" fullWidth style={{ marginTop: 'clamp(24px, 5vw, 32px)' }} />
+            <CTAButton label="Start With CLIFF →" fullWidth style={{ marginTop: 'clamp(24px, 5vw, 32px)' }} />
           </div>
         </div></Reveal>
       </div>
@@ -624,12 +648,12 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ padding: 'clamp(56px, 12vw, 100px) clamp(20px, 5vw, 40px)', textAlign: 'center', background: 'linear-gradient(160deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
         <Reveal><div style={{ maxWidth: 540, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>Ready to escape the black hole?</p>
+          <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>Let CLIFF become your career agent</p>
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(28px, 7vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 16px' }}>
-            Search Smarter,<br />Not Harder.
+            Stop searching.<br />Start making progress.
           </h2>
           <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: 'rgba(255,255,255,0.75)', margin: '0 0 clamp(28px, 6vw, 36px)', lineHeight: 1.65 }}>
-            Join 2,400+ students who stopped applying blindly and started getting results.
+            Join 2,400+ students who handed the hard part to CLIFF.
           </p>
           <button onClick={go} style={{
             fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: '#fff',
@@ -667,7 +691,7 @@ export default function StudentLandingPage({ onParentClick }) {
         transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
       }}>
         <span style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 700, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          Your first application package is waiting
+          CLIFF is ready to start working for you
         </span>
         <button onClick={go} style={{
           fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 700, color: '#fff',
