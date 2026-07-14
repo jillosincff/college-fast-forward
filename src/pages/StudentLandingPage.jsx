@@ -385,7 +385,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
-                  Tell CLIFF your goals. It cuts through the noise, finds the opportunities worth your time, prepares your applications, and tells you exactly what to do next.
+                  Tell CLIFF your career goals. It finds the right opportunities, tailors your resume, and tells you exactly what to do next to land the role you want.
                 </h2>
               </div>
             )}
