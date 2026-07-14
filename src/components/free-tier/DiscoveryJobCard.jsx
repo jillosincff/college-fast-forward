@@ -4,11 +4,11 @@ import { base44 } from '@/api/base44Client';
 import useParentCompanies from '@/hooks/useParentCompanies';
 import { getStandoutInsight } from '@/functions/getStandoutInsight';
 import WarmApplyFlow from './WarmApplyFlow';
-import { openCliffWorkspace } from '@/lib/cliffWorkspace';
+import JobCardPlanCTA from './JobCardPlanCTA';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
-export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill, user, compact }) {
+export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill, user, compact, access, pursuit, rank, onUpgrade }) {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [appliedExternally, setAppliedExternally] = useState(false);
@@ -82,6 +82,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
     if (jobUrl) window.open(jobUrl, '_blank', 'noopener,noreferrer');
     setAppliedExternally(true);
     handleTrackOnly('cold_apply');
+    try { base44.analytics.track({ eventName: 'external_apply_clicked', properties: { company: companyName, role: jobTitle, card_rank: rank ?? 0 } }); } catch {}
   };
 
   const handleLoadInsight = async () => {
@@ -235,16 +236,22 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
           )
         )}
 
-        {/* ── PRIMARY CTA: one workflow, CLIFF organizes the rest ── */}
+        {/* ── PRIMARY CTA: one plan-aware workflow action ── */}
         {(alumniPhase === 'idle' || alumniPhase === 'found') && (
           <>
-            <button
-              onClick={() => openCliffWorkspace({ company: companyName, role: jobTitle, jobDescription: jobDesc, jobUrl, location, salary, alumniCount: lead.alumniCount || 0 })}
-              className="w-full py-3 rounded-xl text-white text-sm font-extrabold transition-all cursor-pointer active:scale-[0.98]"
-              style={{ minHeight: 'auto', background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', boxShadow: '0 4px 14px rgba(124,58,237,0.3)' }}
-            >
-              ✨ Let CLIFF Handle This
-            </button>
+            <JobCardPlanCTA
+              access={access}
+              pursuit={pursuit}
+              rank={rank ?? 0}
+              onUpgrade={onUpgrade}
+              companyName={companyName}
+              jobTitle={jobTitle}
+              jobDesc={jobDesc}
+              jobUrl={jobUrl}
+              location={location}
+              salary={salary}
+              alumniCount={lead.alumniCount || 0}
+            />
             <button
               onClick={() => setShowApplyModal(true)}
               className="w-full py-2 rounded-xl border-2 border-indigo-200 bg-white text-indigo-700 text-xs font-bold hover:bg-indigo-50 transition-all cursor-pointer active:scale-[0.98]"

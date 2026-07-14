@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { recordMemorySignal } from '@/functions/recordMemorySignal';
 import { RefreshCw } from 'lucide-react';
+import useAccessPlan from '@/hooks/useAccessPlan';
 
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp, onUpgrade }) {
   const [selectedLead, setSelectedLead] = useState(null);
@@ -19,6 +20,29 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
   const queryClient = useQueryClient();
+
+  // Canonical plan + magic-moment state — drives plan-aware card CTAs
+  const access = useAccessPlan(user);
+
+  // Existing pursuits so in-progress jobs show their next step instead of a restart CTA
+  const [pursuits, setPursuits] = useState([]);
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.JobPursuit.filter({ user_email: user.email }, '-updated_date', 100)
+      .then(rows => setPursuits(rows || []))
+      .catch(() => {});
+  }, [user?.email]);
+
+  const findPursuit = (lead) => {
+    const c = (lead.company || lead.companyName || '').toLowerCase().trim();
+    const r = (lead.role || lead.job_title || '').toLowerCase().trim();
+    if (!c) return null;
+    return pursuits.find(p => {
+      if ((p.company_name || '').toLowerCase().trim() !== c) return false;
+      const pt = (p.job_title || '').toLowerCase().trim();
+      return !r || !pt || pt.includes(r) || r.includes(pt);
+    }) || null;
+  };
 
   // CLIFF memory: active high-confidence "avoid" memories quietly filter the feed
   const [memories, setMemories] = useState([]);
@@ -102,6 +126,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   // Called when user explicitly saves/swipes — marks card as actioned and removes it from feed
   const handleAddToPipeline = async (lead, applicationPath = 'cold_apply') => {
     recordMemorySignal({ event: 'job_saved', company: lead.company, role: lead.role, location: lead.location || '' }).catch(() => {});
+    try { base44.analytics.track({ eventName: 'job_saved', properties: { company: lead.company || '', role: lead.role || '' } }); } catch {}
     try {
       await writeToPipeline(lead, applicationPath);
       handleAction(lead); // removes card from feed
@@ -121,6 +146,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
 
   const handleDismiss = (lead) => {
     recordMemorySignal({ event: 'job_dismissed', company: lead.company, role: lead.role, location: lead.location || '' }).catch(() => {});
+    try { base44.analytics.track({ eventName: 'job_dismissed', properties: { company: lead.company || '', role: lead.role || '' } }); } catch {}
     handleAction(lead);
   };
 
@@ -290,6 +316,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
                     schoolAbbr={schoolAbbr}
                     onDismiss={() => handleDismiss(lead)}
                     user={user}
+                    access={access}
+                    pursuit={findPursuit(lead)}
+                    rank={idx}
+                    onUpgrade={onUpgrade}
                     compact
                   />
                 ))}
@@ -302,16 +332,15 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
                     Load More ({visibleSlots.length - visibleCount} remaining)
                   </button>
                 )}
-                {!isPremium && visibleSlots.length >= dailyLimit && (
+                {!isPremium && !access.excludePrompts && visibleSlots.length >= dailyLimit && (
                   <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 text-center">
-                    <p className="text-sm font-bold text-purple-900">🎯 That's your {dailyLimit} daily opportunities</p>
-                    <p className="text-xs text-purple-700 mt-1">Premium unlocks unlimited matches + instant resume tailoring.</p>
+                    <p className="text-sm font-bold text-purple-900">CLIFF has more matches ready for you.</p>
                     <button
                       onClick={() => onUpgrade?.('Unlimited Daily Matches')}
                       className="mt-3 px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer"
                       style={{ minHeight: 'auto' }}
                     >
-                      ⚡ Upgrade to Premium
+                      Unlock Today's Full List
                     </button>
                   </div>
                 )}
@@ -328,6 +357,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
                     schoolAbbr={schoolAbbr}
                     onDismiss={() => handleDismiss(lead)}
                     user={user}
+                    access={access}
+                    pursuit={findPursuit(lead)}
+                    rank={idx}
+                    onUpgrade={onUpgrade}
                   />
                 ))}
               </div>
