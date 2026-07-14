@@ -208,7 +208,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const shortName = t.shortName || college || 'your university';
   const [selectedSignal, setSelectedSignal] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [signalAdditions, setSignalAdditions] = useState([]);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
   const [networkStats, setNetworkStats] = useState({ companies: 0, alumni: 0, parents: 0 });
@@ -541,8 +541,13 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
               }}
             />
 
-            {/* Momentum score inline on mobile (sidebar is desktop-only) */}
-            {isMobile && <MomentumScore user={user} />}
+            {/* Momentum score + Job Workspace inline on mobile (sidebar is desktop-only) */}
+            {isMobile && (
+              <>
+                <MomentumScore user={user} />
+                <JobWorkspaceCard user={user} />
+              </>
+            )}
 
             {/* Primary action: paste a job → warm connection → outreach → tracked */}
             <WarmApplyBar user={user} />
