@@ -1,8 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 Deno.serve(async (req) => {
+  let base44 = null;
+  let reservedPlan = null; // magic-moment reservation, released on any failure
   try {
-    const base44 = createClientFromRequest(req);
+    base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -51,13 +53,25 @@ Deno.serve(async (req) => {
       (user.fastiq_setup_complete && user.trial_status !== 'expired');
 
     let isFreeMagicMoment = false;
+    let accessPlan = null;
     if (!isPremium && !(adminTest && user.role === 'admin')) {
-      // Check if this is the user's first completed tailoring
-      const existingTailored = await base44.entities.TailoredResume.filter({ user_email: user.email });
-      const completedCount = (existingTailored || []).filter(t => t.status !== 'pending').length;
-      isFreeMagicMoment = completedCount === 0;
+      // Canonical magic-moment source: UserAccessPlan (admins can reset it).
+      // Fallback: completed tailoring history for accounts without a plan record.
+      const plans = await base44.asServiceRole.entities.UserAccessPlan.filter({ user_id: user.id });
+      accessPlan = plans[0] || null;
+      if (accessPlan) {
+        const inProgressRecently = accessPlan.magic_moment_status === 'in_progress' &&
+          accessPlan.magic_moment_started_at &&
+          (Date.now() - new Date(accessPlan.magic_moment_started_at).getTime()) < 3 * 60 * 1000;
+        isFreeMagicMoment = accessPlan.magic_moment_eligible !== false &&
+          accessPlan.magic_moment_status !== 'completed' &&
+          !inProgressRecently;
+      } else {
+        const existingTailored = await base44.entities.TailoredResume.filter({ user_email: user.email });
+        isFreeMagicMoment = (existingTailored || []).filter(t => t.status !== 'pending').length === 0;
+      }
 
-      if (completedCount >= 1) {
+      if (!isFreeMagicMoment) {
         // Not first freebie — queue it for 24 hours
         const availableAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
@@ -86,6 +100,24 @@ Deno.serve(async (req) => {
           role_title: jobTitle || '',
           company_name: companyName || '',
           message: 'Your resume is in the batch queue. Expected in ~24 hours.',
+        });
+      }
+
+      // Reserve the magic moment so duplicate clicks can't start two free workflows.
+      // The benefit is only marked consumed after the deliverable is shown.
+      const reservation = { magic_moment_status: 'in_progress', magic_moment_started_at: new Date().toISOString() };
+      if (accessPlan) {
+        await base44.asServiceRole.entities.UserAccessPlan.update(accessPlan.id, reservation);
+        reservedPlan = accessPlan;
+      } else {
+        reservedPlan = await base44.asServiceRole.entities.UserAccessPlan.create({
+          user_id: user.id,
+          user_email: user.email,
+          plan: 'free',
+          access_state: 'free',
+          access_source: 'default_free',
+          magic_moment_eligible: true,
+          ...reservation,
         });
       }
     }
@@ -169,6 +201,11 @@ Return as JSON.`;
 
     if (!result?.tailored_content || result.tailored_content.trim().length < 100) {
       console.error('Tailoring failed: empty tailored_content after retry');
+      // Release the reservation — a failed run must never burn the free benefit
+      if (reservedPlan) {
+        await base44.asServiceRole.entities.UserAccessPlan.update(reservedPlan.id, { magic_moment_status: 'available' }).catch(() => {});
+        reservedPlan = null;
+      }
       return Response.json({
         success: false,
         error: 'The AI couldn\'t generate your tailored resume. Please try again.',
@@ -215,8 +252,17 @@ Return as JSON.`;
       properties: { feature_type: 'resume_tailoring', original_score: result.original_score || 0 },
     }).catch(() => {});
 
-    // One-time free "magic moment" — record consumption in the entitlement system
+    // One-time free "magic moment" — record consumption in the entitlement system.
+    // Consumed only now: the tailored resume completed and is about to be shown.
     if (isFreeMagicMoment) {
+      if (reservedPlan) {
+        await base44.asServiceRole.entities.UserAccessPlan.update(reservedPlan.id, {
+          magic_moment_status: 'completed',
+          magic_moment_completed_at: new Date().toISOString(),
+          magic_moment_job_id: tailoredResume.id,
+        }).catch(() => {});
+        reservedPlan = null;
+      }
       try {
         const nowIso = new Date().toISOString();
         const existing = await base44.asServiceRole.entities.FeatureUsage.filter({
@@ -256,6 +302,14 @@ Return as JSON.`;
     });
   } catch (error) {
     console.error('tailorResume error:', error);
+    // Release the magic-moment reservation so a failed run never burns the benefit
+    if (reservedPlan && base44) {
+      try {
+        await base44.asServiceRole.entities.UserAccessPlan.update(reservedPlan.id, { magic_moment_status: 'available' });
+      } catch (releaseError) {
+        console.error('Reservation release failed:', releaseError.message);
+      }
+    }
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

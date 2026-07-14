@@ -1,0 +1,140 @@
+{
+  "name": "UserAccessPlan",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user this access plan belongs to"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user \u2014 used for lookups and RLS"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "pro"
+      ],
+      "default": "free",
+      "description": "Canonical plan"
+    },
+    "access_state": {
+      "type": "string",
+      "enum": [
+        "free",
+        "trial_active",
+        "pro_active",
+        "canceled_active_until_period_end",
+        "payment_past_due",
+        "expired",
+        "grandfathered",
+        "admin_granted",
+        "internal_test"
+      ],
+      "default": "free",
+      "description": "Current billing/access state"
+    },
+    "access_source": {
+      "type": "string",
+      "enum": [
+        "billing_provider",
+        "legacy_subscription",
+        "admin_override",
+        "grandfathered",
+        "internal",
+        "default_free"
+      ],
+      "default": "default_free",
+      "description": "Where this access classification came from"
+    },
+    "trial_started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paid_period_ends_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "override_ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Expiration for admin-granted access"
+    },
+    "grandfathered": {
+      "type": "boolean",
+      "default": false
+    },
+    "grandfathered_notes": {
+      "type": "string"
+    },
+    "exclude_upgrade_prompts": {
+      "type": "boolean",
+      "default": false,
+      "description": "Never show this account upgrade prompts (internal/test/VIP)"
+    },
+    "magic_moment_eligible": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this account may use the one-time free CLIFF-powered application"
+    },
+    "magic_moment_status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "in_progress",
+        "completed"
+      ],
+      "default": "available",
+      "description": "One-time free application benefit status. in_progress = reserved during generation."
+    },
+    "magic_moment_job_id": {
+      "type": "string",
+      "description": "TailoredResume/job record the benefit was used on"
+    },
+    "magic_moment_started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "magic_moment_completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "needs_review": {
+      "type": "boolean",
+      "default": false,
+      "description": "Migration flagged conflicting billing records \u2014 resolve before gating"
+    },
+    "review_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "plan",
+    "access_state"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

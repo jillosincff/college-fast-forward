@@ -1,0 +1,57 @@
+{
+  "name": "AccessAuditLog",
+  "type": "object",
+  "properties": {
+    "admin_email": {
+      "type": "string",
+      "description": "Admin who made the change"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Student user affected"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the affected user"
+    },
+    "action": {
+      "type": "string",
+      "description": "Override action, e.g. grant_pro, remove_pro, reset_magic_moment"
+    },
+    "previous_access": {
+      "type": "object",
+      "default": {},
+      "description": "Snapshot of the access plan before the change"
+    },
+    "new_access": {
+      "type": "object",
+      "default": {},
+      "description": "Snapshot of the access plan after the change"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why the override was made"
+    },
+    "note": {
+      "type": "string",
+      "description": "Internal note"
+    }
+  },
+  "required": [
+    "admin_email",
+    "user_id",
+    "action"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
