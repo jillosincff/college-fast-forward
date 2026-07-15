@@ -96,15 +96,24 @@ export default function OnboardingSteps5to8({
             </div>
 
             {/* Instant mirroring */}
-            {selected && (
-              <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
-                <p style={{ fontFamily: FONT, fontSize: 13, color: '#0E7490', margin: 0, lineHeight: 1.6 }}>
-                  <strong>On it. "{selected.label}" is now my #1 priority.</strong><br />
-                  {selected.sub}
-                </p>
-              </div>
-            )}
+            {selected && (() => {
+              const responseMap = {
+                which_jobs: "That's exactly where I'll start.",
+                resume: "I'll take that off your plate.",
+                interviews: "Got it. I'll make that my first priority.",
+                outreach: "That's exactly where I'll start.",
+                disorganized: "I'll take that off your plate.",
+              };
+              return (
+                <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
+                  <p style={{ fontFamily: FONT, fontSize: 14, color: '#0E7490', margin: 0, lineHeight: 1.6 }}>
+                    <strong>{responseMap[selected.key] || "Got it. I'll make that my first priority."}</strong><br />
+                    {selected.sub}
+                  </p>
+                </div>
+              );
+            })()}
 
             <Nav onBack={back} onNext={next} nextDisabled={!selectedKey} />
           </div>

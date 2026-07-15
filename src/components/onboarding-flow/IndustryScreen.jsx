@@ -142,10 +142,10 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
       </div>
 
       <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 4vw, 34px)', fontWeight: 800, color: TEXT, lineHeight: 1.15, letterSpacing: '-0.03em', margin: '0 0 12px' }}>
-        What spaces are you trying to break into?
+        Where do you want to end up?
       </h1>
       <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 auto 8px', maxWidth: 460 }}>
-        Select up to 3 fields. Your agent will use this to map out the right internal pipelines, alumni connections, and tailored strategies for those exact spaces.
+        Pick up to 3 spaces you're drawn to. Don't worry — you can always change this later.
       </p>
       <p style={{ fontFamily: FONT, fontSize: 12, color: totalSelected >= MAX_TOTAL ? '#EA580C' : TEXT3, margin: '0 0 24px', fontWeight: totalSelected >= MAX_TOTAL ? 700 : 400, transition: 'color 0.2s' }}>
         {totalSelected >= MAX_TOTAL ? '✓ Max 3 selected' : `${MAX_TOTAL - totalSelected} selection${MAX_TOTAL - totalSelected !== 1 ? 's' : ''} remaining`}
@@ -227,6 +227,18 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
           );
         })}
       </div>
+
+      {/* Still figuring it out — that's a valid answer */}
+      {!canContinue && (
+        <button
+          onClick={() => { setSelectedIndustries([]); setTargetRoles([]); onNext(); }}
+          style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT2, background: CARD, border: '1.5px dashed #CBD5E1', borderRadius: 100, padding: '10px 22px', cursor: 'pointer', minHeight: 'auto', marginTop: 14, transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.color = INDIGO; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = TEXT2; }}
+        >
+          🔭 Still figuring it out — that's okay
+        </button>
+      )}
 
       {/* Mirroring panel — appears after any selection */}
       {canContinue && (

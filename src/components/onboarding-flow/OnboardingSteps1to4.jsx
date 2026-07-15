@@ -57,12 +57,12 @@ export default function OnboardingSteps1to4({
 
           {/* Headline — a promise, not a question */}
           <h1 style={{ fontFamily: FONT, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 14px', fontSize: 'clamp(34px, 6vw, 52px)', color: TEXT }}>
-            Meet{' '}
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>CLIFF.</span>
+            Meet CLIFF.<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Your AI Career Agent.</span>
           </h1>
 
           <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 2.2vw, 19px)', color: '#334155', lineHeight: 1.6, margin: '0 auto 24px', maxWidth: 480, fontWeight: 600 }}>
-            I'm your AI Career Agent. Here's what I'm going to do for you:
+            Tell me where you want to go.<br />I'll build the plan and help you get there.
           </p>
 
           {/* The promises */}
@@ -80,8 +80,6 @@ export default function OnboardingSteps1to4({
             ))}
           </div>
 
-          <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 16px' }}>Let's build your plan.</p>
-
           {/* CTA button with glow */}
           <button
             onClick={next}
@@ -89,7 +87,7 @@ export default function OnboardingSteps1to4({
             style={{ display: 'block', width: '100%', maxWidth: 420, margin: '0 auto 28px', fontFamily: FONT, fontSize: 17, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 12, padding: '20px 52px', cursor: 'pointer', minHeight: 56, boxShadow: '0 10px 24px rgba(109,40,217,0.28)', transition: 'all 0.2s ease', letterSpacing: '-0.01em' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(109,40,217,0.38)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(109,40,217,0.28)'; }}
-          >Let's Go →</button>
+          >Let's Build Your Plan →</button>
 
           {/* Social proof trust bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -180,25 +178,19 @@ export default function OnboardingSteps1to4({
 
           {/* Instant mirroring after selection */}
           {seeking && (() => {
-            const selected = SEEKING_OPTIONS.find(o => o.key === seeking);
-            const mirrorMap = {
-              internship: 'short-term roles and return-offer internships',
-              fulltime: 'full-time pipelines and long-term networking',
-              both: 'a flexible dual-track of internships and full-time roles',
-              exploring: 'options that help you discover the best fit first',
+            const responseMap = {
+              internship: { lead: 'Perfect.', follow: "We'll build toward that." },
+              fulltime: { lead: 'Great.', follow: "I'll focus on helping you launch your career." },
+              both: { lead: 'Great.', follow: "I'll build a plan that keeps both doors open." },
+              exploring: { lead: 'No problem.', follow: "I'll help you discover what fits you best." },
             };
-            const focusMap = {
-              internship: 'internships',
-              fulltime: 'full-time roles',
-              both: 'both internships and full-time roles',
-              exploring: 'exploring your options',
-            };
+            const r = responseMap[seeking] || { lead: 'Got it.', follow: "I'll build your plan around that." };
             return (
               <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 12, padding: '14px 18px', marginTop: 16, display: 'flex', gap: 10, alignItems: 'flex-start', animation: 'fadeUp 0.25s ease' }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
-                <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.6 }}>
-                  <strong>Perfect. I'll focus on {focusMap[seeking] || selected?.label?.toLowerCase()} first.</strong><br />
-                  I'm now prioritizing <em>{mirrorMap[seeking]}</em>. Next question.
+                <p style={{ fontFamily: FONT, fontSize: 14, color: '#065F46', margin: 0, lineHeight: 1.6 }}>
+                  <strong>{r.lead}</strong><br />
+                  {r.follow}
                 </p>
               </div>
             );

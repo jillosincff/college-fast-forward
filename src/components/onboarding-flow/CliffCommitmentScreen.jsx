@@ -5,12 +5,10 @@ import {
 } from './onboardingShared';
 
 const PLAN_STEPS = [
-  { icon: '🔍', text: 'Searching live job boards…' },
-  { icon: '🧠', text: 'Learning your preferences…' },
-  { icon: '⚖️', text: 'Prioritizing opportunities…' },
-  { icon: '🤝', text: 'Finding warm connections…' },
-  { icon: '📄', text: 'Checking your resume…' },
-  { icon: '📅', text: 'Preparing your first week…' },
+  { icon: '🧠', text: 'Learning about you…' },
+  { icon: '🗺️', text: 'Building your career plan…' },
+  { icon: '🔍', text: 'Finding your best opportunities…' },
+  { icon: '🎯', text: 'Preparing your first move…' },
 ];
 
 const SOLVE_MAP = {
@@ -33,7 +31,7 @@ export default function CliffCommitmentScreen({
   locationPref, locationCity, selectedIndustries = [], targetRoles = [],
   onBack, saveAndAuth,
 }) {
-  const [phase, setPhase] = useState('confirm'); // 'confirm' | 'planning' | 'ready'
+  const [phase, setPhase] = useState('intro'); // 'intro' | 'confirm' | 'planning' | 'ready'
   const [stepIdx, setStepIdx] = useState(0);
   const launchedRef = useRef(false);
 
@@ -46,17 +44,23 @@ export default function CliffCommitmentScreen({
     : locationCity ? `opportunities in ${locationCity}` : 'your target market';
   const industriesLabel = selectedIndustries.slice(0, 2).join(' & ');
 
+  // "Hiring an agent": the plan is a goal + this month's moves
+  const goalLabel = (() => {
+    const focus = targetRoles[0] || industriesLabel;
+    const kind = seeking === 'internship' ? 'Internship'
+      : seeking === 'fulltime' ? 'First Job'
+      : seeking === 'both' ? 'Internship & First Job'
+      : 'Finding Your Direction';
+    return focus ? `${focus} ${seeking === 'exploring' ? '— ' + kind : kind}` : kind;
+  })();
+
   const commitments = [
-    industriesLabel
-      ? `Prioritize ${industriesLabel}${targetRoles[0] ? ` — starting with ${targetRoles[0]} roles` : ''}`
-      : 'Learn which industries fit you as we go',
-    `Focus on ${locationLabel}`,
-    `Help you land ${seekingLabel} first`,
+    resumeData ? 'Resume — already improved ✓' : 'Build your resume foundation',
+    `Build your target companies (${locationLabel})`,
+    'Your first application — on me',
+    'Interview prep',
+    `Watch recruiting for ${seekingLabel} so you never miss a deadline`,
     ...(blockers[0] && SOLVE_MAP[blockers[0]] ? [SOLVE_MAP[blockers[0]]] : []),
-    resumeData
-      ? 'Use your upgraded resume as the foundation for every application'
-      : "Build your resume foundation from what you've shared",
-    'Build your first application — free',
   ];
 
   // Planning animation → then straight to the dashboard (Magic Moment)
@@ -77,6 +81,49 @@ export default function CliffCommitmentScreen({
     saveAndAuth('free');
   };
 
+  // ── PHASE 0: Career Intelligence — everything CLIFF keeps track of ──
+  if (phase === 'intro') {
+    return (
+      <div style={{ textAlign: 'center', maxWidth: 520, width: '100%', paddingTop: 40, animation: 'fadeUp 0.35s ease' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(109,40,217,0.08)', border: '1px solid rgba(109,40,217,0.2)', borderRadius: 100, padding: '6px 16px', marginBottom: 22 }}>
+          <span style={{ fontSize: 13 }}>🤖</span>
+          <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: INDIGO, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Your Career Agent</span>
+        </div>
+        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(26px, 4.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 26px', lineHeight: 1.15 }}>
+          Here's what I'll help you with.
+        </h1>
+        <div style={{ background: CARD, border: '1px solid #E8EAF6', borderRadius: 16, padding: '22px 26px', textAlign: 'left', boxShadow: '0 4px 24px rgba(109,40,217,0.08)', marginBottom: 20 }}>
+          {[
+            'Know what to work on this month',
+            'Find opportunities worth pursuing',
+            'Skip distractions',
+            'Prepare stronger applications',
+            'Stay ahead of recruiting',
+            'Keep your career moving',
+          ].map((line, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: i < 5 ? 12 : 0 }}>
+              <span style={{ width: 20, height: 20, borderRadius: '50%', background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, color: '#0891b2', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>✓</span>
+              <p style={{ fontFamily: FONT, fontSize: 14.5, fontWeight: 500, color: TEXT, margin: 0, lineHeight: 1.55 }}>{line}</p>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 20px', lineHeight: 1.6 }}>
+          You don't have to remember all this.<br /><strong style={{ color: TEXT }}>I'll keep track for you.</strong>
+        </p>
+        <button
+          onClick={() => setPhase('confirm')}
+          className="onb-btn-primary"
+          style={{ display: 'block', width: '100%', maxWidth: 420, margin: '0 auto 12px', fontFamily: FONT, fontSize: 16, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 12, padding: '18px 40px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 24px rgba(109,40,217,0.28)', transition: 'all 0.2s ease' }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(109,40,217,0.38)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(109,40,217,0.28)'; }}
+        >
+          Continue →
+        </button>
+        <button onClick={onBack} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '6px 10px' }}>← Back</button>
+      </div>
+    );
+  }
+
   // ── PHASE 3: The emotional handoff — CLIFF says "I did the work." ──
   if (phase === 'ready') {
     const industriesLabel2 = selectedIndustries.slice(0, 2).join(' & ');
@@ -84,14 +131,14 @@ export default function CliffCommitmentScreen({
       <div style={{ textAlign: 'center', maxWidth: 500, width: '100%', paddingTop: 60, animation: 'fadeUp 0.4s ease' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '6px 16px', marginBottom: 22 }}>
           <span style={{ fontSize: 13 }}>✓</span>
-          <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#0891b2', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Your Career Plan is Ready</span>
+          <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#0891b2', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Done</span>
         </div>
 
         <h1 style={{ fontFamily: FONT, fontSize: 'clamp(26px, 4.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 10px', lineHeight: 1.15 }}>
-          {firstName ? `Hi ${firstName}.` : 'Hi.'}
+          {firstName ? `Hi ${firstName}.` : 'Done.'}
         </h1>
         <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 600, color: TEXT2, margin: '0 0 26px' }}>
-          While you were setting up your profile, I already got to work.
+          I've already started working — and I've already found a few things.
         </p>
 
         <div style={{ background: CARD, border: '1px solid #E8EAF6', borderRadius: 16, padding: '22px 26px', textAlign: 'left', boxShadow: '0 4px 24px rgba(109,40,217,0.08)', marginBottom: 26 }}>
@@ -169,15 +216,21 @@ export default function CliffCommitmentScreen({
       </div>
 
       <h1 style={{ fontFamily: FONT, fontSize: 'clamp(26px, 4.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 10px', lineHeight: 1.15 }}>
-        Here's what I'm going to do.
+        Here's our plan.
       </h1>
-      <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 auto 28px', maxWidth: 440, lineHeight: 1.65 }}>
-        {college ? `Your plan, built around you and ${college}.` : 'Your plan, built around you.'}
+      <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 auto 24px', maxWidth: 440, lineHeight: 1.65 }}>
+        {college ? `Built around you and ${college}.` : 'Built around you.'}
       </p>
 
-      {/* Commitment list */}
+      {/* Goal */}
+      <div style={{ background: 'rgba(109,40,217,0.06)', border: '1px solid rgba(109,40,217,0.18)', borderRadius: 14, padding: '14px 20px', marginBottom: 14, textAlign: 'left' }}>
+        <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 3px' }}>Your goal</p>
+        <p style={{ fontFamily: FONT, fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>{goalLabel}</p>
+      </div>
+
+      {/* This month's moves */}
       <div style={{ background: CARD, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 16, padding: '24px 26px', textAlign: 'left', boxShadow: SHADOW, marginBottom: 24 }}>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#0891b2', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 16px' }}>I'm going to:</p>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#0891b2', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 16px' }}>This month:</p>
         {commitments.map((c, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: i < commitments.length - 1 ? 12 : 0 }}>
             <span style={{ width: 20, height: 20, borderRadius: '50%', background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, color: '#0891b2', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>✓</span>
@@ -195,13 +248,13 @@ export default function CliffCommitmentScreen({
         onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(109,40,217,0.38)'; }}
         onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(109,40,217,0.28)'; }}
       >
-        Yes — build my plan →
+        Looks good →
       </button>
       <button
         onClick={onBack}
         style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '6px 10px', textDecoration: 'underline', textUnderlineOffset: 3 }}
       >
-        Edit my answers
+        Let's change something
       </button>
     </div>
   );

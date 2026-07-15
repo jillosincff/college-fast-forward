@@ -42,7 +42,8 @@ export default function OnboardingSteps9to13({
           {!uploading && dataInputMode === 'choose' && (
             <>
               <h1 style={h1style}>Give CLIFF something to work with.</h1>
-              <p style={{ ...substyle, marginBottom: 28 }}>The more CLIFF knows about you, the smarter its job matches, materials, and warm intros get.</p>
+              <p style={{ ...substyle, marginBottom: 8 }}>The more CLIFF knows about you, the smarter its job matches, materials, and warm intros get.</p>
+              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#059669', margin: '0 0 28px' }}>Even if it's rough — I can improve it.</p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
                 {/* Upload Resume */}
@@ -198,10 +199,13 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
             Customized for your{selectedIndustries.length > 0 ? ` ${selectedIndustries.slice(0,2).join(' & ')}` : ''}{blockers.includes('resume') || blockers.includes('ghosted') ? ' · optimized to beat ATS rejection' : ' target roles'}
           </span>
         </div>
+        <p style={{ fontFamily: FONT, fontSize: 17, fontWeight: 700, color: TEXT, margin: '0 auto 8px', maxWidth: 560, lineHeight: 1.5 }}>
+          Good news — you're already closer than you think.
+        </p>
         <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 auto', maxWidth: 560, lineHeight: 1.7 }}>
           {dataInputMode === 'quickstart'
-            ? 'The Agent built your starter profile and showed what stronger positioning looks like.'
-            : <>Based on your {selectedIndustries.length > 0 ? <strong style={{ color: TEXT }}>{selectedIndustries.slice(0,2).join(' & ')}</strong> : 'target'} goals{blockers.length > 0 ? <> and the <strong style={{ color: TEXT }}>{blockers.length === 2 ? '2 roadblocks' : 'roadblock'}</strong> you flagged</> : ''}, the Agent rewrote your bullets, modernized the layout, and made it ATS-ready while keeping your authentic story.</>}
+            ? "I built your foundation and showed what stronger positioning looks like."
+            : "I kept your authentic story — and made it read the way recruiters shortlist."}
         </p>
       </div>
 
@@ -291,18 +295,21 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
               ✓ What CLIFF Noticed
             </h3>
             <div style={{ display: 'flex', gap: 28, alignItems: 'center', flexWrap: 'wrap' }}>
-              {/* Left: checklist (65%) */}
-              <div style={{ flex: '0 0 calc(65% - 14px)', minWidth: 200, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Left: strengths → opportunity → what CLIFF will improve (65%) */}
+              <div style={{ flex: '0 0 calc(65% - 14px)', minWidth: 200, display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {[
-                  'Strengthened bullet points to focus on results and impact (recruiters love this)',
-                  'Improved formatting and visual hierarchy for a modern, professional look',
-                  'Made it ATS-friendly while keeping it visually standout',
-                  'Aligned keywords with your target industries and roles',
-                  'Structured so automated screeners can read every section correctly',
-                ].map((line, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: FONT, fontSize: 13, color: TEXT, lineHeight: 1.6 }}>
-                    <span style={{ color: GREEN, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
-                    <span>{line}</span>
+                  { label: '💪 Your strengths', color: '#059669', lines: ['You have real experience worth showcasing', 'Your foundation is stronger than most students at this stage'] },
+                  { label: '🎯 Your biggest opportunity', color: INDIGO, lines: ['Your bullets described tasks — now they show results and impact, which is what recruiters shortlist'] },
+                  { label: "✨ What I'll keep improving", color: '#0891b2', lines: ['Keywords aligned to your target roles, ATS-safe structure, and stronger positioning — handled for every application'] },
+                ].map((sec, i) => (
+                  <div key={i}>
+                    <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: sec.color, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>{sec.label}</p>
+                    {sec.lines.map((line, j) => (
+                      <div key={j} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: FONT, fontSize: 13, color: TEXT, lineHeight: 1.6, marginBottom: j < sec.lines.length - 1 ? 6 : 0 }}>
+                        <span style={{ color: GREEN, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
+                        <span>{line}</span>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
@@ -346,7 +353,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.boxShadow = SHADOW_MD; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = SHADOW; }}
             >
-              Save This Version &amp; Continue Onboarding
+              Save This Version &amp; Keep Going
             </button>
           </div>
 
