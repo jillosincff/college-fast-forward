@@ -1,0 +1,83 @@
+{
+  "name": "CareerTrajectoryOutcome",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Student the event belongs to"
+    },
+    "trajectory_id": {
+      "type": "string",
+      "description": "StudentCareerTrajectory record id"
+    },
+    "template_id": {
+      "type": "string",
+      "description": "CareerTrajectoryTemplate id"
+    },
+    "event": {
+      "type": "string",
+      "enum": [
+        "trajectory_shown",
+        "pathway_selected",
+        "alternative_viewed",
+        "confirmed",
+        "dismissed",
+        "step_pursued",
+        "internship_pursued",
+        "career_action_completed",
+        "interview",
+        "offer",
+        "accepted",
+        "goal_changed",
+        "feedback"
+      ],
+      "description": "Learning-engine event type"
+    },
+    "recommended_step": {
+      "type": "string",
+      "description": "The role/step this event relates to, if any"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Related job/pursuit id, if any"
+    },
+    "student_feedback": {
+      "type": "string",
+      "description": "Free-text feedback from the student"
+    },
+    "metadata": {
+      "type": "object",
+      "default": {}
+    }
+  },
+  "required": [
+    "user_email",
+    "event"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

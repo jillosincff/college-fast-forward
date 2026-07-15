@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { deriveStudentProfile, getCareerIntelligence } from '@/lib/careerIntelligence/engine';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import YourPathForward from '@/components/trajectory/YourPathForward';
+import { Check, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -13,6 +14,14 @@ const YEAR_LABELS = {
 
 export default function CareerSeasonCard({ user }) {
   const [expanded, setExpanded] = useState(true);
+  const [showPath, setShowPath] = useState(false);
+
+  // Timeline "Show my path" CTAs open the trajectory view here
+  useEffect(() => {
+    const open = () => setShowPath(true);
+    window.addEventListener('cliff:showPath', open);
+    return () => window.removeEventListener('cliff:showPath', open);
+  }, []);
   const { ci, profile } = useMemo(() => {
     if (!user) return { ci: null, profile: null };
     const profile = deriveStudentProfile(user);
@@ -79,8 +88,13 @@ export default function CareerSeasonCard({ user }) {
               📅 Up next: {upcomingSeason.emoji} {upcomingSeason.name} starts in {upcomingSeason.startsIn} — I'll shift your plan when it does.
             </p>
           )}
+          <button onClick={() => setShowPath(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: dm, fontSize: 12.5, fontWeight: 800, color: '#6d28d9', background: '#f5f3ff', border: '1px solid #ede9fe', borderRadius: 999, padding: '9px 16px', cursor: 'pointer', marginTop: 12, minHeight: 44 }}>
+            Show My Path <ArrowRight size={13} />
+          </button>
         </>
       )}
+      {showPath && <YourPathForward user={user} onClose={() => setShowPath(false)} />}
     </div>
   );
 }

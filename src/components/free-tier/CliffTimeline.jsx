@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { decisionEngine } from '@/functions/decisionEngine';
 import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 import { getCareerIntelligenceTimelineItems } from '@/lib/careerIntelligence/engine';
+import { getTrajectoryTimelineItem } from '@/lib/careerTrajectory/engine';
+import { base44 } from '@/api/base44Client';
 import { ArrowRight } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -23,11 +25,20 @@ const dayLabel = (date) => {
 const runAction = (a) => {
   if (a?.type === 'workspace') openCliffWorkspace(a.payload);
   else if (a?.type === 'route' && a.route) window.location.hash = a.route;
+  else if (a?.type === 'event' && a.event) window.dispatchEvent(new Event(a.event));
   else window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 export default function CliffTimeline({ user }) {
   const [data, setData] = useState(null);
+  const [trajectory, setTrajectory] = useState(null);
+
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.StudentCareerTrajectory.filter({ user_email: user.email, status: 'active' })
+      .then(rows => setTrajectory(rows?.[0] || null))
+      .catch(() => {});
+  }, [user?.email]);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -38,8 +49,9 @@ export default function CliffTimeline({ user }) {
     return () => { cancelled = true; };
   }, [user?.email]);
 
-  // Career Intelligence items appear exactly like other CLIFF recommendations
-  const items = [...(data?.timeline || []), ...getCareerIntelligenceTimelineItems(user)];
+  // Career Intelligence + Trajectory items appear exactly like other CLIFF recommendations
+  const trajItem = getTrajectoryTimelineItem(user, trajectory);
+  const items = [...(data?.timeline || []), ...getCareerIntelligenceTimelineItems(user), ...(trajItem ? [trajItem] : [])];
   const waiting = data?.waiting || [];
   const suppressed = data?.suppressed || [];
   if (!items.length && !waiting.length) return null;

@@ -1,0 +1,145 @@
+{
+  "name": "CareerTrajectoryTemplate",
+  "type": "object",
+  "properties": {
+    "career_family": {
+      "type": "string",
+      "description": "Career family, e.g. Marketing, Finance, Software Engineering"
+    },
+    "target_role": {
+      "type": "string",
+      "description": "The destination role this pathway builds toward"
+    },
+    "target_industry": {
+      "type": "string",
+      "description": "Primary industry for this pathway"
+    },
+    "pathway_name": {
+      "type": "string",
+      "description": "Human name for the primary pathway"
+    },
+    "pathway_summary": {
+      "type": "string",
+      "description": "One-paragraph plain-language summary of the path"
+    },
+    "match_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Lowercase keywords used to match student goals to this template"
+    },
+    "starting_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Realistic first roles/internships"
+    },
+    "stepping_stone_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Mid-path roles that commonly build toward the target"
+    },
+    "advanced_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Roles at or beyond the target"
+    },
+    "internship_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Internship types that feed this path"
+    },
+    "skills_by_stage": {
+      "type": "object",
+      "default": {},
+      "description": "{early:[], middle:[], advanced:[]} skills built at each stage"
+    },
+    "campus_experiences": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Campus experiences that can substitute for early work experience"
+    },
+    "recommended_majors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "alternative_majors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Majors that can still reach this path"
+    },
+    "typical_entry_points": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "alternative_paths": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "[{name, steps:[], note}] alternative routes to the same target"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "curated",
+        "ai_suggested"
+      ],
+      "default": "curated"
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "reviewed",
+        "approved",
+        "retired"
+      ],
+      "default": "draft",
+      "description": "Only approved templates are used as authoritative bases"
+    },
+    "disclaimer": {
+      "type": "string",
+      "description": "Illustrative-not-mandatory disclaimer shown with the path"
+    }
+  },
+  "required": [
+    "career_family",
+    "target_role",
+    "pathway_name"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

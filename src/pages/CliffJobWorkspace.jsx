@@ -9,6 +9,7 @@ import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import TrustPanel from '@/components/workspace/TrustPanel';
+import TrajectoryFitCard from '@/components/workspace/TrajectoryFitCard';
 import CliffReadyCard from '@/components/conversion/CliffReadyCard';
 import decodeEntities from '@/utils/decodeEntities';
 
@@ -125,6 +126,9 @@ export default function CliffJobWorkspace() {
         {user && <CliffReadyCard job={job} />}
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
+
+        {/* Career Trajectory: why this job matters for the student's long-term path */}
+        {user && <TrajectoryFitCard job={job} user={user} />}
 
         {/* CLIFF Trust Engine: why this, why not others, confidence, what changed, outcome timeline */}
         {user && <TrustPanel job={job} />}

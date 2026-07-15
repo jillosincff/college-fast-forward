@@ -1,0 +1,161 @@
+{
+  "name": "StudentCareerTrajectory",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Student this trajectory belongs to"
+    },
+    "target_role": {
+      "type": "string",
+      "description": "Student's long-term target role"
+    },
+    "target_industry": {
+      "type": "string"
+    },
+    "template_id": {
+      "type": "string",
+      "description": "CareerTrajectoryTemplate this trajectory is based on"
+    },
+    "selected_pathway_name": {
+      "type": "string",
+      "description": "Primary pathway or alternative path name the student is following"
+    },
+    "current_stage": {
+      "type": "string",
+      "enum": [
+        "exploring",
+        "foundation_building",
+        "experience_building",
+        "internship_ready",
+        "entry_level_ready",
+        "early_career",
+        "advancing"
+      ],
+      "default": "exploring",
+      "description": "Supportive stage label \u2014 never shown as a judgment"
+    },
+    "current_strengths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "current_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "recommended_next_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "recommended_internship_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "recommended_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "recommended_campus_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "long_term_path": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Ordered role steps of the primary path"
+    },
+    "alternative_path": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Ordered role steps of one alternative route"
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "How confident CLIFF is in the template match"
+    },
+    "student_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Student confirmed this is their path"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "dismissed",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "last_recalculated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_email",
+    "target_role"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
