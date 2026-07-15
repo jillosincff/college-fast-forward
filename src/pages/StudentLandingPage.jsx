@@ -502,7 +502,12 @@ export default function StudentLandingPage({ onParentClick }) {
               <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 24px', lineHeight: 1.6, fontStyle: 'italic' }}>
                 Includes one complete CLIFF-powered application — on us.
               </p>
-              <button onClick={go} style={{ marginTop: 'auto', fontFamily: SF, fontSize: 15, fontWeight: 700, color: INDIGO, background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 52, width: '100%' }}>
+              <button onClick={go} style={{ marginTop: 'auto', fontFamily: SF, fontSize: 15, fontWeight: 700, color: INDIGO, background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 52, width: '100%', transition: 'all 0.15s ease', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
+                onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+                onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)'; }}
+                onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+              >
                 Start Free
               </button>
             </div>
@@ -518,9 +523,12 @@ export default function StudentLandingPage({ onParentClick }) {
               <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 14px', lineHeight: 1.6, fontStyle: 'italic' }}>
                 The value isn't more tools. It's less thinking.
               </p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 20 }}>
-                <span style={{ fontFamily: SF, fontSize: 34, fontWeight: 900, color: TEXT, letterSpacing: '-0.03em' }}>$4.99</span>
-                <span style={{ fontFamily: SF, fontSize: 14, fontWeight: 600, color: TEXT3 }}>/week · cancel anytime</span>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                  <span style={{ fontFamily: SF, fontSize: 34, fontWeight: 900, color: TEXT, letterSpacing: '-0.03em' }}>$4.99</span>
+                  <span style={{ fontFamily: SF, fontSize: 14, fontWeight: 600, color: TEXT3 }}>/week</span>
+                </div>
+                <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: TEXT3, margin: '4px 0 0' }}>Billed $19.96/month · cancel anytime</p>
               </div>
               <CTAButton label="Keep CLIFF Working" fullWidth style={{ marginTop: 'auto' }} />
             </div>
