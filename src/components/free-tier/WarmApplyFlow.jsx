@@ -10,7 +10,7 @@ const isUrl = (s) => /^https?:\/\//i.test((s || '').trim());
 
 // Guided flow: confirm job → find warm connection → draft outreach → track → tailor.
 // Pass `job` ({ company, role, jobUrl }) to skip the confirm step (feed cards).
-export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly = false }) {
+export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly = false, resumeReady = false }) {
   const fromJob = !!job?.company;
   // applyOnly: straight to the apply/track step — no network scan (that's the "Find alumni" action)
   const [step, setStep] = useState(applyOnly ? 'apply' : (fromJob ? 'network' : 'confirm')); // apply | confirm | network | message | done
@@ -117,7 +117,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
         job_title: role.trim() || null,
         job_url: jobUrl || null,
         application_path: contact ? 'alumni_outreach' : 'cold_apply',
-        status: contact ? 'reached_out' : 'identified',
+        status: contact ? 'reached_out' : (applyOnly ? 'applied' : 'identified'),
         status_date: new Date().toISOString(),
         reached_out_date: contact ? new Date().toISOString() : null,
         alumni_name: contact?.name || null,
@@ -172,6 +172,14 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
               <p style={{ fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.6 }}>
                 Submit your application, then log it here so CLIFF tracks your follow-ups.
               </p>
+              {resumeReady && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 12, padding: '11px 14px' }}>
+                  <Check size={15} color="#16a34a" style={{ flexShrink: 0 }} />
+                  <p style={{ fontSize: 12.5, fontWeight: 700, color: '#15803d', margin: 0, lineHeight: 1.5 }}>
+                    Your resume is already tailored for this role — download it from Resume Tailoring and attach it when you apply.
+                  </p>
+                </div>
+              )}
               {jobUrl && (
                 <a href={jobUrl} target="_blank" rel="noopener noreferrer"
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', fontFamily: dm, fontSize: 14, fontWeight: 800, textDecoration: 'none', minHeight: 48, boxSizing: 'border-box' }}>
@@ -180,7 +188,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
               )}
               <button onClick={goToTailoring}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px', borderRadius: 12, border: '1.5px solid #ddd6fe', background: '#faf5ff', color: '#6d28d9', fontFamily: dm, fontSize: 14, fontWeight: 800, cursor: 'pointer', minHeight: 48 }}>
-                <FileText size={16} /> Tailor my resume for this role
+                <FileText size={16} /> {resumeReady ? 'Review my tailored resume' : 'Tailor my resume for this role'}
               </button>
               {trackError && (
                 <p style={{ fontSize: 12, fontWeight: 600, color: '#dc2626', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '8px 12px', margin: 0 }}>{trackError}</p>
@@ -340,13 +348,15 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
               <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
               <p style={{ fontSize: 16, fontWeight: 900, color: '#111827', margin: '0 0 6px' }}>{company} is in your pipeline</p>
               <p style={{ fontSize: 13, color: '#6b7280', margin: '0 0 20px', lineHeight: 1.6 }}>
-                {contact ? `Your outreach to ${contact.name.split(' ')[0]} is logged. ` : ''}One last power move: tailor your resume for this role before you apply.
+                {contact ? `Your outreach to ${contact.name.split(' ')[0]} is logged. ` : ''}{resumeReady ? "CLIFF is tracking this one — you'll get a nudge when it's time to follow up." : 'One last power move: tailor your resume for this role before you apply.'}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {!resumeReady && (
                 <button onClick={goToTailoring}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', fontFamily: dm, fontSize: 14, fontWeight: 800, cursor: 'pointer', minHeight: 48 }}>
                   <FileText size={16} /> Tailor my resume for this role
                 </button>
+                )}
                 <button onClick={() => { onClose(); window.location.hash = '#/ApplicationTracker'; }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '12px', borderRadius: 12, border: '1.5px solid #e5e7eb', background: '#fff', color: '#374151', fontFamily: dm, fontSize: 13, fontWeight: 700, cursor: 'pointer', minHeight: 44 }}>
                   <ClipboardList size={15} /> View in Application Tracker

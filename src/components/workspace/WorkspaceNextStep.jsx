@@ -85,7 +85,13 @@ export default function WorkspaceNextStep({ job, pursuit, fit, fitLoading, user 
       )}
 
       {showApply && (
-        <WarmApplyFlow job={{ company, role, jobUrl }} user={user} applyOnly onClose={() => setShowApply(false)} />
+        <WarmApplyFlow
+          job={{ company, role, jobUrl }}
+          user={user}
+          applyOnly
+          resumeReady={['ready_for_review', 'approved', 'complete'].includes(pursuit?.resume_status || '')}
+          onClose={() => setShowApply(false)}
+        />
       )}
     </div>
   );
