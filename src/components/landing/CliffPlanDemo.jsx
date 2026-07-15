@@ -34,8 +34,8 @@ export default function CliffPlanDemo({ onContinue }) {
 
       {/* Student message */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
-        <div style={{ background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', borderRadius: '16px 16px 4px 16px', padding: '10px 14px', maxWidth: '85%' }}>
-          <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 600, margin: 0, lineHeight: 1.45 }}>I want a marketing internship in Florida.</p>
+        <div style={{ background: '#5b21b6', borderRadius: '16px 16px 4px 16px', padding: '11px 15px', maxWidth: '85%' }}>
+          <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 700, margin: 0, lineHeight: 1.45, color: '#ffffff', WebkitTextFillColor: '#ffffff' }}>I want a marketing internship in Florida.</p>
         </div>
       </div>
 
