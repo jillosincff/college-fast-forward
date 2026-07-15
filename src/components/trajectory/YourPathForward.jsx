@@ -70,9 +70,12 @@ export default function YourPathForward({ user, onClose }) {
       ]);
       if (cancelled) return;
       setTemplates(tpls);
-      const existing = (trajRows || []).find(r => r.status === 'active') || (trajRows || [])[0] || null;
+      const activeRow = (trajRows || []).find(r => r.status === 'active') || null;
+      const existing = activeRow || (trajRows || [])[0] || null;
       const plan = (plans || [])[0];
-      const goalText = existing?.target_role
+      // Only an ACTIVE trajectory seeds the goal — a dismissed path must never
+      // resurface on its own after the student said "not for me".
+      const goalText = activeRow?.target_role
         || plan?.goal_summary || plan?.goal_text
         || user?.career_goals?.target_role || user?.career_goals?.dream_job || '';
       const match = matchTemplate(goalText, tpls);

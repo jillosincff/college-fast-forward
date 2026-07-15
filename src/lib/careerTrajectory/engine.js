@@ -30,7 +30,7 @@ export const REASSURANCES = [
 ];
 
 const norm = (s) => String(s || '').toLowerCase();
-const GENERIC = new Set(['intern', 'internship', 'summer', 'assistant', 'associate', 'senior', 'junior', 'staff', 'lead', 'role', 'roles']);
+const GENERIC = new Set(['intern', 'internship', 'summer', 'assistant', 'associate', 'senior', 'junior', 'staff', 'lead', 'role', 'roles', 'manager', 'management', 'director', 'coordinator', 'specialist', 'analyst', 'engineer', 'representative']);
 const tokens = (s) => norm(s).split(/[^a-z]+/).filter(w => w.length > 3 && !GENERIC.has(w));
 
 // Match a student's goal text to an approved template. Conservative: no match
@@ -114,10 +114,11 @@ export function jobTrajectoryValue(jobTitle, traj) {
   const jt = tokens(jobTitle);
   if (!jt.length || !traj) return null;
   const overlap = (roles) => (roles || []).some(r => tokens(r).some(w => jt.includes(w)));
-  if (overlap([traj.target_role])) {
+  // "Directly in line" only on an exact title match — never on loose token overlap
+  if (norm(jobTitle).includes(norm(traj.target_role))) {
     return { value: 'target', message: `This is directly in line with your ${traj.target_role} goal.` };
   }
-  if (overlap(traj.recommended_next_roles) || overlap(traj.long_term_path) || overlap(traj.recommended_internship_types)) {
+  if (overlap([traj.target_role]) || overlap(traj.recommended_next_roles) || overlap(traj.long_term_path) || overlap(traj.recommended_internship_types)) {
     return { value: 'strong_stepping_stone', message: `This is not your final goal, but it's a strong stepping stone — roles like this commonly build the experience used in ${traj.target_role} roles.` };
   }
   if (overlap(traj.alternative_path)) {
