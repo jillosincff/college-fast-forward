@@ -10,7 +10,7 @@ import TrajectorySection from '@/components/landing/TrajectorySection';
 import IntelligenceStackSection from '@/components/landing/IntelligenceStackSection';
 import RoommateSection from '@/components/landing/RoommateSection';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
-import JourneyDemo from '@/components/landing/JourneyDemo';
+import CareerMiniPlanDemo from '@/components/landing/CareerMiniPlanDemo';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -304,7 +304,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: 'clamp(8px, 2.5vw, 12px) clamp(14px, 4vw, 28px)', marginBottom: 'clamp(20px, 5vw, 32px)' }}>
                 <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 800, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>MEET CLIFF: YOUR AI CAREER COPILOT BY COLLEGE FAST FORWARD</span>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 800, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>YOUR AI CAREER AGENT FOR INTERNSHIPS AND FIRST JOBS</span>
               </div>
             )}
 
@@ -314,27 +314,18 @@ export default function StudentLandingPage({ onParentClick }) {
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.08, color: '#030712', margin: '0 0 16px' }}>
                   <span style={{ display: 'block' }}>Stop wondering what to do next.</span>
                   <span style={{ display: 'block', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                    CLIFF already has your plan.
+                    CLIFF already has a plan.
                   </span>
                 </h1>
               </div>
             )}
 
-            {/* Benefit bullets */}
+            {/* Subheadline */}
             {mounted && (
-              <div className="hero-animate-3" style={{ display: 'flex', flexDirection: 'column', gap: 14, margin: '0 0 32px', maxWidth: 560 }}>
-                {[
-                  { icon: '📍', bold: 'Map it:', text: 'Get a step-by-step roadmap from freshman year to your first job offer.' },
-                  { icon: '🔍', bold: 'Find it:', text: 'Match with high-value internships that are actually worth your time.' },
-                  { icon: '✍️', bold: 'Win it:', text: 'Stand out with highly tailored, AI-optimized applications.' },
-                ].map((b) => (
-                  <div key={b.bold} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                    <span style={{ fontSize: 'clamp(16px, 4vw, 19px)', lineHeight: 1.4, flexShrink: 0 }}>{b.icon}</span>
-                    <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', color: '#334155', margin: 0, lineHeight: 1.5, letterSpacing: '-0.01em' }}>
-                      <strong style={{ color: '#0f172a', fontWeight: 800 }}>{b.bold}</strong> {b.text}
-                    </p>
-                  </div>
-                ))}
+              <div className="hero-animate-3">
+                <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
+                  Tell CLIFF your goals. It builds your career plan, finds the opportunities worth your time, and tells you exactly what to do next — from freshman year through your first offer.
+                </h2>
               </div>
             )}
 
@@ -356,7 +347,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Build My Plan →
+                  Build My Plan
                 </button>
                 <button onClick={() => scrollToSection('how-cliff-works')} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(15px, 3.5vw, 16px)', fontWeight: 700, color: INDIGO,
@@ -404,6 +395,9 @@ export default function StudentLandingPage({ onParentClick }) {
           )}
         </div>
       </div>
+
+      {/* ── INTERACTIVE PROOF: Career Intelligence mini-plan ── */}
+      <CareerMiniPlanDemo go={go} />
 
       {/* ── SCHOOL MARQUEE ── */}
       <SchoolMarquee />
@@ -472,7 +466,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── 7. NETWORKING (one capability, not the product) ── */}
-      <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px) 0', background: BG, borderTop: '1px solid #f1f5f9' }}>
+      <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: BG, borderTop: '1px solid #f1f5f9' }}>
         <Reveal><div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
           <SectionLabel text="Networking Intelligence" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 14px' }}>
@@ -484,7 +478,6 @@ export default function StudentLandingPage({ onParentClick }) {
           </p>
         </div></Reveal>
       </div>
-      <JourneyDemo go={go} />
 
       {/* ── 8. CLIFFING CAMPAIGN ── */}
       <RoommateSection go={go} />
