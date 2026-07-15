@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { analyzeJobFit } from '@/functions/analyzeJobFit';
 import { syncJobPursuit } from '@/functions/syncJobPursuit';
-import ReadyToApplyCard from '@/components/workspace/ReadyToApplyCard';
 import WorkspaceNextStep from '@/components/workspace/WorkspaceNextStep';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import JobFitCard from '@/components/workspace/JobFitCard';
@@ -124,9 +123,6 @@ export default function CliffJobWorkspace() {
 
         {/* "CLIFF Is Ready" preview — Free students post-Magic-Moment only (backend-gated) */}
         {user && <CliffReadyCard job={job} />}
-
-        {/* Supporting detail: 1) Application readiness 2) Fit 3) Prep 4) Networking (optional, last) */}
-        {user && <ReadyToApplyCard job={job} pursuit={pursuit} user={user} />}
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
 
