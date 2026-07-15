@@ -273,15 +273,17 @@ export default function StudentLandingPage({ onParentClick }) {
           {!(!isLoadingAuth && user) && (
             <button onClick={login} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Log In</button>
           )}
-          <button onClick={go} className="nav-cta-btn" style={{
-            fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
-            background: GRAD_INDIGO, border: 'none', borderRadius: 999,
+          <button onClick={() => (!isLoadingAuth && user ? go() : scrollToSection('how-cliff-works'))} className="nav-cta-btn" style={{
+            fontFamily: SF, fontSize: 14, fontWeight: 700, color: INDIGO,
+            background: 'transparent', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999,
             padding: '10px 20px', cursor: 'pointer', minHeight: 44, whiteSpace: 'nowrap',
-            boxShadow: '0 4px 14px rgba(109,40,217,0.35)', transition: 'all 0.15s',
+            transition: 'all 0.15s',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-          >{!isLoadingAuth && user ? 'Dashboard →' : 'Build My Plan →'}</button>
+            onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; e.currentTarget.style.borderColor = INDIGO; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
+            onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)'; }}
+            onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+          >{!isLoadingAuth && user ? 'Dashboard →' : 'Meet CLIFF'}</button>
         </div>
       </nav>
 
@@ -302,7 +304,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: 'clamp(8px, 2.5vw, 12px) clamp(14px, 4vw, 28px)', marginBottom: 'clamp(20px, 5vw, 32px)' }}>
                 <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>YOUR AI CAREER AGENT FOR INTERNSHIPS AND FIRST JOBS</span>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 800, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>MEET CLIFF: YOUR AI CAREER COPILOT BY COLLEGE FAST FORWARD</span>
               </div>
             )}
 
@@ -312,18 +314,27 @@ export default function StudentLandingPage({ onParentClick }) {
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.08, color: '#030712', margin: '0 0 16px' }}>
                   <span style={{ display: 'block' }}>Stop wondering what to do next.</span>
                   <span style={{ display: 'block', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                    CLIFF already has a plan.
+                    CLIFF already has your plan.
                   </span>
                 </h1>
               </div>
             )}
 
-            {/* Subheadline */}
+            {/* Benefit bullets */}
             {mounted && (
-              <div className="hero-animate-3">
-                <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
-                  Tell CLIFF your goals. CLIFF builds your career plan, finds the opportunities worth your time, prepares stronger applications, and guides every next move — from freshman year through your first offer.
-                </h2>
+              <div className="hero-animate-3" style={{ display: 'flex', flexDirection: 'column', gap: 14, margin: '0 0 32px', maxWidth: 560 }}>
+                {[
+                  { icon: '📍', bold: 'Map it:', text: 'Get a step-by-step roadmap from freshman year to your first job offer.' },
+                  { icon: '🔍', bold: 'Find it:', text: 'Match with high-value internships that are actually worth your time.' },
+                  { icon: '✍️', bold: 'Win it:', text: 'Stand out with highly tailored, AI-optimized applications.' },
+                ].map((b) => (
+                  <div key={b.bold} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <span style={{ fontSize: 'clamp(16px, 4vw, 19px)', lineHeight: 1.4, flexShrink: 0 }}>{b.icon}</span>
+                    <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', color: '#334155', margin: 0, lineHeight: 1.5, letterSpacing: '-0.01em' }}>
+                      <strong style={{ color: '#0f172a', fontWeight: 800 }}>{b.bold}</strong> {b.text}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -345,38 +356,40 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Build My Plan
+                  Build My Plan →
                 </button>
                 <button onClick={() => scrollToSection('how-cliff-works')} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(15px, 3.5vw, 16px)', fontWeight: 700, color: INDIGO,
-                  background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999,
+                  background: 'transparent', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999,
                   padding: 'clamp(14px, 3.5vw, 18px) clamp(28px, 6vw, 40px)',
                   cursor: 'pointer', minHeight: 56, transition: 'all 0.2s ease',
                   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+                  marginBottom: 8,
                 }}
                   onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; e.currentTarget.style.borderColor = INDIGO; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
                 >
                   See How CLIFF Works
                 </button>
                 </div>
 
-                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                  Free to start. Your first CLIFF-powered application is on us. No credit card required.
-                </p>
-
-                {/* Above-the-fold social proof */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex' }}>
+                {/* Social proof / trust anchor */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
+                  <div style={{ display: 'flex', flexShrink: 0 }}>
                     {STORIES.map((st, i) => (
-                      <img key={i} src={st.photo} alt={st.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', marginLeft: i > 0 ? -10 : 0, boxShadow: SHADOW }} />
+                      <img key={i} src={st.photo} alt={st.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', marginLeft: i > 0 ? -8 : 0, boxShadow: SHADOW }} />
                     ))}
                   </div>
-                  <div>
-                    <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.01em' }}>2,400+ students on CFF</p>
-                    <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '1px 0 0', fontWeight: 500 }}>Backed by 4,100+ parents & alumni in the network</p>
-                  </div>
+                  <p style={{ fontFamily: SF, fontSize: 13, color: '#64748b', margin: 0, fontWeight: 600, lineHeight: 1.5 }}>
+                    ⭐ Join 5,000+ students building their future with CLIFF
+                  </p>
                 </div>
+
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(12px, 3vw, 13px)', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                  Free to start. Your first CLIFF-powered application is on us. No credit card required.
+                </p>
 
               </div>
             )}
