@@ -50,10 +50,9 @@ export const TOP_SCHOOLS = [
 ];
 
 export const SEEKING_OPTIONS = [
-  { key: 'internship', emoji: '🎓', label: 'Internship', sub: 'This semester or summer', hint: 'Agent will prioritize short-term roles + strong return-offer paths' },
-  { key: 'fulltime', emoji: '💼', label: 'Full-time job after graduation', sub: 'Ready to enter the workforce', hint: 'Agent will focus on full-time pipelines + long-term networking' },
-  { key: 'both', emoji: '🎯', label: 'Both internships and full-time', sub: 'Keeping all options open', hint: 'Agent will build a flexible dual-track strategy' },
-  { key: 'exploring', emoji: '🔭', label: 'Just exploring options', sub: "Not sure yet — that's okay", hint: 'Agent will help you discover what fits best first' },
+  { key: 'internship', emoji: '🎓', label: 'Internship', sub: 'This semester or summer' },
+  { key: 'fulltime', emoji: '💼', label: 'Full-time job', sub: 'Ready to launch my career' },
+  { key: 'exploring', emoji: '🔭', label: 'Still exploring', sub: "Not sure yet — that's okay" },
 ];
 
 export const BLOCKERS = [
@@ -111,11 +110,11 @@ export const BLOCKERS = [
 // Single-select "If CLIFF could solve ONE thing today…" options.
 // Keys intentionally reuse legacy BLOCKERS keys so downstream logic keeps working.
 export const CLIFF_SOLVE = [
-  { key: 'which_jobs', icon: '🔍', label: 'Find better jobs', sub: "I'll scout and rank the roles actually worth your time — daily." },
-  { key: 'resume', icon: '📄', label: 'Improve my resume', sub: "I'll rewrite it to beat ATS filters and reach real recruiters." },
-  { key: 'interviews', icon: '🎤', label: 'Help me get interviews', sub: "I'll prepare every application so more of them convert." },
-  { key: 'outreach', icon: '🤝', label: 'Find people to contact', sub: "I'll surface parents & alumni insiders at your target companies." },
-  { key: 'disorganized', icon: '📁', label: 'Keep me organized', sub: "I'll track every application and tell you exactly when to follow up." },
+  { key: 'which_jobs', icon: '🔍', label: 'Finding the right jobs', sub: "I'll scout and rank the roles actually worth your time — daily." },
+  { key: 'resume', icon: '📄', label: 'Improving my resume', sub: "I'll rewrite it to beat ATS filters and reach real recruiters." },
+  { key: 'interviews', icon: '🎤', label: 'Getting interviews', sub: "I'll prepare every application so more of them convert." },
+  { key: 'outreach', icon: '🤝', label: 'Networking', sub: "I'll surface parents & alumni insiders at your target companies." },
+  { key: 'no_direction', icon: '🧭', label: 'Figuring out where to start', sub: "I'll help you discover the path that actually fits you." },
 ];
 
 // ── Screen 2: Built by Experts (extracted to avoid conditional hooks) ───────
@@ -326,6 +325,8 @@ export function loadSavedProgress() {
       locationPref: localStorage.getItem('cff_location_pref') || '',
       locationCity: localStorage.getItem('cff_location_city') || '',
       resumeUrl: localStorage.getItem('cff_resume_url') || '',
+      yearLevel: localStorage.getItem('cff_year') || '',
+      goalText: localStorage.getItem('cff_goal_text') || '',
     };
   } catch (e) {
     return { screen: 1, seeking: '', college: '', frustration: 5, blockers: [], selectedIndustries: [], targetRoles: [], locationPref: '', locationCity: '', resumeUrl: '' };

@@ -1,39 +1,36 @@
 import { base44 } from '@/api/base44Client';
-import LinkedInScreen from './LinkedInScreen';
 import CliffCommitmentScreen from './CliffCommitmentScreen';
 import ATSScoreRing from './ATSScoreRing';
 import LiveEngineLoader from './LiveEngineLoader';
-import CliffRevealScreen from './CliffRevealScreen';
 import {
   FONT, BG, CARD, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_BORDER,
   GRAD_INDIGO, SHADOW, SHADOW_MD, R, BLUE, BLUE_LIGHT, BLUE_BORDER,
-  GREEN, GREEN_LIGHT, GREEN_BORDER, Btn, InputField,
+  GREEN, GREEN_LIGHT, GREEN_BORDER, CLIFF_SOLVE, Btn, Nav, InputField,
 } from './onboardingShared';
 
 /**
- * Onboarding screens 9–13 — extracted verbatim from OnboardingFlow.
- * All state + handlers are passed in as props from the shell. No logic changed.
+ * Onboarding screens 7–10 of the agent-hiring flow:
+ * 7 = Resume · 8 = Resume reveal · 9 = One priority · 10 = Here's our plan
  */
 export default function OnboardingSteps9to13({
   screen, next, back,
   h1style, substyle,
-  // screen 9 (data input)
+  // screen 7 (resume)
   fileRef, handleFileUpload, uploading, setUploading,
   dataInputMode, setDataInputMode,
-  college, seeking, selectedIndustries,
-  linkedinInput, setLinkedinInput, setResumeData,
+  college, seeking, selectedIndustries, setResumeData,
   quickMajor, setQuickMajor, quickSkills, setQuickSkills, quickRole, setQuickRole,
-  // screen 10 (cliff reveal)
-  firstName, resumeData, targetRoles, locationCity, locationPref,
-  // screen 11 (wow moment)
-  blockers, saveAndAuth, showPaywall, setShowPaywall,
-  // screen 13 (plan)
-  frustration,
+  // screen 8 (reveal)
+  firstName, resumeData,
+  // screen 9 (one priority)
+  blockers, selectBlocker,
+  // screen 10 (plan)
+  targetRoles, locationCity, locationPref, saveAndAuth,
 }) {
   return (
     <>
-      {/* ── SCREEN 9: Data Input ── */}
-      {screen === 9 && (
+      {/* ── SCREEN 7: Give CLIFF something to work with ── */}
+      {screen === 7 && (
         <div style={{ textAlign: 'center', maxWidth: 520, width: '100%' }}>
           <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
@@ -42,8 +39,8 @@ export default function OnboardingSteps9to13({
           {!uploading && dataInputMode === 'choose' && (
             <>
               <h1 style={h1style}>Give CLIFF something to work with.</h1>
-              <p style={{ ...substyle, marginBottom: 8 }}>The more CLIFF knows about you, the smarter its job matches, materials, and warm intros get.</p>
-              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#059669', margin: '0 0 28px' }}>Even if it's rough — I can improve it.</p>
+              <p style={{ ...substyle, marginBottom: 8 }}>The more I know about you, the smarter my matches, materials, and warm intros get.</p>
+              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#059669', margin: '0 0 28px' }}>Even if it's rough — I'll improve it.</p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
                 {/* Upload Resume */}
@@ -55,8 +52,8 @@ export default function OnboardingSteps9to13({
                   <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 10, border: `1px solid ${GREEN_BORDER}` }}>📄</span>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>Upload Resume</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>PDF or Word — get a full Before/After transformation in seconds</p>
-                    <p style={{ fontFamily: FONT, fontSize: 11, color: '#059669', margin: 0, fontStyle: 'italic' }}>Agent rewrites bullet points, adds ATS keywords + aligns with your target roles</p>
+                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>PDF or Word — see what I can do with it in seconds</p>
+                    <p style={{ fontFamily: FONT, fontSize: 11, color: '#059669', margin: 0, fontStyle: 'italic' }}>I'll rewrite bullet points, add ATS keywords + align it with your target roles</p>
                   </div>
                   <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: GREEN, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>BEST</span>
                 </button>
@@ -69,13 +66,12 @@ export default function OnboardingSteps9to13({
                 >
                   <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 10, border: `1px solid ${BLUE_BORDER}` }}>⚡</span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>No resume yet? Quick Start</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>Answer 3 quick questions and the Agent builds your Starter Profile.</p>
+                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>No resume yet? No problem.</p>
+                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>Answer 3 quick questions and I'll build your foundation myself.</p>
                     <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic' }}>Perfect for freshmen and first-time job seekers</p>
                   </div>
                   <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: INDIGO, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>FAST</span>
                 </button>
-
               </div>
 
               <div style={{ textAlign: 'center', marginTop: 16 }}>
@@ -83,34 +79,6 @@ export default function OnboardingSteps9to13({
                   Skip for now →
                 </button>
               </div>
-
-              {/* Teaser: what you'll get */}
-              <div style={{ background: BG, border: '1px solid #E2E8F0', borderRadius: 12, padding: '16px 18px', marginTop: 20 }}>
-                <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 10px' }}>What you'll get right after:</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  {[
-                    { icon: '✨', text: 'AI-optimized resume version' },
-                    { icon: '💬', text: 'Personalized outreach templates' },
-                    { icon: '🔍', text: "Insider match preview based on everything you've shared so far" },
-                  ].map((item, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>
-                      <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>{item.text}</p>
-                    </div>
-                  ))}
-                </div>
-                {/* Latency-as-a-Feature expectation setter */}
-                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #E2E8F0', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                  <span style={{ fontSize: 13, flexShrink: 0 }}>⚡</span>
-                  <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.5 }}>
-                    <strong style={{ color: TEXT }}>This first optimization is instant</strong> — on us. Future resume tailoring is batch-processed within 24 hours, or upgrade for <strong style={{ color: INDIGO }}>instant results every time.</strong>
-                  </p>
-                </div>
-              </div>
-
-              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '16px 0 0', lineHeight: 1.6, fontStyle: 'italic' }}>
-                Choose the fastest way for you — most students see their first "wow" moment within 60 seconds.
-              </p>
 
               <div style={{ textAlign: 'center', marginTop: 8 }}>
                 <button onClick={back} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
@@ -121,8 +89,8 @@ export default function OnboardingSteps9to13({
           {!uploading && dataInputMode === 'quickstart' && (
             <>
               <div style={{ width: 56, height: 56, borderRadius: 14, background: '#FFFBEB', border: '1px solid #FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, margin: '0 auto 20px', boxShadow: SHADOW }}>⚡</div>
-              <h1 style={h1style}>Quick Start</h1>
-              <p style={substyle}>Answer 3 questions and the Agent builds your Starter Profile in seconds.</p>
+              <h1 style={h1style}>Tell me the basics.</h1>
+              <p style={substyle}>Answer 3 questions and I'll build your foundation in seconds.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, textAlign: 'left', marginBottom: 20 }}>
                 <InputField label="1. What's your major?" placeholder="e.g. Business Administration, Computer Science..." value={quickMajor} onChange={e => setQuickMajor(e.target.value)} />
                 <InputField label="2. What are 2 things you're good at?" placeholder="e.g. Python, Writing, Organizing events, Excel..." value={quickSkills} onChange={e => setQuickSkills(e.target.value)} />
@@ -159,7 +127,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                 }}
                 disabled={!quickMajor.trim() || !quickSkills.trim() || !quickRole.trim()}
                 style={{ display: 'block', width: '100%', marginBottom: 12 }}
-              >Build My Starter Profile →</Btn>
+              >Build It For Me →</Btn>
               <div style={{ textAlign: 'center' }}>
                 <button onClick={() => setDataInputMode('choose')} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>← Back to options</button>
               </div>
@@ -168,37 +136,16 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         </div>
       )}
 
-      {/* ── SCREEN 10: Meet CLiFF ── */}
-      {screen === 10 && (
-        <CliffRevealScreen
-          onNext={next}
-          firstName={firstName}
-          skipped={!resumeData}
-          targetRoles={targetRoles}
-          locationCity={locationCity}
-          locationPref={locationPref}
-          seeking={seeking}
-          selectedIndustries={selectedIndustries}
-        />
-      )}
-
-      {/* ── SCREEN 11: Wow Moment (Resume Before/After) ── */}
-      {screen === 11 && (
+      {/* ── SCREEN 8: Resume Reveal — "Here's what I noticed." ── */}
+      {screen === 8 && (
       <div style={{ maxWidth: 900, width: '100%', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
         <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 12px' }}>
           {firstName
-            ? <>{firstName}, here's what CLIFF <span style={{ color: '#10B981' }}>noticed.</span></>
-            : dataInputMode === 'quickstart' ? 'Your Starter Profile Is Ready' : <>Here's what CLIFF <span style={{ color: '#10B981' }}>noticed.</span></>}
+            ? <>{firstName}, here's what I <span style={{ color: '#10B981' }}>noticed.</span></>
+            : <>Here's what I <span style={{ color: '#10B981' }}>noticed.</span></>}
         </h1>
-        {/* Personal note — mirrors back their inputs */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
-          <span style={{ fontSize: 12 }}>🤖</span>
-          <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: '#059669' }}>
-            Customized for your{selectedIndustries.length > 0 ? ` ${selectedIndustries.slice(0,2).join(' & ')}` : ''}{blockers.includes('resume') || blockers.includes('ghosted') ? ' · optimized to beat ATS rejection' : ' target roles'}
-          </span>
-        </div>
         <p style={{ fontFamily: FONT, fontSize: 17, fontWeight: 700, color: TEXT, margin: '0 auto 8px', maxWidth: 560, lineHeight: 1.5 }}>
           Good news — you're already closer than you think.
         </p>
@@ -227,7 +174,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                 <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, overflow: 'hidden' }}>
                   <div style={{ background: '#F1F5F9', padding: '14px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                      {dataInputMode === 'quickstart' ? 'Starter Profile' : 'Your Current Resume'}
+                      {dataInputMode === 'quickstart' ? 'Your Foundation' : 'Your Current Resume'}
                     </span>
                     <span style={{ fontFamily: FONT, fontSize: 10, color: TEXT3 }}>As submitted</span>
                   </div>
@@ -245,7 +192,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 280, flexDirection: 'column', gap: 10 }}>
                         <div style={{ width: 28, height: 28, border: `3px solid #E2E8F0`, borderTop: `3px solid ${BLUE}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                        <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>Parsing your resume...</p>
+                        <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>Reading your resume...</p>
                       </div>
                     )}
                   </div>
@@ -254,14 +201,14 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                 {/* AFTER */}
                 <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, border: `2px solid ${GREEN_BORDER}`, overflow: 'hidden' }}>
                   <div style={{ background: GREEN_LIGHT, padding: '14px 20px', borderBottom: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Agent Optimized</span>
-                    <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#fff', background: GREEN, borderRadius: 6, padding: '2px 10px' }}>OPTIMIZED</span>
+                    <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em' }}>CLIFF Improved</span>
+                    <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#fff', background: GREEN, borderRadius: 6, padding: '2px 10px' }}>IMPROVED</span>
                   </div>
                   <div style={{ minHeight: 480 }}>
                     {!opt ? (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 480, flexDirection: 'column', gap: 10 }}>
                         <div style={{ width: 32, height: 32, border: `3px solid ${GREEN_BORDER}`, borderTop: `3px solid ${GREEN}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                        <p style={{ fontFamily: FONT, fontSize: 13, color: GREEN, margin: 0 }}>Optimizing your resume...</p>
+                        <p style={{ fontFamily: FONT, fontSize: 13, color: GREEN, margin: 0 }}>Improving your resume...</p>
                       </div>
                     ) : (
                       <div>
@@ -289,13 +236,9 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
             );
           })()}
 
-          {/* Agent Feedback Card — 2-col layout */}
-          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px 28px', marginBottom: 24, border: `1px solid ${GREEN_BORDER}` }}>
-            <h3 style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              ✓ What CLIFF Noticed
-            </h3>
+          {/* Strengths → biggest opportunity → what CLIFF will improve */}
+          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px 28px', marginBottom: 28, border: `1px solid ${GREEN_BORDER}` }}>
             <div style={{ display: 'flex', gap: 28, alignItems: 'center', flexWrap: 'wrap' }}>
-              {/* Left: strengths → opportunity → what CLIFF will improve (65%) */}
               <div style={{ flex: '0 0 calc(65% - 14px)', minWidth: 200, display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {[
                   { label: '💪 Your strengths', color: '#059669', lines: ['You have real experience worth showcasing', 'Your foundation is stronger than most students at this stage'] },
@@ -313,78 +256,99 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                   </div>
                 ))}
               </div>
-              {/* Right: ATS Score Ring (35%) */}
               <div style={{ flex: '0 0 35%', minWidth: 160, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <ATSScoreRing />
               </div>
             </div>
           </div>
 
-          {/* Emotional Payoff Section */}
-          <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)', border: `1px solid ${BLUE_BORDER}`, borderRadius: R, padding: '22px 28px', marginBottom: 28 }}>
-            <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>🎯 What this actually means for you</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { icon: '🧑‍💼', text: 'Your applications will finally reach human recruiters instead of getting auto-filtered' },
-                { icon: '🏆', text: 'Your resume now reads like the candidates recruiters actually shortlist' },
-                { icon: '🤝', text: 'Alumni & parents will see a polished, confident version of you' },
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <span style={{ fontSize: 16, flexShrink: 0 }}>{item.icon}</span>
-                  <p style={{ fontFamily: FONT, fontSize: 14, color: '#1E3A5F', margin: 0, lineHeight: 1.6, fontWeight: 500 }}>{item.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
+          {/* CTA */}
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <button
               onClick={next}
-              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 12px', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 10, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(109,40,217,0.3)', transition: 'all 0.2s' }}
+              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 10, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(109,40,217,0.3)', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(109,40,217,0.4)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(109,40,217,0.3)'; }}
             >
-              Next: Optimize My LinkedIn Profile →
-            </button>
-            <button
-              onClick={() => saveAndAuth('free')}
-              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto', fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT2, background: CARD, border: `1.5px solid #E2E8F0`, borderRadius: 10, padding: '14px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: SHADOW, transition: 'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.boxShadow = SHADOW_MD; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = SHADOW; }}
-            >
-              Save This Version &amp; Keep Going
+              Continue →
             </button>
           </div>
-
-          {/* Micro-copy */}
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '0 0 16px', lineHeight: 1.7, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto', fontStyle: 'italic' }}>
-            You've now completed the hardest part most students never do. Your Agent is building the rest of your sprint plan with this stronger foundation.
-          </p>
 
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <button onClick={back} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
           </div>
-
         </div>
       )}
 
-      {/* ── SCREEN 12: LinkedIn Identity Architect ── */}
-      {screen === 12 && (
-        <LinkedInScreen
-          resumeData={resumeData}
-          college={college}
-          seeking={seeking}
-          targetRole={resumeData?.targetRole || quickRole || targetRoles[0]}
-          selectedIndustries={selectedIndustries}
-          onBack={back}
-          saveAndAuth={saveAndAuth}
-          onNext={next}
-        />
-      )}
+      {/* ── SCREEN 9: One Priority ── */}
+      {screen === 9 && (() => {
+        const selectedKey = blockers[0] || null;
+        const selected = CLIFF_SOLVE.find(o => o.key === selectedKey);
+        return (
+          <div style={{ textAlign: 'center', maxWidth: 540, width: '100%' }}>
+            <h1 style={h1style}>If I could solve ONE thing first…</h1>
+            <p style={{ ...substyle, marginBottom: 20 }}>What would help most?</p>
 
-      {/* ── SCREEN 13: "Here's what I'm going to do." — no pricing, straight to Magic Moment ── */}
-      {screen === 13 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }} className="blocker-card-list">
+              {CLIFF_SOLVE.map(opt => {
+                const active = selectedKey === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => selectBlocker(opt.key)}
+                    className="onb-option-btn"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                      background: active ? GREEN_LIGHT : CARD,
+                      border: `2px solid ${active ? GREEN : '#E2E8F0'}`,
+                      borderRadius: 14, padding: '16px 18px', cursor: 'pointer',
+                      textAlign: 'left', minHeight: 'auto',
+                      boxShadow: active
+                        ? `0 0 0 3px ${GREEN_BORDER}, 0 8px 20px rgba(6,182,212,0.12)`
+                        : '0 4px 12px rgba(0,0,0,0.05)',
+                      transform: active ? 'translateY(-1px)' : 'translateY(0)',
+                      transition: 'all 0.18s ease',
+                    }}
+                    onMouseEnter={e => { if (!active) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = '#CBD5E1'; } }}
+                    onMouseLeave={e => { if (!active) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E2E8F0'; } }}
+                  >
+                    <span style={{ fontSize: 20, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'rgba(6,182,212,0.12)' : BG, borderRadius: 10, border: `1px solid ${active ? GREEN_BORDER : '#E2E8F0'}`, transition: 'all 0.18s' }}>{opt.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: active ? '#0E7490' : TEXT, margin: '0 0 3px' }}>{opt.label}</p>
+                      <p style={{ fontFamily: FONT, fontSize: 12, color: active ? '#0891b2' : TEXT3, margin: 0, fontStyle: 'italic' }}>{opt.sub}</p>
+                    </div>
+                    <div style={{
+                      width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                      border: `2px solid ${active ? GREEN : '#CBD5E1'}`,
+                      background: active ? GREEN : 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, color: '#fff', fontWeight: 800,
+                      transition: 'all 0.18s ease',
+                    }}>
+                      {active && '✓'}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {selected && (
+              <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
+                <p style={{ fontFamily: FONT, fontSize: 14, color: '#0E7490', margin: 0, lineHeight: 1.6 }}>
+                  <strong>Perfect. That's my first priority.</strong><br />
+                  {selected.sub}
+                </p>
+              </div>
+            )}
+
+            <Nav onBack={back} onNext={next} nextDisabled={!selectedKey} />
+          </div>
+        );
+      })()}
+
+      {/* ── SCREEN 10: Here's Our Plan → planning → dashboard ── */}
+      {screen === 10 && (
         <CliffCommitmentScreen
           resumeData={resumeData}
           firstName={firstName}

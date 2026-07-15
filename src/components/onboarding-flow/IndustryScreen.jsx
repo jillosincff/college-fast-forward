@@ -142,10 +142,10 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
       </div>
 
       <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 4vw, 34px)', fontWeight: 800, color: TEXT, lineHeight: 1.15, letterSpacing: '-0.03em', margin: '0 0 12px' }}>
-        Where do you want to end up?
+        Where do you eventually want to end up?
       </h1>
       <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 auto 8px', maxWidth: 460 }}>
-        Pick up to 3 spaces you're drawn to. Don't worry — you can always change this later.
+        Pick up to 3 spaces you're drawn to. You can change this anytime.
       </p>
       <p style={{ fontFamily: FONT, fontSize: 12, color: totalSelected >= MAX_TOTAL ? '#EA580C' : TEXT3, margin: '0 0 24px', fontWeight: totalSelected >= MAX_TOTAL ? 700 : 400, transition: 'color 0.2s' }}>
         {totalSelected >= MAX_TOTAL ? '✓ Max 3 selected' : `${MAX_TOTAL - totalSelected} selection${MAX_TOTAL - totalSelected !== 1 ? 's' : ''} remaining`}

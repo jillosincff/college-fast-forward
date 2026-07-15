@@ -12,15 +12,19 @@ import {
   saveProgress, loadSavedProgress,
 } from './onboardingShared';
 
+/**
+ * The agent-hiring flow — 10 screens:
+ * 1 Meet CLIFF · 2 Goal · 3 School · 4 Year · 5 Career interest ·
+ * 6 Ideal opportunity · 7 Resume · 8 Reveal · 9 One priority · 10 Our plan
+ */
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false, resumeAtScreen = null }) {
-  // Load saved progress for returning users
+  // Load saved progress for returning users. Positions saved by the old
+  // 13-screen flow (or anything out of range) restart cleanly at 1.
   const saved = resumeAtScreen ? loadSavedProgress() : null;
-  // Screens 2 (experts) + 3 (frustration slider) were removed — never resume onto them
-  const startScreen = (resumeAtScreen === 2 || resumeAtScreen === 3) ? 4 : (resumeAtScreen || 1);
+  const startScreen = (resumeAtScreen && resumeAtScreen >= 1 && resumeAtScreen <= 10) ? resumeAtScreen : 1;
 
   const [screen, setScreen] = useState(startScreen);
-  const [analyzing, setAnalyzing] = useState(false); // analyzing loader after university
-  const [frustration, setFrustration] = useState(saved?.frustration ?? 5);
+  const [analyzing, setAnalyzing] = useState(false);
   const [seeking, setSeeking] = useState(saved?.seeking ?? '');
   const [blockers, setBlockers] = useState(saved?.blockers ?? []);
   const [college, setCollege] = useState(() => {
@@ -28,9 +32,10 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     // Pre-fill from the landing page teaser search so students don't retype their school
     try { return localStorage.getItem('cff_teaser_school') || ''; } catch { return ''; }
   });
+  const [yearLevel, setYearLevel] = useState(saved?.yearLevel ?? '');
+  const [goalText, setGoalText] = useState(saved?.goalText ?? '');
   const [locationPref, setLocationPref] = useState(saved?.locationPref ?? '');
   const [locationCity, setLocationCity] = useState(saved?.locationCity ?? '');
-  const [citySuggestionsClosed, setCitySuggestionsClosed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState(saved?.resumeUrl ?? '');
   const [resumeData, setResumeDataRaw] = useState(() => {
@@ -53,20 +58,16 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     } catch {}
   };
   const [showPaywall, setShowPaywall] = useState(false);
-  const [linkedinInput, setLinkedinInput] = useState('');
   const [quickMajor, setQuickMajor] = useState('');
   const [quickSkills, setQuickSkills] = useState('');
   const [quickRole, setQuickRole] = useState('');
   const [dataInputMode, setDataInputMode] = useState('choose');
-  const [hoveredExpert, setHoveredExpert] = useState(null);
-  const [selectedExpert, setSelectedExpert] = useState(null);
-  const [analyzingFrustration, setAnalyzingFrustration] = useState(false);
   const [selectedIndustries, setSelectedIndustries] = useState(saved?.selectedIndustries ?? []);
   const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
   const fileRef = useRef();
 
-  const TOTAL = 11; // 13 internal screens minus removed experts (2) and frustration (3)
-  const displayStep = screen > 3 ? screen - 2 : screen;
+  const TOTAL = 10;
+  const displayStep = screen;
 
   // ── Abandonment event tracking ──────────────────────────────────────────
   const screenRef = useRef(startScreen);
@@ -88,11 +89,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       base44.functions.invoke('logAnalyticsEvent', {
         event_name: 'onboarding_step_abandoned',
         anonymous_id: anonId,
-        properties: {
-          screen: s,
-          step: s > 3 ? s - 2 : s, // matches the "X / 11" progress display
-          reason,
-        },
+        properties: { screen: s, step: s, reason },
       }).catch(() => {});
     } catch {}
   };
@@ -106,15 +103,14 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
 
   const next = () => {
     let newScreen = screen + 1;
-    // Screens 2 (experts) + 3 (frustration) are cut from the flow
-    if (newScreen === 2 || newScreen === 3) newScreen = 4;
-    // Skippers have no resume — bypass the Before/After screen (11),
+    // Skippers have no resume — bypass the reveal screen (8),
     // which would otherwise render infinite "parsing" spinners.
-    if (newScreen === 11 && !resumeData) newScreen = 12;
+    if (newScreen === 8 && !resumeData) newScreen = 9;
     saveProgress(newScreen, {
       cff_seeking: seeking,
       cff_college: college,
-      cff_frustration: frustration,
+      cff_year: yearLevel,
+      cff_goal_text: goalText,
       cff_blockers: blockers,
       cff_industries: selectedIndustries,
       cff_target_roles: targetRoles,
@@ -122,7 +118,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       cff_location_city: locationCity,
       cff_resume_url: resumeUrl,
     });
-    if (newScreen > 13) {
+    if (newScreen > 10) {
       if (onClose) onClose();
     } else {
       setScreen(newScreen);
@@ -131,19 +127,15 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const back = () => {
     setScreen(s => {
       let prev = Math.max(1, s - 1);
-      if (prev === 3 || prev === 2) prev = 1; // experts + frustration screens removed
-      // Mirror the forward skip: no resume → screen 11 doesn't exist for this user
-      if (prev === 11 && !resumeData) prev = 10;
-      // Reset screen 9 sub-mode when leaving screen 9 via back
-      if (s === 9) setDataInputMode('choose');
+      // Mirror the forward skip: no resume → reveal (8) doesn't exist for this user
+      if (prev === 8 && !resumeData) prev = 7;
+      // Reset resume screen sub-mode when leaving via back
+      if (s === 7) setDataInputMode('choose');
       return prev;
     });
   };
 
-  const toggleBlocker = (key) => {
-    setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
-  };
-  // Single-select variant — "If CLIFF could solve ONE thing today"
+  // Single-select — "If I could solve ONE thing first…"
   const selectBlocker = (key) => setBlockers([key]);
 
   // Fire referral milestone when referee hits the school step
@@ -163,8 +155,6 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       }).catch(() => {}); // fire-and-forget — never block the UI
     } catch {}
   };
-
-
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -228,12 +218,11 @@ CRITICAL RULES:
       setUploading(false);
       next();
       return;
-      } catch (err) {
+    } catch (err) {
       setUploading(false);
       next();
       return;
-      }
-    setUploading(false);
+    }
   };
 
   const saveAndAuth = async (planType) => {
@@ -247,10 +236,11 @@ CRITICAL RULES:
       localStorage.removeItem('cff_onboarding_screen');
       if (college) localStorage.setItem('cff_college', college);
       if (seeking) localStorage.setItem('cff_seeking', seeking);
+      if (yearLevel) localStorage.setItem('cff_year', yearLevel);
+      if (goalText) localStorage.setItem('cff_goal_text', goalText);
       if (blockers.length) localStorage.setItem('cff_blockers', JSON.stringify(blockers));
       if (selectedIndustries.length) localStorage.setItem('cff_industries', JSON.stringify(selectedIndustries));
       if (targetRoles.length) localStorage.setItem('cff_target_roles', JSON.stringify(targetRoles));
-      if (frustration) localStorage.setItem('cff_frustration', String(frustration));
       if (resumeUrl) localStorage.setItem('cff_resume_url', resumeUrl);
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
       if (loc) localStorage.setItem('cff_location', loc);
@@ -258,7 +248,7 @@ CRITICAL RULES:
       // Zeigarnik close: surface an "unfinished draft" card on first dashboard visit
       localStorage.setItem('cff_first_draft_pending', 'true');
       if (blockers.includes('no_direction')) localStorage.setItem('cff_career_unsure', 'true');
-      
+
       // CRITICAL: Update user profile with persona if already authenticated
       try {
         const currentUser = await base44.auth.me();
@@ -271,6 +261,7 @@ CRITICAL RULES:
               // Use the canonical name→code map (matches ParentNetworkProfile codes like "UF").
               // Unknown schools get '' — the validateOnboardingSchoolCode automation alerts on those.
               school_code: (deriveSchoolCode(college) || '').toUpperCase(),
+              academic_year: yearLevel || '',
               career_blockers: blockers,
             });
           // Event tracking: student profile onboarding completion (fire-and-forget)
@@ -280,6 +271,7 @@ CRITICAL RULES:
               school: college || '',
               plan_type: planType || '',
               seeking: seeking || '',
+              year: yearLevel || '',
               blockers_count: blockers.length,
               has_resume: !!resumeUrl,
             },
@@ -311,7 +303,7 @@ CRITICAL RULES:
     }
   };
 
-  const isFullPageScreen = screen >= 11;
+  const isFullPageScreen = screen === 8; // resume reveal is full-page
   const rawName = resumeData?.original?.name;
   const authFirstName = (() => {
     try { return sessionStorage.getItem('cff_auth_first_name') || null; } catch { return null; }
@@ -339,10 +331,8 @@ CRITICAL RULES:
     isolation: 'isolate',
   };
 
-  // Card wrapper for screens 1–8
   const card = { textAlign: 'center', maxWidth: 560, width: '100%' };
 
-  // Heading styles for screens 1–8
   const h1style = {
     fontFamily: FONT, fontSize: 'clamp(24px, 4vw, 38px)',
     fontWeight: 800, color: TEXT, lineHeight: 1.15,
@@ -358,7 +348,7 @@ CRITICAL RULES:
       <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        input::placeholder { color: #94A3B8; }
+        input::placeholder, textarea::placeholder { color: #94A3B8; }
         /* Mobile: ensure single column, generous side padding */
         @media (max-width: 640px) {
           .onb-card { padding: 0 4px !important; }
@@ -375,8 +365,6 @@ CRITICAL RULES:
       {/* ── Close Button ── */}
       <button onClick={() => { logAbandonment('closed_flow'); if (onClose) onClose(); }} style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW }}>✕</button>
 
-      {/* Welcome back banner intentionally removed */}
-
       {/* ── Analyzing Loader (postAuth only) ── */}
       {analyzing && (
         <div style={{ textAlign: 'center', maxWidth: 520, width: '100%', animation: 'fadeUp 0.3s ease' }}>
@@ -384,9 +372,7 @@ CRITICAL RULES:
         </div>
       )}
 
-
-
-      {/* ── Progress Bar (all screens — drop-off is highest when users can't see the finish line) ── */}
+      {/* ── Progress Bar ── */}
       {!analyzing && (
         <>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#E2E8F0' }}>
@@ -404,24 +390,18 @@ CRITICAL RULES:
         <OnboardingSteps1to4
           screen={screen} next={next} back={back}
           h1style={h1style} substyle={substyle} card={card}
-          hoveredExpert={hoveredExpert} setHoveredExpert={setHoveredExpert}
-          selectedExpert={selectedExpert} setSelectedExpert={setSelectedExpert}
-          blockers={blockers}
-          frustration={frustration} setFrustration={setFrustration}
-          analyzingFrustration={analyzingFrustration} setAnalyzingFrustration={setAnalyzingFrustration}
           seeking={seeking} setSeeking={setSeeking}
         />
 
         <OnboardingSteps5to8
           screen={screen} next={next} back={back}
-          h1style={h1style} substyle={substyle} card={card}
+          h1style={h1style} substyle={substyle}
+          college={college} setCollege={setCollege} fireReferralMilestone={fireReferralMilestone}
+          yearLevel={yearLevel} setYearLevel={setYearLevel}
           selectedIndustries={selectedIndustries} setSelectedIndustries={setSelectedIndustries}
           targetRoles={targetRoles} setTargetRoles={setTargetRoles}
-          blockers={blockers} toggleBlocker={toggleBlocker} selectBlocker={selectBlocker}
-          college={college} setCollege={setCollege} fireReferralMilestone={fireReferralMilestone}
-          locationPref={locationPref} setLocationPref={setLocationPref}
-          locationCity={locationCity} setLocationCity={setLocationCity}
-          citySuggestionsClosed={citySuggestionsClosed} setCitySuggestionsClosed={setCitySuggestionsClosed}
+          goalText={goalText} setGoalText={setGoalText}
+          setLocationPref={setLocationPref} setLocationCity={setLocationCity}
         />
 
         <OnboardingSteps9to13
@@ -431,15 +411,15 @@ CRITICAL RULES:
           uploading={uploading} setUploading={setUploading}
           dataInputMode={dataInputMode} setDataInputMode={setDataInputMode}
           college={college} seeking={seeking} selectedIndustries={selectedIndustries}
-          linkedinInput={linkedinInput} setLinkedinInput={setLinkedinInput} setResumeData={setResumeData}
+          setResumeData={setResumeData}
           quickMajor={quickMajor} setQuickMajor={setQuickMajor}
           quickSkills={quickSkills} setQuickSkills={setQuickSkills}
           quickRole={quickRole} setQuickRole={setQuickRole}
           firstName={firstName} resumeData={resumeData}
+          blockers={blockers} selectBlocker={selectBlocker}
           targetRoles={targetRoles} locationCity={locationCity} locationPref={locationPref}
-          blockers={blockers} saveAndAuth={saveAndAuth}
+          saveAndAuth={saveAndAuth}
           showPaywall={showPaywall} setShowPaywall={setShowPaywall}
-          frustration={frustration}
         />
 
       </FunnelTransition>}
