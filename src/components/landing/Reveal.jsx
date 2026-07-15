@@ -36,13 +36,15 @@ export default function Reveal({ children, delay = 0 }) {
     // never fires (iframes, older Safari, unusual zoom levels).
     window.addEventListener('scroll', check, { passive: true });
     window.addEventListener('resize', check, { passive: true });
-    // Reveal anything already in the viewport on mount.
-    check();
     // Final fail-safe: after 4s, force-show if it's anywhere near view.
+    // Declared BEFORE the initial check() — show() calls cleanup(), which
+    // referenced this before initialization when content was in view on mount.
     const failSafe = setTimeout(() => {
       const rect = el.getBoundingClientRect();
       if (rect.top < window.innerHeight * 1.5) show();
     }, 4000);
+    // Reveal anything already in the viewport on mount.
+    check();
 
     function cleanup() {
       if (io) io.disconnect();
