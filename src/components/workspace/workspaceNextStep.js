@@ -59,7 +59,7 @@ export function computeNextStep(pursuit, fit) {
     key: 'apply',
     title: 'Submit your application.',
     detail: 'Your resume is ready — this application is prepared and worth sending today.',
-    time: '~10 min', ctaLabel: 'Apply now', cta: 'apply',
+    time: '~10 min', ctaLabel: 'Review resume & apply', cta: 'apply',
   };
 }
 
