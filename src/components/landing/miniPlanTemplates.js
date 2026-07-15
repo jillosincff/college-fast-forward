@@ -16,7 +16,7 @@ export const FIELDS = [
 ];
 
 export const GOALS = [
-  { label: 'Build experience', key: 'build_experience' },
+  { label: 'Gain experience', key: 'build_experience' },
   { label: 'Internship', key: 'internship' },
   { label: 'Full-time job', key: 'fulltime' },
   { label: 'Still figuring it out', key: 'exploring' },
