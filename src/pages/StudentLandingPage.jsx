@@ -1,94 +1,46 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
-import { GraduationCap, Users, Target, FileText, Rocket, Check, X, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { GraduationCap, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
-import { base44 } from '@/api/base44Client';
 import Reveal from '@/components/landing/Reveal';
-import AppShowcase from '@/components/landing/AppShowcase';
-import LiveJobsSection from '@/components/landing/LiveJobsSection';
-import AgentWeekDemo from '@/components/landing/AgentWeekDemo';
-import WhileAwaySection from '@/components/landing/WhileAwaySection';
-import PhilosophySection from '@/components/landing/PhilosophySection';
-import WhatIsCliffing from '@/components/landing/WhatIsCliffing';
+import CliffPlanDemo from '@/components/landing/CliffPlanDemo';
+import CareerIntelligenceSection from '@/components/landing/CareerIntelligenceSection';
+import TrajectorySection from '@/components/landing/TrajectorySection';
+import IntelligenceStackSection from '@/components/landing/IntelligenceStackSection';
 import RoommateSection from '@/components/landing/RoommateSection';
-import ProblemClarifier from '@/components/landing/ProblemClarifier';
-import { HERO_VARIANTS, getHeroVariant, trackHeroEvent } from '@/components/landing/heroVariants';
-import DayWithCliff from '@/components/landing/DayWithCliff';
-import CliffTrustSection from '@/components/landing/CliffTrustSection';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
 import MatchTeaser from '@/components/landing/MatchTeaser';
-import JourneySection from '@/components/landing/JourneySection';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
 
-// Page backgrounds
 const BG   = '#f8f9ff';
-const BG2  = '#ffffff';
-
-// Cards
 const CARD  = '#ffffff';
 const CARD2 = '#f1f5ff';
-
-// Text
 const TEXT  = '#0f172a';
 const TEXT2 = '#475569';
 const TEXT3 = '#94a3b8';
 
-// Signature Purple — primary brand color (unified across all CTAs)
 const INDIGO       = '#6d28d9';
 const INDIGO_DIM   = '#5b21b6';
 const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
 const INDIGO_BORDER= 'rgba(109,40,217,0.20)';
 
-// Violet — secondary accent
-const VIOLET       = '#7c3aed';
-const VIOLET_LIGHT = 'rgba(124,58,237,0.08)';
-const VIOLET_BORDER= 'rgba(124,58,237,0.20)';
-
-// Pink — accent 3
-const PINK        = '#ec4899';
-const PINK_LIGHT  = 'rgba(236,72,153,0.08)';
-const PINK_BORDER = 'rgba(236,72,153,0.22)';
-
-// Teal — accent 4
-const TEAL        = '#06b6d4';
-const TEAL_LIGHT  = 'rgba(6,182,212,0.08)';
-const TEAL_BORDER = 'rgba(6,182,212,0.22)';
-const TEAL_DARK   = '#0891b2';
-
-// Coral for "bad" contrast
 const CORAL       = '#f43f5e';
-const CORAL_LIGHT = 'rgba(244,63,94,0.07)';
 const CORAL_BORDER= 'rgba(244,63,94,0.22)';
 
-// Gradient helpers
 const GRAD_HERO   = 'linear-gradient(145deg, #f0f4ff 0%, #fdf2ff 50%, #f0fbff 100%)';
 const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
-const GRAD_WARM   = 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)';
 
-// Shadows (unified across all floating elements)
 const SHADOW    = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
 const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
 const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
 
-
-
-const PROOF_CALLOUTS = [
-  { text: 'Tailored resumes for every job you target' },
-  { text: 'Interview preparation and practice' },
-  { text: 'Smarter job prioritization — focus where you can actually win' },
-  { text: 'Warm introductions when they genuinely improve your chances' },
-  { text: 'Follow-up reminders at exactly the right time' },
-  { text: 'Career strategy that adapts as you make progress' },
-  { text: 'Networking done for you — not left up to you' },
-];
-
 const STORIES = [
-  { quote: "I stopped wondering what I should do every day. CLIFF always had the next move ready — and I landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/c2df92fac_IMG_8456.png", tag: "Landed an internship", color: INDIGO },
-  { quote: "CLIFF kept me on track without me constantly checking everything. I finally felt like someone was actually helping me.", name: "Maya R.", school: "UF '26, Business", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png", tag: "Off my mind", color: VIOLET },
-  { quote: "I spent less time searching and more time getting interviews. I heard back from an alumna within 48 hours.", name: "Nerissa R.", school: "USC '25, Marketing", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png", tag: "More interviews, less searching", color: PINK },
+  { quote: "I stopped wondering what I should do every day. CLIFF always had the next move ready — and I landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/c2df92fac_IMG_8456.png", tag: "Landed an internship", color: '#6d28d9' },
+  { quote: "CLIFF kept me on track without me constantly checking everything. I finally felt like someone was actually helping me.", name: "Maya R.", school: "UF '26, Business", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png", tag: "Off my mind", color: '#7c3aed' },
+  { quote: "I spent less time searching and more time getting interviews. I heard back from an alumna within 48 hours.", name: "Nerissa R.", school: "USC '25, Marketing", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png", tag: "More interviews, less searching", color: '#ec4899' },
 ];
 
 function StoriesCarousel() {
@@ -166,13 +118,7 @@ export default function StudentLandingPage({ onParentClick }) {
   const [showFunnel, setShowFunnel] = useState(false);
   const [funnelStartScreen, setFunnelStartScreen] = useState(null);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
-  const [heroVariant] = useState(() => getHeroVariant());
   const { user, isLoadingAuth } = useAuth();
-
-  // Track which hero variant was shown (once per page view)
-  useEffect(() => {
-    trackHeroEvent('hero_variant_shown', heroVariant);
-  }, [heroVariant]);
 
   useEffect(() => {
     setMounted(true);
@@ -246,7 +192,7 @@ export default function StudentLandingPage({ onParentClick }) {
     </div>
   );
 
-  const CTAButton = ({ label = 'Start Free →', onClick = go, fullWidth = false, style: extra = {} }) => (
+  const CTAButton = ({ label, onClick = go, fullWidth = false, style: extra = {} }) => (
     <button onClick={onClick} style={{
       fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 700, color: '#fff',
       background: GRAD_INDIGO, border: 'none', borderRadius: 999,
@@ -282,37 +228,26 @@ export default function StudentLandingPage({ onParentClick }) {
 
       <style>{`
         @keyframes pulseGreen { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        @keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-8px)} }
-        @keyframes gradShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
         .hero-animate { animation: fadeUp 0.7s ease both; }
         .hero-animate-2 { animation: fadeUp 0.7s 0.12s ease both; }
         .hero-animate-3 { animation: fadeUp 0.7s 0.24s ease both; }
-        .hero-animate-4 { animation: fadeUp 0.7s 0.36s ease both; }
         .hero-animate-5 { animation: fadeUp 0.7s 0.48s ease both; }
         .hero-animate-6 { animation: fadeUp 0.7s 0.60s ease both; }
-        /* Nav: tighten secondary links on small screens so they stay visible */
         @media (max-width: 640px) {
           .nav-secondary-link { font-size: 12px !important; padding: 8px 6px !important; }
           .nav-cta-btn { padding: 10px 14px !important; font-size: 13px !important; }
           .nav-jump-link { display: none !important; }
         }
-        /* Hero: stack layout on mobile */
         @media (max-width: 768px) {
           .hero-grid { grid-template-columns: 1fr !important; }
           .hero-visual { order: 3; min-height: 280px !important; margin-top: 8px; }
           .hero-text { order: 1; }
         }
-        /* Hero: compress height on desktop so the visual doesn't float in empty space */
         @media (min-width: 769px) {
           .hero-section { min-height: auto !important; }
         }
-        /* How-it-works steps: stack on mobile */
-        @media (max-width: 760px) {
-          .hiw-steps { grid-template-columns: 1fr !important; }
-        }
         @media (max-width: 640px) {
-          /* Full-width primary CTAs for easier thumb reach on phones */
           .hero-cta-btn { width: 100% !important; align-self: stretch !important; }
         }
       `}</style>
@@ -333,7 +268,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </span></span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <button onClick={() => scrollToSection('how-it-works')} className="nav-secondary-link nav-jump-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>How it Works</button>
+          <button onClick={() => scrollToSection('how-cliff-works')} className="nav-secondary-link nav-jump-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>How it Works</button>
           <button onClick={() => scrollToSection('pricing')} className="nav-secondary-link nav-jump-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Pricing</button>
           <button onClick={parent} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Parents &amp; Alumni</button>
           {!(!isLoadingAuth && user) && (
@@ -347,49 +282,48 @@ export default function StudentLandingPage({ onParentClick }) {
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-          >{!isLoadingAuth && user ? 'Dashboard →' : 'Start CLIFFing →'}</button>
+          >{!isLoadingAuth && user ? 'Dashboard →' : 'Build My Plan →'}</button>
         </div>
       </nav>
 
-      {/* ── HERO ── */}
+      {/* ── 1. HERO ── */}
       <div className="hero-section" style={{
         minHeight: '90vh', display: 'flex', alignItems: 'center',
         padding: 'clamp(80px, 12vw, 112px) clamp(20px, 5vw, 40px) clamp(48px, 7vw, 64px)',
         background: GRAD_HERO, position: 'relative', overflow: 'hidden',
       }}>
-        {/* Subtle radial glow */}
         <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.12) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
 
         <div className="hero-grid" style={{ maxWidth: 1200, width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-          
-          {/* Left Column - Text (60%) */}
+
+          {/* Left Column - Text */}
           <div className="hero-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
 
-            {/* Eyebrow badge */}
+            {/* Eyebrow */}
             {mounted && (
               <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: 'clamp(8px, 2.5vw, 12px) clamp(14px, 4vw, 28px)', marginBottom: 'clamp(20px, 5vw, 32px)' }}>
                 <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>YOUR PROACTIVE AI CAREER AGENT FOR INTERNSHIPS &amp; FIRST JOBS</span>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>YOUR AI CAREER AGENT FOR INTERNSHIPS AND FIRST JOBS</span>
               </div>
             )}
 
-            {/* Main headline — A/B testable variants (default: A) */}
+            {/* Headline */}
             {mounted && (
               <div className="hero-animate-2">
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.08, color: '#030712', margin: '0 0 16px' }}>
-                  <span style={{ display: 'block' }}>{HERO_VARIANTS[heroVariant].line1}</span>
+                  <span style={{ display: 'block' }}>Stop wondering what to do next.</span>
                   <span style={{ display: 'block', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                    {HERO_VARIANTS[heroVariant].line2}
+                    CLIFF already has a plan.
                   </span>
                 </h1>
               </div>
             )}
 
-            {/* Sub-headline */}
+            {/* Subheadline */}
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
-                  Tell CLIFF what you want. It finds the opportunities worth your time, prepares stronger applications, and keeps your search moving — without the endless scrolling and guessing.
+                  Tell CLIFF your goals. CLIFF builds your career plan, finds the opportunities worth your time, prepares stronger applications, and guides every next move — from freshman year through your first offer.
                 </h2>
               </div>
             )}
@@ -398,7 +332,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-5" style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-                <button onClick={() => { trackHeroEvent('hero_primary_cta_click', heroVariant); go(); }} className="hero-cta-btn" style={{
+                <button onClick={go} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(16px, 3.5vw, 18px)', fontWeight: 600, color: '#fff',
                   background: GRAD_INDIGO, border: 'none', borderRadius: 999,
                   padding: 'clamp(16px, 4vw, 20px) clamp(48px, 8vw, 64px)',
@@ -412,9 +346,9 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Start CLIFFing
+                  Build My Plan
                 </button>
-                <button onClick={() => { trackHeroEvent('hero_secondary_cta_click', heroVariant); scrollToSection('what-is-cliffing'); }} className="hero-cta-btn" style={{
+                <button onClick={() => scrollToSection('how-cliff-works')} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(15px, 3.5vw, 16px)', fontWeight: 700, color: INDIGO,
                   background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999,
                   padding: 'clamp(14px, 3.5vw, 18px) clamp(28px, 6vw, 40px)',
@@ -424,12 +358,12 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; e.currentTarget.style.borderColor = INDIGO; }}
                   onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
                 >
-                  See What CLIFFing Means
+                  See How CLIFF Works
                 </button>
                 </div>
 
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                  Free to start. Your first CLIFF-powered application is on us.
+                  Free to start. Your first CLIFF-powered application is on us. No credit card required.
                 </p>
 
                 {/* Above-the-fold social proof */}
@@ -449,154 +383,69 @@ export default function StudentLandingPage({ onParentClick }) {
             )}
           </div>
 
-          {/* Right Column - Product Visualization (40%) */}
+          {/* Right Column - 2. HERO PRODUCT DEMO */}
           {mounted && (
             <div className="hero-animate-6 hero-visual" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {/* Soft radial glow behind the product card */}
               <div style={{ position: 'absolute', inset: '-10%', background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24, pointerEvents: 'none' }} />
-              <AgentWeekDemo />
+              <CliffPlanDemo onContinue={go} />
             </div>
           )}
         </div>
       </div>
 
-      {/* ── WHAT IS CLIFFING? ── */}
-      <WhatIsCliffing go={go} />
-
-      {/* ── WHILE YOU WERE AWAY (marketing illustration) ── */}
-      <WhileAwaySection />
-
-      {/* ── PROBLEM CLARIFIER ── */}
-      <ProblemClarifier />
-
       {/* ── SCHOOL MARQUEE ── */}
       <SchoolMarquee />
 
-      {/* ── LIVE JOBS ── */}
-      <LiveJobsSection go={go} />
-
-      {/* ── OLD WAY VS SMART WAY ── */}
+      {/* ── 3. PROBLEM VS SOLUTION ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
         <Reveal><div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <SectionLabel text="Two ways to job hunt" />
+          <SectionLabel text="Signal, not noise" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 44px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
-            Without CLIFF vs.<br />
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>With CLIFF</span>
+            The internet gives you thousands of jobs.<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>CLIFF tells you which ones actually matter.</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(20px, 5vw, 28px)' }}>
-            {/* Old Way - "Black Hole" box with warning state */}
+            {/* Traditional Job Search */}
             <div style={{ background: 'rgba(254,242,242,0.6)', border: `1px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: '0 1px 3px rgba(244,63,94,0.08)' }}>
-              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>Without CLIFF</p>
-              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 20px', letterSpacing: '-0.02em' }}>You do everything alone</p>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 20px', letterSpacing: '-0.02em' }}>Traditional Job Search</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {[
-                  { emoji: '🔍', text: 'Browse hundreds of jobs' },
-                  { emoji: '📄', text: 'Rewrite your resume for every application' },
-                  { emoji: '🏢', text: 'Research every company yourself' },
-                  { emoji: '🤔', text: 'Figure out who to contact' },
-                  { emoji: '⏰', text: 'Remember to follow up' },
-                  { emoji: '🤞', text: 'Hope something works' },
-                ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                {['Endless scrolling', 'Same resume everywhere', 'Guessing', 'Miss deadlines', 'No plan'].map((text) => (
+                  <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                     <X size={15} color={CORAL} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
-                    <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#9f1239', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                    <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#9f1239', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{text}</p>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20, background: CORAL_LIGHT, borderRadius: 10, padding: '10px 14px', textAlign: 'center', border: `1px solid ${CORAL_BORDER}` }}>
-                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: CORAL }}>Only ~2% of online applications lead to a job (Jobvite Recruiting Benchmark)</span>
-              </div>
             </div>
 
-            {/* Smart Way - elevated with soft glow */}
+            {/* CLIFF */}
             <div style={{ background: 'rgba(245,243,255,0.8)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: SHADOW_MD }}>
-              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>With CLIFF</p>
-              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: INDIGO, margin: '0 0 20px', letterSpacing: '-0.02em' }}>CLIFF does the work</p>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: INDIGO, margin: '0 0 20px', letterSpacing: '-0.02em' }}>CLIFF</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {[
-                  { emoji: '🎯', text: 'Tell CLIFF your goal' },
-                  { emoji: '✨', text: "Review today's best moves" },
-                  { emoji: '✅', text: 'Approve applications' },
-                  { emoji: '🎤', text: 'Practice interviews' },
-                  { emoji: '📬', text: 'Follow up at the right time' },
-                  { emoji: '🏁', text: 'Stay on track until you get hired' },
-                ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                {['Personalized career plan', 'Best opportunities only', 'Tailored applications', 'Right timing', 'One clear next move'].map((text) => (
+                  <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                     <Check size={15} color={INDIGO} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
-                    <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: INDIGO_DIM, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                    <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: INDIGO_DIM, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{text}</p>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20, background: '#fff', borderRadius: 10, padding: '10px 14px', textAlign: 'center', border: `1px solid ${INDIGO_BORDER}` }}>
-                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO }}>Referred candidates are far more likely to land interviews (LinkedIn)</span>
-              </div>
             </div>
           </div>
-
-          {/* CFF proof list - connected dashboard element */}
-          <div style={{ marginTop: 'clamp(32px, 8vw, 48px)', background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, boxShadow: SHADOW, padding: 'clamp(20px, 5vw, 32px)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}><Zap size={18} color="#fff" /></div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>CLIFF uses every advantage available</p>
-                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>The network supports the promise — it isn't the promise</p>
-              </div>
-            </div>
-            {PROOF_CALLOUTS.map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 'clamp(9px, 2.5vw, 12px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                  <span style={{ fontSize: 10, color: '#fff', fontWeight: 800 }}>✓</span>
-                </div>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT2, margin: 0, fontWeight: 500, lineHeight: 1.5 }}>{item.text}</p>
-              </div>
-            ))}
-          </div>
+          <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.5vw, 20px)', fontWeight: 900, color: TEXT, textAlign: 'center', margin: 'clamp(28px, 7vw, 40px) 0 0', letterSpacing: '-0.02em' }}>
+            Less searching.{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>More progress.</span>
+          </p>
         </div></Reveal>
       </div>
 
-      {/* ── JOURNEY: FROM DOOM-SCROLLING TO DONE-FOR-YOU ── */}
-      <JourneySection />
+      {/* ── 4. CAREER INTELLIGENCE ── */}
+      <CareerIntelligenceSection />
 
-      {/* ── APP SHOWCASE ── */}
-      <AppShowcase />
+      {/* ── 5. CAREER TRAJECTORY ── */}
+      <TrajectorySection />
 
-      {/* ── PRODUCT PHILOSOPHY ── */}
-      <PhilosophySection />
-
-      {/* ── A DAY WITH CLIFF ── */}
-      <DayWithCliff />
-
-      {/* ── WHY STUDENTS TRUST CLIFF ── */}
-      <CliffTrustSection />
-
-      {/* ── HOW IT WORKS ── */}
-      <div id="how-it-works" style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
-        <Reveal><div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <SectionLabel text="Your agent never clocks out" />
-          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 7vw, 48px)', textAlign: 'center' }}>
-            What CLIFF does{' '}
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>while you're busy.</span>
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-            {[
-              { emoji: '🔭', title: 'Finds better opportunities', sub: 'Keeps scanning and surfaces only the ones actually worth your time.' },
-              { emoji: '🧹', title: 'Removes expired jobs', sub: 'Dead listings disappear before you waste a minute on them.' },
-              { emoji: '📄', title: 'Prepares stronger applications', sub: 'Everything you submit goes out sharper than you\u2019d send alone.' },
-              { emoji: '🗂️', title: 'Keeps your search organized', sub: 'Every application, follow-up, and interview lives in one plan.' },
-              { emoji: '🎯', title: 'Tells you exactly what matters today', sub: 'One next move, every day. You never wonder what to do next.' },
-            ].map((s, i) => (
-              <div key={i} style={{ background: '#fff', borderRadius: 20, padding: 'clamp(20px, 4vw, 28px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', transition: 'all 0.25s ease' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = SHADOW_MD; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = SHADOW; e.currentTarget.style.borderColor = '#f1f5f9'; }}
-              >
-                <div style={{ fontSize: 26, marginBottom: 12 }}>{s.emoji}</div>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 800, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em' }}>{s.title}</p>
-                <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 500, color: TEXT2, margin: 0, lineHeight: 1.55 }}>{s.sub}</p>
-              </div>
-            ))}
-          </div>
-        </div></Reveal>
-      </div>
+      {/* ── 6. INTELLIGENCE STACK ── */}
+      <IntelligenceStackSection />
 
       {/* ── SOCIAL PROOF ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
@@ -607,75 +456,66 @@ export default function StudentLandingPage({ onParentClick }) {
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block' }}>Real students.</span>
           </h2>
           <StoriesCarousel />
-          <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textAlign: 'center', margin: 'clamp(16px, 4vw, 24px) 0 0', lineHeight: 1.6 }}>
-            Students use CFF to stay organized, reduce stress, and move through the search with more traction.
-          </p>
         </div></Reveal>
       </div>
 
-      {/* ── CAMPAIGN: YOUR ROOMMATE IS STILL JOB SEARCHING ── */}
-      <RoommateSection go={go} />
-
-      {/* ── YOUR UNFAIR ADVANTAGE: PARENTS & ALUMNI ── */}
+      {/* ── 7. NETWORKING (one capability, not the product) ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px) 0', background: BG, borderTop: '1px solid #f1f5f9' }}>
         <Reveal><div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
-          <SectionLabel text="Parents & Alumni" />
+          <SectionLabel text="Networking Intelligence" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 14px' }}>
-            Your unfair{' '}
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>advantage.</span>
+            When networking helps,{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>CLIFF knows.</span>
           </h2>
           <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 4vw, 16px)', color: TEXT2, margin: '0 auto', maxWidth: 540, lineHeight: 1.65 }}>
-            Unlike LinkedIn or Indeed, CLIFF can uncover trusted parents, alumni and mentors — and brings them in when they genuinely improve your chances.
+            Sometimes networking gives you a real advantage. Sometimes it doesn't. CLIFF tells you the difference — and taps trusted parents and alumni only when they genuinely improve your chances.
           </p>
         </div></Reveal>
       </div>
       <MatchTeaser go={go} />
 
-      {/* ── PRICING ── */}
+      {/* ── 8. CLIFFING CAMPAIGN ── */}
+      <RoommateSection go={go} />
+
+      {/* ── 9. PRICING ── */}
       <div id="pricing" style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', scrollMarginTop: 80 }}>
         <Reveal><div style={{ maxWidth: 900, margin: '0 auto' }}>
           <SectionLabel text="Simple Pricing" />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
-            Choose how much of your job search<br />
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>you want to manage yourself.</span>
+            Two ways to work<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>with CLIFF.</span>
           </h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(16px, 4vw, 24px)', alignItems: 'stretch' }}>
-            {/* CFF Free — guidance */}
+            {/* Free — you drive */}
             <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(24px, 5vw, 32px)', border: '1px solid #e2e8f0', boxShadow: SHADOW, display: 'flex', flexDirection: 'column' }}>
-              <p style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: TEXT, margin: '0 0 4px' }}>CFF Free</p>
-              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: TEXT2, margin: '0 0 4px' }}>You drive. CLIFF helps.</p>
-              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 18px', fontStyle: 'italic' }}>You decide what to work on. CLIFF helps you execute.</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {['Personalized opportunities & rankings', "Today's Best Moves & CLIFF's Verdict", 'Career Timeline & Application History', 'Career Momentum', 'One complete CLIFF-powered application', 'Weekly career summary'].map(t => (
-                  <div key={t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
-                    <Check size={14} color="#64748b" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
-                    <span style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 500, color: TEXT2, lineHeight: 1.5 }}>{t}</span>
-                  </div>
-                ))}
-              </div>
+              <p style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: TEXT, margin: '0 0 4px' }}>Free</p>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.01em' }}>You drive. CLIFF helps.</p>
+              <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, margin: '0 0 12px', lineHeight: 1.65 }}>
+                You decide what to work on. CLIFF builds your plan, ranks your opportunities, and preps your next move whenever you show up.
+              </p>
+              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 24px', lineHeight: 1.6, fontStyle: 'italic' }}>
+                Includes one complete CLIFF-powered application — on us.
+              </p>
               <button onClick={go} style={{ marginTop: 'auto', fontFamily: SF, fontSize: 15, fontWeight: 700, color: INDIGO, background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 52, width: '100%' }}>
                 Start Free
               </button>
             </div>
 
-            {/* CLIFF Pro — execution */}
+            {/* Pro — CLIFF keeps working */}
             <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(24px, 5vw, 32px)', border: `2px solid ${INDIGO}`, boxShadow: SHADOW_MD, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-              <span style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: GRAD_INDIGO, color: '#fff', fontFamily: SF, fontSize: 11, fontWeight: 800, borderRadius: 100, padding: '4px 14px', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>CLIFF KEEPS WORKING</span>
-              <p style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: INDIGO, margin: '0 0 4px' }}>CLIFF Pro</p>
-              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: TEXT2, margin: '0 0 4px' }}>CLIFF keeps working — even when you're not.</p>
-              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 12px', fontStyle: 'italic' }}>The value isn't more tools. It's less thinking.</p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 14 }}>
+              <span style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: GRAD_INDIGO, color: '#fff', fontFamily: SF, fontSize: 11, fontWeight: 800, borderRadius: 100, padding: '4px 14px', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>MOST STUDENTS CHOOSE PRO</span>
+              <p style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: INDIGO, margin: '0 0 4px' }}>Pro</p>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.01em' }}>CLIFF keeps working.</p>
+              <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, margin: '0 0 12px', lineHeight: 1.65 }}>
+                CLIFF works in the background — watching deadlines, finding better opportunities, preparing everything ahead of time, and bringing you back only when something matters.
+              </p>
+              <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 14px', lineHeight: 1.6, fontStyle: 'italic' }}>
+                The value isn't more tools. It's less thinking.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 20 }}>
                 <span style={{ fontFamily: SF, fontSize: 34, fontWeight: 900, color: TEXT, letterSpacing: '-0.03em' }}>$4.99</span>
                 <span style={{ fontFamily: SF, fontSize: 14, fontWeight: 600, color: TEXT3 }}>/week · cancel anytime</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {['Everything in Free', 'Unlimited CLIFF-powered applications', 'Unlimited resume, interview & company prep', 'Unlimited outreach & follow-up drafting', 'Full Job Workspace & Timeline', 'CLIFF works proactively in the background', 'Finds better opportunities & watches deadlines', 'Brings you back only when something matters'].map(t => (
-                  <div key={t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
-                    <Check size={14} color={INDIGO} strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 3 }} />
-                    <span style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 600, color: TEXT, lineHeight: 1.5 }}>{t}</span>
-                  </div>
-                ))}
               </div>
               <CTAButton label="Keep CLIFF Working" fullWidth style={{ marginTop: 'auto' }} />
             </div>
@@ -688,16 +528,16 @@ export default function StudentLandingPage({ onParentClick }) {
         </div></Reveal>
       </div>
 
-      {/* ── FINAL CTA ── */}
+      {/* ── 10. FINAL CTA ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 100px) clamp(20px, 5vw, 40px)', textAlign: 'center', background: 'linear-gradient(160deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
-        <Reveal><div style={{ maxWidth: 540, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <Reveal><div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>Let CLIFF become your career agent</p>
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(28px, 7vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 16px' }}>
-            Stop searching.<br />Start making progress.
+            Stop job searching.<br />Start CLIFFing.
           </h2>
           <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: 'rgba(255,255,255,0.75)', margin: '0 0 clamp(28px, 6vw, 36px)', lineHeight: 1.65 }}>
-            Join 2,400+ students who handed the hard part to CLIFF.
+            The future belongs to students who spend less time wondering what to do — and more time making meaningful progress.
           </p>
           <button onClick={go} style={{
             fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 800, color: '#fff',
@@ -710,7 +550,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.background = '#1e293b'; e.currentTarget.style.boxShadow = '0 20px 56px rgba(15,23,42,0.55), 0 0 0 4px rgba(255,255,255,0.30)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.background = '#0f172a'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(15,23,42,0.45), 0 0 0 4px rgba(255,255,255,0.20)'; }}
           >
-            Start CLIFFing →
+            Build My Career Plan →
           </button>
           <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', color: 'rgba(255,255,255,0.85)', margin: 'clamp(20px, 5vw, 28px) 0 0', lineHeight: 1.6 }}>
             Got a parent or alum who can help students land?{' '}
@@ -735,7 +575,7 @@ export default function StudentLandingPage({ onParentClick }) {
         transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
       }}>
         <span style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 700, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          CLIFF is ready to start working for you
+          CLIFF already has a plan for you
         </span>
         <button onClick={go} style={{
           fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 700, color: '#fff',
@@ -745,7 +585,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-        >{!isLoadingAuth && user ? 'Dashboard →' : 'Start CLIFFing →'}</button>
+        >{!isLoadingAuth && user ? 'Dashboard →' : 'Build My Plan →'}</button>
       </div>
 
       {/* ── FOOTER ── */}
@@ -759,7 +599,7 @@ export default function StudentLandingPage({ onParentClick }) {
           ))}
         </div>
         <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.5 }}>
-          © {new Date().getFullYear()} College Fast Forward · Helping students land faster with less stress.
+          © {new Date().getFullYear()} College Fast Forward · Your AI Career Agent for internships and first jobs.
         </p>
       </div>
     </div>
