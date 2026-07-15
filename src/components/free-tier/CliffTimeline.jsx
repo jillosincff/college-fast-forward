@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { decisionEngine } from '@/functions/decisionEngine';
 import { openCliffWorkspace } from '@/lib/cliffWorkspace';
+import { getCareerIntelligenceTimelineItems } from '@/lib/careerIntelligence/engine';
 import { ArrowRight } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -37,7 +38,8 @@ export default function CliffTimeline({ user }) {
     return () => { cancelled = true; };
   }, [user?.email]);
 
-  const items = data?.timeline || [];
+  // Career Intelligence items appear exactly like other CLIFF recommendations
+  const items = [...(data?.timeline || []), ...getCareerIntelligenceTimelineItems(user)];
   const waiting = data?.waiting || [];
   const suppressed = data?.suppressed || [];
   if (!items.length && !waiting.length) return null;

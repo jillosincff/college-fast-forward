@@ -30,6 +30,7 @@ import GoalHero from '@/components/free-tier/GoalHero';
 import GoalMemoryStrip from '@/components/free-tier/GoalMemoryStrip';
 import DashboardHero from '@/components/free-tier/DashboardHero';
 import DashboardStatsRow from '@/components/free-tier/DashboardStatsRow';
+import CareerSeasonCard from '@/components/free-tier/CareerSeasonCard';
 import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
 import PostMagicMomentFlow from '@/components/conversion/PostMagicMomentFlow';
@@ -342,6 +343,7 @@ export default function FreeTierDashboard() {
           <>
             <DashboardHero user={user} firstName={firstName} />
             <DashboardStatsRow user={user} />
+            <CareerSeasonCard user={user} />
             <GoalHero user={user} />
             <GoalMemoryStrip user={user} />
           </>
