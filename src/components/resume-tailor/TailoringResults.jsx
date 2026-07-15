@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { toast } from 'sonner';
-import ScorePanel from './ScorePanel';
+import ApplicationReadyHero from './ApplicationReadyHero';
+import MatchConfidencePanel from './MatchConfidencePanel';
 import ResumeView from './ResumeView';
 import ChangesPanel from './ChangesPanel';
 import DownloadBar from './DownloadBar';
@@ -13,32 +14,45 @@ const playfair = "'Playfair Display', Georgia, serif";
 
 export default function TailoringResults({ result, companyName, jobTitle, originalResumeText, onStartOver, applyContext, userEmail }) {
   const tr = result.tailoredResume || {};
-  const [changes, setChanges] = useState(tr.changes || []);
+  // Opinionated default: CLIFF's changes are pre-accepted — students undo, not approve.
+  const [changes, setChanges] = useState(() =>
+    (tr.changes || []).map(c => (c.accepted === null || c.accepted === undefined) ? { ...c, accepted: true } : c)
+  );
   const [activeTab, setActiveTab] = useState('tailored');
   const [submitting, setSubmitting] = useState(false);
+  const reviewRef = useRef(null);
 
-  // When the student arrived via the job-application "tailor it first" flow,
-  // submitting here tracks the application in their pipeline with the tailored
-  // resume, then sends them back to the job listing.
+  // Persist the auto-acceptance once
+  useEffect(() => {
+    const hadPending = (tr.changes || []).some(c => c.accepted === null || c.accepted === undefined);
+    if (tr.id && hadPending) {
+      base44.entities.TailoredResume.update(tr.id, { changes }).catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const tailoredScore = result.tailoredScore || tr.ats_score || 0;
+
+  // When the student arrived via the job-application flow, submitting here tracks
+  // the application with the tailored resume, then sends them back to the tracker.
   const handleSubmitApplication = async () => {
     setSubmitting(true);
     // Open the real job posting synchronously (before any await) so popup
     // blockers allow it — the student finishes applying on the official site.
-    const jobUrl = applyContext.jobUrl || '';
+    const jobUrl = applyContext?.jobUrl || '';
     if (jobUrl) window.open(jobUrl, '_blank', 'noopener');
     try {
       await addPipelineEntry({
-        company: applyContext.company || companyName,
-        job_title: applyContext.role || jobTitle,
-        job_description: applyContext.jd || '',
-        job_url: applyContext.jobUrl || '',
+        company: applyContext?.company || companyName,
+        job_title: applyContext?.role || jobTitle,
+        job_description: applyContext?.jd || '',
+        job_url: jobUrl,
         application_path: 'cold_apply',
         status: 'applied',
         status_date: new Date().toISOString(),
-        location: applyContext.location || '',
-        notes: `Resume tailored via CLiFF (ATS ${result.tailoredScore || tr.ats_score || 0}%)`,
+        location: applyContext?.location || '',
+        notes: `Resume tailored via CLiFF (ATS ${tailoredScore}%)`,
       });
-      // Clear the handoff context so revisiting this page doesn't re-enter the apply flow
       try { sessionStorage.removeItem('cff_apply_tailor_ctx'); } catch {}
       window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
       toast.success(jobUrl
@@ -51,34 +65,28 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
     }
   };
 
-  const handleAccept = async (changeId) => {
+  const scrollToReview = () => reviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Primary apply action: submit + track when in the apply flow; otherwise take
+  // the student to the download bar so they can grab the resume and apply.
+  const handleApplyNow = () => {
+    if (applyContext) handleSubmitApplication();
+    else document.getElementById('rt-download')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const handleAccept = (changeId) => {
     const updated = changes.map(c => c.id === changeId ? { ...c, accepted: true } : c);
     setChanges(updated);
-    if (tr.id) {
-      base44.entities.TailoredResume.update(tr.id, { changes: updated }).catch(() => {});
-    }
+    if (tr.id) base44.entities.TailoredResume.update(tr.id, { changes: updated }).catch(() => {});
   };
 
-  const handleReject = async (changeId) => {
+  const handleReject = (changeId) => {
     const updated = changes.map(c => c.id === changeId ? { ...c, accepted: false } : c);
     setChanges(updated);
-    if (tr.id) {
-      base44.entities.TailoredResume.update(tr.id, { changes: updated }).catch(() => {});
-    }
-  };
-
-  const handleAcceptAll = async () => {
-    const updated = changes.map(c => c.accepted === null ? { ...c, accepted: true } : c);
-    setChanges(updated);
-    if (tr.id) {
-      base44.entities.TailoredResume.update(tr.id, { changes: updated }).catch(() => {});
-    }
-    toast.success('All changes accepted!');
+    if (tr.id) base44.entities.TailoredResume.update(tr.id, { changes: updated }).catch(() => {});
   };
 
   const acceptedCount = changes.filter(c => c.accepted === true).length;
-  const rejectedCount = changes.filter(c => c.accepted === false).length;
-  const pendingCount = changes.filter(c => c.accepted === null || c.accepted === undefined).length;
 
   return (
     <div style={{ fontFamily: dmSans, background: '#F8FAFC', minHeight: '100vh' }}>
@@ -89,73 +97,69 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
       `}</style>
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: applyContext ? '24px 16px 160px' : '24px 16px 100px' }}>
-        <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#1a1a1a', marginBottom: 4 }}>
-          Resume <em style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>Tailored</em>
-          {companyName ? ` for ${companyName}` : ''}
-        </h1>
-        <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', marginBottom: 24 }}>
-          {jobTitle || 'Role'} · {changes.length} changes made
-        </p>
 
-        {/* Return-to-application banner (apply-modal flow) */}
-        {applyContext && (
-          <div style={{
-            background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
-            border: '1px solid rgba(124,58,237,0.25)', borderRadius: 14,
-            padding: '16px 20px', marginBottom: 24,
-          }}>
-            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#5b21b6', margin: '0 0 3px' }}>
-              ✨ Your tailored resume is ready — one step left
-            </p>
-            <p style={{ fontFamily: dmSans, fontSize: 12.5, color: '#7c3aed', margin: 0, lineHeight: 1.5 }}>
-              Review the changes, download your tailored resume, then hit <strong>Finish Applying</strong> below — we'll track it and open {applyContext.company || companyName}'s official application.
-            </p>
-          </div>
-        )}
+        {/* HERO — the application is ready; CLIFF's confidence panel; primary CTA */}
+        <ApplicationReadyHero
+          companyName={applyContext?.company || companyName}
+          jobTitle={applyContext?.role || jobTitle}
+          tailoredScore={tailoredScore}
+          onReview={scrollToReview}
+          onTrustApply={handleApplyNow}
+          submitting={submitting}
+        />
 
-        <div className="rt-grid">
-          {/* Left — Score Panel */}
-          <ScorePanel
+        {/* REVIEW — match confidence, before/after preview, what CLIFF improved */}
+        <div ref={reviewRef} className="rt-grid" style={{ scrollMarginTop: 16 }}>
+          <MatchConfidencePanel
             originalScore={result.originalScore || tr.original_score || 0}
-            tailoredScore={result.tailoredScore || tr.ats_score || 0}
+            tailoredScore={tailoredScore}
             keywordsAdded={tr.keywords_added || []}
             keywordsMissing={tr.keywords_missing || []}
-            acceptedCount={acceptedCount}
-            rejectedCount={rejectedCount}
-            pendingCount={pendingCount}
-            totalChanges={changes.length}
           />
 
-          {/* Center — Resume View */}
           <ResumeView
             originalText={originalResumeText}
             tailoredText={tr.tailored_content || ''}
             changes={changes}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            tailoredScore={result.tailoredScore || tr.ats_score || 0}
+            tailoredScore={tailoredScore}
           />
 
-          {/* Right — Changes Panel */}
           <ChangesPanel
             changes={changes}
             onAccept={handleAccept}
             onReject={handleReject}
-            onAcceptAll={handleAcceptAll}
           />
         </div>
 
-        {/* Download Bar */}
-        <DownloadBar
-          tailoredContent={tr.tailored_content || ''}
-          acceptedCount={acceptedCount}
-          totalChanges={changes.length}
-          atsScore={result.tailoredScore || tr.ats_score || 0}
-          companyName={companyName}
-          jobTitle={jobTitle}
-          tailoredResumeId={tr.id}
-          onStartOver={onStartOver}
-        />
+        {/* Download */}
+        <div id="rt-download">
+          <DownloadBar
+            tailoredContent={tr.tailored_content || ''}
+            acceptedCount={acceptedCount}
+            totalChanges={changes.length}
+            atsScore={tailoredScore}
+            companyName={companyName}
+            jobTitle={jobTitle}
+            tailoredResumeId={tr.id}
+            onStartOver={onStartOver}
+          />
+        </div>
+
+        {/* FINAL CTA — the checkpoint before landing the internship */}
+        <div style={{ textAlign: 'center', marginTop: 40, background: '#fff', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 20, padding: '36px 24px' }}>
+          <h2 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#1a1a1a', margin: '0 0 8px' }}>
+            Everything looks good.
+          </h2>
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: '#6b7280', margin: '0 0 20px' }}>
+            CLIFF is ready to help you apply.
+          </p>
+          <button onClick={handleApplyNow} disabled={submitting}
+            style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '16px 48px', cursor: submitting ? 'default' : 'pointer', minHeight: 'auto', boxShadow: '0 6px 18px rgba(124,58,237,0.35)', opacity: submitting ? 0.7 : 1 }}>
+            {submitting ? 'Saving…' : 'Apply Now →'}
+          </button>
+        </div>
       </div>
 
       {/* Sticky submit bar — always visible during the apply flow so the path
