@@ -28,8 +28,8 @@ import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
 import GoalHero from '@/components/free-tier/GoalHero';
 import GoalMemoryStrip from '@/components/free-tier/GoalMemoryStrip';
-import WhileYouWereAway from '@/components/free-tier/WhileYouWereAway';
-import CliffingWelcome from '@/components/free-tier/CliffingWelcome';
+import DashboardHero from '@/components/free-tier/DashboardHero';
+import DashboardStatsRow from '@/components/free-tier/DashboardStatsRow';
 import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
 import PostMagicMomentFlow from '@/components/conversion/PostMagicMomentFlow';
@@ -337,11 +337,11 @@ export default function FreeTierDashboard() {
         {/* Referral prompt at peak moments (reply received / interview landed) */}
         {!focusMode && <PeakMomentSharePrompt user={user} />}
 
-        {/* CLIFF OS home: greeting + "What's our goal today?" + session memory */}
+        {/* CLIFF OS home: purple hero + stats row + goal + session memory */}
         {!isTrialExpired && !focusMode && (
           <>
-            <CliffingWelcome />
-            <WhileYouWereAway user={user} />
+            <DashboardHero user={user} firstName={firstName} />
+            <DashboardStatsRow user={user} />
             <GoalHero user={user} />
             <GoalMemoryStrip user={user} />
           </>
