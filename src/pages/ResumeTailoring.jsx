@@ -199,6 +199,31 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     return () => window.removeEventListener('hashchange', detectApplyHandoff);
   }, [applyContext]);
 
+  // Handle deep-link from the workspace "Review my tailored resume" button:
+  // ?from=warm_apply&company=&role= — open the matching tailored resume directly.
+  useEffect(() => {
+    if (phase !== 'hub' || tailoredResumes.length === 0) return;
+    const hashQuery = window.location.hash.split('?')[1] || '';
+    const hashParams = new URLSearchParams(hashQuery);
+    if (hashParams.get('from') !== 'warm_apply') return;
+    const wantCompany = (hashParams.get('company') || '').trim().toLowerCase();
+    if (!wantCompany) return;
+    const wantRole = (hashParams.get('role') || '').trim().toLowerCase();
+    const companyMatches = tailoredResumes
+      .filter(t => t.status !== 'pending' && t.tailored_content &&
+        (t.company_name || '').trim().toLowerCase() === wantCompany)
+      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    // Prefer an exact role match, otherwise the newest one for this company
+    const found = companyMatches.find(t => wantRole && (t.role_title || '').trim().toLowerCase() === wantRole) || companyMatches[0];
+    if (found) {
+      handleViewTailored(found);
+      try {
+        const cleanHash = window.location.hash.split('?')[0];
+        window.history.replaceState(null, '', cleanHash);
+      } catch {}
+    }
+  }, [phase, tailoredResumes]);
+
   // Handle deep-link from batch completion email: ?resume_id=xxx
   useEffect(() => {
     if (phase !== 'hub' || tailoredResumes.length === 0) return;
