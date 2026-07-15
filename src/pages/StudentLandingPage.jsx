@@ -10,7 +10,7 @@ import TrajectorySection from '@/components/landing/TrajectorySection';
 import IntelligenceStackSection from '@/components/landing/IntelligenceStackSection';
 import RoommateSection from '@/components/landing/RoommateSection';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
-import MatchTeaser from '@/components/landing/MatchTeaser';
+import JourneyDemo from '@/components/landing/JourneyDemo';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -484,7 +484,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </p>
         </div></Reveal>
       </div>
-      <MatchTeaser go={go} />
+      <JourneyDemo go={go} />
 
       {/* ── 8. CLIFFING CAMPAIGN ── */}
       <RoommateSection go={go} />
