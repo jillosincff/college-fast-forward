@@ -6,24 +6,35 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // Career Season: CLIFF knows where the student is in their career journey and
 // what this month is actually for — powered by the Career Intelligence Engine.
+const YEAR_LABELS = {
+  freshman: 'freshman', sophomore: 'sophomore', junior: 'junior',
+  senior: 'senior', recent_grad: 'recent graduate',
+};
+
 export default function CareerSeasonCard({ user }) {
   const [expanded, setExpanded] = useState(true);
-  const ci = useMemo(() => {
-    if (!user) return null;
-    return getCareerIntelligence(deriveStudentProfile(user));
+  const { ci, profile } = useMemo(() => {
+    if (!user) return { ci: null, profile: null };
+    const profile = deriveStudentProfile(user);
+    return { ci: getCareerIntelligence(profile), profile };
   }, [user]);
 
   if (!ci) return null;
   const { season, voice, monthName, monthlyFocus, canWait, upcomingSeason } = ci;
 
+  const yearLabel = YEAR_LABELS[profile.studentYear] || 'student';
+  const whoYouAre = profile.studentYear === 'recent_grad'
+    ? `You're a recent graduate${profile.major ? ` in ${profile.major}` : ''}.`
+    : `You're a ${yearLabel}${profile.major ? ` ${profile.major}` : ''} student.`;
+
   return (
     <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 22 }}>{season.emoji}</span>
+          <span style={{ fontSize: 22 }}>📍</span>
           <div>
-            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Career Season</p>
-            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#111827', margin: 0 }}>{season.name}</p>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Where You Should Be Right Now</p>
+            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#111827', margin: 0 }}>{whoYouAre}</p>
           </div>
         </div>
         <button onClick={() => setExpanded(!expanded)}
@@ -32,15 +43,18 @@ export default function CareerSeasonCard({ user }) {
         </button>
       </div>
 
-      <p style={{ fontFamily: dm, fontSize: 12.5, color: '#6b7280', margin: '8px 0 0', lineHeight: 1.55 }}>{season.why}</p>
+      <p style={{ fontFamily: dm, fontSize: 12.5, color: '#6b7280', margin: '8px 0 0', lineHeight: 1.55 }}>
+        <span style={{ fontWeight: 800, color: '#374151' }}>{season.emoji} {season.name}</span> — {season.why}
+      </p>
+
+      <p style={{ fontFamily: dm, fontSize: 12.5, fontWeight: 700, color: '#15803d', margin: '8px 0 0', lineHeight: 1.5 }}>
+        🎯 You're right on time. Here's what this month is for:
+      </p>
 
       {expanded && (
         <>
           <p style={{ fontFamily: dm, fontSize: 13.5, fontWeight: 800, color: '#111827', margin: '14px 0 8px', lineHeight: 1.5 }}>
-            {voice}
-          </p>
-          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '0 0 8px' }}>
-            This {monthName}, I'd focus on:
+            {voice} This {monthName}, I'd focus on:
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {monthlyFocus.map(rec => (

@@ -127,8 +127,8 @@ export function getCareerIntelligenceTimelineItems(user, date = new Date()) {
   if (!top) return [];
   return [{
     date: date.toISOString(),
-    emoji: '📅',
-    text: `Career Intelligence: ${top.reason} Recommended: ${top.title.toLowerCase()} (${top.estimated_time}).`,
+    emoji: '📍',
+    text: `${top.reason} Recommended: ${top.title.toLowerCase()} (${top.estimated_time}). You're right on time.`,
     cta: 'Start',
     action: top.action_route ? { type: 'route', route: top.action_route } : { type: 'scroll' },
   }];
