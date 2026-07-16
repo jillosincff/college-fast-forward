@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { deriveSchoolCode } from '@/lib/schoolNames';
+import { buildLocationPayload, buildLocationMemories, normalizeLocation } from '@/lib/locationPrefs';
 import { processReferralMilestone } from '@/functions/processReferralMilestone';
 import LiveEngineLoader from './LiveEngineLoader';
 import FunnelTransition from './FunnelTransition';
@@ -13,15 +14,16 @@ import {
 } from './onboardingShared';
 
 /**
- * The agent-hiring flow — 10 screens:
+ * The agent-hiring flow — 11 screens:
  * 1 Meet CLIFF · 2 Goal · 3 School · 4 Year · 5 Career interest ·
- * 6 Ideal opportunity · 7 Resume · 8 Reveal · 9 One priority · 10 Our plan
+ * 6 Ideal opportunity · 7 Work location · 8 Resume · 9 Reveal ·
+ * 10 One priority · 11 Our plan
  */
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false, resumeAtScreen = null }) {
   // Load saved progress for returning users. Positions saved by the old
   // 13-screen flow (or anything out of range) restart cleanly at 1.
   const saved = resumeAtScreen ? loadSavedProgress() : null;
-  const startScreen = (resumeAtScreen && resumeAtScreen >= 1 && resumeAtScreen <= 10) ? resumeAtScreen : 1;
+  const startScreen = (resumeAtScreen && resumeAtScreen >= 1 && resumeAtScreen <= 11) ? resumeAtScreen : 1;
 
   const [screen, setScreen] = useState(startScreen);
   const [analyzing, setAnalyzing] = useState(false);
@@ -36,6 +38,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [goalText, setGoalText] = useState(saved?.goalText ?? '');
   const [locationPref, setLocationPref] = useState(saved?.locationPref ?? '');
   const [locationCity, setLocationCity] = useState(saved?.locationCity ?? '');
+  const [workLocation, setWorkLocation] = useState(saved?.workLocation ?? { types: [], locations: [], flexibility: '' });
   const [uploading, setUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState(saved?.resumeUrl ?? '');
   const [resumeData, setResumeDataRaw] = useState(() => {
@@ -66,7 +69,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
   const fileRef = useRef();
 
-  const TOTAL = 10;
+  const TOTAL = 11;
   const displayStep = screen;
 
   // ── Abandonment event tracking ──────────────────────────────────────────
@@ -101,11 +104,25 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     return () => window.removeEventListener('pagehide', onPageHide);
   }, []);
 
+  // Carry forward any location CLIFF already extracted from the ideal-opportunity
+  // free text — never ask the student to repeat themselves.
+  useEffect(() => {
+    if (screen !== 7 || workLocation.types.length) return;
+    const prefill = { types: [], locations: [], flexibility: '' };
+    if (locationCity) {
+      const rec = normalizeLocation(locationCity);
+      if (rec) { prefill.types.push('specific_locations'); prefill.locations.push(rec); }
+    }
+    if (locationPref === 'remote') prefill.types.push('remote');
+    if (prefill.types.length) setWorkLocation(prefill);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
+
   const next = () => {
     let newScreen = screen + 1;
-    // Skippers have no resume — bypass the reveal screen (8),
+    // Skippers have no resume — bypass the reveal screen (9),
     // which would otherwise render infinite "parsing" spinners.
-    if (newScreen === 8 && !resumeData) newScreen = 9;
+    if (newScreen === 9 && !resumeData) newScreen = 10;
     saveProgress(newScreen, {
       cff_seeking: seeking,
       cff_college: college,
@@ -116,9 +133,10 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       cff_target_roles: targetRoles,
       cff_location_pref: locationPref,
       cff_location_city: locationCity,
+      cff_work_location: workLocation,
       cff_resume_url: resumeUrl,
     });
-    if (newScreen > 10) {
+    if (newScreen > 11) {
       if (onClose) onClose();
     } else {
       setScreen(newScreen);
@@ -127,10 +145,10 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const back = () => {
     setScreen(s => {
       let prev = Math.max(1, s - 1);
-      // Mirror the forward skip: no resume → reveal (8) doesn't exist for this user
-      if (prev === 8 && !resumeData) prev = 7;
+      // Mirror the forward skip: no resume → reveal (9) doesn't exist for this user
+      if (prev === 9 && !resumeData) prev = 8;
       // Reset resume screen sub-mode when leaving via back
-      if (s === 7) setDataInputMode('choose');
+      if (s === 8) setDataInputMode('choose');
       return prev;
     });
   };
@@ -244,6 +262,9 @@ CRITICAL RULES:
       if (resumeUrl) localStorage.setItem('cff_resume_url', resumeUrl);
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
       if (loc) localStorage.setItem('cff_location', loc);
+      // Structured work-location preferences — used by ranking + carried through OAuth
+      const locPayload = buildLocationPayload(workLocation);
+      try { localStorage.setItem('cff_location_prefs', JSON.stringify(locPayload)); } catch {}
       if (planType === 'free') localStorage.setItem('cff_plan_type', 'free');
       // Zeigarnik close: surface an "unfinished draft" card on first dashboard visit
       localStorage.setItem('cff_first_draft_pending', 'true');
@@ -263,7 +284,13 @@ CRITICAL RULES:
               school_code: (deriveSchoolCode(college) || '').toUpperCase(),
               academic_year: yearLevel || '',
               career_blockers: blockers,
+              ...locPayload,
             });
+          // Explicit location statements → high-confidence CLIFF memories
+          try {
+            const locMems = buildLocationMemories(workLocation, currentUser.email);
+            if (locMems.length) await base44.entities.StudentMemory.bulkCreate(locMems);
+          } catch (memErr) {}
           // Event tracking: student profile onboarding completion (fire-and-forget)
           base44.functions.invoke('logAnalyticsEvent', {
             event_name: 'student_onboarding_completed',
@@ -308,7 +335,7 @@ CRITICAL RULES:
     }
   };
 
-  const isFullPageScreen = screen === 8; // resume reveal is full-page
+  const isFullPageScreen = screen === 9; // resume reveal is full-page
   const rawName = resumeData?.original?.name;
   const authFirstName = (() => {
     try { return sessionStorage.getItem('cff_auth_first_name') || null; } catch { return null; }
@@ -407,6 +434,7 @@ CRITICAL RULES:
           targetRoles={targetRoles} setTargetRoles={setTargetRoles}
           goalText={goalText} setGoalText={setGoalText}
           setLocationPref={setLocationPref} setLocationCity={setLocationCity}
+          seeking={seeking} workLocation={workLocation} setWorkLocation={setWorkLocation}
         />
 
         <OnboardingSteps9to13

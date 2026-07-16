@@ -324,6 +324,7 @@ export function loadSavedProgress() {
       targetRoles: JSON.parse(localStorage.getItem('cff_target_roles') || '[]'),
       locationPref: localStorage.getItem('cff_location_pref') || '',
       locationCity: localStorage.getItem('cff_location_city') || '',
+      workLocation: JSON.parse(localStorage.getItem('cff_work_location') || 'null'),
       resumeUrl: localStorage.getItem('cff_resume_url') || '',
       yearLevel: localStorage.getItem('cff_year') || '',
       goalText: localStorage.getItem('cff_goal_text') || '',

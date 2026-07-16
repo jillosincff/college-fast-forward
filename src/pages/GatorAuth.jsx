@@ -7,6 +7,7 @@ import { sendMagicLink } from '@/functions/sendMagicLink';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import OtpVerifyForm from '@/components/auth/OtpVerifyForm';
 import { deriveSchoolCode } from '@/lib/schoolNames';
+import { buildLocationMemories } from '@/lib/locationPrefs';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -223,6 +224,8 @@ export default function GatorAuth() {
             const college = localStorage.getItem('cff_college') || '';
             let blockers = [];
             try { blockers = JSON.parse(localStorage.getItem('cff_blockers') || '[]'); } catch (e) {}
+            let locPrefs = {};
+            try { locPrefs = JSON.parse(localStorage.getItem('cff_location_prefs') || '{}') || {}; } catch (e) {}
             await base44.auth.updateMe({
               persona: 'student',
               roles: ['student'],
@@ -231,7 +234,14 @@ export default function GatorAuth() {
               school: college,
               school_code: (deriveSchoolCode(college) || '').toUpperCase(),
               career_blockers: blockers,
+              ...locPrefs,
             });
+            // Work-location statements captured in the funnel → CLIFF memories
+            try {
+              const wl = JSON.parse(localStorage.getItem('cff_work_location') || 'null');
+              const locMems = buildLocationMemories(wl, user.email);
+              if (locMems.length) await base44.entities.StudentMemory.bulkCreate(locMems);
+            } catch (e) {}
             localStorage.removeItem('cff_funnel_completed');
             try { sessionStorage.removeItem('cff_funnel_completed'); sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); } catch (e) {}
             try { await refreshUser(); } catch (e) {}

@@ -9,8 +9,8 @@ import {
 } from './onboardingShared';
 
 /**
- * Onboarding screens 7–10 of the agent-hiring flow:
- * 7 = Resume · 8 = Resume reveal · 9 = One priority · 10 = Here's our plan
+ * Onboarding screens 8–11 of the agent-hiring flow:
+ * 8 = Resume · 9 = Resume reveal · 10 = One priority · 11 = Here's our plan
  */
 export default function OnboardingSteps9to13({
   screen, next, back,
@@ -29,8 +29,8 @@ export default function OnboardingSteps9to13({
 }) {
   return (
     <>
-      {/* ── SCREEN 7: Give CLIFF something to work with ── */}
-      {screen === 7 && (
+      {/* ── SCREEN 8: Give CLIFF something to work with ── */}
+      {screen === 8 && (
         <div style={{ textAlign: 'center', maxWidth: 520, width: '100%' }}>
           <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
@@ -136,8 +136,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         </div>
       )}
 
-      {/* ── SCREEN 8: Resume Reveal — "Here's what I noticed." ── */}
-      {screen === 8 && (
+      {/* ── SCREEN 9: Resume Reveal — "Here's what I noticed." ── */}
+      {screen === 9 && (
       <div style={{ maxWidth: 900, width: '100%', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
@@ -280,8 +280,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         </div>
       )}
 
-      {/* ── SCREEN 9: One Priority ── */}
-      {screen === 9 && (() => {
+      {/* ── SCREEN 10: One Priority ── */}
+      {screen === 10 && (() => {
         const selectedKey = blockers[0] || null;
         const selected = CLIFF_SOLVE.find(o => o.key === selectedKey);
         return (
@@ -347,8 +347,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         );
       })()}
 
-      {/* ── SCREEN 10: Here's Our Plan → planning → dashboard ── */}
-      {screen === 10 && (
+      {/* ── SCREEN 11: Here's Our Plan → planning → dashboard ── */}
+      {screen === 11 && (
         <CliffCommitmentScreen
           resumeData={resumeData}
           firstName={firstName}

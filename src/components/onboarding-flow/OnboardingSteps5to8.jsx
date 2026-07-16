@@ -2,10 +2,12 @@ import IndustryScreen from './IndustryScreen';
 import Screen6School from './Screen6School';
 import YearScreen from './YearScreen';
 import IdealOpportunityScreen from './IdealOpportunityScreen';
+import WorkLocationScreen from './WorkLocationScreen';
 
 /**
- * Onboarding screens 3–6 of the agent-hiring flow:
- * 3 = School · 4 = Year · 5 = Where you want to end up · 6 = Ideal opportunity
+ * Onboarding screens 3–7 of the agent-hiring flow:
+ * 3 = School · 4 = Year · 5 = Where you want to end up · 6 = Ideal opportunity ·
+ * 7 = Where do you want to work
  */
 export default function OnboardingSteps5to8({
   screen, next, back,
@@ -18,6 +20,8 @@ export default function OnboardingSteps5to8({
   selectedIndustries, setSelectedIndustries, targetRoles, setTargetRoles,
   // screen 6 (ideal opportunity — free text, CLIFF extracts the rest)
   goalText, setGoalText, setLocationPref, setLocationCity,
+  // screen 7 (work location)
+  seeking, workLocation, setWorkLocation,
 }) {
   return (
     <>
@@ -66,6 +70,19 @@ export default function OnboardingSteps5to8({
           setGoalText={setGoalText}
           setLocationPref={setLocationPref}
           setLocationCity={setLocationCity}
+          h1style={h1style}
+          substyle={substyle}
+          onBack={back}
+          onNext={next}
+        />
+      )}
+
+      {/* ── SCREEN 7: Where do you want to work? ── */}
+      {screen === 7 && (
+        <WorkLocationScreen
+          seeking={seeking}
+          value={workLocation}
+          onChange={setWorkLocation}
           h1style={h1style}
           substyle={substyle}
           onBack={back}

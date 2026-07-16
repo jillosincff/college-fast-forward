@@ -34,6 +34,7 @@ import CareerSeasonCard from '@/components/free-tier/CareerSeasonCard';
 import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
 import PostMagicMomentFlow from '@/components/conversion/PostMagicMomentFlow';
+import LocationPrefPrompt from '@/components/free-tier/LocationPrefPrompt';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -337,6 +338,9 @@ export default function FreeTierDashboard() {
 
         {/* Referral prompt at peak moments (reply received / interview landed) */}
         {!focusMode && <PeakMomentSharePrompt user={user} />}
+
+        {/* One-time work-location question for students who onboarded before this step existed */}
+        {!focusMode && !isTrialExpired && <LocationPrefPrompt user={user} onUpdated={setUser} />}
 
         {/* CLIFF OS home: purple hero + stats row + goal + session memory */}
         {!isTrialExpired && !focusMode && (

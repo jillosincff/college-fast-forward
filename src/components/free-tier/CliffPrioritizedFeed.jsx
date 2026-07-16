@@ -11,6 +11,7 @@ import { recordMemorySignal } from '@/functions/recordMemorySignal';
 import { RefreshCw } from 'lucide-react';
 import useAccessPlan from '@/hooks/useAccessPlan';
 import { computeCliffVerdict } from '@/lib/cliffVerdict';
+import { locationPrefsFromUser } from '@/lib/locationPrefs';
 
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp, onUpgrade }) {
   const [selectedLead, setSelectedLead] = useState(null);
@@ -162,7 +163,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   // CLIFF Confidence Engine: opinionated verdict per job, then rank best-first
   const verdictMap = new Map(slots.map(s => [
     `${s.company}||${s.role}`,
-    computeCliffVerdict(s, { memories, careerGoals: user?.career_goals || {}, pursuit: findPursuit(s) }),
+    computeCliffVerdict(s, { memories, careerGoals: user?.career_goals || {}, pursuit: findPursuit(s), locationPrefs: locationPrefsFromUser(user) }),
   ]));
   const verdictOf = (s) => verdictMap.get(`${s.company}||${s.role}`);
   const sortedSlots = [...slots].sort((a, b) => (verdictOf(b)?.score || 0) - (verdictOf(a)?.score || 0));

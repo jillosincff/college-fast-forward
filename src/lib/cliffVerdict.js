@@ -8,7 +8,7 @@ export const TIER_DISPLAY = {
 };
 
 export function computeCliffVerdict(lead, ctx = {}) {
-  const { memories = [], careerGoals = {}, pursuit = null } = ctx;
+  const { memories = [], careerGoals = {}, pursuit = null, locationPrefs = null } = ctx;
   const role = (lead.role || lead.job_title || '').toLowerCase();
   const location = (lead.location || lead.location_text || '').toLowerCase();
 
@@ -26,11 +26,32 @@ export function computeCliffVerdict(lead, ctx = {}) {
   else if (industryHit) { score += 2; reasons.push(`Matches your ${industryHit} focus`); }
   else if (targets.length || industries.length) { score -= 1; cautions.push('Outside your stated targets'); }
 
+  // Explicit work-location preferences (onboarding / dashboard prompt)
+  const lp = locationPrefs || {};
+  const prefLocs = (lp.preferred_locations || [])
+    .map(l => (l.display_label || l.city || l.metro || l.state || '').toLowerCase())
+    .filter(Boolean);
+  const isRemoteLead = /remote/.test(location) || lead.is_remote === true;
+  const strictLocation = lp.location_flexibility === 'stay' || lp.relocation_openness === 'no';
+
+  if (isRemoteLead && ['required', 'preferred'].includes(lp.remote_preference)) {
+    score += 2; reasons.push('Remote role — you marked remote as preferred');
+  }
+  if (prefLocs.length) {
+    const locMatch = prefLocs.find(p => location.includes(p) || (p.includes(',') && location.includes(p.split(',')[0].trim())));
+    if (locMatch) { score += 2; reasons.push(`Matches your ${locMatch} preference`); }
+    else if (!isRemoteLead && location) {
+      if (strictLocation) { score -= 3; cautions.push('Outside your required locations'); }
+      else if (lp.relocation_openness === 'yes') { cautions.push('Outside your preferred area — surfaced because the fit is strong'); }
+      else { score -= 1; cautions.push('Outside your preferred area'); }
+    }
+  }
+
   // CLIFF memory alignment
   for (const m of memories) {
     const v = (m.value || '').toLowerCase();
     if (!v) continue;
-    if (m.category === 'preferred_locations' && location.includes(v)) { score += 2; reasons.push(`Matches your ${m.value} preference`); }
+    if (m.category === 'preferred_locations' && !prefLocs.length && location.includes(v)) { score += 2; reasons.push(`Matches your ${m.value} preference`); }
     else if (m.category === 'preferred_industries' && role.includes(v) && !industryHit) { score += 1; reasons.push(`Fits your interest in ${m.value}`); }
     else if (m.category === 'disliked_industries' && role.includes(v)) { score -= 2; cautions.push(`You've been skipping ${m.value} roles`); }
   }
