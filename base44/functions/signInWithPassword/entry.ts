@@ -32,37 +32,38 @@ Deno.serve(async (req) => {
     const emailLower = email.toLowerCase().trim();
     const base44 = createClientFromRequest(req);
 
-    // First check RegistrationAttempt entity (new signups)
-    const attempts = await base44.asServiceRole.entities.RegistrationAttempt.filter({ email: emailLower });
-    const attempt = attempts
-      ?.filter(a => a.password_hash)
-      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
+    // The User record's password is always authoritative (it's updated on password
+    // reset). Only fall back to the original signup record if the account has no
+    // password stored directly.
+    const users = await base44.asServiceRole.entities.User.filter({ email: emailLower });
+    const userRecord = users?.[0];
+
+    if (!userRecord) {
+      return new Response(JSON.stringify({ error: 'No account found with this email. Try signing in with Google or create a new account.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     let passwordValid = false;
 
-    if (attempt) {
-      passwordValid = await bcrypt.compare(password, attempt.password_hash);
+    if (userRecord.hashed_password) {
+      passwordValid = await bcrypt.compare(password, userRecord.hashed_password);
     } else {
-      // Fall back to hashed_password stored directly on User record (original/migrated users)
-      const users = await base44.asServiceRole.entities.User.filter({ email: emailLower });
-      const userRecord = users?.[0];
-      
-      // If user exists but has no password set, they need to reset it
-      if (userRecord && !userRecord.hashed_password) {
+      // Fall back to the most recent signup record's password hash
+      const attempts = await base44.asServiceRole.entities.RegistrationAttempt.filter({ email: emailLower });
+      const attempt = attempts
+        ?.filter(a => a.password_hash)
+        .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
+
+      if (!attempt) {
         return new Response(JSON.stringify({ error: 'Your account exists but has no password set. Use the magic link or reset your password to continue.' }), {
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      
-      if (!userRecord) {
-        return new Response(JSON.stringify({ error: 'No account found with this email. Try signing in with Google or create a new account.' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
-      passwordValid = await bcrypt.compare(password, userRecord.hashed_password);
+
+      passwordValid = await bcrypt.compare(password, attempt.password_hash);
     }
 
     if (!passwordValid) {
