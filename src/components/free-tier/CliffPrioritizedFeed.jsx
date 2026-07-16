@@ -71,11 +71,6 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
     enabled: !!user?.id,
   });
 
-  // Debug logging
-  useEffect(() => {
-    console.log('[CliffPrioritizedFeed] State:', { isLoading, error, slotsCount: slots?.length, dropData });
-  }, [isLoading, error, slots, dropData]);
-
   // Listen for manual refresh requests from parent
   useEffect(() => {
     const handler = (event) => {
