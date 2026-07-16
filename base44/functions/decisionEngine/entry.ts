@@ -76,10 +76,27 @@ Deno.serve(async (req) => {
     } else if (unprepared) {
       move = { title: `Apply to ${unprepared.company}`, reason: "It's already in your pipeline — I'll prep the whole application with you.", time: '~20 minutes', outcome: `A submit-ready application at ${unprepared.company}.`, cta: 'Continue', action: ws({ company: unprepared.company, role: unprepared.job_title, jobDescription: unprepared.job_description || '', jobUrl: unprepared.job_url || '', location: unprepared.location || '' }) };
     } else if (opps[0]) {
-      const o = opps[0];
-      move = { title: `Apply to ${o.company}`, reason: o.beat_others || `It's my top pick for "${plan.goal_summary}".`, time: o.effort || '~20 minutes', outcome: 'Your strongest current shot at your goal.', cta: 'Continue', action: ws({ company: o.company, role: o.role, jobUrl: o.url || '', location: o.location || '' }) };
-      if (opps.length > 1) {
-        suppressed.push(`I'm holding ${opps.slice(1).map((x: any) => x.company).join(' and ')} until ${o.company} is submitted — one great application beats three rushed ones.`);
+      // Shared Location Intelligence: never pick a plan opportunity that violates
+      // an explicit location constraint; explain location fit in the reason.
+      let oppEvals: any[] = [];
+      try {
+        const locRes = await base44.functions.invoke('locationIntelligence', {
+          jobs: opps.map((x: any, i: number) => ({ key: String(i), location: x.location || '', title: x.role || '' })),
+          log_context: 'decision_engine',
+        });
+        oppEvals = (locRes as any)?.data?.evaluations || (locRes as any)?.evaluations || [];
+      } catch (e) { /* service optional */ }
+      const evalOf = (i: number) => oppEvals.find((ev: any) => ev.key === String(i));
+      let pickIdx = opps.findIndex((_x: any, i: number) => !evalOf(i)?.hard_constraint_violation);
+      if (pickIdx < 0) pickIdx = 0;
+      const o = opps[pickIdx];
+      const oLoc = evalOf(pickIdx);
+      let reason = o.beat_others || `It's my top pick for "${plan.goal_summary}".`;
+      if (oLoc?.display_explanation && ['strong', 'tradeoff'].includes(oLoc.location_match)) reason += ` ${oLoc.display_explanation}`;
+      move = { title: `Apply to ${o.company}`, reason, time: o.effort || '~20 minutes', outcome: 'Your strongest current shot at your goal.', cta: 'Continue', action: ws({ company: o.company, role: o.role, jobUrl: o.url || '', location: o.location || '' }) };
+      const held = opps.filter((_x: any, i: number) => i !== pickIdx);
+      if (held.length) {
+        suppressed.push(`I'm holding ${held.map((x: any) => x.company).join(' and ')} until ${o.company} is submitted — one great application beats three rushed ones.`);
       }
     } else {
       move = { title: 'Tell me your goal', reason: "I don't have an active plan for you yet — give me a goal and I'll line everything up.", time: '~30 seconds', outcome: 'A full plan with your 3 best opportunities.', cta: 'Start', action: { type: 'goal' } };

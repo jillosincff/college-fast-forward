@@ -114,12 +114,28 @@ Deno.serve(async (req) => {
         if (m.category === 'target_companies') return (s.company || '').toLowerCase().includes(v);
         return (s.role || s.title || '').toLowerCase().includes(v);
       });
-      passes.sort((a, b) => (prefHit(b) ? 1 : 0) - (prefHit(a) ? 1 : 0));
-      const best = passes[0];
+      // Shared Location Intelligence: a hard location violation never becomes a Best Move
+      const locByKey = {};
+      try {
+        const locRes = await base44.functions.invoke('locationIntelligence', {
+          jobs: passes.map((s, i) => ({ key: String(i), location: s.location || '', title: s.role || s.title || '' })),
+          log_context: 'best_moves',
+        });
+        for (const ev of (locRes?.data?.evaluations || locRes?.evaluations || [])) locByKey[ev.key] = ev;
+      } catch (e) { /* service optional — never block the move list */ }
+      passes.forEach((s, i) => { s._loc = locByKey[String(i)] || null; });
+      const nonViolating = passes.filter(s => !s._loc?.hard_constraint_violation);
+      const locSkipped = passes.length - nonViolating.length;
+      const ranked = nonViolating.length ? nonViolating : passes;
+      ranked.sort((a, b) =>
+        ((b._loc?.ranking_adjustment || 0) + (prefHit(b) ? 1 : 0)) - ((a._loc?.ranking_adjustment || 0) + (prefHit(a) ? 1 : 0)));
+      const best = ranked[0];
       if (best) {
         const pref = prefHit(best);
         const reasons = ['Strong match for your goals, and it recently opened — early applicants stand out'];
-        if (pref) reasons.push(pref.category === 'preferred_locations' ? `I prioritized ${pref.value} opportunities like you prefer` : `I know you're targeting ${pref.value}`);
+        if (best._loc?.display_explanation && ['strong', 'tradeoff'].includes(best._loc.location_match)) reasons.push(best._loc.display_explanation);
+        if (locSkipped > 0) reasons.push(`I skipped ${locSkipped} similar role${locSkipped === 1 ? '' : 's'} because ${locSkipped === 1 ? 'it' : 'they'} didn't fit your location preferences`);
+        if (pref && !best._loc?.display_explanation) reasons.push(pref.category === 'preferred_locations' ? `I prioritized ${pref.value} opportunities like you prefer` : `I know you're targeting ${pref.value}`);
         if (skippedBy) reasons.push(`I skipped ${skippedBy.value} ${skippedBy.category === 'excluded_locations' ? 'listings' : 'roles'} because ${skippedBy.source === 'explicit' ? "you told me you're not interested" : "you keep passing on them"}`);
         candidates.push({
           score: 65, kind: 'newjob',
@@ -127,7 +143,7 @@ Deno.serve(async (req) => {
           reasons, time: '5 min', action_label: 'Apply',
           action: { type: 'workspace', company: best.company, role: best.role || best.title || '', jobUrl: best.jobUrl || best.job_url || '', location: best.location || '' },
           company: best.company,
-          runner_up: passes[1]?.company || '',
+          runner_up: ranked[1]?.company || '',
         });
       }
     }

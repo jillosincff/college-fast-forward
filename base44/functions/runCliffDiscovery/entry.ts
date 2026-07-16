@@ -38,10 +38,25 @@ Deno.serve(async (req) => {
 
     // 1. Better job found — today's feed has a similar role at a different company
     const slots = ((drops || [])[0]?.slots) || [];
+    // Shared Location Intelligence: a job is only "better" if it's still better
+    // AFTER location — never suggest relocation the student explicitly rejected.
+    const slotLoc: any = {};
+    if (slots.length) {
+      try {
+        const locRes = await base44.functions.invoke('locationIntelligence', {
+          jobs: slots.map((s: any, i: number) => ({ key: String(i), location: s.location || '', title: s.role || s.title || s.job_title || '' })),
+          log_context: 'discovery',
+        });
+        for (const ev of ((locRes as any)?.data?.evaluations || (locRes as any)?.evaluations || [])) slotLoc[ev.key] = ev;
+      } catch (e) { /* service optional */ }
+    }
     outer: for (const p of activePursuits) {
       const pt = tokens(p.job_title);
       if (!pt.length) continue;
-      for (const s of slots) {
+      for (let si = 0; si < slots.length; si++) {
+        const s = slots[si];
+        const sEval = slotLoc[String(si)];
+        if (sEval?.hard_constraint_violation || sEval?.location_match === 'mismatch') continue;
         const sCompany = s.company || s.company_name || '';
         const sRole = s.role || s.title || s.job_title || '';
         if (!sCompany || !sRole || norm(sCompany) === norm(p.company_name)) continue;
@@ -52,7 +67,7 @@ Deno.serve(async (req) => {
             found.push({
               user_email: email, discovery_key: key, discovery_type: 'better_job',
               headline: `I found a role at ${sCompany} worth a look`,
-              detail: `${sRole} at ${sCompany} looks like a strong fit alongside your ${p.company_name} pursuit.`,
+              detail: `${sRole} at ${sCompany} looks like a strong fit alongside your ${p.company_name} pursuit.${sEval?.display_explanation && ['strong', 'tradeoff'].includes(sEval.location_match) ? ` ${sEval.display_explanation}` : ''}`,
               reason: 'Similar role, fresh posting — more shots on goal for the same prep.',
               action_label: 'View Job', action_route: 'workspace',
               company_name: sCompany, job_title: sRole, job_url: s.job_url || s.url || '',

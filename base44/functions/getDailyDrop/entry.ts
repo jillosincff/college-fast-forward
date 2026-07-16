@@ -717,7 +717,14 @@ Deno.serve(async (req) => {
     const targetIndustries = (goals.target_industries || goals.industries || []).filter(Boolean).map(i => i.toLowerCase());
     const targetRole = (Array.isArray(goals.target_roles) ? goals.target_roles[0] : goals.target_roles) || goals.role || '';
     const sizePref = goals.company_size_preference || 'all';
-    const location = goals.location_preference || user.location_preference || user.location || '';
+    // Structured work-location preferences drive RETRIEVAL, not just post-filtering
+    const structuredLoc = (Array.isArray(user.preferred_locations) && user.preferred_locations[0])
+      ? (user.preferred_locations[0].display_label || user.preferred_locations[0].city || '')
+      : '';
+    const remotePref = user.remote_preference || '';
+    const location = structuredLoc
+      || (['required', 'preferred'].includes(remotePref) ? 'Remote' : '')
+      || goals.location_preference || user.location_preference || user.location || '';
     const seeking = goals.seeking || 'both';
 
     // Size pref - but allow all sizes to get more results
@@ -896,9 +903,29 @@ Deno.serve(async (req) => {
     relevant.sort((a, b) => b.score - a.score);
     console.log('[getDailyDrop] Fit scoring: %d eligible → %d passed relevance bar (roleWords: %s)',
       eligibleJobs.length, relevant.length, roleWords.join(','));
-    const orderedEligible = relevant.map(s => s.job);
-    
-    for (const job of orderedEligible) {
+
+    // ── SHARED LOCATION INTELLIGENCE: strict constraints filter here, preferences
+    // re-rank here. One service, same rules as every other CLIFF surface. ──
+    try {
+      const jobsForLoc = relevant.map((s, i) => ({ key: String(i), location: s.job.location || '', title: s.job.job_title || '' }));
+      if (jobsForLoc.length) {
+        const locRes = await base44.functions.invoke('locationIntelligence', { jobs: jobsForLoc, log_context: 'daily_drop' });
+        const byKey = {};
+        for (const ev of (locRes?.data?.evaluations || locRes?.evaluations || [])) byKey[ev.key] = ev;
+        relevant.forEach((s, i) => { s.loc = byKey[String(i)] || null; });
+        // Never surface hard violations — unless dropping them would empty the feed
+        const kept = relevant.filter(s => !s.loc?.hard_constraint_violation);
+        if (kept.length >= 3 || kept.length === relevant.length) relevant = kept;
+        relevant.sort((a, b) =>
+          (b.score + (b.loc?.ranking_adjustment || 0) * 10) - (a.score + (a.loc?.ranking_adjustment || 0) * 10));
+        console.log('[getDailyDrop] Location intelligence: %d kept of %d', relevant.length, jobsForLoc.length);
+      }
+    } catch (e) {
+      console.warn('[getDailyDrop] locationIntelligence unavailable:', e.message);
+    }
+
+    for (const item of relevant) {
+      const job = item.job;
       const companyKey = job.name.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (mergedCompanies.has(companyKey)) continue;
       mergedCompanies.add(companyKey);
@@ -918,6 +945,8 @@ Deno.serve(async (req) => {
         salary_range: job.salary_range || null,
         location: job.location || null,
         posted_date: job.posted_date || null,
+        location_match: item.loc?.location_match || 'unknown',
+        location_note: item.loc?.display_explanation || '',
       });
 
       if (mergedJobs.length >= dailyLimit * 2) break;
