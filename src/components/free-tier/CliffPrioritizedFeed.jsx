@@ -12,12 +12,26 @@ import { RefreshCw } from 'lucide-react';
 import useAccessPlan from '@/hooks/useAccessPlan';
 import { computeCliffVerdict } from '@/lib/cliffVerdict';
 import { locationPrefsFromUser } from '@/lib/locationPrefs';
+import BestOpportunityCard from './BestOpportunityCard';
 
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp, onUpgrade }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
   const [visibleCount, setVisibleCount] = useState(8); // pagination for infinite scroll
+  // Library is a reference area — collapsed by default, remembered per student
+  const [libraryOpen, setLibraryOpen] = useState(() => {
+    try { return localStorage.getItem('cliff_library_open') === '1'; } catch { return false; }
+  });
+  const openLibrary = () => {
+    setLibraryOpen(true);
+    try { localStorage.setItem('cliff_library_open', '1'); } catch {}
+    try { base44.analytics.track({ eventName: 'browse_more_opportunities_clicked' }); } catch {}
+  };
+  const closeLibrary = () => {
+    setLibraryOpen(false);
+    try { localStorage.setItem('cliff_library_open', '0'); } catch {}
+  };
   const schoolAbbr = schoolAbbrProp || user?.school_code?.toUpperCase() || 'UF';
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
@@ -187,13 +201,39 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const memoryRef = memoryHits[0];
   const allActioned = slots.length > 0 && visibleSlots.length === 0;
   const noGoals = !target_industries?.length && !effectiveRole;
-  const paginatedSlots = visibleSlots.slice(0, visibleCount);
-  const hasMore = visibleCount < visibleSlots.length;
+  // CLIFF's Best Opportunities: top 3 non-skip verdicts lead; the rest is the collapsed library
+  const bestSlots = visibleSlots.filter(s => verdictOf(s)?.verdict !== 'skip').slice(0, 3);
+  const bestKeys = new Set(bestSlots.map(s => `${s.company}||${s.role}`));
+  const librarySlots = visibleSlots.filter(s => !bestKeys.has(`${s.company}||${s.role}`));
+  // Empty/error/caught-up states must always render — treat as open when there's no best section
+  const effectiveOpen = libraryOpen || bestSlots.length === 0;
+  const paginatedSlots = librarySlots.slice(0, visibleCount);
+  const hasMore = visibleCount < librarySlots.length;
   const isPremium = dropData?.data?.is_premium || dropData?.is_premium;
   const dailyLimit = dropData?.data?.daily_limit || dropData?.daily_limit || 15;
 
   return (
     <div className="w-full max-w-6xl mx-auto px-0 py-2 space-y-6">
+      {/* CLIFF's Best Opportunities — verdict-first, max 3, never forced */}
+      {!isLoading && bestSlots.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">CLIFF's Best Opportunities</h2>
+          {bestSlots.map((lead, i) => (
+            <BestOpportunityCard
+              key={`${lead.company}||${lead.role}`}
+              lead={lead}
+              verdict={verdictOf(lead)}
+              rank={i}
+              pursuit={findPursuit(lead)}
+              onDetails={setSelectedLead}
+            />
+          ))}
+          {bestSlots.length < 3 && (
+            <p className="text-xs text-gray-500 italic">I'm still evaluating the rest. I won't waste your time with weak matches.</p>
+          )}
+        </div>
+      )}
+
       <div className="border-b border-gray-100 pb-4">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -205,7 +245,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
                 ? 'CLIFF is gathering opportunities…'
                 : allActioned
                   ? 'All caught up for today'
-                  : `A reference shelf of ${visibleSlots.length} opportunit${visibleSlots.length === 1 ? 'y' : 'ies'} CLIFF has vetted — your plan above already has the best ones`
+                  : `A reference shelf of ${librarySlots.length} opportunit${librarySlots.length === 1 ? 'y' : 'ies'} CLIFF has vetted — your best ones are already above`
               }
             </p>
           </div>
@@ -233,14 +273,25 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
         </div>
       </div>
 
-      {!noGoals && !isLoading && visibleSlots.length > 0 && (
+      {/* Collapsed library: one calm CTA instead of a long feed */}
+      {!effectiveOpen && !isLoading && (
+        <button
+          onClick={openLibrary}
+          className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-bold hover:bg-gray-50 transition-colors cursor-pointer"
+          style={{ minHeight: 44 }}
+        >
+          Browse More Opportunities ({librarySlots.length})
+        </button>
+      )}
+
+      {effectiveOpen && !noGoals && !isLoading && visibleSlots.length > 0 && (
         <p className="text-[11px] text-gray-400 font-medium italic">
           ✨ These are hand-picked matches based on your profile. Tap any role for more options.
         </p>
       )}
 
       {/* One memory reference per session — CLIFF shows it's listening */}
-      {!isLoading && memoryRef && (
+      {effectiveOpen && !isLoading && memoryRef && (
         <p className="text-[11px] text-purple-600 font-semibold">
           🧠 I filtered out {memoryRef.value} {memoryRef.category === 'avoided_companies' ? 'jobs' : memoryRef.category === 'excluded_locations' ? 'locations' : 'roles'} {memoryRef.source === 'explicit' ? 'like you asked' : "based on what you've been skipping"}.{' '}
           <button onClick={() => { window.location.hash = '#/CliffMemory'; }} className="underline cursor-pointer bg-transparent border-0 p-0 text-purple-600" style={{ minHeight: 'auto', minWidth: 'auto' }}>Manage</button>
@@ -263,6 +314,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
         </div>
       )}
 
+      {effectiveOpen && (
       <section className="space-y-3">
         {isLoading ? (
           <div className="space-y-3">
@@ -370,6 +422,17 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
           <EmptyMatchesState hasGoals={!noGoals} onSetGoals={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))} />
         )}
       </section>
+      )}
+
+      {effectiveOpen && libraryOpen && bestSlots.length > 0 && (
+        <button
+          onClick={closeLibrary}
+          className="w-full py-2 text-xs font-semibold text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer"
+          style={{ minHeight: 44 }}
+        >
+          Collapse library ▲
+        </button>
+      )}
 
       {selectedLead && (
         <MatchDeepDiveModal lead={selectedLead} isOpen={!!selectedLead} onClose={() => setSelectedLead(null)} />

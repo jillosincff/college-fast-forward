@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 const FOLLOW_UP_DAYS = 3;
 
-// Four glanceable tiles under the hero: watching / ready / interviews / follow-ups.
+// Progress-only metrics: zero-value tiles are hidden, never shown as discouraging
+// empty inventory. If nothing is non-zero, the row disappears entirely.
 export default function DashboardStatsRow({ user }) {
   const [stats, setStats] = useState(null);
 
@@ -34,23 +35,32 @@ export default function DashboardStatsRow({ user }) {
     return () => { cancelled = true; window.removeEventListener('cff:pipeline-changed', refresh); };
   }, [user?.email]);
 
-  const tiles = [
-    { label: 'Opportunities Watching', value: stats?.watching, zeroLabel: 'Scanning' },
-    { label: 'Applications Ready', value: stats?.ready, zeroLabel: 'In prep' },
-    { label: 'Interviews', value: stats?.interviews, zeroLabel: 'Working on it' },
-    { label: 'Follow-ups', value: stats?.followUps, zeroLabel: 'All clear' },
-  ];
+  if (!stats) return null;
+
+  const tiles = [];
+  if (stats.ready > 0) tiles.push({ label: 'Applications ready', value: stats.ready });
+  if (stats.interviews > 0) tiles.push({ label: 'Interviews scheduled', value: stats.interviews });
+  if (stats.followUps > 0) tiles.push({ label: 'Follow-ups due', value: stats.followUps });
+  if (stats.watching > 0) tiles.push({
+    label: 'Opportunities being watched', value: stats.watching,
+    sub: "I'll only recommend them when they're worth your time.",
+  });
+
+  if (!tiles.length) return null;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 16 }}>
       {tiles.map((t, i) => (
         <div key={i} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '14px 16px', textAlign: 'center' }}>
-          <p style={{ fontFamily: dm, fontSize: stats != null && t.value > 0 ? 22 : 14, fontWeight: 900, color: t.value > 0 ? '#111827' : '#9ca3af', margin: '0 0 2px', lineHeight: 1.5 }}>
-            {stats == null ? '·' : (t.value > 0 ? t.value : t.zeroLabel)}
+          <p style={{ fontFamily: dm, fontSize: 22, fontWeight: 900, color: '#111827', margin: '0 0 2px', lineHeight: 1.3 }}>
+            {t.value}
           </p>
           <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {t.label}
           </p>
+          {t.sub && (
+            <p style={{ fontFamily: dm, fontSize: 10.5, color: '#9ca3af', margin: '4px 0 0', lineHeight: 1.4 }}>{t.sub}</p>
+          )}
         </div>
       ))}
     </div>

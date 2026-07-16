@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { deriveStudentProfile, getCareerIntelligence } from '@/lib/careerIntelligence/engine';
 import YourPathForward from '@/components/trajectory/YourPathForward';
 import { Check, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
@@ -20,6 +21,7 @@ export default function CareerSeasonCard({ user }) {
   useEffect(() => {
     const open = () => setShowPath(true);
     window.addEventListener('cliff:showPath', open);
+    try { base44.analytics.track({ eventName: 'monthly_focus_viewed' }); } catch {}
     return () => window.removeEventListener('cliff:showPath', open);
   }, []);
   const { ci, profile } = useMemo(() => {
@@ -42,8 +44,9 @@ export default function CareerSeasonCard({ user }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 22 }}>📍</span>
           <div>
-            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Where You Should Be Right Now</p>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>This Month's Focus</p>
             <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: '#111827', margin: 0 }}>{whoYouAre}</p>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 600, color: '#9ca3af', margin: 0 }}>Where you should be right now</p>
           </div>
         </div>
         <button onClick={() => setExpanded(!expanded)}
@@ -66,7 +69,7 @@ export default function CareerSeasonCard({ user }) {
             {voice} This {monthName}, I'd focus on:
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {monthlyFocus.map(rec => (
+            {monthlyFocus.slice(0, 3).map(rec => (
               <div key={rec.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, background: '#faf9ff', border: '1px solid #ede9fe', borderRadius: 10, padding: '9px 12px' }}>
                 <Check size={14} color="#7c3aed" style={{ flexShrink: 0, marginTop: 2 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -88,7 +91,10 @@ export default function CareerSeasonCard({ user }) {
               📅 Up next: {upcomingSeason.emoji} {upcomingSeason.name} starts in {upcomingSeason.startsIn} — I'll shift your plan when it does.
             </p>
           )}
-          <button onClick={() => setShowPath(true)}
+          <button onClick={() => {
+            try { base44.analytics.track({ eventName: 'show_my_path_clicked' }); } catch {}
+            setShowPath(true);
+          }}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: dm, fontSize: 12.5, fontWeight: 800, color: '#6d28d9', background: '#f5f3ff', border: '1px solid #ede9fe', borderRadius: 999, padding: '9px 16px', cursor: 'pointer', marginTop: 12, minHeight: 44 }}>
             Show My Path <ArrowRight size={13} />
           </button>

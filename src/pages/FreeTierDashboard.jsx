@@ -346,10 +346,11 @@ export default function FreeTierDashboard() {
         {!isTrialExpired && !focusMode && (
           <>
             <DashboardHero user={user} firstName={firstName} />
-            <DashboardStatsRow user={user} />
             <CareerSeasonCard user={user} />
+            <CliffTimeline user={user} />
             <GoalHero user={user} />
             <GoalMemoryStrip user={user} />
+            <DashboardStatsRow user={user} />
           </>
         )}
 
@@ -364,9 +365,6 @@ export default function FreeTierDashboard() {
           <>
             {/* Day-one unlocked warm connection */}
             <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
-
-            {/* One timeline: CLIFF has already decided what's next — Today → Tomorrow → later */}
-            <CliffTimeline user={user} />
           </>
         )}
 

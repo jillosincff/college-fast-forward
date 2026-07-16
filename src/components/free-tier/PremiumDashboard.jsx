@@ -473,12 +473,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(167,139,250,0.28)', filter: 'blur(60px)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(139,92,246,0.35)', borderRadius: 100, padding: '4px 12px', marginBottom: 16 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Premium Account</span>
-          </div>
-
           <h1 style={{ fontFamily: dm, fontSize: isMobile ? 20 : 28, fontWeight: 800, color: '#fff', margin: '0 0 10px', lineHeight: isMobile ? 1.25 : 1.2, letterSpacing: '-0.01em' }}>
             Let's get locked in and get you hired, {firstName}
           </h1>

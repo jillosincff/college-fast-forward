@@ -5,6 +5,7 @@ import { getCareerIntelligenceTimelineItems } from '@/lib/careerIntelligence/eng
 import { getTrajectoryTimelineItem } from '@/lib/careerTrajectory/engine';
 import { base44 } from '@/api/base44Client';
 import { ArrowRight } from 'lucide-react';
+import { matchesHeroPriority } from '@/lib/dashboardDedup';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -32,6 +33,14 @@ const runAction = (a) => {
 export default function CliffTimeline({ user }) {
   const [data, setData] = useState(null);
   const [trajectory, setTrajectory] = useState(null);
+  const [, setHeroTick] = useState(0);
+
+  // Re-check dedup once the hero registers its Today's Priority
+  useEffect(() => {
+    const bump = () => setHeroTick(t => t + 1);
+    window.addEventListener('cliff:hero-priority', bump);
+    return () => window.removeEventListener('cliff:hero-priority', bump);
+  }, []);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -51,7 +60,10 @@ export default function CliffTimeline({ user }) {
 
   // Career Intelligence + Trajectory items appear exactly like other CLIFF recommendations
   const trajItem = getTrajectoryTimelineItem(user, trajectory);
-  const items = [...(data?.timeline || []), ...getCareerIntelligenceTimelineItems(user), ...(trajItem ? [trajItem] : [])];
+  const allItems = [...(data?.timeline || []), ...getCareerIntelligenceTimelineItems(user), ...(trajItem ? [trajItem] : [])];
+  // Dedup layer: never repeat the hero's Today's Priority, and cap at 3 actions
+  const heroDup = allItems.some(it => matchesHeroPriority(it.text));
+  const items = allItems.filter(it => !matchesHeroPriority(it.text)).slice(0, 3);
   const waiting = data?.waiting || [];
   const suppressed = data?.suppressed || [];
   if (!items.length && !waiting.length) return null;
@@ -67,7 +79,10 @@ export default function CliffTimeline({ user }) {
 
   return (
     <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-      <h3 style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: '0 0 14px' }}>Your plan — I've already lined it up</h3>
+      <h3 style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: heroDup ? '0 0 4px' : '0 0 14px' }}>Today's plan</h3>
+      {heroDup && (
+        <p style={{ fontFamily: dm, fontSize: 11.5, color: '#9ca3af', margin: '0 0 12px' }}>↑ Your top priority is already queued above — start with Continue.</p>
+      )}
       {groups.map((g, gi) => (
         <div key={g.label} style={{ display: 'flex', gap: 14 }}>
           {/* Timeline rail */}

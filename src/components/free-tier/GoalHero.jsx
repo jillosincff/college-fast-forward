@@ -9,7 +9,7 @@ import { Sparkles, Check } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
-const EXAMPLES = ['I found a job.', 'Help me get an internship.', "Prepare me for tomorrow's interview.", "I haven't heard back.", 'Find me something better.'];
+const EXAMPLES = ['Find me a marketing internship in South Florida', 'Prepare me for my Nike interview', "I haven't heard back from Deloitte", 'I want to work in sports', 'Show me what I should focus on'];
 const BUILD_STEPS = ['Building your plan…', 'Reading opportunities…', 'Filtering low-value jobs…', 'Ranking your best opportunities…', 'Checking your existing progress…'];
 
 const timeGreeting = () => {
@@ -66,6 +66,7 @@ export default function GoalHero({ user }) {
     e?.preventDefault();
     const text = goal.trim();
     if (!text) return;
+    try { base44.analytics.track({ eventName: 'goal_input_submitted' }); } catch {}
     setError('');
     setAck('');
     setPhase('interpreting');
@@ -156,9 +157,6 @@ export default function GoalHero({ user }) {
   // ── Home: greeting + one question ────────────────────────────────────
   return shell(
     <>
-      <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#c4b5fd', margin: '0 0 4px' }}>
-        {timeGreeting()}, {firstName}.
-      </p>
       <h2 style={{ fontFamily: dm, fontSize: 22, fontWeight: 900, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.01em' }}>
         What's our goal today?
       </h2>
