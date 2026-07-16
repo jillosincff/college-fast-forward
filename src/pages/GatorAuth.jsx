@@ -88,7 +88,7 @@ export default function GatorAuth() {
     setLoading(true);
     try {
       // Native, silent login — mints a real Base44 session in-place (no redirect, no Base44 page).
-      const res = await base44.auth.loginViaEmailPassword(signinEmail.trim(), signinPassword);
+      const res = await base44.auth.loginViaEmailPassword(signinEmail.trim().toLowerCase(), signinPassword);
       const token = res?.access_token || res?.data?.access_token;
       if (token) base44.auth.setToken(token);
       await completeAuth();
@@ -128,8 +128,9 @@ export default function GatorAuth() {
     setLoading(true);
     try {
       // Native registration — creates the account and emails a 6-digit verification code.
-      await base44.auth.register({ email: signupEmail.trim(), password: signupPassword, full_name: fullName });
-      setPendingOtpEmail(signupEmail.trim());
+      const cleanEmail = signupEmail.trim().toLowerCase();
+      await base44.auth.register({ email: cleanEmail, password: signupPassword, full_name: fullName });
+      setPendingOtpEmail(cleanEmail);
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.message || err?.message || '';
       if (/already|exist|registered/i.test(detail)) {

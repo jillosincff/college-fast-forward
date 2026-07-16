@@ -31,13 +31,21 @@ export default function OtpVerifyForm({ email, onVerified }) {
     if (otpCode.length < 4) { setError('Enter the code from your email.'); return; }
     setLoading(true);
     try {
-      const res = await base44.auth.verifyOtp({ email, otpCode });
+      const res = await base44.auth.verifyOtp({ email: email.trim().toLowerCase(), otpCode });
       const token = res?.access_token || res?.data?.access_token;
       if (token) base44.auth.setToken(token);
       // Whether or not a token came back, a verified account can now be routed.
       await onVerified();
     } catch (err) {
-      setError(err?.response?.data?.detail || err?.response?.data?.message || 'That code is incorrect or expired. Try again.');
+      const detail = err?.response?.data?.detail || err?.response?.data?.message || '';
+      // If the account is already verified (e.g. the first attempt succeeded but the
+      // screen didn't advance, then the user retried with a consumed code), don't
+      // show a false "incorrect code" error — the account is good, move them on.
+      if (/already.*verif|verif.*already/i.test(detail)) {
+        await onVerified();
+        return;
+      }
+      setError(detail || 'That code is incorrect or expired. Try again.');
     } finally {
       setLoading(false);
     }
@@ -47,7 +55,7 @@ export default function OtpVerifyForm({ email, onVerified }) {
     setError(''); setInfo('');
     setResending(true);
     try {
-      await base44.auth.resendOtp(email);
+      await base44.auth.resendOtp(email.trim().toLowerCase());
       setInfo('A new code is on its way to your inbox.');
     } catch (err) {
       setError('Could not resend the code. Please wait a moment and try again.');
