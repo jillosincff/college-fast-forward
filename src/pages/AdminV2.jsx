@@ -12,6 +12,7 @@ import TtfmpSection from '@/components/adminv2/cliff/TtfmpSection';
 import AccessControlSection from '@/components/adminv2/cliff/AccessControlSection';
 import CliffAccuracySection from '@/components/adminv2/cliff/CliffAccuracySection';
 import ConversionFunnelSection from '@/components/adminv2/cliff/ConversionFunnelSection';
+import LearningMetricsSection from '@/components/adminv2/cliff/LearningMetricsSection';
 
 export default function AdminV2() {
   const [user, setUser] = useState(null);
@@ -95,6 +96,7 @@ export default function AdminV2() {
 
       {data && (
         <>
+          <LearningMetricsSection />
           <AccessControlSection />
           <ConversionFunnelSection />
           <CliffAccuracySection />
