@@ -154,8 +154,10 @@ button, a, [role="button"] {
     @apply border-border;
   }
   
-  /* Prevent horizontal scroll on mobile */
-  html, body {
+  /* Prevent horizontal scroll on mobile.
+     Kept OFF the <html> element — overflow-x:hidden on the root breaks
+     trackpad/wheel vertical scrolling in desktop Safari (Mac). */
+  body {
     overflow-x: hidden;
     width: 100%;
     max-width: 100vw;
@@ -402,9 +404,15 @@ button {
   }
 }
 
-/* Disable iOS rubber-banding on body */
+/* Disable rubber-banding only on touch devices — applying
+   overscroll-behavior to the root on desktop blocks wheel/trackpad
+   scrolling in Safari on Mac */
+@media (pointer: coarse) {
+  html, body {
+    overscroll-behavior-y: none;
+  }
+}
 html, body {
-  overscroll-behavior-y: none;
   /* Prevent scroll anchoring from pinning the page while async feeds load —
      this caused the "can't scroll back up" bug on the dashboard */
   overflow-anchor: none;
