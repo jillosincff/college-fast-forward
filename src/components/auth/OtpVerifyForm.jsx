@@ -10,7 +10,7 @@ const ACCENT = '#6d28d9';
  * The user enters it here; verifyOtp() mints a real session, then onVerified() runs
  * (GatorAuth routing then sends new students to onboarding, returning users to dashboard).
  */
-export default function OtpVerifyForm({ email, onVerified }) {
+export default function OtpVerifyForm({ email, password, onVerified }) {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -30,17 +30,37 @@ export default function OtpVerifyForm({ email, onVerified }) {
     const otpCode = code.trim();
     if (otpCode.length < 4) { setError('Enter the code from your email.'); return; }
     setLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
+    // Signs in with the password from the signup form to mint a real session.
+    // verifyOtp alone doesn't reliably return a session token, which left users
+    // verified server-side but stuck on this screen (retries then read as
+    // "incorrect code" because the code was already consumed).
+    const signInNow = async () => {
+      if (!password) return false;
+      try {
+        const res = await base44.auth.loginViaEmailPassword(cleanEmail, password);
+        const token = res?.access_token || res?.data?.access_token;
+        if (token) base44.auth.setToken(token);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    };
     try {
-      const res = await base44.auth.verifyOtp({ email: email.trim().toLowerCase(), otpCode });
+      const res = await base44.auth.verifyOtp({ email: cleanEmail, otpCode });
       const token = res?.access_token || res?.data?.access_token;
       if (token) base44.auth.setToken(token);
-      // Whether or not a token came back, a verified account can now be routed.
+      else await signInNow();
       await onVerified();
     } catch (err) {
+      // The verify call errored — but the account may already be verified
+      // (first attempt succeeded, or a retry with a consumed code). If we can
+      // sign in with their password, they're verified: move them on.
+      if (await signInNow()) {
+        await onVerified();
+        return;
+      }
       const detail = err?.response?.data?.detail || err?.response?.data?.message || '';
-      // If the account is already verified (e.g. the first attempt succeeded but the
-      // screen didn't advance, then the user retried with a consumed code), don't
-      // show a false "incorrect code" error — the account is good, move them on.
       if (/already.*verif|verif.*already/i.test(detail)) {
         await onVerified();
         return;

@@ -69,6 +69,7 @@ export default function GatorAuth() {
 
   // OTP verification step (after native signup)
   const [pendingOtpEmail, setPendingOtpEmail] = useState('');
+  const [pendingOtpPassword, setPendingOtpPassword] = useState('');
 
   // After a session is minted (login or OTP verify), refresh auth so checkAndRoute runs
   // and routes the user (new → 13-step onboarding, returning → dashboard).
@@ -99,6 +100,7 @@ export default function GatorAuth() {
         // Do NOT auto-resend: that issues a NEW code and invalidates the one already
         // sitting in their inbox, causing a correct code to read as "wrong/expired".
         // They can press "Resend code" on the OTP screen if they truly need a fresh one.
+        setPendingOtpPassword(signinPassword);
         setPendingOtpEmail(signinEmail.trim());
       } else {
         setError(detail || 'Invalid email or password.');
@@ -130,6 +132,7 @@ export default function GatorAuth() {
       // Native registration — creates the account and emails a 6-digit verification code.
       const cleanEmail = signupEmail.trim().toLowerCase();
       await base44.auth.register({ email: cleanEmail, password: signupPassword, full_name: fullName });
+      setPendingOtpPassword(signupPassword);
       setPendingOtpEmail(cleanEmail);
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.message || err?.message || '';
@@ -351,9 +354,9 @@ export default function GatorAuth() {
             </div>
             <p style={{ fontFamily: dmSans, fontSize: 15, color: '#64748b', margin: 0 }}>Verify your email to continue.</p>
           </div>
-          <OtpVerifyForm email={pendingOtpEmail} onVerified={completeAuth} />
+          <OtpVerifyForm email={pendingOtpEmail} password={pendingOtpPassword} onVerified={completeAuth} />
           <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <button onClick={() => { setPendingOtpEmail(''); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: '#94a3b8', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>← Back</button>
+            <button onClick={() => { setPendingOtpEmail(''); setPendingOtpPassword(''); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: '#94a3b8', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>← Back</button>
           </div>
         </div>
       </AuthPageShell>
