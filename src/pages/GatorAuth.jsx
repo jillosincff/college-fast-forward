@@ -76,6 +76,10 @@ export default function GatorAuth() {
   // and routes the user (new → 13-step onboarding, returning → dashboard).
   const completeAuth = async () => {
     try { await refreshUser(); } catch (e) {}
+    // Dismiss the OTP screen — while pendingOtpEmail is set, render short-circuits
+    // to the OTP form and the user gets stuck there even after routing decides.
+    setPendingOtpEmail('');
+    setPendingOtpPassword('');
     setStep(null); // re-trigger the routing effect via loading state
   };
 
