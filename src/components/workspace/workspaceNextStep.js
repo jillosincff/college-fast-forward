@@ -5,6 +5,8 @@ const resumeDone = s => ['ready_for_review', 'approved', 'complete'].includes(s 
 
 export function computeVerdict(fit) {
   const label = fit?.fit_label || '';
+  // A hard location violation (e.g. relocation the student explicitly ruled out) always means skip
+  if (fit?.location_fit?.hard_constraint_violation) return { icon: '⚠️', word: 'Skip', tone: 'skip' };
   if (label === 'Low Priority') return { icon: '⚠️', word: 'Skip', tone: 'skip' };
   if (label === 'Strong Match') return { icon: '🔥', word: 'Pursue', tone: 'pursue' };
   return { icon: '⭐', word: 'Worth pursuing', tone: 'consider' };
@@ -19,7 +21,9 @@ export function computeNextStep(pursuit, fit) {
     return {
       key: 'skip',
       title: 'Skip this one.',
-      detail: fit?.recommendation || "Your time is better spent on a stronger opportunity — I'd rather you send one great application than three rushed ones.",
+      detail: (fit?.location_fit?.hard_constraint_violation && fit.location_fit.display_explanation)
+        || fit?.recommendation
+        || "Your time is better spent on a stronger opportunity — I'd rather you send one great application than three rushed ones.",
       time: '0 min', ctaLabel: 'Show me better opportunities', cta: 'back',
     };
   }

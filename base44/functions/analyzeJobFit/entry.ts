@@ -19,6 +19,16 @@ Deno.serve(async (req) => {
     const seeking = goals.seeking || 'both';
     const locPref = goals.location_preference || user.location_preference || '';
 
+    // Shared Location Intelligence — the authoritative location verdict for this job
+    let locationFit: any = null;
+    try {
+      const locRes = await base44.functions.invoke('locationIntelligence', {
+        jobs: [{ key: 'job', location: location || '', title: role }],
+        log_context: 'workspace',
+      });
+      locationFit = ((locRes as any)?.data?.evaluations || (locRes as any)?.evaluations || [])[0] || null;
+    } catch (e) { /* service optional — fit analysis still works */ }
+
     // Best-effort resume context — fit analysis still works from goals alone.
     let resumeText = '';
     try {
@@ -41,6 +51,7 @@ JOB:
 - Company: ${company}
 - Role: ${role}
 - Location: ${location || 'not specified'}
+- CLIFF's location assessment (AUTHORITATIVE — weave it naturally into why_match and recommendation, never contradict it): ${locationFit?.location_reason || 'no location preference data'}${locationFit?.hard_constraint_violation ? " This job VIOLATES the student's stated location constraint — recommend skipping it unless something exceptional applies." : ''}
 - Description: ${(jobDescription || '').slice(0, 5000) || 'not provided'}
 
 Analyze the fit. Rules:
@@ -70,7 +81,7 @@ Write in a warm, direct tone addressed to the student ("you").`;
       },
     });
 
-    return Response.json({ success: true, fit: result });
+    return Response.json({ success: true, fit: { ...result, location_fit: locationFit } });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

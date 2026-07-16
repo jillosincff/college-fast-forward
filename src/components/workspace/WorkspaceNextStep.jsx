@@ -34,6 +34,13 @@ export default function WorkspaceNextStep({ job, pursuit, fit, fitLoading, user 
   const plan = computePlan(pursuit, step.key);
   const vs = VERDICT_STYLES[verdict.tone];
 
+  // Location reasoning lives inside the Next Step reasoning — proof CLIFF listened.
+  // (Skip verdicts already carry the location explanation as their detail.)
+  const locFit = fit?.location_fit;
+  const locNote = step.key !== 'skip' && locFit?.display_explanation && ['strong', 'tradeoff'].includes(locFit.location_match)
+    ? locFit.display_explanation
+    : '';
+
   const act = () => {
     if (step.cta === 'tailor') {
       const params = new URLSearchParams({ company, role, job_url: jobUrl, from: 'workspace' });
@@ -57,7 +64,7 @@ export default function WorkspaceNextStep({ job, pursuit, fit, fitLoading, user 
 
       <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 4px' }}>Next step</p>
       <h2 style={{ fontFamily: dm, fontSize: 19, fontWeight: 900, color: '#111827', margin: '0 0 6px', lineHeight: 1.3 }}>{step.title}</h2>
-      <p style={{ fontFamily: dm, fontSize: 13, color: '#4b5563', margin: '0 0 14px', lineHeight: 1.55 }}>{step.detail}</p>
+      <p style={{ fontFamily: dm, fontSize: 13, color: '#4b5563', margin: '0 0 14px', lineHeight: 1.55 }}>{step.detail}{locNote ? ` ${locNote}` : ''}</p>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
         <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#9ca3af', display: 'flex', alignItems: 'center', gap: 5 }}>
