@@ -384,7 +384,11 @@ export default function GatorAuth() {
       try {
         await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
       } catch (e) {}
+      // Full reload so the auth context re-fetches the now-onboarded user —
+      // otherwise OnboardingGuard sees the stale (no persona) user and loops
+      // the student back to onboarding screen 1.
       window.location.hash = '#/FreeTierDashboard';
+      window.location.reload();
     };
     return <OnboardingFlow postAuth={true} onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} resumeAtScreen={null} />;
   }

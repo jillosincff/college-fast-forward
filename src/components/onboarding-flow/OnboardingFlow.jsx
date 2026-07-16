@@ -288,7 +288,12 @@ CRITICAL RULES:
 
     if (postAuth || onAlreadyAuthed || alreadyAuthed) {
       if (planType === 'free') {
+        // Full reload — the in-memory auth context still has the PRE-onboarding
+        // user (no persona), so a plain hash change gets bounced by
+        // OnboardingGuard back to GatorAuth → onboarding screen 1 (the
+        // "Meet CLIFF" loop). Reloading re-fetches the updated user.
         window.location.hash = '#/FreeTierDashboard';
+        window.location.reload();
       } else {
         if (onAlreadyAuthed) onAlreadyAuthed();
         else if (onClose) onClose();
