@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
+import AvoidingPreferencesStrip from './AvoidingPreferencesStrip';
 
 export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFresh, openedFromNudge = false }) {
   const queryClient = useQueryClient();
@@ -120,6 +121,9 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
               </div>
             </div>
           ) : null}
+
+          {/* Negative preferences CLIFF remembers (e.g. "no sales") — read-only here */}
+          <AvoidingPreferencesStrip userEmail={user?.email} />
 
           {error && <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', padding: '10px 12px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>{error}</div>}
 
