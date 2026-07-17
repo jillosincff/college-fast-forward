@@ -1,143 +1,120 @@
-import { base44 } from '@/api/base44Client';
 import CliffCommitmentScreen from './CliffCommitmentScreen';
 import ATSScoreRing from './ATSScoreRing';
-import LiveEngineLoader from './LiveEngineLoader';
+import ResumeStep from './ResumeStep';
 import {
-  FONT, BG, CARD, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_BORDER,
-  GRAD_INDIGO, SHADOW, SHADOW_MD, R, BLUE, BLUE_LIGHT, BLUE_BORDER,
-  GREEN, GREEN_LIGHT, GREEN_BORDER, CLIFF_SOLVE, Btn, Nav, InputField,
+  FONT, BG, CARD, TEXT, TEXT2, TEXT3, INDIGO,
+  GRAD_INDIGO, SHADOW, SHADOW_MD, R, BLUE,
+  GREEN, GREEN_LIGHT, GREEN_BORDER, CLIFF_SOLVE, Nav,
 } from './onboardingShared';
 
 /**
  * Onboarding screens 8–11 of the agent-hiring flow:
- * 8 = Resume · 9 = Resume reveal · 10 = One priority · 11 = Here's our plan
+ * 8 = One priority · 9 = Resume (optional) · 10 = Resume insight · 11 = Here's our plan
+ * Resume comes AFTER CLIFF understands the student — it's an accelerator, not an entrance fee.
  */
 export default function OnboardingSteps9to13({
   screen, next, back,
   h1style, substyle,
-  // screen 7 (resume)
+  // screen 9 (resume)
   fileRef, handleFileUpload, uploading, setUploading,
   dataInputMode, setDataInputMode,
   college, seeking, selectedIndustries, setResumeData,
   quickMajor, setQuickMajor, quickSkills, setQuickSkills, quickRole, setQuickRole,
-  // screen 8 (reveal)
+  yearLevel, onSkipConfirm, trackResume,
+  // screen 10 (insight)
   firstName, resumeData,
-  // screen 9 (one priority)
+  // screen 8 (one priority)
   blockers, selectBlocker,
-  // screen 10 (plan)
+  // screen 11 (plan)
   targetRoles, locationCity, locationPref, saveAndAuth,
 }) {
   return (
     <>
-      {/* ── SCREEN 8: Give CLIFF something to work with ── */}
-      {screen === 8 && (
-        <div style={{ textAlign: 'center', maxWidth: 520, width: '100%' }}>
-          <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
+      {/* ── SCREEN 8: One Priority ── */}
+      {screen === 8 && (() => {
+        const selectedKey = blockers[0] || null;
+        const selected = CLIFF_SOLVE.find(o => o.key === selectedKey);
+        return (
+          <div style={{ textAlign: 'center', maxWidth: 540, width: '100%' }}>
+            <h1 style={h1style}>If I could solve ONE thing first…</h1>
+            <p style={{ ...substyle, marginBottom: 20 }}>What would help most?</p>
 
-          {uploading && <LiveEngineLoader college={college} selectedIndustries={selectedIndustries} seeking={seeking} onSkip={() => { setUploading(false); next(); }} />}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }} className="blocker-card-list">
+              {CLIFF_SOLVE.map(opt => {
+                const active = selectedKey === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => selectBlocker(opt.key)}
+                    className="onb-option-btn"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                      background: active ? GREEN_LIGHT : CARD,
+                      border: `2px solid ${active ? GREEN : '#E2E8F0'}`,
+                      borderRadius: 14, padding: '16px 18px', cursor: 'pointer',
+                      textAlign: 'left', minHeight: 'auto',
+                      boxShadow: active
+                        ? `0 0 0 3px ${GREEN_BORDER}, 0 8px 20px rgba(6,182,212,0.12)`
+                        : '0 4px 12px rgba(0,0,0,0.05)',
+                      transform: active ? 'translateY(-1px)' : 'translateY(0)',
+                      transition: 'all 0.18s ease',
+                    }}
+                    onMouseEnter={e => { if (!active) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = '#CBD5E1'; } }}
+                    onMouseLeave={e => { if (!active) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E2E8F0'; } }}
+                  >
+                    <span style={{ fontSize: 20, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'rgba(6,182,212,0.12)' : BG, borderRadius: 10, border: `1px solid ${active ? GREEN_BORDER : '#E2E8F0'}`, transition: 'all 0.18s' }}>{opt.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: active ? '#0E7490' : TEXT, margin: '0 0 3px' }}>{opt.label}</p>
+                      <p style={{ fontFamily: FONT, fontSize: 12, color: active ? '#0891b2' : TEXT3, margin: 0, fontStyle: 'italic' }}>{opt.sub}</p>
+                    </div>
+                    <div style={{
+                      width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                      border: `2px solid ${active ? GREEN : '#CBD5E1'}`,
+                      background: active ? GREEN : 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, color: '#fff', fontWeight: 800,
+                      transition: 'all 0.18s ease',
+                    }}>
+                      {active && '✓'}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
-          {!uploading && dataInputMode === 'choose' && (
-            <>
-              <h1 style={h1style}>Give CLIFF something to work with.</h1>
-              <p style={{ ...substyle, marginBottom: 8 }}>The more I know about you, the smarter my matches, materials, and warm intros get.</p>
-              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#059669', margin: '0 0 28px' }}>Even if it's rough — I'll improve it.</p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
-                {/* Upload Resume */}
-                <button onClick={() => fileRef.current?.click()}
-                  style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 14, background: GREEN_LIGHT, border: `2px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: `0 4px 12px rgba(16,185,129,0.10)` }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = GREEN; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 20px rgba(16,185,129,0.18)`; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = GREEN_BORDER; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(16,185,129,0.10)`; }}
-                >
-                  <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 10, border: `1px solid ${GREEN_BORDER}` }}>📄</span>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>Upload Resume</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>PDF or Word — see what I can do with it in seconds</p>
-                    <p style={{ fontFamily: FONT, fontSize: 11, color: '#059669', margin: 0, fontStyle: 'italic' }}>I'll rewrite bullet points, add ATS keywords + align it with your target roles</p>
-                  </div>
-                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: GREEN, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>BEST</span>
-                </button>
-
-                {/* Quick Start — no resume needed */}
-                <button onClick={() => setDataInputMode('quickstart')}
-                  style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 14, background: BLUE_LIGHT, border: `2px solid ${BLUE_BORDER}`, borderRadius: 14, padding: '18px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: `0 4px 12px rgba(0,102,255,0.08)` }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 20px rgba(0,102,255,0.14)`; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(0,102,255,0.08)`; }}
-                >
-                  <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 10, border: `1px solid ${BLUE_BORDER}` }}>⚡</span>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>No resume yet? No problem.</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>Answer 3 quick questions and I'll build your foundation myself.</p>
-                    <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic' }}>Perfect for freshmen and first-time job seekers</p>
-                  </div>
-                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: INDIGO, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>FAST</span>
-                </button>
+            {selected && (
+              <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
+                <p style={{ fontFamily: FONT, fontSize: 14, color: '#0E7490', margin: 0, lineHeight: 1.6 }}>
+                  <strong>Perfect. That's my first priority.</strong><br />
+                  {selected.sub}
+                </p>
               </div>
+            )}
 
-              <div style={{ textAlign: 'center', marginTop: 16 }}>
-                <button onClick={next} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 8px', textDecoration: 'underline', textUnderlineOffset: 3 }}>
-                  Skip for now →
-                </button>
-              </div>
+            <Nav onBack={back} onNext={next} nextDisabled={!selectedKey} />
+          </div>
+        );
+      })()}
 
-              <div style={{ textAlign: 'center', marginTop: 8 }}>
-                <button onClick={back} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
-              </div>
-            </>
-          )}
-
-          {!uploading && dataInputMode === 'quickstart' && (
-            <>
-              <div style={{ width: 56, height: 56, borderRadius: 14, background: '#FFFBEB', border: '1px solid #FDE68A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, margin: '0 auto 20px', boxShadow: SHADOW }}>⚡</div>
-              <h1 style={h1style}>Tell me the basics.</h1>
-              <p style={substyle}>Answer 3 questions and I'll build your foundation in seconds.</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, textAlign: 'left', marginBottom: 20 }}>
-                <InputField label="1. What's your major?" placeholder="e.g. Business Administration, Computer Science..." value={quickMajor} onChange={e => setQuickMajor(e.target.value)} />
-                <InputField label="2. What are 2 things you're good at?" placeholder="e.g. Python, Writing, Organizing events, Excel..." value={quickSkills} onChange={e => setQuickSkills(e.target.value)} />
-                <InputField label="3. What job/internship are you dreaming of?" placeholder="e.g. Marketing internship at a tech company..." value={quickRole} onChange={e => setQuickRole(e.target.value)} />
-              </div>
-              <Btn
-                onClick={async () => {
-                  if (!quickMajor.trim() || !quickSkills.trim() || !quickRole.trim()) return;
-                  setUploading(true);
-                  try {
-                    const res = await base44.integrations.Core.InvokeLLM({
-                      prompt: `Build a realistic starter professional profile for a college student with:
-Major: ${quickMajor}, Skills: ${quickSkills}, Dream role: ${quickRole}, University: ${college || 'university'}
-Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, class projects), relevant skills, and education. Then write an optimized version.`,
-                      response_json_schema: {
-                        type: 'object', properties: {
-                          original: { type: 'object', properties: {
-                            name: { type: 'string' }, summary: { type: 'string' },
-                            education: { type: 'array', items: { type: 'object', properties: { school: { type: 'string' }, degree: { type: 'string' }, dates: { type: 'string' } } } },
-                            experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } },
-                            skills: { type: 'array', items: { type: 'string' } },
-                            activities: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' } } } }
-                          }},
-                          optimized_experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } }
-                        }
-                      }
-                    });
-                    const parsed = res.original;
-                    if (parsed.education?.length > 0 && college) parsed.education[0].school = college;
-                    setResumeData({ original: parsed, optimized: { ...parsed, experience: res.optimized_experience }, isQuickStart: true, targetRole: quickRole });
-                  } catch { /* advance anyway */ }
-                  setUploading(false);
-                  next();
-                }}
-                disabled={!quickMajor.trim() || !quickSkills.trim() || !quickRole.trim()}
-                style={{ display: 'block', width: '100%', marginBottom: 12 }}
-              >Build It For Me →</Btn>
-              <div style={{ textAlign: 'center' }}>
-                <button onClick={() => setDataInputMode('choose')} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>← Back to options</button>
-              </div>
-            </>
-          )}
-        </div>
+      {/* ── SCREEN 9: Resume — encouraged, never required ── */}
+      {screen === 9 && (
+        <ResumeStep
+          next={next} back={back} h1style={h1style} substyle={substyle}
+          fileRef={fileRef} handleFileUpload={handleFileUpload}
+          uploading={uploading} setUploading={setUploading}
+          dataInputMode={dataInputMode} setDataInputMode={setDataInputMode}
+          college={college} seeking={seeking} yearLevel={yearLevel}
+          setResumeData={setResumeData}
+          quickMajor={quickMajor} setQuickMajor={setQuickMajor}
+          quickSkills={quickSkills} setQuickSkills={setQuickSkills}
+          quickRole={quickRole} setQuickRole={setQuickRole}
+          onSkipConfirm={onSkipConfirm} trackResume={trackResume}
+        />
       )}
 
-      {/* ── SCREEN 9: Resume Reveal — "Here's what I noticed." ── */}
-      {screen === 9 && (
+      {/* ── SCREEN 10: Resume Insight — "Here's what I noticed." ── */}
+      {screen === 10 && (
       <div style={{ maxWidth: 900, width: '100%', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
@@ -147,7 +124,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
             : <>Here's what I <span style={{ color: '#10B981' }}>noticed.</span></>}
         </h1>
         <p style={{ fontFamily: FONT, fontSize: 17, fontWeight: 700, color: TEXT, margin: '0 auto 8px', maxWidth: 560, lineHeight: 1.5 }}>
-          Good news — you're already closer than you think.
+          Good news — you already have useful experience to build from.
         </p>
         <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 auto', maxWidth: 560, lineHeight: 1.7 }}>
           {dataInputMode === 'quickstart'
@@ -279,73 +256,6 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           </div>
         </div>
       )}
-
-      {/* ── SCREEN 10: One Priority ── */}
-      {screen === 10 && (() => {
-        const selectedKey = blockers[0] || null;
-        const selected = CLIFF_SOLVE.find(o => o.key === selectedKey);
-        return (
-          <div style={{ textAlign: 'center', maxWidth: 540, width: '100%' }}>
-            <h1 style={h1style}>If I could solve ONE thing first…</h1>
-            <p style={{ ...substyle, marginBottom: 20 }}>What would help most?</p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }} className="blocker-card-list">
-              {CLIFF_SOLVE.map(opt => {
-                const active = selectedKey === opt.key;
-                return (
-                  <button
-                    key={opt.key}
-                    onClick={() => selectBlocker(opt.key)}
-                    className="onb-option-btn"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 14, width: '100%',
-                      background: active ? GREEN_LIGHT : CARD,
-                      border: `2px solid ${active ? GREEN : '#E2E8F0'}`,
-                      borderRadius: 14, padding: '16px 18px', cursor: 'pointer',
-                      textAlign: 'left', minHeight: 'auto',
-                      boxShadow: active
-                        ? `0 0 0 3px ${GREEN_BORDER}, 0 8px 20px rgba(6,182,212,0.12)`
-                        : '0 4px 12px rgba(0,0,0,0.05)',
-                      transform: active ? 'translateY(-1px)' : 'translateY(0)',
-                      transition: 'all 0.18s ease',
-                    }}
-                    onMouseEnter={e => { if (!active) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = '#CBD5E1'; } }}
-                    onMouseLeave={e => { if (!active) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E2E8F0'; } }}
-                  >
-                    <span style={{ fontSize: 20, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? 'rgba(6,182,212,0.12)' : BG, borderRadius: 10, border: `1px solid ${active ? GREEN_BORDER : '#E2E8F0'}`, transition: 'all 0.18s' }}>{opt.icon}</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: active ? '#0E7490' : TEXT, margin: '0 0 3px' }}>{opt.label}</p>
-                      <p style={{ fontFamily: FONT, fontSize: 12, color: active ? '#0891b2' : TEXT3, margin: 0, fontStyle: 'italic' }}>{opt.sub}</p>
-                    </div>
-                    <div style={{
-                      width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                      border: `2px solid ${active ? GREEN : '#CBD5E1'}`,
-                      background: active ? GREEN : 'transparent',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 11, color: '#fff', fontWeight: 800,
-                      transition: 'all 0.18s ease',
-                    }}>
-                      {active && '✓'}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selected && (
-              <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
-                <p style={{ fontFamily: FONT, fontSize: 14, color: '#0E7490', margin: 0, lineHeight: 1.6 }}>
-                  <strong>Perfect. That's my first priority.</strong><br />
-                  {selected.sub}
-                </p>
-              </div>
-            )}
-
-            <Nav onBack={back} onNext={next} nextDisabled={!selectedKey} />
-          </div>
-        );
-      })()}
 
       {/* ── SCREEN 11: Here's Our Plan → planning → dashboard ── */}
       {screen === 11 && (

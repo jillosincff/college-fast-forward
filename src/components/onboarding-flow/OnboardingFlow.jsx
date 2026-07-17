@@ -16,8 +16,8 @@ import {
 /**
  * The agent-hiring flow — 11 screens:
  * 1 Meet CLIFF · 2 Goal · 3 School · 4 Year · 5 Career interest ·
- * 6 Ideal opportunity · 7 Work location · 8 Resume · 9 Reveal ·
- * 10 One priority · 11 Our plan
+ * 6 Ideal opportunity · 7 Work location · 8 One priority · 9 Resume ·
+ * 10 Reveal · 11 Our plan
  */
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false, resumeAtScreen = null }) {
   // Load saved progress for returning users. Positions saved by the old
@@ -68,6 +68,26 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [selectedIndustries, setSelectedIndustries] = useState(saved?.selectedIndustries ?? []);
   const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
   const fileRef = useRef();
+  const [resumeSkipped, setResumeSkipped] = useState(false);
+
+  // Fire-and-forget resume-funnel analytics
+  const trackResume = (event_name, props = {}) => {
+    base44.functions.invoke('logAnalyticsEvent', {
+      event_name,
+      properties: {
+        year: yearLevel || '', seeking: seeking || '',
+        device: window.innerWidth < 768 ? 'mobile' : 'desktop',
+        ...props,
+      },
+    }).catch(() => {});
+  };
+
+  // "Skip for now" confirmed — advance without a resume, keeping every prior answer
+  const confirmResumeSkip = () => {
+    setResumeSkipped(true);
+    setDataInputMode('choose');
+    next();
+  };
 
   const TOTAL = 11;
   const displayStep = screen;
@@ -104,6 +124,13 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     return () => window.removeEventListener('pagehide', onPageHide);
   }, []);
 
+  // Resume-funnel step views
+  useEffect(() => {
+    if (screen === 9) trackResume('onboarding_resume_step_viewed');
+    if (screen === 10 && resumeData) trackResume('onboarding_resume_insight_viewed');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
+
   // Carry forward any location CLIFF already extracted from the ideal-opportunity
   // free text — never ask the student to repeat themselves.
   useEffect(() => {
@@ -120,9 +147,9 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
 
   const next = () => {
     let newScreen = screen + 1;
-    // Skippers have no resume — bypass the reveal screen (9),
+    // Skippers have no resume — bypass the reveal screen (10),
     // which would otherwise render infinite "parsing" spinners.
-    if (newScreen === 9 && !resumeData) newScreen = 10;
+    if (newScreen === 10 && !resumeData) newScreen = 11;
     saveProgress(newScreen, {
       cff_seeking: seeking,
       cff_college: college,
@@ -145,10 +172,10 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const back = () => {
     setScreen(s => {
       let prev = Math.max(1, s - 1);
-      // Mirror the forward skip: no resume → reveal (9) doesn't exist for this user
-      if (prev === 9 && !resumeData) prev = 8;
+      // Mirror the forward skip: no resume → reveal (10) doesn't exist for this user
+      if (prev === 10 && !resumeData) prev = 9;
       // Reset resume screen sub-mode when leaving via back
-      if (s === 8) setDataInputMode('choose');
+      if (s === 9) setDataInputMode('choose');
       return prev;
     });
   };
@@ -177,12 +204,22 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = ''; // allow re-selecting the same file after a failure
+    // Client-side guardrails: supported formats + size limit (shown on the step)
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    if (!['pdf', 'doc', 'docx'].includes(ext) || file.size > 10 * 1024 * 1024) {
+      trackResume('onboarding_resume_parse_failed', { reason: file.size > 10 * 1024 * 1024 ? 'too_large' : 'unsupported_format' });
+      setDataInputMode('failed');
+      return;
+    }
     // Note: a fresh upload is ALWAYS parsed — the 24h cache only restores
     // state for drop-off returns (handled at state init), never new files.
+    trackResume('onboarding_resume_upload_started');
     setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setResumeUrl(file_url);
+      trackResume('onboarding_resume_upload_completed');
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `You are a resume parser. Analyze this resume file and return TWO versions.
 CRITICAL RULES:
@@ -232,13 +269,21 @@ CRITICAL RULES:
           }
         });
       }
+      // A filename alone is never proof of parsing — require real extracted content
+      const hasContent = parsed && typeof parsed === 'object' &&
+        (parsed.experience?.length || parsed.education?.length || parsed.skills?.length || (parsed.summary || '').trim());
+      if (!hasContent) throw new Error('no_extractable_text');
       setResumeData({ original: parsed, optimized: { ...parsed, experience: result.optimized_experience } });
+      trackResume('onboarding_resume_parse_succeeded');
       setUploading(false);
+      setDataInputMode('choose');
       next();
       return;
     } catch (err) {
+      // Never lose progress — show recovery options instead of silently advancing
+      trackResume('onboarding_resume_parse_failed', { reason: err?.message || 'parse_error' });
       setUploading(false);
-      next();
+      setDataInputMode('failed');
       return;
     }
   };
@@ -260,6 +305,14 @@ CRITICAL RULES:
       if (selectedIndustries.length) localStorage.setItem('cff_industries', JSON.stringify(selectedIndustries));
       if (targetRoles.length) localStorage.setItem('cff_target_roles', JSON.stringify(targetRoles));
       if (resumeUrl) localStorage.setItem('cff_resume_url', resumeUrl);
+      // Resume capture state — also read by GatorAuth's post-OAuth profile finalization
+      const resumeStatus = resumeData ? 'ready' : 'not_provided';
+      const resumeSource = resumeData
+        ? (resumeData.isQuickStart ? 'built_with_cliff' : resumeData.isPasted ? 'pasted_text' : 'upload')
+        : '';
+      localStorage.setItem('cff_resume_status', resumeStatus);
+      localStorage.setItem('cff_resume_source', resumeSource);
+      localStorage.setItem('cff_resume_skipped', resumeSkipped ? 'true' : 'false');
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
       if (loc) localStorage.setItem('cff_location', loc);
       // Structured work-location preferences — used by ranking + carried through OAuth
@@ -284,6 +337,11 @@ CRITICAL RULES:
               school_code: (deriveSchoolCode(college) || '').toUpperCase(),
               academic_year: yearLevel || '',
               career_blockers: blockers,
+              resume_status: resumeStatus,
+              resume_source: resumeSource,
+              onboarding_resume_skipped: resumeSkipped,
+              onboarding_resume_step_completed: true,
+              ...(resumeUrl ? { resume_uploaded_at: new Date().toISOString() } : {}),
               ...locPayload,
             });
           // Explicit location statements → high-confidence CLIFF memories
@@ -301,6 +359,8 @@ CRITICAL RULES:
               year: yearLevel || '',
               blockers_count: blockers.length,
               has_resume: !!resumeUrl,
+              resume_status: resumeStatus,
+              resume_skipped: resumeSkipped,
             },
           }).catch(() => {});
         }
@@ -335,7 +395,7 @@ CRITICAL RULES:
     }
   };
 
-  const isFullPageScreen = screen === 9; // resume reveal is full-page
+  const isFullPageScreen = screen === 10; // resume reveal is full-page
   const rawName = resumeData?.original?.name;
   const authFirstName = (() => {
     try { return sessionStorage.getItem('cff_auth_first_name') || null; } catch { return null; }
@@ -449,6 +509,8 @@ CRITICAL RULES:
           quickSkills={quickSkills} setQuickSkills={setQuickSkills}
           quickRole={quickRole} setQuickRole={setQuickRole}
           firstName={firstName} resumeData={resumeData}
+          yearLevel={yearLevel}
+          onSkipConfirm={confirmResumeSkip} trackResume={trackResume}
           blockers={blockers} selectBlocker={selectBlocker}
           targetRoles={targetRoles} locationCity={locationCity} locationPref={locationPref}
           saveAndAuth={saveAndAuth}

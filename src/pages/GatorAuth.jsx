@@ -230,6 +230,10 @@ export default function GatorAuth() {
             try { blockers = JSON.parse(localStorage.getItem('cff_blockers') || '[]'); } catch (e) {}
             let locPrefs = {};
             try { locPrefs = JSON.parse(localStorage.getItem('cff_location_prefs') || '{}') || {}; } catch (e) {}
+            // Resume capture state saved by the funnel before the OAuth round-trip —
+            // attach it to the new account so the upload survives authentication.
+            const resumeStatus = localStorage.getItem('cff_resume_status') || 'not_provided';
+            const resumeUrl = localStorage.getItem('cff_resume_url') || '';
             await base44.auth.updateMe({
               persona: 'student',
               roles: ['student'],
@@ -238,6 +242,11 @@ export default function GatorAuth() {
               school: college,
               school_code: (deriveSchoolCode(college) || '').toUpperCase(),
               career_blockers: blockers,
+              resume_status: resumeStatus,
+              resume_source: localStorage.getItem('cff_resume_source') || '',
+              onboarding_resume_skipped: localStorage.getItem('cff_resume_skipped') === 'true',
+              onboarding_resume_step_completed: true,
+              ...(resumeUrl ? { resume_file_url: resumeUrl, resume_uploaded_at: new Date().toISOString() } : {}),
               ...locPrefs,
             });
             // Work-location statements captured in the funnel → CLIFF memories
