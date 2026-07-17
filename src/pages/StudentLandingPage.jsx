@@ -304,7 +304,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: 'clamp(8px, 2.5vw, 12px) clamp(14px, 4vw, 28px)', marginBottom: 'clamp(20px, 5vw, 32px)' }}>
                 <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 800, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>YOUR AI CAREER AGENT FOR INTERNSHIPS AND FIRST JOBS</span>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 800, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>COLLEGE FAST FORWARD · POWERED BY CLIFF</span>
               </div>
             )}
 
@@ -312,9 +312,9 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-2">
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.08, color: '#030712', margin: '0 0 16px' }}>
-                  <span style={{ display: 'block' }}>Stop wondering what to do next.</span>
+                  <span style={{ display: 'block' }}>Getting your first job is brutal.</span>
                   <span style={{ display: 'block', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                    CLIFF already has a plan.
+                    Meet CLIFF. He works for you 24/7.
                   </span>
                 </h1>
               </div>
@@ -324,7 +324,8 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
-                  Tell CLIFF your goals. It builds your career plan, finds the opportunities worth your time, and tells you exactly what to do next — from freshman year through your first offer.
+                  Tell him where you want to go.<br />
+                  He'll find the right jobs, tailor your resume, prep you for interviews, and tell you exactly what to do next.
                 </h2>
               </div>
             )}
@@ -347,7 +348,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Build My Plan
+                  Get Started Free
                 </button>
                 <button onClick={() => scrollToSection('how-cliff-works')} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(15px, 3.5vw, 16px)', fontWeight: 700, color: INDIGO,
@@ -379,7 +380,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 </div>
 
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(12px, 3vw, 13px)', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                  Free to start. Your first CLIFF-powered application is on us. No credit card required.
+                  No credit card required.
                 </p>
 
               </div>
