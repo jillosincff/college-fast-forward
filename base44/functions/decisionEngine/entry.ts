@@ -10,10 +10,11 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const [pipelineRaw, resumesRaw, plans] = await Promise.all([
+    const [pipelineRaw, resumesRaw, plans, masterResumesRaw] = await Promise.all([
       base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 100).catch(() => []),
       base44.entities.TailoredResume.filter({ user_email: user.email }, '-created_date', 20).catch(() => []),
       base44.entities.CareerPlan.filter({ user_email: user.email, status: 'active' }, '-created_date', 1).catch(() => []),
+      base44.entities.Resume.filter({ student_email: user.email }, '-created_date', 1).catch(() => []),
     ]);
     const pipeline = pipelineRaw || [];
     const resumes = resumesRaw || [];
@@ -53,6 +54,10 @@ Deno.serve(async (req) => {
     const unprepared = pipeline.find(r => ['identified', 'matched'].includes(r.status)
       && !resumes.some(t => (t.company_name || '').toLowerCase() === (r.company || '').toLowerCase()));
     const opps = plan?.opportunities || [];
+    // No master resume on file — blocks every application CLIFF could prepare.
+    // Deliberately ranked BELOW offers, imminent interviews, and due follow-ups:
+    // adding a resume never outranks a live deadline.
+    const noResume = !(masterResumesRaw || []).length;
 
     // ── THE decision: one move, strict priority ladder ─────────────────
     let move: any; let urgency = 'normal';
@@ -71,6 +76,9 @@ Deno.serve(async (req) => {
         suppressed.push(`I'm holding your ${r.company} follow-up until tomorrow — one nudge at a time gets replies.`);
         timeline.push({ emoji: '⏰', date: atDay(i + 1), text: `Follow up with ${r.alumni_name || r.company}`, cta: 'Follow up', action: route('#/ApplicationTracker') });
       });
+    } else if (noResume && (unprepared || opps.length)) {
+      const target = unprepared?.company || opps[0]?.company || '';
+      move = { title: 'Add your resume', reason: `You're ready to apply${target ? ` to ${target}` : ''} — I just need your resume to prepare a strong, tailored application.`, time: '~1 minute', outcome: 'Unlocks tailored applications and sharper matches — even a rough draft works.', cta: 'Add resume', action: route('#/ResumeTailoring') };
     } else if (readyResume) {
       move = { title: `Apply to ${readyResume.company_name}`, reason: "I already tailored your resume — it just needs your approval before it goes out.", time: '~5 minutes', outcome: `A submitted application at ${readyResume.company_name}.`, cta: 'Continue', action: route('#/ResumeTailoring') };
     } else if (unprepared) {

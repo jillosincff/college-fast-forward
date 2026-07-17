@@ -12,6 +12,7 @@ import ResumeBuilderStep from '@/components/fast-track-pro/ResumeBuilderStep';
 import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
 import TailoringResults from '@/components/resume-tailor/TailoringResults';
 import ApplyTailorStep from '@/components/resume-tailor/ApplyTailorStep';
+import ContextualResumeUpload from '@/components/resume-tailor/ContextualResumeUpload';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
 import { getFastTrackVariant, trackQueuedView, trackQueuedUpgradeClick, trackQueuedBackOut } from '@/utils/tailoringLatency';
 
@@ -343,6 +344,42 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     }
   };
 
+  // Contextual upload mid-application: the student started applying without a
+  // resume on file. Upload + extract text synchronously (tailoring needs it),
+  // then return automatically to the SAME opportunity — never the dashboard.
+  const uploadResumeForApply = async (file) => {
+    setFileName(file.name);
+    setPhase('uploading');
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      base44.auth.updateMe({
+        resume_url: file_url, resume_filename: file.name,
+        resume_status: 'ready', resume_source: 'upload',
+        resume_uploaded_at: new Date().toISOString(),
+      }).catch(() => {});
+      const extracted = await base44.integrations.Core.InvokeLLM({
+        prompt: 'Extract all text content from this resume document. Return only the raw text, preserving structure but no JSON or formatting.',
+        file_urls: [file_url],
+        model: 'gemini_3_flash',
+      });
+      const parsed_text = typeof extracted === 'string' ? extracted : '';
+      const newResume = await base44.entities.Resume.create({
+        student_email: user.email,
+        original_file_name: file.name,
+        original_file_url: file_url,
+        parsed_text,
+        is_active: true,
+      });
+      setResumes(prev => [...prev, newResume]);
+      setResumeId(newResume.id);
+      setResumeText(parsed_text);
+    } catch (e) {
+      console.error('Contextual upload failed:', e);
+    }
+    // Back to the exact opportunity either way — on failure the upload prompt re-renders
+    setPhase('applyTailor');
+  };
+
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -569,6 +606,18 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
   // ── PHASE: applyTailor (arrived from job-application "tailor it first") ────
   if (phase === 'applyTailor') {
+    // No resume on file (e.g. skipped during onboarding) — ask for it here,
+    // in the context of this job, and return to this same application after.
+    if (!hasResumes) {
+      return (
+        <ContextualResumeUpload
+          company={companyName || applyContext?.company || ''}
+          role={jobTitle || applyContext?.role || ''}
+          onFile={uploadResumeForApply}
+          onCancel={() => { try { sessionStorage.removeItem('cff_apply_tailor_ctx'); } catch {} navigate('FreeTierDashboard'); }}
+        />
+      );
+    }
     const active = resumes.find(r => r.is_active) || resumes[0];
     const resumeName = active?.name || active?.original_file_name || fileName || 'Your Resume';
     return (
