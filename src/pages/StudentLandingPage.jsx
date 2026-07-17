@@ -314,19 +314,29 @@ export default function StudentLandingPage({ onParentClick }) {
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.08, color: '#030712', margin: '0 0 16px' }}>
                   <span style={{ display: 'block' }}>Getting your first job is brutal.</span>
                   <span style={{ display: 'block', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                    Meet CLIFF. He works for you 24/7.
+                    Meet CLIFF. He does the work that gets you hired.
                   </span>
                 </h1>
               </div>
             )}
 
-            {/* Subheadline */}
+            {/* Checklist */}
             {mounted && (
-              <div className="hero-animate-3">
-                <h2 style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 21px)', fontWeight: 500, color: '#334155', margin: '0 0 32px', lineHeight: 1.5, letterSpacing: '-0.01em', maxWidth: 560 }}>
-                  Tell him where you want to go.<br />
-                  He'll find the right jobs, tailor your resume, prep you for interviews, and tell you exactly what to do next.
-                </h2>
+              <div className="hero-animate-3" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(10px, 2.5vw, 14px)', margin: '4px 0 32px' }}>
+                {[
+                  'Finds jobs worth your time.',
+                  'Tailors every application.',
+                  'Finds and reaches out to warm connections.',
+                  'Preps you for interviews.',
+                  'Keeps you on track.',
+                ].map((item, i) => (
+                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 12, animation: `fadeUp 0.5s ${0.35 + i * 0.15}s ease both` }}>
+                    <span style={{ width: 26, height: 26, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Check size={15} color={INDIGO} strokeWidth={3} />
+                    </span>
+                    <span style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 19px)', fontWeight: 600, color: '#334155', lineHeight: 1.4, letterSpacing: '-0.01em' }}>{item}</span>
+                  </div>
+                ))}
               </div>
             )}
 
