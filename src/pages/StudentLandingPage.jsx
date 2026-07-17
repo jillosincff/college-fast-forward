@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
-import { GraduationCap, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
 import Reveal from '@/components/landing/Reveal';
@@ -300,41 +300,36 @@ export default function StudentLandingPage({ onParentClick }) {
           {/* Left Column - Text */}
           <div className="hero-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
 
-            {/* Eyebrow */}
-            {mounted && (
-              <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: 'clamp(8px, 2.5vw, 12px) clamp(14px, 4vw, 28px)', marginBottom: 'clamp(20px, 5vw, 32px)' }}>
-                <GraduationCap size={14} color={INDIGO} style={{ flexShrink: 0 }} />
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 800, color: INDIGO, letterSpacing: '0.06em', lineHeight: 1.4 }}>COLLEGE FAST FORWARD · POWERED BY CLIFF</span>
-              </div>
-            )}
-
             {/* Headline */}
             {mounted && (
               <div className="hero-animate-2">
-                <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 60px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.08, color: '#030712', margin: '0 0 16px' }}>
-                  <span style={{ display: 'block' }}>Getting your first job is brutal.</span>
-                  <span style={{ display: 'block', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                    Meet CLIFF. He does the work that gets you hired.
-                  </span>
+                <h1 style={{ fontFamily: SF, fontSize: 'clamp(32px, 8.5vw, 62px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.08, color: '#030712', margin: '0 0 clamp(20px, 5vw, 28px)' }}>
+                  Getting your first job is brutal.
                 </h1>
+                <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 40px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.15, margin: '0 0 10px', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  Meet CLIFF.
+                </h2>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 500, color: '#334155', lineHeight: 1.4, letterSpacing: '-0.01em', margin: '0 0 clamp(24px, 6vw, 36px)' }}>
+                  He does the work that lands you interviews.
+                </p>
               </div>
             )}
 
             {/* Checklist */}
             {mounted && (
-              <div className="hero-animate-3" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(10px, 2.5vw, 14px)', margin: '4px 0 32px' }}>
+              <div className="hero-animate-3" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(14px, 3.5vw, 18px)', margin: '0 0 clamp(36px, 8vw, 48px)' }}>
                 {[
-                  'Finds jobs worth your time.',
-                  'Tailors every application.',
-                  'Finds and reaches out to warm connections.',
+                  'Finds jobs worth applying to.',
+                  'Tailors every resume for every job.',
+                  'Finds warm connections inside companies.',
                   'Preps you for interviews.',
                   'Keeps you on track.',
                 ].map((item, i) => (
-                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 12, animation: `fadeUp 0.5s ${0.35 + i * 0.15}s ease both` }}>
-                    <span style={{ width: 26, height: 26, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Check size={15} color={INDIGO} strokeWidth={3} />
+                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 14, animation: `fadeUp 0.5s ${0.35 + i * 0.15}s ease both` }}>
+                    <span style={{ width: 28, height: 28, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Check size={16} color={INDIGO} strokeWidth={3} />
                     </span>
-                    <span style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.2vw, 19px)', fontWeight: 600, color: '#334155', lineHeight: 1.4, letterSpacing: '-0.01em' }}>{item}</span>
+                    <span style={{ fontFamily: SF, fontSize: 'clamp(17px, 4.5vw, 20px)', fontWeight: 600, color: '#334155', lineHeight: 1.4, letterSpacing: '-0.01em' }}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -347,8 +342,8 @@ export default function StudentLandingPage({ onParentClick }) {
                 <button onClick={go} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(16px, 3.5vw, 18px)', fontWeight: 600, color: '#fff',
                   background: GRAD_INDIGO, border: 'none', borderRadius: 999,
-                  padding: 'clamp(16px, 4vw, 20px) clamp(48px, 8vw, 64px)',
-                  cursor: 'pointer', minHeight: 56,
+                  padding: 'clamp(18px, 4.5vw, 22px) clamp(48px, 8vw, 64px)',
+                  cursor: 'pointer', minHeight: 62,
                   boxShadow: '0 20px 48px rgba(109,40,217,0.35)',
                   transition: 'all 0.3s ease',
                   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
