@@ -23,6 +23,7 @@ import AtsMatcher from '@/components/free-tier/AtsMatcher';
 import FirstWarmMatchCard from '@/components/free-tier/FirstWarmMatchCard';
 import FirstApplicationPackageCard from '@/components/free-tier/FirstApplicationPackageCard';
 import { getThemeForSchool } from '@/lib/campusThemes';
+import { getFirstName } from '@/lib/firstName';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
@@ -193,7 +194,7 @@ export default function FreeTierDashboard() {
     return () => window.removeEventListener('cff:user-updated', handleUserUpdate);
   }, []);
 
-  const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const firstName = getFirstName(user);
   const college = (() => {
     try { return localStorage.getItem('cff_college') || user?.school || 'your university'; } catch { return 'your university'; }
   })();
