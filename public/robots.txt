@@ -1,35 +1,15 @@
 User-agent: *
-
-# Allow the homepage and future content/blog pages
-Allow: /$
-Allow: /blog/
-Allow: /resources/
-Allow: /sitemap.xml
-
-# Block all app & authenticated pages
-Disallow: /Dashboard
-Disallow: /Home
-Disallow: /HomePage
-Disallow: /AlumniHome
-Disallow: /AlumniAllSet
-Disallow: /AdminSetup
-Disallow: /AdminV2
-Disallow: /AdminReferrals
-Disallow: /admin
-Disallow: /ParentOnboarding
-Disallow: /SetSearchGoals
-Disallow: /PostRequest
-Disallow: /PaymentSuccess
-Disallow: /ResetPassword
-Disallow: /StudentInvitedOnboarding
-Disallow: /PublicProfile
-Disallow: /Unsubscribe
-Disallow: /GetStarted
-Disallow: /CareerAssessment
-Disallow: /AIAdvisor
-Disallow: /cliff-scout
-Disallow: /engagement-agent
+Allow: /
 Disallow: /ApplicationTracker
+Disallow: /Dashboard
+Disallow: /Login
+Disallow: /Register
+Disallow: /GetStarted
+Disallow: /Home
+Disallow: /AdminSetup
+Disallow: /SetSearchGoals
+Disallow: /action-plan-architect
+Disallow: /jill-osinoff-dashboard
+Disallow: /Unsubscribe
 
-# Sitemap location
 Sitemap: https://collegefastforward.com/sitemap.xml
