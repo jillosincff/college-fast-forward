@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
 
+    <!-- Force SEO title/OG overrides in case the app name is injected at runtime -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        document.title = 'AI Career Agent for College Students | College Fast Forward';
+        var ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', 'AI Career Agent for College Students | College Fast Forward');
+        var twTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twTitle) twTitle.setAttribute('content', 'AI Career Agent for College Students | College Fast Forward');
+      });
+    </script>
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z7KEL61F0C"></script>
     <script>
