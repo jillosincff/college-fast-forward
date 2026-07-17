@@ -147,8 +147,17 @@ export default function StudentLandingPage({ onParentClick }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Allow viewing the marketing page while logged in via ?preview=1 (search or hash params)
+  const isPreview = (() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
+      return searchParams.get('preview') === '1' || hashParams.get('preview') === '1';
+    } catch { return false; }
+  })();
+
   useEffect(() => {
-    if (isLoadingAuth || !user) return;
+    if (isLoadingAuth || !user || isPreview) return;
     if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentHome');
     else if (user.persona === 'alumni' || user.roles?.includes('alumni'))
       navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
@@ -212,7 +221,7 @@ export default function StudentLandingPage({ onParentClick }) {
   // While auth is resolving, or when a logged-in user is about to be redirected
   // to their dashboard, don't paint the marketing page — otherwise it flashes
   // for a beat before the redirect effect fires.
-  const willRedirect = !isLoadingAuth && user && (user.persona || user.roles?.length > 0);
+  const willRedirect = !isPreview && !isLoadingAuth && user && (user.persona || user.roles?.length > 0);
   if (isLoadingAuth || willRedirect) {
     return (
       <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: BG }}>
