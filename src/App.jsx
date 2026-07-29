@@ -14,14 +14,12 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
 import JoinPage from '@/pages/JoinPage';
 import AlumniHome from '@/pages/AlumniHome';
-import FastIQAssessment from '@/pages/FastIQAssessment';
 import StudentOnboarding from '@/pages/StudentOnboarding';
 import ResumeTailoring from '@/pages/ResumeTailoring';
 import MockInterview from '@/pages/MockInterview';
 import LinkedInReview from '@/pages/LinkedInReview';
 
 import CareerAssessment from '@/pages/CareerAssessment';
-import FastIQDashboard from '@/pages/FastIQDashboard';
 import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
 import StudentWelcome from '@/pages/StudentWelcome';
@@ -198,13 +196,13 @@ const AuthenticatedApp = () => {
       <Route path="/Directory" element={<Navigate to="/FreeTierDashboard" replace />} />
 
       {/* Feature routes — ALL guarded (require auth + onboarding) */}
-      <Route path="/FastIQAssessment" element={<OnboardingGuard><LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/FastIQAssessment" element={<Navigate to="/CareerAssessment" replace />} />
       <Route path="/ResumeTailoring" element={<OnboardingGuard><LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/MockInterview" element={<OnboardingGuard><LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/LinkedInReview" element={<OnboardingGuard><LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper></OnboardingGuard>} />
 
       <Route path="/CareerAssessment" element={<OnboardingGuard><LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper></OnboardingGuard>} />
-      <Route path="/FastIQDashboard" element={<OnboardingGuard><LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/FastIQDashboard" element={<Navigate to="/FreeTierDashboard" replace />} />
       <Route path="/OutreachDrafts" element={<OnboardingGuard><LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/ApplicationTracker" element={<OnboardingGuard><LayoutWrapper currentPageName="ApplicationTracker"><ApplicationTracker /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/EmailConnectionSettings" element={<OnboardingGuard><LayoutWrapper currentPageName="EmailConnectionSettings"><EmailConnectionSettings /></LayoutWrapper></OnboardingGuard>} />
