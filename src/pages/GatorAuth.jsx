@@ -45,7 +45,18 @@ export default function GatorAuth() {
   const { user, isLoadingAuth: isLoading, refreshUser } = useAuth();
   const [step, setStep] = useState(null);
   const [resumeScreen, setResumeScreen] = useState(null);
-  const [activeTab, setActiveTab] = useState('signin');
+  const [activeTab, setActiveTab] = useState(() => {
+    // New visitors arriving from the landing "Get Started" CTA carry an
+    // onboarding-intent flag; show them Sign up, not Sign in. Returning users
+    // clicking "Log In" from the nav have no flag → default to Sign in.
+    try {
+      const role = localStorage.getItem('pending_invite_role')
+        || sessionStorage.getItem('pending_invite_role');
+      const onbType = sessionStorage.getItem('cff_onboarding_type');
+      if (role === 'student' || onbType === 'student') return 'signup';
+    } catch (e) { /* private browsing */ }
+    return 'signin';
+  });
   const [isMigration] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('migration') === 'true';
