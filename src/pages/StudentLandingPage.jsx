@@ -164,6 +164,17 @@ export default function StudentLandingPage({ onParentClick }) {
     else if (user.persona || user.roles?.length > 0) navigate('FreeTierDashboard');
   }, [user, isLoadingAuth]);
 
+  // Test/preview harness: ?preview=1&funnel=1 opens the onboarding flow overlay
+  // even for already-onboarded users, so the flow can be QA'd end-to-end.
+  useEffect(() => {
+    if (!isPreview) return;
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const hp = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
+      if (sp.get('funnel') === '1' || hp.get('funnel') === '1') setShowFunnel(true);
+    } catch {}
+  }, [isPreview]);
+
   const go = () => {
     if (!isLoadingAuth && user) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentHome');
