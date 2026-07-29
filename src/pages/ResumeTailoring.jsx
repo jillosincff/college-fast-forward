@@ -16,6 +16,28 @@ import ContextualResumeUpload from '@/components/resume-tailor/ContextualResumeU
 import { checkIsFastIQ } from '@/utils/isFastIQ';
 import { getFastTrackVariant, trackQueuedView, trackQueuedUpgradeClick, trackQueuedBackOut } from '@/utils/tailoringLatency';
 
+/**
+ * Recovery: the tailoring backend can actually finish (and consume the one-time
+ * free "magic moment") even when the response is slow enough to trip the client
+ * timeout, or lost entirely. Before showing a dead-end error, poll once for a
+ * tailored resume that was just created for this company/role — if it exists,
+ * surface it so a slow success never burns the benefit and leaves the student
+ * empty-handed (which would also force their next attempt into the 24h queue).
+ */
+async function recoverTailoredResume(email, company, role) {
+  try {
+    const list = await base44.entities.TailoredResume.filter({ user_email: email });
+    const now = Date.now();
+    const wantCompany = (company || '').trim().toLowerCase();
+    const wantRole = (role || '').trim().toLowerCase();
+    return (list || [])
+      .filter(t => t.status === 'completed' && t.tailored_content &&
+        (!wantCompany || (t.company_name || '').trim().toLowerCase() === wantCompany) &&
+        (!wantRole || (t.role_title || '').trim().toLowerCase() === wantRole) &&
+        (now - new Date(t.created_date).getTime()) < 3 * 60 * 1000)
+      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0] || null;
+  } catch { return null; }
+}
 
 export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -462,6 +484,18 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         setPhase(failPhase);
       }
     } catch (e) {
+      // The backend may have finished (and consumed the magic moment) even
+      // though the response was slow/lost. Try to recover the result before
+      // falling back to a dead-end error that would force a 24h queue retry.
+      const recovered = await recoverTailoredResume(user.email, companyName.trim(), jobTitle.trim());
+      if (recovered) {
+        setResult({ tailoredResume: recovered, success: true, magic_moment: true });
+        base44.entities.TailoredResume.filter({ user_email: user.email })
+          .then(t => setTailoredResumes(t || []))
+          .catch(() => {});
+        setPhase('results');
+        return;
+      }
       setError(e?.message === 'timeout'
         ? 'This is taking longer than expected. Please try again.'
         : 'Something went wrong. Please try again.');
