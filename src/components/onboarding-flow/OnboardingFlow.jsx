@@ -23,7 +23,10 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   // Load saved progress for returning users. Positions saved by the old
   // 13-screen flow (or anything out of range) restart cleanly at 1.
   const saved = resumeAtScreen ? loadSavedProgress() : null;
-  const startScreen = (resumeAtScreen && resumeAtScreen >= 1 && resumeAtScreen <= 11) ? resumeAtScreen : 1;
+  // Start on the first real question (screen 2 = "What are we working toward?").
+  // Screen 1 ("Meet CLIFF") was a zero-input intro wall that caused 80% of
+  // in-flow abandonment — students closed it instead of clicking through.
+  const startScreen = (resumeAtScreen && resumeAtScreen >= 2 && resumeAtScreen <= 11) ? resumeAtScreen : 2;
 
   const [screen, setScreen] = useState(startScreen);
   const [analyzing, setAnalyzing] = useState(false);
@@ -89,8 +92,10 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     next();
   };
 
-  const TOTAL = 11;
-  const displayStep = screen;
+  // Screen 1 (Meet CLIFF intro) is skipped, so the visible flow is 10 steps.
+  // Internal screen numbers stay 2–11; display offset by 1 so the bar reads 1/10 → 10/10.
+  const TOTAL = 10;
+  const displayStep = screen - 1;
 
   // ── Abandonment event tracking ──────────────────────────────────────────
   const screenRef = useRef(startScreen);
