@@ -99,8 +99,9 @@ export default function StudentOnboarding() {
     const updateData = {
       persona: 'student',
       roles: ['student'],
-      onboarding_completed: true,
-      onboarding_completed_at: new Date().toISOString(),
+      // NOTE: onboarding_completed is NOT set here — it flips only at the
+      // welcome moment after the micro-questions have warmed the job feed.
+      // Setting it early left drop-offs marked "done" with a cold start.
       is_new_signup: true,
       invite_code_used: 'direct',
       school: school.trim(),
@@ -172,13 +173,25 @@ export default function StudentOnboarding() {
     }
   };
 
-  const handleWelcomeComplete = useCallback(() => {
+  const handleWelcomeComplete = useCallback(async () => {
+    // Flip onboarding_completed now that the job feed is warm and the welcome
+    // moment is done. Reload (not a plain hash change) so the in-memory auth
+    // context re-fetches the user — otherwise OnboardingGuard bounces the
+    // stale "not completed" state back into onboarding (the screen-1 loop).
+    try {
+      await base44.auth.updateMe({
+        onboarding_completed: true,
+        onboarding_completed_at: new Date().toISOString(),
+      });
+    } catch (e) { /* never block the dashboard on this */ }
+
     // Generate LinkedIn optimization in background (non-blocking)
     base44.functions.invoke('generateLinkedInOptimization', {}).catch(() => {});
 
     // Flow B: straight to the dashboard where the free Magic Moment application waits.
     // Pricing comes later — after the student has experienced CLIFF working.
-    navigate('FreeTierDashboard');
+    window.location.hash = '#/FreeTierDashboard';
+    window.location.reload();
   }, []);
 
   // ── SCREEN 2.5: Three micro questions (20 seconds) — warms up the job feed ──
