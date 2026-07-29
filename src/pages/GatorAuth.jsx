@@ -148,6 +148,22 @@ export default function GatorAuth() {
       // Native registration — creates the account and emails a 6-digit verification code.
       const cleanEmail = signupEmail.trim().toLowerCase();
       await base44.auth.register({ email: cleanEmail, password: signupPassword, full_name: fullName });
+      // Defer email verification: try to mint a session immediately so the
+      // student can start onboarding now and confirm their email later. The
+      // verification email is still sent — we just don't block the funnel on
+      // it. If the platform requires verification before issuing a session,
+      // fall back to the OTP step (current behavior, no regression).
+      try {
+        const res = await base44.auth.loginViaEmailPassword(cleanEmail, signupPassword);
+        const token = res?.access_token || res?.data?.access_token;
+        if (token) {
+          base44.auth.setToken(token);
+          await completeAuth();
+          return;
+        }
+      } catch (loginErr) {
+        // Unverified account can't log in yet — show the OTP step.
+      }
       setPendingOtpPassword(signupPassword);
       setPendingOtpEmail(cleanEmail);
     } catch (err) {
