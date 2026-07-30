@@ -1,15 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /ApplicationTracker
-Disallow: /Dashboard
-Disallow: /Login
-Disallow: /Register
-Disallow: /GetStarted
-Disallow: /Home
-Disallow: /AdminSetup
-Disallow: /SetSearchGoals
-Disallow: /action-plan-architect
-Disallow: /jill-osinoff-dashboard
-Disallow: /Unsubscribe
 
 Sitemap: https://collegefastforward.com/sitemap.xml

@@ -60,6 +60,11 @@ import CliffMemory from '@/pages/CliffMemory';
 import Stats from '@/pages/Stats';
 import CliffWins from '@/pages/CliffWins';
 import BlogAICareerTools from '@/pages/BlogAICareerTools';
+import AiResumeBuilder from '@/pages/seo/AiResumeBuilder';
+import AtsResumeChecker from '@/pages/seo/AtsResumeChecker';
+import InterviewPrep from '@/pages/seo/InterviewPrep';
+import JobApplicationTracker from '@/pages/seo/JobApplicationTracker';
+import LinkedinReview from '@/pages/seo/LinkedinReview';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -169,6 +174,13 @@ const AuthenticatedApp = () => {
 
       {/* Public SEO blog article — no guard, no app chrome */}
       <Route path="/blog/ai-career-tools-college-students" element={<BlogAICareerTools />} />
+
+      {/* Public SEO product landing pages — indexable, no auth */}
+      <Route path="/ai-resume-builder" element={<AiResumeBuilder />} />
+      <Route path="/ats-resume-checker" element={<AtsResumeChecker />} />
+      <Route path="/interview-prep" element={<InterviewPrep />} />
+      <Route path="/job-application-tracker" element={<JobApplicationTracker />} />
+      <Route path="/linkedin-review" element={<LinkedinReview />} />
 
       {/* Onboarding routes — no guard */}
       <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
