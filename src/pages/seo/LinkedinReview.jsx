@@ -21,16 +21,16 @@ export default function LinkedinReview() {
           { icon: '📝', title: 'About section', desc: 'Is your summary clear, specific, and recruiter-ready?' },
           { icon: '🏷️', title: 'Skills section', desc: 'Are the right skills listed and ranked?' },
           { icon: '💼', title: 'Experience descriptions', desc: 'Do your roles show impact, not just duties?' },
-          { icon: '✅', title: 'Profile completeness', desc: 'Find the gaps recruiters look for.' },
+          { icon: '✅', title: 'Overall profile completeness', desc: 'Find the gaps recruiters look for.' },
         ]}
       />
       <FeatureGrid
         title="Get optimized"
         items={[
-          { icon: '✨', title: 'Headline suggestions', desc: 'AI-generated headlines tuned to your goals.' },
+          { icon: '✨', title: 'AI-generated headline suggestions', desc: 'Headlines tuned to your goals.' },
           { icon: '🔄', title: 'About section rewrites', desc: 'Clearer, sharper summaries you can use today.' },
           { icon: '🎯', title: 'Skills recommendations', desc: 'The skills to add for the roles you want.' },
-          { icon: '📊', title: 'Completeness score', desc: 'A single score showing how recruiter-ready you are.' },
+          { icon: '📊', title: 'Profile completeness score', desc: 'A single score for how recruiter-ready you are.' },
         ]}
       />
       <CTASection label="Get My LinkedIn Score — Free" />

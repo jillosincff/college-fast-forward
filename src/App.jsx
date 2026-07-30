@@ -269,6 +269,12 @@ function App() {
         window.location.replace(window.location.origin + '/#/MigrationSignIn?forgot=true');
         return;
       }
+      // Public SEO landing pages are linked as clean paths — forward into hash routes
+      const seoLandingPaths = ['/ai-resume-builder', '/ats-resume-checker', '/interview-prep', '/job-application-tracker', '/linkedin-review'];
+      if (seoLandingPaths.includes(window.location.pathname)) {
+        window.location.replace(window.location.origin + '/#' + window.location.pathname + window.location.search);
+        return;
+      }
       const searchParams = new URLSearchParams(window.location.search);
       const hashQuery = window.location.hash.split('?')[1] || '';
       const hashParams = new URLSearchParams(hashQuery);

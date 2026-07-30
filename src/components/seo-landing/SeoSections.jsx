@@ -62,7 +62,7 @@ export function Steps({ title, steps }) {
               {i + 1}
             </div>
             <h3 style={{ fontFamily: SF, fontSize: 18, fontWeight: 800, color: TEXT, margin: '0 0 8px' }}>{s.title}</h3>
-            <p style={{ fontFamily: INTER, fontSize: 15, color: TEXT2, lineHeight: 1.6, margin: 0 }}>{s.desc}</p>
+            {s.desc ? <p style={{ fontFamily: INTER, fontSize: 15, color: TEXT2, lineHeight: 1.6, margin: 0 }}>{s.desc}</p> : null}
           </div>
         ))}
       </div>
@@ -80,7 +80,7 @@ export function FeatureGrid({ title, items }) {
             <span style={{ fontSize: 22, flexShrink: 0 }}>{f.icon}</span>
             <div>
               <h3 style={{ fontFamily: SF, fontSize: 16, fontWeight: 800, color: TEXT, margin: '0 0 6px' }}>{f.title}</h3>
-              <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.55, margin: 0 }}>{f.desc}</p>
+              {f.desc ? <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.55, margin: 0 }}>{f.desc}</p> : null}
             </div>
           </div>
         ))}

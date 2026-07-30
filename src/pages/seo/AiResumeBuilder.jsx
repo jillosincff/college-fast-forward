@@ -11,24 +11,24 @@ export default function AiResumeBuilder() {
     >
       <Hero
         h1="AI Resume Builder for College Students"
-        sub="Build a resume that actually gets past ATS — and gets you interviews."
+        sub="Build a tailored, ATS-optimized resume for every job application with AI. Free for college students."
         ctaLabel="Build My Resume Free"
       />
       <Steps
         title="How it works"
         steps={[
-          { title: 'Upload or start fresh', desc: 'Upload your current resume or start from scratch — CLIFF handles the formatting.' },
-          { title: 'Paste the job description', desc: "CLIFF tailors your resume to match the role's keywords and requirements." },
-          { title: 'Get your ATS score', desc: 'See your ATS score and a keyword match report before you hit submit.' },
+          { title: 'Upload your current resume or start from scratch' },
+          { title: 'Paste a job description — CLIFF tailors your resume to match' },
+          { title: 'Get an instant ATS score and keyword match report' },
         ]}
       />
       <FeatureGrid
-        title="Feature highlights"
+        title="Features"
         items={[
-          { icon: '🤖', title: 'ATS-optimized formatting', desc: 'Clean layouts hiring bots can actually parse.' },
-          { icon: '🔑', title: 'Keyword matching', desc: 'Match keywords straight from the job description.' },
-          { icon: '🗂️', title: 'Multiple versions', desc: 'Keep separate resumes for different roles.' },
-          { icon: '⚡', title: 'One-click tailoring', desc: 'Re-tailor for every application in seconds.' },
+          { icon: '🤖', title: 'ATS-optimized formatting that passes screening software' },
+          { icon: '🔑', title: 'Keyword matching to any job description' },
+          { icon: '🗂️', title: 'Multiple resume versions for different roles' },
+          { icon: '⚡', title: 'One-click tailoring per application' },
         ]}
       />
       <SocialProof />
@@ -36,7 +36,6 @@ export default function AiResumeBuilder() {
       <CrossLinks links={[
         { label: 'ATS Resume Checker', to: '#/ats-resume-checker' },
         { label: 'Interview Prep', to: '#/interview-prep' },
-        { label: 'AI Career Tools Guide', to: '#/blog/ai-career-tools-college-students' },
       ]} />
     </SeoLandingLayout>
   );

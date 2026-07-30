@@ -17,18 +17,18 @@ export default function InterviewPrep() {
       <Steps
         title="How it works"
         steps={[
-          { title: 'Role-specific questions', desc: "CLIFF generates realistic interview questions based on your target role and company." },
-          { title: 'Practice your answers', desc: 'Answer out loud or in writing — repeat any question until it feels natural.' },
-          { title: 'Instant AI feedback', desc: 'Get real-time feedback and scoring on every answer you give.' },
+          { title: 'CLIFF generates realistic interview questions for your target role and company', desc: 'Questions tuned to the exact role and company you are targeting.' },
+          { title: 'You practice answering', desc: 'Answer out loud or in writing — repeat any question until it feels natural.' },
+          { title: 'Get instant AI feedback and scoring', desc: 'Real-time notes and a score on every answer you give.' },
         ]}
       />
       <FeatureGrid
         title="Features"
         items={[
           { icon: '🎯', title: 'Role-specific question banks', desc: 'Questions tuned to the role and company you are targeting.' },
-          { icon: '💬', title: 'Real-time feedback', desc: 'Instant notes on your answers as you practice.' },
-          { icon: '📊', title: 'Confidence & clarity scoring', desc: 'See how you sound, not just what you say.' },
-          { icon: '🕒', title: 'Practice anytime', desc: 'No scheduling, no waiting — practice on your schedule.' },
+          { icon: '💬', title: 'Real-time feedback on your answers', desc: 'Instant notes on your answers as you practice.' },
+          { icon: '📊', title: 'Confidence and clarity scoring', desc: 'See how you sound, not just what you say.' },
+          { icon: '🕒', title: 'Practice anytime, no scheduling needed', desc: 'No scheduling, no waiting — practice on your schedule.' },
         ]}
       />
       <SocialProof />

@@ -18,10 +18,10 @@ export default function JobApplicationTracker() {
         title="What it tracks"
         items={[
           { icon: '📋', title: 'Application status', desc: 'Know exactly where each application stands.' },
-          { icon: '⏰', title: 'Deadlines & follow-up reminders', desc: 'Never miss a deadline or a follow-up again.' },
-          { icon: '📄', title: 'Resume version per application', desc: 'Remember which resume you sent to each role.' },
-          { icon: '🤝', title: 'Networking contacts', desc: 'Keep your contacts per company in one place.' },
-          { icon: '📅', title: 'Interview dates', desc: 'Track every interview and prep time.' },
+          { icon: '⏰', title: 'Deadlines and follow-up reminders', desc: 'Never miss a deadline or a follow-up again.' },
+          { icon: '📄', title: 'Resume version used per application', desc: 'Remember which resume you sent to each role.' },
+          { icon: '🤝', title: 'Networking contacts per company', desc: 'Keep your contacts organized by company.' },
+          { icon: '📅', title: 'Interview dates', desc: 'Track every interview and your prep time.' },
         ]}
       />
       <FeatureGrid
@@ -29,7 +29,7 @@ export default function JobApplicationTracker() {
         items={[
           { icon: '🔔', title: 'Automatic reminders', desc: 'CLIFF nudges you when a follow-up is due.' },
           { icon: '🤖', title: 'AI suggests next action', desc: 'Always know your best next move per application.' },
-          { icon: '📈', title: 'Moving vs. stalled', desc: 'See which applications are progressing and which are stuck.' },
+          { icon: '📈', title: 'See which applications are moving vs stalled', desc: 'Spot progress and stuck applications at a glance.' },
           { icon: '🗂️', title: 'All in one dashboard', desc: 'Your whole search in a single view.' },
         ]}
       />
