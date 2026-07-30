@@ -123,6 +123,24 @@ function OnboardingGuard({ children }) {
   return children;
 }
 
+// HashRouter only reads the URL hash, so a clean URL like /ai-resume-builder
+// resolves to the "/" route and would render the homepage. The homepage route
+// delegates to the matching SEO landing page when the real browser pathname is
+// one of the public SEO pages — no redirect or reload needed.
+function RootRoute() {
+  const realPath = window.location.pathname;
+  const seoPages = {
+    '/ai-resume-builder': AiResumeBuilder,
+    '/ats-resume-checker': AtsResumeChecker,
+    '/interview-prep': InterviewPrep,
+    '/job-application-tracker': JobApplicationTracker,
+    '/linkedin-review': LinkedinReview,
+  };
+  const SeoPage = seoPages[realPath];
+  if (SeoPage) return <SeoPage />;
+  return <StudentLandingPage />;
+}
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [timedOut, setTimedOut] = useState(false);
@@ -238,7 +256,7 @@ const AuthenticatedApp = () => {
       <Route path="/cliff-wins" element={<CliffWins />} />
 
       {/* Main routes */}
-      <Route path="/" element={<StudentLandingPage />} />
+      <Route path="/" element={<RootRoute />} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
@@ -267,14 +285,6 @@ function App() {
       }
       if (window.location.pathname === '/forgot-password') {
         window.location.replace(window.location.origin + '/#/MigrationSignIn?forgot=true');
-        return;
-      }
-      // Public SEO landing pages are linked as clean paths — forward into hash routes.
-      // Use a hash-only replace so it works inside sandboxed preview iframes (where
-      // window.location.origin can be the string "null") and avoids a full reload.
-      const seoLandingPaths = ['/ai-resume-builder', '/ats-resume-checker', '/interview-prep', '/job-application-tracker', '/linkedin-review'];
-      if (seoLandingPaths.includes(window.location.pathname)) {
-        window.location.replace('#/' + window.location.pathname.replace(/^\/+/, '') + window.location.search);
         return;
       }
       const searchParams = new URLSearchParams(window.location.search);

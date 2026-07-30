@@ -1,6 +1,6 @@
 import React from 'react';
 import SeoLandingLayout from '@/components/seo-landing/SeoLandingLayout';
-import { Hero, Steps, FeatureGrid, SocialProof, CTASection, CrossLinks } from '@/components/seo-landing/SeoSections';
+import { Hero, Steps, FeatureGrid, CTASection } from '@/components/seo-landing/SeoSections';
 
 export default function AiResumeBuilder() {
   return (
@@ -15,7 +15,7 @@ export default function AiResumeBuilder() {
         ctaLabel="Build My Resume Free"
       />
       <Steps
-        title="How it works"
+        title="How It Works"
         steps={[
           { title: 'Upload your current resume or start from scratch' },
           { title: 'Paste a job description — CLIFF tailors your resume to match' },
@@ -25,18 +25,13 @@ export default function AiResumeBuilder() {
       <FeatureGrid
         title="Features"
         items={[
-          { icon: '🤖', title: 'ATS-optimized formatting that passes screening software' },
-          { icon: '🔑', title: 'Keyword matching to any job description' },
-          { icon: '🗂️', title: 'Multiple resume versions for different roles' },
-          { icon: '⚡', title: 'One-click tailoring per application' },
+          { icon: '✅', title: 'ATS-optimized formatting that passes screening software' },
+          { icon: '✅', title: 'Keyword matching to any job description' },
+          { icon: '✅', title: 'Multiple resume versions for different roles' },
+          { icon: '✅', title: 'One-click tailoring per application' },
         ]}
       />
-      <SocialProof />
       <CTASection label="Start Building Your Resume — Free" />
-      <CrossLinks links={[
-        { label: 'ATS Resume Checker', to: '#/ats-resume-checker' },
-        { label: 'Interview Prep', to: '#/interview-prep' },
-      ]} />
     </SeoLandingLayout>
   );
 }
