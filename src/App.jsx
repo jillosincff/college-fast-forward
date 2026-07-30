@@ -269,10 +269,12 @@ function App() {
         window.location.replace(window.location.origin + '/#/MigrationSignIn?forgot=true');
         return;
       }
-      // Public SEO landing pages are linked as clean paths — forward into hash routes
+      // Public SEO landing pages are linked as clean paths — forward into hash routes.
+      // Use a hash-only replace so it works inside sandboxed preview iframes (where
+      // window.location.origin can be the string "null") and avoids a full reload.
       const seoLandingPaths = ['/ai-resume-builder', '/ats-resume-checker', '/interview-prep', '/job-application-tracker', '/linkedin-review'];
       if (seoLandingPaths.includes(window.location.pathname)) {
-        window.location.replace(window.location.origin + '/#' + window.location.pathname + window.location.search);
+        window.location.replace('#/' + window.location.pathname.replace(/^\/+/, '') + window.location.search);
         return;
       }
       const searchParams = new URLSearchParams(window.location.search);
