@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
+import useAccessPlan from '@/hooks/useAccessPlan';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 const device = () => (window.innerWidth < 768 ? 'mobile' : 'desktop');
@@ -10,23 +11,36 @@ const device = () => (window.innerWidth < 768 ? 'mobile' : 'desktop');
 // already built (tailored resume + drafted note), so the first session ends
 // with an approve-and-send moment instead of a to-do list.
 export default function FirstApplicationPackageCard({ user }) {
+  // Backend eligibility covers the ~1,600 existing students who onboarded
+  // before the localStorage flag existed — they have magic_moment_status
+  // 'available' but no cff_first_draft_pending flag, so the old gate hid the
+  // card from them entirely.
+  const { magicMomentAvailable, magicMomentCompleted, loading: planLoading } = useAccessPlan(user);
+  const pendingFlag = (() => { try { return localStorage.getItem('cff_first_draft_pending') === 'true'; } catch { return false; } })();
+  const eligible = !planLoading && !magicMomentCompleted && (magicMomentAvailable || pendingFlag);
+
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [dismissed, setDismissed] = useState(() => {
-    try { return localStorage.getItem('cff_first_draft_pending') !== 'true'; } catch { return true; }
-  });
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (dismissed) return;
+    if (dismissed || !eligible) return;
     let cancelled = false;
-    // Build goals from onboarding data (user.career_goals may not be set yet)
+    // Build goals from onboarding localStorage, falling back to the stored
+    // career_goals so existing students (no localStorage flags) still get a
+    // real job match instead of an empty query.
     const goals = (() => {
       try {
+        const lsRoles = JSON.parse(localStorage.getItem('cff_target_roles') || '[]');
+        const lsIndustries = JSON.parse(localStorage.getItem('cff_industries') || '[]');
+        const lsLocation = localStorage.getItem('cff_location') || '';
+        const lsSeeking = localStorage.getItem('cff_seeking') || '';
+        const cg = user?.career_goals || {};
         return {
-          role: JSON.parse(localStorage.getItem('cff_target_roles') || '[]')[0] || '',
-          industries: JSON.parse(localStorage.getItem('cff_industries') || '[]'),
-          locations: [localStorage.getItem('cff_location') || ''].filter(Boolean),
-          seeking: localStorage.getItem('cff_seeking') || 'both',
+          role: lsRoles[0] || (cg.target_roles?.[0]) || '',
+          industries: lsIndustries.length ? lsIndustries : (cg.target_industries || []),
+          locations: [lsLocation || cg.location_preference || ''].filter(Boolean),
+          seeking: lsSeeking || cg.seeking || 'both',
         };
       } catch { return {}; }
     })();
@@ -51,9 +65,9 @@ export default function FirstApplicationPackageCard({ user }) {
       .catch(() => { if (!cancelled) window.dispatchEvent(new CustomEvent('cff:first-package-done')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [dismissed]);
+  }, [dismissed, eligible]);
 
-  if (dismissed) return null;
+  if (!eligible || dismissed) return null;
 
   const clear = () => {
     try { localStorage.removeItem('cff_first_draft_pending'); } catch {}
@@ -94,7 +108,7 @@ export default function FirstApplicationPackageCard({ user }) {
     window.location.hash = `#/ResumeTailoring?${params.toString()}`;
   };
 
-  if (loading) {
+  if (planLoading || loading) {
     return (
       <div style={{ background: 'linear-gradient(135deg, #ede9fe 0%, #fff 60%)', border: '1.5px solid #c4b5fd', borderRadius: 16, padding: '18px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
         <span style={{ width: 18, height: 18, border: '2.5px solid #ddd6fe', borderTopColor: '#7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
