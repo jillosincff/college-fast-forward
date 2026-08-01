@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import useAccessPlan from '@/hooks/useAccessPlan';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
+const device = () => (window.innerWidth < 768 ? 'mobile' : 'desktop');
 
 // Plan-based dashboard state:
 // - Magic moment available → subtle reminder that the first application is free
@@ -8,6 +11,16 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 // Renders nothing for Pro users, excluded accounts, or while loading.
 export default function PlanStateBanner({ user, onUpgrade }) {
   const { loading, excludePrompts, magicMomentAvailable, magicMomentCompleted } = useAccessPlan(user);
+
+  // Track exposure of the post-magic-moment Pro card so the conversion funnel
+  // reflects real reach — once per session.
+  useEffect(() => {
+    if (loading || excludePrompts || !magicMomentCompleted) return;
+    try { if (sessionStorage.getItem('cff_plan_banner_shown')) return; sessionStorage.setItem('cff_plan_banner_shown', '1'); } catch {}
+    base44.functions.invoke('conversionEngine', {
+      action: 'promptAction', trigger: 'plan_state_banner', act: 'shown', device: device(),
+    }).catch(() => {});
+  }, [loading, excludePrompts, magicMomentCompleted]);
 
   if (loading || excludePrompts) return null;
 
@@ -26,6 +39,12 @@ export default function PlanStateBanner({ user, onUpgrade }) {
   }
 
   if (magicMomentCompleted) {
+    const handleCta = () => {
+      base44.functions.invoke('conversionEngine', {
+        action: 'promptAction', trigger: 'plan_state_banner', act: 'cta_clicked', device: device(),
+      }).catch(() => {});
+      onUpgrade?.('CLIFF Pro', 'plan_state_banner');
+    };
     return (
       <div style={{
         background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
@@ -41,7 +60,7 @@ export default function PlanStateBanner({ user, onUpgrade }) {
           </p>
         </div>
         <button
-          onClick={() => onUpgrade?.('CLIFF Pro')}
+          onClick={handleCta}
           style={{
             fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#1e1b4b',
             background: '#fff', border: 'none', borderRadius: 999, padding: '11px 22px',

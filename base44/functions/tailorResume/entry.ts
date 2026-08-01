@@ -293,6 +293,41 @@ Return as JSON.`;
       }
     }
 
+    // TTFMP: record tailored_resume_completed as a meaningful-progress event.
+    try {
+      const evKey = `${user.id}|tailored_resume_completed|${tailoredResume.id}`;
+      const existingEv = await base44.asServiceRole.entities.StudentAnalyticsEvent.filter({ event_key: evKey });
+      if (!existingEv?.length) {
+        const nowIso = new Date().toISOString();
+        await base44.asServiceRole.entities.StudentAnalyticsEvent.create({
+          student_id: user.id,
+          user_email: user.email,
+          event_name: 'tailored_resume_completed',
+          event_key: evKey,
+          event_timestamp: nowIso,
+          related_record_id: tailoredResume.id,
+          company_name: companyName || '',
+          source_feature: 'Resume Tailor',
+          delivery_channel: 'In App',
+          is_meaningful_progress: true,
+          historically_backfilled: false,
+        });
+        if (!user.first_meaningful_progress_at) {
+          const seconds = Math.max(0, Math.round((new Date(nowIso).getTime() - new Date(user.created_date).getTime()) / 1000));
+          await base44.asServiceRole.entities.User.update(user.id, {
+            first_meaningful_progress_at: nowIso,
+            first_meaningful_progress_type: 'tailored_resume_completed',
+            first_meaningful_progress_event_id: tailoredResume.id,
+            ttfmp_seconds: seconds,
+            ttfmp_under_10_minutes: seconds <= 600,
+            ttfmp_backfilled: false,
+          });
+        }
+      }
+    } catch (e) {
+      console.log('TTFMP log failed (non-critical):', e.message);
+    }
+
     return Response.json({
       success: true,
       tailoredResume,

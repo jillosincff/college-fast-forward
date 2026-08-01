@@ -129,6 +129,24 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
       const result = res?.data || res;
       if (result?.error) throw new Error(result.message || 'Could not save to your tracker.');
       window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
+      // Learning engine: mark this recommendation as pursued (and applied for
+      // cold/apply-only), so the outcome feedback loop can fire later.
+      const _isApply = !contact;
+      base44.functions.invoke('recordRecommendation', {
+        company: company.trim(), role: role.trim() || '', event: 'pursued',
+      }).catch(() => {});
+      if (_isApply) {
+        base44.functions.invoke('recordRecommendation', {
+          company: company.trim(), role: role.trim() || '', event: 'applied',
+        }).catch(() => {});
+      }
+      // TTFMP: log a meaningful-progress event (application_submitted / outreach_sent).
+      base44.functions.invoke('logMeaningfulEvent', {
+        event_name: _isApply ? 'application_submitted' : 'outreach_sent',
+        company_name: company.trim(),
+        source_feature: 'Warm Apply Flow',
+        delivery_channel: _isApply ? 'External Application' : 'LinkedIn',
+      }).catch(() => {});
       setStep('done');
     } catch (err) {
       setTrackError(err?.response?.data?.message || err.message || 'Something went wrong. Please try again.');
