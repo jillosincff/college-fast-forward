@@ -8,84 +8,135 @@ const TEXT = '#0f172a';
 const TEXT2 = '#475569';
 const TEXT3 = '#94a3b8';
 const INDIGO = '#6d28d9';
+const INDIGO_DIM = '#5b21b6';
 const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
+const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
 const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 const CARD = '#ffffff';
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
+const CORAL = '#f43f5e';
+const CORAL_BORDER = 'rgba(244,63,94,0.22)';
 
-const VALUES = [
-  { title: 'Outcomes over clicks', desc: 'CLIFF exists to land students internships and first jobs \u2014 not to generate engagement. We measure success in interviews and offers.' },
-  { title: 'Less cognitive load', desc: 'The job search is exhausting. CLIFF manages the whole journey so students always know their next best move.' },
-  { title: 'Signal, not noise', desc: 'Thousands of job postings, but only a few matter. CLIFF tells students which ones are worth their time.' },
-  { title: 'Real connections', desc: 'When networking genuinely helps, CLIFF taps trusted parents and alumni \u2014 never spam, never cold busywork.' },
+const OLD_WAY = [
+  'Spending 10+ hours a week scrolling job boards',
+  'Tweaking your resume manually for every single application',
+  'Going into interviews blind and unprepared',
+  'Applying into a black hole with no feedback',
+];
+
+const CLIFF_WAY = [
+  { title: 'Automated Discovery', desc: 'CLIFF surfaces roles tailored specifically to your background and goals.' },
+  { title: 'Instant Optimization', desc: 'CLIFF tailors your resume to beat ATS filters in seconds.' },
+  { title: 'Tailored Prep', desc: 'Custom interview prep and actionable guidance for every stage.' },
+  { title: 'Clear Roadmap', desc: 'Know exactly where you stand and what to do next.' },
 ];
 
 export default function About() {
   return (
     <SeoLandingLayout
       title="About College Fast Forward | Founder Jill Osinoff | CLIFF AI Career Agent"
-      description="College Fast Forward is a US-based company building CLIFF, the AI career agent for college students. Founded by Jill Osinoff to help students land internships and first jobs."
+      description="College Fast Forward built CLIFF, the AI career agent for college students and recent grads. Founded by Jill Osinoff — UF Mom and former professional recruiter."
       slug="about"
     >
-      {/* Hero */}
-      <section style={{ maxWidth: 820, margin: '0 auto', padding: 'clamp(48px,8vw,80px) clamp(20px,5vw,32px) 0', textAlign: 'center' }}>
-        <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: INDIGO, margin: '0 0 14px' }}>About</p>
-        <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px,7vw,48px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.035em', lineHeight: 1.1, margin: '0 0 20px' }}>
+      {/* 1. HERO */}
+      <section style={{ maxWidth: 820, margin: '0 auto', padding: 'clamp(56px,8vw,88px) clamp(20px,5vw,32px) 0', textAlign: 'center' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 100, padding: '6px 16px', fontFamily: SF, fontSize: 12, fontWeight: 800, color: INDIGO, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 20px' }}>
+          About College Fast Forward
+        </span>
+        <h1 style={{ fontFamily: SF, fontSize: 'clamp(30px,7vw,50px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.035em', lineHeight: 1.1, margin: '0 0 20px' }}>
           We built CLIFF so students{' '}
           <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>stop job searching.</span>
         </h1>
-        <p style={{ fontFamily: INTER, fontSize: 'clamp(17px,3.5vw,20px)', color: TEXT2, lineHeight: 1.6, margin: '0 auto', maxWidth: 660 }}>
-          CLIFF is the AI that does the work — finding roles worth applying to, tailoring your resume, prepping you for interviews, and keeping everything on track. Built for college students and recent grads who are sick of guessing what to do next.
+        <p style={{ fontFamily: INTER, fontSize: 'clamp(17px,3.5vw,21px)', color: TEXT2, lineHeight: 1.6, margin: '0 auto', maxWidth: 660 }}>
+          CLIFF is the AI agent built for college students and recent grads who are sick of sending hundreds of resumes into the void.
         </p>
       </section>
 
-      {/* Mission */}
+      {/* 2. OUR MISSION */}
       <Section narrow>
-        <div style={{ background: GRAD_INDIGO, borderRadius: 20, padding: 'clamp(28px,6vw,40px)', boxShadow: '0 14px 40px rgba(109,40,217,0.28)' }}>
-          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px,5vw,30px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 12px' }}>Our mission</h2>
-          <p style={{ fontFamily: INTER, fontSize: 'clamp(16px,3vw,18px)', color: 'rgba(255,255,255,0.92)', lineHeight: 1.65, margin: 0 }}>
-            Getting your first job is brutal. You're drowning in postings, guessing what actually matters, and burning out before you even land an interview. CLIFF does the work — so you spend less time wondering what to do next, and more time actually getting hired.
+        <div style={{ background: GRAD_INDIGO, borderRadius: 20, padding: 'clamp(28px,6vw,44px)', boxShadow: '0 14px 40px rgba(109,40,217,0.28)' }}>
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px,5vw,32px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 16px' }}>Our Mission</h2>
+          <p style={{ fontFamily: INTER, fontSize: 'clamp(16px,3vw,19px)', color: 'rgba(255,255,255,0.94)', lineHeight: 1.7, margin: 0 }}>
+            To level the playing field for entry-level talent. Getting your first job shouldn&apos;t feel like a full-time job. Right now, students are drowning in job postings, tailoring resumes manually for hours, and getting ghosted by automated HR software. We built College Fast Forward and CLIFF to give candidates their own unfair advantage — an AI advocate that works 24/7 to find the right roles, optimize applications, and prep you to land the offer.
           </p>
         </div>
       </Section>
 
-      {/* Founder */}
-      <Section narrow>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 28, alignItems: 'center' }}>
-          <div style={{ background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 28, boxShadow: SHADOW, textAlign: 'center' }}>
-            <div style={{ width: 80, height: 80, borderRadius: '50%', background: GRAD_INDIGO, margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontSize: 30, fontWeight: 900, color: '#fff' }}>JO</div>
-            <h3 style={{ fontFamily: SF, fontSize: 20, fontWeight: 900, color: TEXT, margin: '0 0 4px' }}>Jill Osinoff</h3>
-            <p style={{ fontFamily: INTER, fontSize: 14, color: INDIGO, fontWeight: 700, margin: 0 }}>Founder</p>
-          </div>
-          <div>
-            <h3 style={{ fontFamily: SF, fontSize: 'clamp(20px,4vw,26px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.02em', margin: '0 0 12px' }}>Founded by Jill Osinoff</h3>
-            <p style={{ fontFamily: INTER, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: 0 }}>
-              Jill founded College Fast Forward after watching students struggle to navigate the internship and first-job search. The company is US-based and operated, building CLIFF as an AI career agent that reduces the cognitive load of the job search — so students always know their next best move.
-            </p>
-          </div>
-        </div>
-      </Section>
-
-      {/* Values */}
+      {/* 3. COMPARISON GRID */}
       <Section>
-        <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px,5vw,34px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 24px' }}>What we believe</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 16 }}>
-          {VALUES.map((v, i) => (
-            <div key={i} style={{ background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: '24px 22px', boxShadow: SHADOW }}>
-              <h3 style={{ fontFamily: SF, fontSize: 17, fontWeight: 800, color: TEXT, margin: '0 0 8px' }}>{v.title}</h3>
-              <p style={{ fontFamily: INTER, fontSize: 15, color: TEXT2, lineHeight: 1.6, margin: 0 }}>{v.desc}</p>
+        <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px,5vw,34px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 28px', textAlign: 'center' }}>The old way vs. the CLIFF way</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 'clamp(18px,4vw,24px)' }}>
+          {/* Old Way */}
+          <div style={{ background: 'rgba(254,242,242,0.6)', border: `1px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(22px,5vw,30px)' }}>
+            <p style={{ fontFamily: SF, fontSize: 'clamp(18px,4vw,22px)', fontWeight: 900, color: CORAL, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Old Way 😫</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {OLD_WAY.map((text, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <span style={{ flexShrink: 0, marginTop: 4, color: CORAL, fontWeight: 900 }}>✕</span>
+                  <p style={{ fontFamily: INTER, fontSize: 'clamp(13px,3vw,14px)', color: '#9f1239', margin: 0, lineHeight: 1.55, fontWeight: 500 }}>{text}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* CLIFF Way */}
+          <div style={{ background: 'rgba(245,243,255,0.85)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(22px,5vw,30px)', boxShadow: SHADOW_MD }}>
+            <p style={{ fontFamily: SF, fontSize: 'clamp(18px,4vw,22px)', fontWeight: 900, color: INDIGO, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The CLIFF Way ⚡</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {CLIFF_WAY.map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <span style={{ flexShrink: 0, marginTop: 3, width: 22, height: 22, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: INDIGO, fontWeight: 900, fontSize: 12 }}>✓</span>
+                  <div>
+                    <p style={{ fontFamily: SF, fontSize: 'clamp(14px,3vw,15px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.4 }}>{item.title}</p>
+                    <p style={{ fontFamily: INTER, fontSize: 'clamp(13px,3vw,14px)', color: INDIGO_DIM, margin: '3px 0 0', lineHeight: 1.55 }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </Section>
 
-      {/* Operator disclosure */}
+      {/* 4. FOUNDER SPOTLIGHT */}
       <Section narrow>
-        <div style={{ background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: '24px 24px', boxShadow: SHADOW }}>
-          <h3 style={{ fontFamily: SF, fontSize: 17, fontWeight: 800, color: TEXT, margin: '0 0 10px' }}>Company &amp; operator</h3>
-          <p style={{ fontFamily: INTER, fontSize: 15, color: TEXT2, lineHeight: 1.65, margin: 0 }}>
-            College Fast Forward is a US-based company. The product is CLIFF, an AI career agent. &ldquo;FastIQ&rdquo; and &ldquo;Gator&rdquo; are retired legacy names and do not describe the current product.
+        <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px,5vw,30px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.02em', margin: '0 0 24px', textAlign: 'center' }}>
+          Built by someone who knows both sides of the hiring desk.
+        </h2>
+        <div style={{ background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(24px,5vw,36px)', boxShadow: SHADOW_MD }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 24 }}>
+            {/* Founder headshot slot */}
+            <div style={{ width: 96, height: 96, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontSize: 34, fontWeight: 900, color: '#fff', marginBottom: 16, boxShadow: '0 8px 24px rgba(109,40,217,0.30)' }}>
+              JO
+            </div>
+            <h3 style={{ fontFamily: SF, fontSize: 'clamp(20px,4vw,24px)', fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.01em' }}>Jill Osinoff</h3>
+            <p style={{ fontFamily: INTER, fontSize: 15, color: INDIGO, fontWeight: 700, margin: '0 0 12px' }}>Founder, College Fast Forward</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {['UF Mom', 'Former Professional Recruiter'].map((badge) => (
+                <span key={badge} style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO_DIM, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 100, padding: '5px 14px' }}>{badge}</span>
+              ))}
+            </div>
+          </div>
+          <blockquote style={{ fontFamily: INTER, fontSize: 'clamp(16px,3vw,18px)', color: TEXT2, lineHeight: 1.75, margin: 0, fontStyle: 'italic', borderLeft: `4px solid ${INDIGO}`, paddingLeft: 20 }}>
+            &ldquo;As a former professional recruiter, I&apos;ve seen firsthand how broken, mechanical, and frustrating the hiring process can be for entry-level talent. And as a UF mom, I&apos;ve watched brilliant, hardworking students burn out trying to navigate it. I built College Fast Forward and CLIFF to change the rules. Students shouldn&apos;t have to spend hundreds of hours beating automated HR software just to get a foot in the door. CLIFF gives them the insider tools, strategy, and leverage they need to land their first real opportunity — fast.&rdquo;
+          </blockquote>
+        </div>
+      </Section>
+
+      {/* 5. FINAL CTA */}
+      <Section narrow>
+        <div style={{ textAlign: 'center', background: GRAD_INDIGO, borderRadius: 20, padding: 'clamp(36px,6vw,56px)', boxShadow: '0 14px 40px rgba(109,40,217,0.28)' }}>
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px,5vw,34px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 12px' }}>Ready to fast-forward your career?</h2>
+          <p style={{ fontFamily: INTER, fontSize: 'clamp(16px,3vw,18px)', color: 'rgba(255,255,255,0.9)', margin: '0 0 28px', lineHeight: 1.6 }}>
+            Stop scrolling through job boards. Let CLIFF take it from here.
           </p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+            <a href="#/GetStarted" style={{ display: 'inline-block', fontFamily: SF, fontSize: 17, fontWeight: 800, color: '#fff', background: '#0f172a', borderRadius: 14, padding: '16px 40px', textDecoration: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.25)', transition: 'transform 0.15s ease' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.03)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; }}
+            >Start Free</a>
+            <a href="#/pricing" style={{ fontFamily: SF, fontSize: 15, fontWeight: 700, color: '#fff', textDecoration: 'none', borderBottom: '2px solid rgba(255,255,255,0.5)', padding: '4px 2px' }}>See Pricing</a>
+          </div>
         </div>
       </Section>
 
