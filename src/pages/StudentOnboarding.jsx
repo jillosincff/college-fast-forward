@@ -82,8 +82,10 @@ export default function StudentOnboarding() {
       // Safari clears localStorage during OAuth — sessionStorage survives
       sessionStorage.setItem('cff_onboarding_type', 'student');
     } catch (e) { /* private browsing */ }
-    // Redirect back to StudentOnboarding so step 2 renders after OAuth
-    base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
+    // loginWithProvider takes a relative return path the platform resolves against
+    // the app's real base URL — avoids the fragile manual window.location.origin build
+    // (which is "null" inside the sandboxed preview iframe).
+    base44.auth.loginWithProvider('google', '/#StudentOnboarding');
   };
 
   const handleSubmit = async () => {
