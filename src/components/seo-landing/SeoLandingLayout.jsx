@@ -15,7 +15,7 @@ const LOGO = 'https://media.base44.com/images/public/684474c5723dc90efce23588/51
 
 const NAV_LINKS = [
   { label: 'How it Works', to: '#/' },
-  { label: 'Pricing', to: '#/' },
+  { label: 'Pricing', to: '#/pricing' },
   { label: 'Log In', to: '#/GatorAuth' },
 ];
 
