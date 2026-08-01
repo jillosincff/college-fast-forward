@@ -17,7 +17,7 @@ const ORANGE = '#E85D20';
  * 3 screens: Sign Up → Two Questions → Welcome Moment
  */
 export default function StudentOnboarding() {
-  const { user, refreshUser, isLoading } = useAuth();
+  const { user, refreshUser, isLoadingAuth } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -286,6 +286,19 @@ export default function StudentOnboarding() {
 
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // While auth resolves (e.g. right after the Google OAuth redirect), show a
+  // branded loader instead of the sign-up screen. Without this, returning
+  // students see "Let's get you set up" flash before user loads — many think
+  // sign-up failed and leave, a major contributor to the onboarding drop-off.
+  if (!user && isLoadingAuth) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid rgba(255,255,255,0.15)', borderTopColor: ORANGE, borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }

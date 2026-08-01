@@ -9,7 +9,7 @@ const SEEKING_OPTS = [
   { key: 'fulltime', emoji: '💼', label: 'Full-time job' },
   { key: 'both', emoji: '🔭', label: 'Still exploring' },
 ];
-const INDUSTRY_OPTS = ['Marketing', 'Finance', 'Tech / Software', 'Healthcare', 'Consulting', 'Sales', 'Media & Entertainment', 'Sports', 'Engineering', 'Real Estate', 'Fashion / Retail', 'Government / Nonprofit'];
+const INDUSTRY_OPTS = ['Marketing', 'Finance', 'Tech / Software', 'Healthcare', 'Consulting', 'Sales', 'Media & Entertainment', 'Sports', 'Engineering', 'Real Estate', 'Fashion / Retail', 'Government / Nonprofit', 'Education', 'Arts & Design', 'Hospitality & Tourism', 'Science & Research', 'Operations & Logistics'];
 const LOCATION_OPTS = [
   { key: 'remote', emoji: '🌐', label: 'Remote' },
   { key: 'city', emoji: '📍', label: 'A specific city' },
