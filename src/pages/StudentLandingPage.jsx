@@ -630,7 +630,7 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── FOOTER ── */}
       <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', paddingBottom: 'calc(clamp(20px, 5vw, 28px) + 76px + env(safe-area-inset-bottom, 0px))', textAlign: 'center', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
-          {[['Log In', null, login], ['Parents & Alumni', null, parent], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com?subject=College%20Fast%20Forward%20Support']].map(([label, href, handler]) => (
+          {[['Pricing', '#/pricing'], ['About', '#/about'], ['Customer Stories', '#/customers'], ['Log In', null, login], ['Parents & Alumni', null, parent], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com?subject=College%20Fast%20Forward%20Support']].map(([label, href, handler]) => (
             <a key={label} href={href || undefined} onClick={!href ? (e) => { e.preventDefault(); handler && handler(); } : undefined} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s', cursor: 'pointer' }}
               onMouseEnter={e => e.currentTarget.style.color = TEXT}
               onMouseLeave={e => e.currentTarget.style.color = TEXT3}

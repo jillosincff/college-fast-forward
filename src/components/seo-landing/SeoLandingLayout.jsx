@@ -167,6 +167,9 @@ export default function SeoLandingLayout({ title, description, slug, children })
             <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: 'rgba(244,240,232,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>Company</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <a href="#/" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Home</a>
+              <a href="#/pricing" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Pricing</a>
+              <a href="#/about" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>About</a>
+              <a href="#/customers" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Customer Stories</a>
               <a href="#/GatorAuth" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Log In</a>
               <a href="#/GetStarted" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Sign Up</a>
             </div>

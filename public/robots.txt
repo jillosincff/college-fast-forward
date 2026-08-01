@@ -5,6 +5,9 @@ Allow: /ats-resume-checker
 Allow: /interview-prep
 Allow: /job-application-tracker
 Allow: /linkedin-review
+Allow: /pricing
+Allow: /about
+Allow: /customers
 Allow: /blog/
 Disallow: /
 

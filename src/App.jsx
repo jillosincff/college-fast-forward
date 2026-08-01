@@ -66,6 +66,8 @@ import InterviewPrep from '@/pages/seo/InterviewPrep';
 import JobApplicationTracker from '@/pages/seo/JobApplicationTracker';
 import LinkedinReview from '@/pages/seo/LinkedinReview';
 import Pricing from '@/pages/seo/Pricing';
+import About from '@/pages/seo/About';
+import Customers from '@/pages/seo/Customers';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -137,6 +139,8 @@ function RootRoute() {
     '/job-application-tracker': JobApplicationTracker,
     '/linkedin-review': LinkedinReview,
     '/pricing': Pricing,
+    '/about': About,
+    '/customers': Customers,
   };
   const SeoPage = seoPages[realPath];
   if (SeoPage) return <SeoPage />;
@@ -202,6 +206,8 @@ const AuthenticatedApp = () => {
       <Route path="/job-application-tracker" element={<JobApplicationTracker />} />
       <Route path="/linkedin-review" element={<LinkedinReview />} />
       <Route path="/pricing" element={<Pricing />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/customers" element={<Customers />} />
 
       {/* Onboarding routes — no guard */}
       <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
