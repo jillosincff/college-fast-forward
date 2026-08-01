@@ -185,6 +185,12 @@ export default function StudentOnboarding() {
       });
     } catch (e) { /* never block the dashboard on this */ }
 
+    // Zeigarnik close: surface the "your first application package is ready" card
+    // on the first dashboard visit. Flow A (OnboardingFlow) sets this same flag;
+    // without it the FirstApplicationPackageCard stays hidden and the Magic
+    // Moment is never offered — this was the single biggest funnel leak.
+    try { localStorage.setItem('cff_first_draft_pending', 'true'); } catch (e) {}
+
     // Generate LinkedIn optimization in background (non-blocking)
     base44.functions.invoke('generateLinkedInOptimization', {}).catch(() => {});
 

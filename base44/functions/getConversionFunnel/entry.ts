@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     const steps = [
       { key: 'signup', label: 'Student signup', count: students.length },
       { key: 'onboarding', label: 'Onboarding completed', count: students.filter(u => u.onboarding_completed === true).length },
-      { key: 'mm_offered', label: 'Magic Moment offered', count: (plans || []).filter(p => p.magic_moment_eligible !== false).length },
+      { key: 'mm_offered', label: 'Magic Moment offered', count: distinct('magic_moment_offered') },
       { key: 'mm_started', label: 'Magic Moment started', count: mmStarted },
       { key: 'mm_completed', label: 'Magic Moment completed', count: mmCompleted },
       { key: 'reflection_viewed', label: 'Reflection screen viewed', count: distinct('reflection_viewed') },

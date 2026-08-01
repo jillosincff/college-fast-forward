@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { CheckCircle2, Sparkles, ArrowRight } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
+const device = () => (window.innerWidth < 768 ? 'mobile' : 'desktop');
 
 // Done-For-You activation hero — shown once after onboarding. Presents ONE real
 // job matching the student's goals as a finished "application package" CLIFF
@@ -32,7 +33,18 @@ export default function FirstApplicationPackageCard({ user }) {
     base44.functions.invoke('getLiveJobMatchesFn', { career_goals: goals })
       .then(res => {
         const companies = (res?.data || res)?.companies || [];
-        if (!cancelled && companies.length > 0) setJob(companies[0]);
+        if (!cancelled && companies.length > 0) {
+          setJob(companies[0]);
+          // Record that the Magic Moment was actually offered (a real job shown),
+          // not just eligible. Idempotent via event_key — fires once per student.
+          base44.functions.invoke('conversionEngine', {
+            action: 'log', event_name: 'magic_moment_offered', once: true,
+            trigger: 'first_application_package',
+            company_name: companies[0].name,
+            job_title: companies[0].job_title,
+            device: device(),
+          }).catch(() => {});
+        }
         // No job available → release the dashboard from focus mode so it isn't empty
         else if (!cancelled) window.dispatchEvent(new CustomEvent('cff:first-package-done'));
       })
@@ -50,6 +62,16 @@ export default function FirstApplicationPackageCard({ user }) {
   };
 
   const openPackage = () => {
+    // "Started" = student clicked to open the package. Logs now (not only after
+    // the backend tailoring finishes) so the funnel reflects real intent.
+    // Idempotent — tailorResume's later log is deduped by the same event_key.
+    base44.functions.invoke('conversionEngine', {
+      action: 'log', event_name: 'magic_moment_started', once: true,
+      trigger: 'first_application_package',
+      company_name: job.name,
+      job_title: job.job_title,
+      device: device(),
+    }).catch(() => {});
     const role = job.job_title.replace(/\s+job at\s+.*$/i, '').trim() || job.job_title;
     try {
       sessionStorage.setItem('cff_apply_tailor_ctx', JSON.stringify({
