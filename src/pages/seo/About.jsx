@@ -35,7 +35,7 @@ export default function About() {
           <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>stop job searching.</span>
         </h1>
         <p style={{ fontFamily: INTER, fontSize: 'clamp(17px,3.5vw,20px)', color: TEXT2, lineHeight: 1.6, margin: '0 auto', maxWidth: 660 }}>
-          College Fast Forward is a US-based company. Our product is CLIFF \u2014 the AI career agent that finds roles worth applying to, tailors resumes, preps interviews, and keeps the job search on track for college students and recent grads.
+          CLIFF is the AI that does the work — finding roles worth applying to, tailoring your resume, prepping you for interviews, and keeping everything on track. Built for college students and recent grads who are sick of guessing what to do next.
         </p>
       </section>
 
@@ -44,7 +44,7 @@ export default function About() {
         <div style={{ background: GRAD_INDIGO, borderRadius: 20, padding: 'clamp(28px,6vw,40px)', boxShadow: '0 14px 40px rgba(109,40,217,0.28)' }}>
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px,5vw,30px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 12px' }}>Our mission</h2>
           <p style={{ fontFamily: INTER, fontSize: 'clamp(16px,3vw,18px)', color: 'rgba(255,255,255,0.92)', lineHeight: 1.65, margin: 0 }}>
-            Getting your first job is brutal. Students drown in postings, guess at what matters, and burn out. CLIFF acts as a proactive career agent \u2014 managing the entire internship and first-job search so students spend less time wondering what to do and more time making meaningful progress.
+            Getting your first job is brutal. You're drowning in postings, guessing what actually matters, and burning out before you even land an interview. CLIFF does the work — so you spend less time wondering what to do next, and more time actually getting hired.
           </p>
         </div>
       </Section>
@@ -60,7 +60,7 @@ export default function About() {
           <div>
             <h3 style={{ fontFamily: SF, fontSize: 'clamp(20px,4vw,26px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.02em', margin: '0 0 12px' }}>Founded by Jill Osinoff</h3>
             <p style={{ fontFamily: INTER, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: 0 }}>
-              Jill founded College Fast Forward after watching students struggle to navigate the internship and first-job search. The company is US-based and operated, building CLIFF as an AI career agent that reduces the cognitive load of the job search \u2014 so students always know their next best move.
+              Jill founded College Fast Forward after watching students struggle to navigate the internship and first-job search. The company is US-based and operated, building CLIFF as an AI career agent that reduces the cognitive load of the job search — so students always know their next best move.
             </p>
           </div>
         </div>
