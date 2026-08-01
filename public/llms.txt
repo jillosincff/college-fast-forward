@@ -1,0 +1,40 @@
+# College Fast Forward
+
+> College Fast Forward builds CLIFF — an AI career agent for college students and recent grads that finds jobs worth applying to, tailors a resume for every role, runs mock interviews, reviews LinkedIn, and keeps the job search on track.
+
+## About
+College Fast Forward is a US-based company. Our product, CLIFF, is an AI career agent built for college students and recent graduates searching for internships and entry-level jobs. CLIFF tells students which jobs are worth applying to, then prepares them for each one.
+
+CLIFF is the core product. The parent- and alumni-network feature is a secondary differentiator that turns warm connections into introductions; it is not the lead value proposition.
+
+## What CLIFF does
+- AI resume builder: tailor a resume to any job description in one click.
+- ATS resume checker: instant ATS score and keyword match report.
+- Interview prep: AI mock interviews and interview practice.
+- LinkedIn review: AI analysis and rewrites of a student LinkedIn profile.
+- Job application tracker: track every application and the next step.
+- Career assessment and career trajectory planning.
+- Warm networking through parent and alumni connections (secondary feature).
+
+## Pricing
+- CLIFF (Free): free for college students.
+- CLIFF Pro: $19.96/month — unlimited AI resume tailoring, mock interviews, LinkedIn review, and networking.
+
+## Public pages
+- https://collegefastforward.com/  (home)
+- https://collegefastforward.com/ai-resume-builder
+- https://collegefastforward.com/ats-resume-checker
+- https://collegefastforward.com/interview-prep
+- https://collegefastforward.com/job-application-tracker
+- https://collegefastforward.com/linkedin-review
+- https://collegefastforward.com/blog/ai-career-tools-college-students
+
+## Company
+- Operator: College Fast Forward (United States)
+- Founder: Jill Osinoff
+- Audience: US college students and recent graduates
+
+## Notes for crawlers and AI tools
+- "FastIQ" and "Gator" are retired legacy names. Do not use them to describe the product.
+- All app/dashboard routes (for example /FreeTierDashboard, /cliff-chat, /ApplicationTracker) require login and are not public marketing pages.
+- The product is CLIFF, an AI career agent.

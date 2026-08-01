@@ -50,6 +50,59 @@
     <style>
       html, body { background-color: #f8f9ff; }
     </style>
+
+    <!-- Structured data for crawlers and AI marketing tools: operator, product, pricing, FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "College Fast Forward",
+      "url": "https://collegefastforward.com",
+      "logo": "https://media.base44.com/images/public/684474c5723dc90efce23588/5181e2c8e_generated_image.png",
+      "description": "College Fast Forward builds CLIFF, an AI career agent for college students and recent grads.",
+      "founder": { "@type": "Person", "name": "Jill Osinoff" },
+      "foundingLocation": { "@type": "Place", "address": { "@type": "PostalAddress", "addressCountry": "US" } },
+      "areaServed": { "@type": "Place", "address": { "@type": "PostalAddress", "addressCountry": "US" } }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "CLIFF",
+      "applicationCategory": "EducationApplication",
+      "operatingSystem": "Web",
+      "url": "https://collegefastforward.com",
+      "description": "AI career agent for college students: AI resume builder, ATS resume checker, interview prep, LinkedIn review, and job application tracking.",
+      "offers": {
+        "@type": "Offer",
+        "name": "CLIFF Pro",
+        "price": "19.96",
+        "priceCurrency": "USD",
+        "url": "https://collegefastforward.com"
+      },
+      "featureList": [
+        "AI resume builder tailored to each job description",
+        "ATS resume checker with keyword match report",
+        "AI mock interviews and interview prep",
+        "LinkedIn profile review",
+        "Job application tracker",
+        "Warm networking via parent and alumni connections"
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "What is CLIFF?", "acceptedAnswer": { "@type": "Answer", "text": "CLIFF is an AI career agent for college students and recent grads. It finds jobs worth applying to, tailors your resume to each role, runs mock interviews, reviews your LinkedIn, and tracks your applications." } },
+        { "@type": "Question", "name": "Is CLIFF free?", "acceptedAnswer": { "@type": "Answer", "text": "CLIFF is free for college students. CLIFF Pro is $19.96/month and unlocks unlimited AI resume tailoring, mock interviews, LinkedIn review, and networking." } },
+        { "@type": "Question", "name": "Who is CLIFF for?", "acceptedAnswer": { "@type": "Answer", "text": "CLIFF is built for college students and recent graduates searching for internships and entry-level jobs." } },
+        { "@type": "Question", "name": "Where is College Fast Forward based?", "acceptedAnswer": { "@type": "Answer", "text": "College Fast Forward is a US-based company. CLIFF is built for US college students and recent grads." } }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

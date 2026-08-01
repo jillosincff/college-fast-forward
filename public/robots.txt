@@ -1,4 +1,11 @@
 User-agent: *
-Allow: /
+Allow: /$
+Allow: /ai-resume-builder
+Allow: /ats-resume-checker
+Allow: /interview-prep
+Allow: /job-application-tracker
+Allow: /linkedin-review
+Allow: /blog/
+Disallow: /
 
 Sitemap: https://collegefastforward.com/sitemap.xml
