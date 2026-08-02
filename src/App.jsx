@@ -37,7 +37,6 @@ import RegistrationSuccess from '@/pages/RegistrationSuccess';
 import VerifyEmail from '@/pages/VerifyEmail';
 import OnboardingQuestions from '@/pages/OnboardingQuestions';
 
-import PostJoinUpsell from '@/pages/PostJoinUpsell';
 import Profile from '@/pages/Profile';
 import ProfileEdit from '@/pages/ProfileEdit';
 
@@ -244,7 +243,6 @@ const AuthenticatedApp = () => {
       <Route path="/ApplicationTracker" element={<OnboardingGuard><LayoutWrapper currentPageName="ApplicationTracker"><ApplicationTracker /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/EmailConnectionSettings" element={<OnboardingGuard><LayoutWrapper currentPageName="EmailConnectionSettings"><EmailConnectionSettings /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/email-callback" element={<EmailCallbackPage />} />
-      <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
       <Route path="/Profile" element={<LayoutWrapper currentPageName="Profile"><Profile /></LayoutWrapper>} />
       <Route path="/ProfileEdit" element={<LayoutWrapper currentPageName="ProfileEdit"><ProfileEdit /></LayoutWrapper>} />
       <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
