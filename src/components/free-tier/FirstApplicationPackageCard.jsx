@@ -15,9 +15,12 @@ export default function FirstApplicationPackageCard({ user }) {
   // before the localStorage flag existed — they have magic_moment_status
   // 'available' but no cff_first_draft_pending flag, so the old gate hid the
   // card from them entirely.
-  const { magicMomentAvailable, magicMomentCompleted, loading: planLoading } = useAccessPlan(user);
+  const { magicMomentAvailable, magicMomentCompleted, loadError, loading: planLoading } = useAccessPlan(user);
   const pendingFlag = (() => { try { return localStorage.getItem('cff_first_draft_pending') === 'true'; } catch { return false; } })();
-  const eligible = !planLoading && !magicMomentCompleted && (magicMomentAvailable || pendingFlag);
+  // Don't render the package card when the access-plan fetch failed (loadError) —
+  // a transient error must not resurrect this card for a student who already
+  // completed the Magic Moment, even if a stale localStorage flag lingers.
+  const eligible = !planLoading && !loadError && !magicMomentCompleted && (magicMomentAvailable || pendingFlag);
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
