@@ -36,6 +36,7 @@ import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
 import PostMagicMomentFlow from '@/components/conversion/PostMagicMomentFlow';
 import LocationPrefPrompt from '@/components/free-tier/LocationPrefPrompt';
+import useAccessPlan from '@/hooks/useAccessPlan';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -109,6 +110,16 @@ export default function FreeTierDashboard() {
     window.addEventListener('cff:first-package-done', exitFocus);
     return () => window.removeEventListener('cff:first-package-done', exitFocus);
   }, []);
+
+  // Once the Magic Moment is completed, the Done-For-You package is done — exit
+  // first-session focus mode and clear the stale pending flag so the post-magic-
+  // moment Pro card (PlanStateBanner) renders instead of being suppressed.
+  const { magicMomentCompleted } = useAccessPlan(user);
+  useEffect(() => {
+    if (!magicMomentCompleted) return;
+    try { localStorage.removeItem('cff_first_draft_pending'); } catch {}
+    setFocusMode(false);
+  }, [magicMomentCompleted]);
 
   // Load Satoshi font for brand consistency with the landing/marketing pages
   useEffect(() => {
