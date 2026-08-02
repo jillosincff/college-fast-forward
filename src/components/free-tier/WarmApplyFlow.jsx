@@ -117,7 +117,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
         job_title: role.trim() || null,
         job_url: jobUrl || null,
         application_path: contact ? 'alumni_outreach' : 'cold_apply',
-        status: contact ? 'reached_out' : (applyOnly ? 'applied' : 'identified'),
+        status: contact ? 'reached_out' : 'identified',
         status_date: new Date().toISOString(),
         reached_out_date: contact ? new Date().toISOString() : null,
         alumni_name: contact?.name || null,
@@ -375,7 +375,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
                   <FileText size={16} /> Tailor my resume for this role
                 </button>
                 )}
-                <button onClick={() => { onClose(); window.location.hash = '#/ApplicationTracker'; }}
+                <button onClick={() => { onClose(); window.location.hash = `#/ApplicationTracker?highlight=${encodeURIComponent(company.trim())}`; }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '12px', borderRadius: 12, border: '1.5px solid #e5e7eb', background: '#fff', color: '#374151', fontFamily: dm, fontSize: 13, fontWeight: 700, cursor: 'pointer', minHeight: 44 }}>
                   <ClipboardList size={15} /> View in Application Tracker
                 </button>

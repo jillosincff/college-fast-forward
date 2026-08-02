@@ -116,7 +116,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
         job_description: lead.jobDescription || lead.description || '',
         job_url: jobUrl,
         application_path: 'cold_apply',
-        status: 'applied',
+        status: 'identified',
         status_date: new Date().toISOString(),
         location: lead.location || '',
         notes: [
@@ -134,6 +134,11 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
       setSubmitted(true);
       // Notify the tracker to refresh so the new application shows immediately
       window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
+      // Learning engine: mark this recommendation pursued + applied.
+      base44.functions.invoke('recordRecommendation', { company: companyName, role: jobTitle, event: 'pursued' }).catch(() => {});
+      base44.functions.invoke('recordRecommendation', { company: companyName, role: jobTitle, event: 'applied' }).catch(() => {});
+      // TTFMP: log a meaningful-progress event.
+      base44.functions.invoke('logMeaningfulEvent', { event_name: 'application_submitted', company_name: companyName, source_feature: 'In-App Apply', delivery_channel: 'External Application' }).catch(() => {});
       onSuccess?.();
     } catch (err) {
       // Surface the backend's friendly message (e.g. free pipeline limit) instead of a raw HTTP error
@@ -193,7 +198,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                 </a>
               )}
               <button
-                onClick={() => { onClose(); window.location.hash = '#/ApplicationTracker'; }}
+                onClick={() => { onClose(); window.location.hash = `#/ApplicationTracker?highlight=${encodeURIComponent(companyName)}`; }}
                 className={`block w-full py-3 font-bold rounded-xl text-sm transition cursor-pointer text-center ${jobUrl ? 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300' : 'bg-purple-600 hover:bg-purple-700 text-white'}`}
                 style={{ minHeight: 'auto' }}
               >

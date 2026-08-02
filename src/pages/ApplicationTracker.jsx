@@ -103,6 +103,14 @@ export default function ApplicationTracker() {
     return () => { cancelled = true; };
   }, [user?.email]);
 
+  // Arriving from an apply flow (?highlight=Company) — jump straight to the tab
+  // that contains the new application so it's immediately visible.
+  useEffect(() => {
+    if (!highlight || loading || !applications.length) return;
+    const match = applications.find(a => a.company.toLowerCase().includes(highlight));
+    if (match) setFilter(deriveInsight(match).group);
+  }, [highlight, loading, applications]);
+
   // Every application gets a health + recommendation — never a blank Next Action
   const items = applications.map(app => ({ app, insight: deriveInsight(app) }));
 
