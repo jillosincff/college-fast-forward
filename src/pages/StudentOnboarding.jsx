@@ -53,7 +53,7 @@ export default function StudentOnboarding() {
     // Already onboarded — route them directly to the right dashboard
     if (user.persona && user.onboarding_completed && user.full_name?.trim()) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('ParentHome');
+        navigate('ParentAllSet');
       } else if (user.persona === 'alumni' && user.alumni_intent === 'giving_help') {
         navigate('AlumniHome');
       } else {

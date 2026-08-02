@@ -158,7 +158,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
   useEffect(() => {
     if (isLoadingAuth || !user || isPreview) return;
-    if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentHome');
+    if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentAllSet');
     else if (user.persona === 'alumni' || user.roles?.includes('alumni'))
       navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
     else if (user.persona || user.roles?.length > 0) navigate('FreeTierDashboard');
@@ -177,7 +177,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
   const go = () => {
     if (!isLoadingAuth && user) {
-      if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentHome');
+      if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentAllSet');
       else if (user.persona === 'alumni' || user.roles?.includes('alumni'))
         navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
       else navigate('FreeTierDashboard');
