@@ -56,8 +56,21 @@ export default function CliffProPaywall({ onClose, onUpgrade, trigger = 'generic
   };
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 20000, background: 'rgba(2,6,23,0.65)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 24, maxWidth: 440, width: '100%', padding: '28px 26px 24px', boxShadow: '0 32px 72px -12px rgba(0,0,0,0.20)', overflowY: 'auto', maxHeight: '90vh' }}>
+    <div onClick={onClose} className="cliff-paywall-overlay" style={{ position: 'fixed', inset: 0, zIndex: 20000, background: 'rgba(2,6,23,0.65)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div onClick={e => e.stopPropagation()} className="cliff-paywall-card" style={{ background: '#fff', borderRadius: 24, maxWidth: 440, width: '100%', padding: '28px 26px 24px', boxShadow: '0 32px 72px -12px rgba(0,0,0,0.20)', overflowY: 'auto', maxHeight: '90vh' }}>
+        <style>{`
+          @media (max-width: 600px) {
+            /* Bottom-sheet on phones so the CTA sits in thumb reach */
+            .cliff-paywall-overlay { align-items: flex-end !important; padding: 0 !important; }
+            .cliff-paywall-card {
+              border-radius: 22px 22px 0 0 !important;
+              padding: 22px 18px calc(18px + env(safe-area-inset-bottom)) !important;
+              max-height: 92vh !important;
+            }
+            /* Two 11px columns are unreadable at 360px — stack them */
+            .cliff-paywall-compare { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '4px 14px', marginBottom: 14 }}>
           <span style={{ fontSize: 12 }}>✨</span>
           <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#6d28d9', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Included with CLIFF Pro</span>
@@ -74,7 +87,7 @@ export default function CliffProPaywall({ onClose, onUpgrade, trigger = 'generic
         </p>
 
         {/* Outcome comparison — guidance vs execution */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
+        <div className="cliff-paywall-compare" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
           <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 14, padding: '14px' }}>
             <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>CFF Free</p>
             {FREE_ITEMS.map(t => (
