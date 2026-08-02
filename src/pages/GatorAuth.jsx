@@ -480,6 +480,23 @@ export default function GatorAuth() {
             </div>
           )}
 
+          {/* Google leads — one tap, no password to invent, no email code to hunt for. */}
+          {!forgotMode && (
+            <div style={{ marginBottom: 24 }}>
+              <button onClick={handleGoogleSignIn} disabled={loading} style={{ width: '100%', background: '#fff', border: '1.5px solid #cbd5e1', borderRadius: 12, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#0f172a', opacity: loading ? 0.7 : 1, minHeight: 'auto', boxShadow: '0 2px 8px rgba(15,23,42,0.08)' }}>
+                <GoogleIcon /> Continue with Google
+              </button>
+              <p style={{ fontFamily: dmSans, fontSize: 12.5, color: '#94a3b8', textAlign: 'center', margin: '10px 0 0' }}>
+                Fastest way in — no password, no verification code.
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '22px 0 20px' }}>
+                <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+                <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8' }}>or use email</span>
+                <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+              </div>
+            </div>
+          )}
+
           {!forgotMode && (
           <div style={{ background: '#f1f5f9', borderRadius: 10, padding: 4, marginBottom: 28, display: 'flex', gap: 4 }}>
             {['signin', 'signup'].map(tab => (
@@ -586,16 +603,6 @@ export default function GatorAuth() {
           {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#EF4444', margin: 0 }}>{error}</p></div>}
           {info && !error && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#22C55E', margin: 0 }}>{info}</p></div>}
 
-          {!forgotMode && (
-          <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 12, color: '#94a3b8', margin: 0 }}>Or continue with Google →</p>
-          </div>
-          )}
-          {!forgotMode && (
-          <button onClick={handleGoogleSignIn} disabled={loading} style={{ width: '100%', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#0f172a', opacity: loading ? 0.7 : 1, minHeight: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-            <GoogleIcon /> Continue with Google
-          </button>
-          )}
         </div>
       </AuthPageShell>
     );
