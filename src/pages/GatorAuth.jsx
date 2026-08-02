@@ -476,7 +476,7 @@ export default function GatorAuth() {
               textAlign: 'center',
             }}>
               👋 Welcome to the new College Fast Forward.<br/>
-              Enter your email below and we'll send you a one-time login link — no password needed.
+              Sign in with Google, or use "Forgot your password?" to set a new password for your account.
             </div>
           )}
 
