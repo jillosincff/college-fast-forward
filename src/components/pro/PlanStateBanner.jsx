@@ -47,7 +47,8 @@ export default function PlanStateBanner({ user, onUpgrade }) {
     };
     return (
       <div style={{
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+        background: 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%)',
+        boxShadow: '0 6px 24px rgba(124,58,237,0.28)',
         borderRadius: 16, padding: '18px 22px', marginBottom: 16,
         display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
       }}>
@@ -62,7 +63,7 @@ export default function PlanStateBanner({ user, onUpgrade }) {
         <button
           onClick={handleCta}
           style={{
-            fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#1e1b4b',
+            fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#5b21b6',
             background: '#fff', border: 'none', borderRadius: 999, padding: '11px 22px',
             cursor: 'pointer', flexShrink: 0, minHeight: 44,
           }}
