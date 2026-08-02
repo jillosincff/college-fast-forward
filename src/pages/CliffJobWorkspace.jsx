@@ -11,6 +11,8 @@ import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import TrustPanel from '@/components/workspace/TrustPanel';
 import TrajectoryFitCard from '@/components/workspace/TrajectoryFitCard';
 import CliffReadyCard from '@/components/conversion/CliffReadyCard';
+import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
+import { ArrowRight } from 'lucide-react';
 import decodeEntities from '@/utils/decodeEntities';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -23,6 +25,7 @@ export default function CliffJobWorkspace() {
   const [fitLoading, setFitLoading] = useState(true);
   const [fitError, setFitError] = useState(false);
   const [pursuit, setPursuit] = useState(null);
+  const [showApply, setShowApply] = useState(false);
 
   // Keep the unified JobPursuit record in sync with what CLIFF has prepared
   const syncPursuit = (extra = {}) => {
@@ -117,6 +120,21 @@ export default function CliffJobWorkspace() {
             {job.location && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>📍 {decodeEntities(job.location)}</span>}
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}
           </div>
+
+          {/* Always-available Apply button — opens the "I applied — add to my tracker" confirmation flow */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setShowApply(true)}
+              style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}
+            >
+              Apply <ArrowRight size={15} />
+            </button>
+            {(job.jobUrl || job.job_url) && (
+              <a href={job.jobUrl || job.job_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6d28d9', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                View posting ↗
+              </a>
+            )}
+          </div>
         </div>
 
         {/* One Next Step: CLIFF's single strongest recommendation leads the workspace */}
@@ -138,6 +156,15 @@ export default function CliffJobWorkspace() {
         <CompanyPrepCard job={job} onPrepared={() => syncPursuit({ companyResearched: true })} />
 
         {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
+
+        {showApply && user && (
+          <WarmApplyFlow
+            job={{ company, role, jobUrl: job.jobUrl || job.job_url || '' }}
+            user={user}
+            applyOnly
+            onClose={() => setShowApply(false)}
+          />
+        )}
       </div>
     </div>
   );
