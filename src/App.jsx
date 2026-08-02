@@ -28,10 +28,8 @@ import ApplicationTracker from '@/pages/ApplicationTracker';
 import EmailConnectionSettings from '@/pages/EmailConnectionSettings';
 import EmailCallbackPage from '@/pages/EmailCallback';
 import MigrationSignIn from '@/pages/MigrationSignIn';
-import ParentWelcome from '@/pages/ParentWelcome';
 import ParentOnboarding from '@/pages/ParentOnboarding';
 import ParentProfileEdit from '@/pages/ParentProfileEdit';
-import ParentUpsell from '@/pages/ParentUpsell';
 import ParentAllSet from '@/pages/ParentAllSet';
 import ParentLandingPage from '@/pages/ParentLandingPage';
 import StudentLandingPage from '@/pages/StudentLandingPage';
@@ -213,9 +211,9 @@ const AuthenticatedApp = () => {
       <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
       <Route path="/GatorWelcome" element={<Navigate to="/StudentWelcome" replace />} />
       <Route path="/StudentWelcome" element={<StudentWelcome />} />
-      <Route path="/ParentWelcome" element={<ParentWelcome />} />
+      <Route path="/ParentWelcome" element={<Navigate to="/ParentAllSet" replace />} />
       <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
-      <Route path="/ParentUpsell" element={<ParentUpsell />} />
+      <Route path="/ParentUpsell" element={<Navigate to="/ParentAllSet" replace />} />
       <Route path="/ParentAllSet" element={<ParentAllSet />} />
       <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
       {/* Destination of the signup verification email link. Without this route the
