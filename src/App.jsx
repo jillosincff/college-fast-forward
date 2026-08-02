@@ -229,7 +229,7 @@ const AuthenticatedApp = () => {
       {/* Redirect aliases */}
       <Route path="/AlumniAllSet" element={<Navigate to="/FreeTierDashboard" replace />} />
       <Route path="/AlumniOnboarding" element={<Navigate to="/FreeTierDashboard" replace />} />
-      <Route path="/ParentHome" element={<Navigate to="/FreeTierDashboard" replace />} />
+      <Route path="/ParentHome" element={<Navigate to="/ParentAllSet" replace />} />
       <Route path="/Directory" element={<Navigate to="/FreeTierDashboard" replace />} />
 
       {/* Feature routes — ALL guarded (require auth + onboarding) */}

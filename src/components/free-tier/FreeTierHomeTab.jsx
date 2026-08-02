@@ -60,7 +60,7 @@ ${user.full_name || 'Your student'} has joined College Fast Forward and is ready
 
 FastIQ is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.
 
-Activate FastIQ for your family: ${window.location.origin}/#ParentHome
+Activate FastIQ for your family: ${window.location.origin}/#ParentAllSet
 
 — The College Fast Forward Team`,
       });

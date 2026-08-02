@@ -230,7 +230,7 @@ export default function ParentWelcomeScreen({ user, studentName, isFastIQActive,
 
         {/* Go to dashboard */}
         <button
-          onClick={() => navigate('ParentHome')}
+          onClick={() => navigate('ParentAllSet')}
           style={{
             background: 'none', border: 'none',
             fontSize: 13, color: '#AAAAAA',

@@ -252,7 +252,7 @@ export default function ParentFastIQView({ user }) {
             $29/month or $187/year — 5-day free trial included.
           </p>
           <button
-            onClick={() => navigate('ParentHome')}
+            onClick={() => navigate('ParentAllSet')}
             className="bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold w-full hover:bg-[#d44e14] transition-colors"
             style={{ minHeight: 'auto' }}
           >

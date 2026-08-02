@@ -76,7 +76,7 @@ export default function GiftFastIQModal({ user, onClose }) {
   };
 
   const handleAddCard = async () => {
-    const returnUrl = `${window.location.origin}/#ParentHome?gift=open`;
+    const returnUrl = `${window.location.origin}/#ParentAllSet?gift=open`;
     try {
       if (user?.stripe_customer_id) {
         // Parent already has a Stripe customer — open billing portal to add/update card

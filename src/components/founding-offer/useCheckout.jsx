@@ -15,10 +15,10 @@ export default function useCheckout(user) {
     try {
       const origin = window.location.origin;
       const successUrl = user?.persona === 'parent'
-        ? `${origin}/#ParentHome?payment=success`
+        ? `${origin}/#ParentAllSet?payment=success`
         : `${origin}/#FreeTierDashboard?upgraded=true`;
       const cancelUrl = user?.persona === 'parent'
-        ? `${origin}/#ParentHome?payment=cancelled`
+        ? `${origin}/#ParentAllSet?payment=cancelled`
         : `${origin}/#FreeTierDashboard`;
 
       const response = await createCheckoutSession({

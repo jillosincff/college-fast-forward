@@ -46,7 +46,7 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
 
   if (isParentOrAlumni) {
     // Render a simplified nav for parents/alumni helpers
-    const dashboardPage = isAlumniHelper ? 'AlumniHome' : 'ParentHome';
+    const dashboardPage = isAlumniHelper ? 'AlumniHome' : 'ParentAllSet';
     const helperNavLinks = [
       { label: 'Dashboard', page: dashboardPage },
     ];
