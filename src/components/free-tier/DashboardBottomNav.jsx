@@ -22,7 +22,10 @@ export default function DashboardBottomNav({ activeTab, onTabChange }) {
   return (
     <>
       {/* Top tabs — ALWAYS visible on all screen sizes */}
-      <div style={{
+      {/* Four labelled tabs are far wider than a phone screen. Body has
+          overflow-x:hidden, so on mobile the last tabs (incl. Profile) were
+          clipped and unreachable — make the row horizontally scrollable. */}
+      <div className="scrollbar-hide" style={{
         display: 'flex',
         gap: 0,
         borderBottom: '2px solid #e5e7eb',
@@ -33,6 +36,8 @@ export default function DashboardBottomNav({ activeTab, onTabChange }) {
         position: 'sticky',
         top: 56,
         zIndex: 90,
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
       }}>
         {ALL_TABS.map(tab => {
           const isActive = activeTab === tab.id;
@@ -54,7 +59,9 @@ export default function DashboardBottomNav({ activeTab, onTabChange }) {
                 fontSize: 14,
                 fontWeight: 700,
                 cursor: 'pointer',
-                minHeight: 'auto',
+                minHeight: 44,
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
                 transition: 'color 0.15s, border-color 0.15s',
               }}
             >
