@@ -142,6 +142,17 @@ export default function ParentProfileEdit() {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       <div style={{ flex: 1, maxWidth: 540, margin: '0 auto', width: '100%', padding: '40px 24px' }}>
+        <button
+          type="button"
+          onClick={() => navigate('/FreeTierDashboard')}
+          style={{
+            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+            fontFamily: SF, fontSize: 14, fontWeight: 600, color: INDIGO,
+            minHeight: 'auto', minWidth: 'auto', marginBottom: 20,
+          }}
+        >
+          ← Back to College Fast Forward
+        </button>
         <h1 style={{ fontFamily: SF, fontWeight: 900, fontSize: 28, color: TEXT, textAlign: 'center', letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: 10 }}>
           Update your profile
         </h1>
@@ -377,12 +388,26 @@ export default function ParentProfileEdit() {
           )}
 
           {saved && (
-            <p style={{
-              fontFamily: SF, fontSize: 13, fontWeight: 600, color: '#16a34a',
-              textAlign: 'center', margin: '-4px 0 0', lineHeight: 1.5,
-            }}>
-              Your profile has been saved. You can close this page or keep editing.
-            </p>
+            <>
+              <p style={{
+                fontFamily: SF, fontSize: 13, fontWeight: 600, color: '#16a34a',
+                textAlign: 'center', margin: '-4px 0 0', lineHeight: 1.5,
+              }}>
+                Your profile has been saved.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/FreeTierDashboard')}
+                style={{
+                  width: '100%', padding: '14px 24px', borderRadius: 100,
+                  border: `1.5px solid ${INDIGO_BORDER}`, background: INDIGO_LIGHT,
+                  color: INDIGO, fontFamily: SF, fontSize: 15, fontWeight: 700,
+                  cursor: 'pointer', minHeight: 52,
+                }}
+              >
+                Go to College Fast Forward →
+              </button>
+            </>
           )}
         </div>
       </div>
