@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Loader2, MailCheck, CheckCircle2, AlertCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { verifyRegistration } from '@/functions/verifyRegistration';
-import { sendMagicLink } from '@/functions/sendMagicLink';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const ACCENT = '#6d28d9';
@@ -76,13 +75,7 @@ export default function VerifyEmail() {
         // not signed in — continue to magic-link step
       }
 
-      // 3) Not signed in → send a one-time sign-in link so a session gets created,
-      //    which lands on GatorAuth and routes into onboarding.
-      try {
-        await sendMagicLink({ email: verifiedEmail });
-      } catch (e) {
-        // Even if the email send is rate-limited, one was likely already sent.
-      }
+      // 3) Not signed in → their email is confirmed, so just send them to sign in.
       setState('sent');
     };
 
@@ -136,7 +129,7 @@ export default function VerifyEmail() {
       <>
         {iconBox(MailCheck)}
         {heading("You're verified! One quick step")}
-        {body(<>We just sent a secure sign-in link{email ? ' to' : ''}{email && <strong style={{ color: '#0f172a' }}> {email}</strong>}. Click it to log in — then we'll walk you through setting up your profile.</>)}
+        {body(<>Your email{email ? ' ' : ''}{email && <strong style={{ color: '#0f172a' }}>{email}</strong>} is confirmed. Sign in and we'll walk you through setting up your profile.</>)}
         <button
           onClick={() => { window.location.href = window.location.origin + '/#/GatorAuth'; }}
           style={{
@@ -147,9 +140,7 @@ export default function VerifyEmail() {
         >
           Continue to sign in →
         </button>
-        <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', margin: '20px 0 0', lineHeight: 1.6 }}>
-          Didn't get the email? Check your spam folder.
-        </p>
+
       </>
     );
   }

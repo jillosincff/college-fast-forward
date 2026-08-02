@@ -37,7 +37,7 @@ export default function ResetPassword() {
       // Platform-native reset — this updates the SAME password the Sign In form checks.
       await base44.auth.resetPassword({ resetToken: token, newPassword: password });
       setSuccess(true);
-      setTimeout(() => navigate('GetStarted'), 2500);
+      setTimeout(() => { window.location.hash = '#/GatorAuth'; }, 2000);
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.message || err?.response?.data?.error;
       setError(detail || 'Reset failed. The link may have expired — please request a new one.');
@@ -114,7 +114,7 @@ export default function ResetPassword() {
               <p style={{ textAlign: 'center', margin: 0 }}>
                 <button
                   type="button"
-                  onClick={() => { window.location.hash = '#MigrationSignIn'; }}
+                  onClick={() => { window.location.hash = '#/GatorAuth'; }}
                   style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto', minWidth: 'auto' }}
                 >
                   Back to sign in

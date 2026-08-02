@@ -3,7 +3,6 @@ import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Loader2 } from 'lucide-react';
-import { sendMagicLink } from '@/functions/sendMagicLink';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import OtpVerifyForm from '@/components/auth/OtpVerifyForm';
 import { deriveSchoolCode } from '@/lib/schoolNames';
@@ -76,8 +75,9 @@ export default function GatorAuth() {
   const [signupPassword, setSignupPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // Magic link state
-  const [magicEmail, setMagicEmail] = useState('');
+  // Forgot-password state — handled inline, no separate page
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
 
   // OTP verification step (after native signup)
   const [pendingOtpEmail, setPendingOtpEmail] = useState('');
@@ -178,24 +178,23 @@ export default function GatorAuth() {
     }
   };
 
-  const handleSendMagicLink = async (e) => {
+  // Platform-native password reset — updates the SAME password the sign-in form
+  // checks. (The old custom reset wrote to a separate field that login never
+  // read, which is why resets appeared to "work" but sign-in still failed.)
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
     setError('');
     setInfo('');
-    if (!magicEmail) {
+    if (!forgotEmail) {
       setError('Please enter your email.');
       return;
     }
     setLoading(true);
     try {
-      const { data } = await sendMagicLink({ email: magicEmail });
-      if (data?.success) {
-        setInfo('Check your email for a secure sign-in link. It expires in 15 minutes.');
-      } else {
-        setError(data?.error || 'Could not send magic link. Please try again.');
-      }
+      await base44.auth.resetPasswordRequest(forgotEmail.trim().toLowerCase());
+      setInfo('If an account exists for that email, we just sent a reset link. Check your inbox.');
     } catch (err) {
-      setError(err?.response?.data?.error || 'Could not send magic link. Please try again.');
+      setError('Could not send the reset email. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -481,8 +480,9 @@ export default function GatorAuth() {
             </div>
           )}
 
+          {!forgotMode && (
           <div style={{ background: '#f1f5f9', borderRadius: 10, padding: 4, marginBottom: 28, display: 'flex', gap: 4 }}>
-            {['signin', 'signup', 'magic'].map(tab => (
+            {['signin', 'signup'].map(tab => (
               <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setError(''); setInfo(''); }}
@@ -497,12 +497,12 @@ export default function GatorAuth() {
               >
                 {tab === 'signin' && 'Sign in'}
                 {tab === 'signup' && 'Sign up'}
-                {tab === 'magic' && 'Magic link'}
               </button>
             ))}
           </div>
+          )}
 
-          {activeTab === 'signin' && (
+          {!forgotMode && activeTab === 'signin' && (
             <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
                 <label style={labelStyle}>Email</label>
@@ -515,7 +515,7 @@ export default function GatorAuth() {
               <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 8 }}>
                 <button
                   type="button"
-                  onClick={() => navigate('/MigrationSignIn?forgot=true')}
+                  onClick={() => { setForgotMode(true); setForgotEmail(signinEmail); setError(''); setInfo(''); }}
                   style={{ fontFamily: dmSans, fontSize: 13, color: ACCENT, background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
                 >
                   Forgot your password?
@@ -527,7 +527,7 @@ export default function GatorAuth() {
             </form>
           )}
 
-          {activeTab === 'signup' && (
+          {!forgotMode && activeTab === 'signup' && (
             <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'flex', gap: 10 }}>
                 <div style={{ flex: 1 }}>
@@ -558,32 +558,44 @@ export default function GatorAuth() {
             </form>
           )}
 
-          {activeTab === 'magic' && (
-            <form onSubmit={handleSendMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {forgotMode && (
+            <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ textAlign: 'center', marginBottom: 4 }}>
+                <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>Reset your password</p>
+                <p style={{ fontFamily: dmSans, fontSize: 14, color: '#64748b', margin: 0, lineHeight: 1.6 }}>
+                  Enter your email and we'll send you a link to set a new one.
+                </p>
+              </div>
               <div>
                 <label style={labelStyle}>Email</label>
-                <input type="email" value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} placeholder="you@example.com" style={inputStyle} />
+                <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="you@example.com" style={inputStyle} />
               </div>
               <button type="submit" disabled={loading} style={primaryBtn(loading)}>
-                {loading ? 'Sending...' : 'Send Magic Link'}
+                {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
-              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
-              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', textAlign: 'center', margin: '8px 0 0' }}>
-                Need to reset your password?{' '}
-                <button type="button" onClick={() => navigate('/MigrationSignIn?forgot=true')} style={{ fontFamily: dmSans, fontSize: 13, color: ACCENT, background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none', fontWeight: 600 }}>Click here →</button>
-              </p>
+              <button
+                type="button"
+                onClick={() => { setForgotMode(false); setError(''); setInfo(''); }}
+                style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: '#94a3b8', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}
+              >
+                ← Back to sign in
+              </button>
             </form>
           )}
 
           {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#EF4444', margin: 0 }}>{error}</p></div>}
           {info && !error && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#22C55E', margin: 0 }}>{info}</p></div>}
 
+          {!forgotMode && (
           <div style={{ textAlign: 'center', marginTop: 20 }}>
             <p style={{ fontFamily: dmSans, fontSize: 12, color: '#94a3b8', margin: 0 }}>Or continue with Google →</p>
           </div>
+          )}
+          {!forgotMode && (
           <button onClick={handleGoogleSignIn} disabled={loading} style={{ width: '100%', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#0f172a', opacity: loading ? 0.7 : 1, minHeight: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <GoogleIcon /> Continue with Google
           </button>
+          )}
         </div>
       </AuthPageShell>
     );

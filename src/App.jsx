@@ -27,7 +27,6 @@ import SetSearchGoals from '@/pages/SetSearchGoals';
 import ApplicationTracker from '@/pages/ApplicationTracker';
 import EmailConnectionSettings from '@/pages/EmailConnectionSettings';
 import EmailCallbackPage from '@/pages/EmailCallback';
-import MigrationSignIn from '@/pages/MigrationSignIn';
 import ParentOnboarding from '@/pages/ParentOnboarding';
 import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentAllSet from '@/pages/ParentAllSet';
@@ -156,7 +155,7 @@ const AuthenticatedApp = () => {
 
   // Show loading spinner while checking auth — but never block public/auth pages, and give up after 3s
   const currentHash = window.location.hash.replace('#/', '').replace('#', '').split('?')[0].toLowerCase();
-  const noSpinnerPaths = ['', '/', 'gatorauth', 'getstarted', 'logout', 'migrationsignin', 'resetpassword', 'studentlandingpage', 'parentlandingpage'];
+  const noSpinnerPaths = ['', '/', 'gatorauth', 'getstarted', 'logout', 'resetpassword', 'forgot-password', 'studentlandingpage', 'parentlandingpage'];
   const isNoSpinnerPath = noSpinnerPaths.includes(currentHash);
   if (!isNoSpinnerPath && !timedOut && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
@@ -186,7 +185,8 @@ const AuthenticatedApp = () => {
       <Route path="/sign-up" element={<GatorAuth />} />
       <Route path="/register" element={<GatorAuth />} />
       <Route path="/Register" element={<GatorAuth />} />
-      <Route path="/MigrationSignIn" element={<MigrationSignIn />} />
+      <Route path="/MigrationSignIn" element={<Navigate to="/GatorAuth" replace />} />
+      <Route path="/forgot-password" element={<Navigate to="/GatorAuth" replace />} />
       <Route path="/Logout" element={<Logout />} />
       <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
       <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
@@ -289,7 +289,7 @@ function App() {
         return;
       }
       if (window.location.pathname === '/forgot-password') {
-        window.location.replace(window.location.origin + '/#/MigrationSignIn?forgot=true');
+        window.location.replace(window.location.origin + '/#/GatorAuth');
         return;
       }
       const searchParams = new URLSearchParams(window.location.search);
