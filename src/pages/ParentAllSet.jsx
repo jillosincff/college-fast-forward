@@ -22,6 +22,18 @@ export default function ParentAllSet() {
   const schoolName = user?.school_name || user?.school || 'the network';
   const [copied, setCopied] = useState(false);
 
+  // Show a thank-you confirmation when returning from a successful FastIQ checkout
+  const [showUpgradeThanks, setShowUpgradeThanks] = useState(false);
+  useEffect(() => {
+    const hashQuery = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(hashQuery);
+    if (params.get('upgraded') === 'true') {
+      setShowUpgradeThanks(true);
+      // Clean the param so a refresh doesn't re-trigger the banner
+      window.history.replaceState({}, '', window.location.origin + '/#/ParentAllSet');
+    }
+  }, []);
+
   useEffect(() => {
     if (!document.getElementById('pas-satoshi')) {
       const l = document.createElement('link');
@@ -38,6 +50,21 @@ export default function ParentAllSet() {
       padding: '48px 24px',
     }}>
       <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
+
+        {showUpgradeThanks && (
+          <div style={{
+            background: GRAD_INDIGO, color: '#fff',
+            borderRadius: 16, padding: '18px 22px', marginBottom: 24,
+            boxShadow: '0 12px 32px rgba(109,40,217,0.32)',
+          }}>
+            <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, margin: '0 0 4px' }}>
+              Your student's FastIQ is active. ⚡
+            </p>
+            <p style={{ fontFamily: SF, fontSize: 13, color: 'rgba(255,255,255,0.82)', margin: 0, lineHeight: 1.5 }}>
+              We sent them an email with instructions to log in and start. Thank you for investing in their search.
+            </p>
+          </div>
+        )}
 
         {/* Check */}
         <div style={{

@@ -24,8 +24,8 @@ export default function ParentUpsell() {
       const res = await createCheckoutSession({
         plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
         user: { id: user.id, email: user.email },
-        successUrl: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
-        cancelUrl: `${window.location.origin}/#ParentHome`,
+        successUrl: `${window.location.origin}/#/ParentAllSet?upgraded=true`,
+        cancelUrl: `${window.location.origin}/#/ParentAllSet`,
       });
       const url = res?.data?.url || res?.url;
       if (url) {
@@ -41,7 +41,7 @@ export default function ParentUpsell() {
   };
 
   const handleSkip = () => {
-    navigate('ParentHome');
+    navigate('ParentAllSet');
   };
 
   return (
