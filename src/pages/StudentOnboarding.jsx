@@ -216,7 +216,7 @@ export default function StudentOnboarding() {
   if (step === 2 && user) {
     const isValid = firstName.trim().length > 0 && school.trim().length > 0;
     return (
-      <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div className="onb-screen" style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
         <div style={{ maxWidth: 480, width: '100%' }}>
           {/* Progress dots */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
@@ -224,7 +224,7 @@ export default function StudentOnboarding() {
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE }} />
           </div>
 
-          <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '40px 32px' }}>
+          <div className="onb-card" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '40px 32px' }}>
             <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 24, color: '#fff', lineHeight: 1.3, marginBottom: 8 }}>
               Almost there.
             </h1>
@@ -307,7 +307,7 @@ export default function StudentOnboarding() {
 
   // ── SCREEN 1: Sign Up ──
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+    <div className="onb-screen" style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
       <div style={{ maxWidth: 480, width: '100%' }}>
         {/* Progress dots */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
@@ -315,7 +315,7 @@ export default function StudentOnboarding() {
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
-        <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '40px 32px', textAlign: 'center' }}>
+        <div className="onb-card" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '40px 32px', textAlign: 'center' }}>
           {/* Label */}
           <p style={{
             fontFamily: dmSans, fontSize: 11, fontWeight: 700,

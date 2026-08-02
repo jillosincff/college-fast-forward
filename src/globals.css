@@ -641,6 +641,22 @@ footer,
   }
 }
 
+/* Onboarding screens — mobile.
+   These screens vertically center a card inside a 100vh flex box. When the card
+   is taller than the phone viewport (the micro-questions step), centering pushes
+   the top of the card above the scroll origin and it becomes unreachable.
+   Switch to top-alignment and tighten the doubled-up padding on small screens.
+   !important is required — the screens style themselves inline. */
+@media (max-width: 600px) {
+  .onb-screen {
+    align-items: flex-start !important;
+    padding: 24px 14px calc(32px + env(safe-area-inset-bottom)) !important;
+  }
+  .onb-card {
+    padding: 26px 18px !important;
+  }
+}
+
 /* Free Tier Dashboard — responsive grid */
 @media (max-width: 1024px) {
   .ftd-grid {

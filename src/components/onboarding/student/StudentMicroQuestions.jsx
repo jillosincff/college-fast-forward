@@ -63,9 +63,9 @@ export default function StudentMicroQuestions({ onComplete }) {
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+    <div className="onb-screen" style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
       <div style={{ maxWidth: 520, width: '100%' }}>
-        <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '36px 32px' }}>
+        <div className="onb-card" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '36px 32px' }}>
           <h1 style={{ fontFamily: dm, fontWeight: 700, fontSize: 24, color: '#fff', lineHeight: 1.3, marginBottom: 6 }}>
             Twenty seconds so CLIFF knows where to look.
           </h1>
