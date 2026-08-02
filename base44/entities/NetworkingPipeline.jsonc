@@ -72,10 +72,11 @@
         "intro_made",
         "interview",
         "offer",
-        "no_response"
+        "no_response",
+        "applied"
       ],
       "default": "matched",
-      "description": "Current networking status"
+      "description": "Current networking status. 'applied' = student submitted the application (cold apply / in-app apply / workspace mark-as-applied)."
     },
     "status_date": {
       "type": "string",

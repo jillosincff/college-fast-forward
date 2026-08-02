@@ -116,7 +116,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
         job_description: lead.jobDescription || lead.description || '',
         job_url: jobUrl,
         application_path: 'cold_apply',
-        status: 'identified',
+        status: 'applied',
         status_date: new Date().toISOString(),
         location: lead.location || '',
         notes: [

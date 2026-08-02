@@ -36,6 +36,7 @@ const PIPELINE_STATUS_MAP = {
   interview: 'interviewing',
   offer: 'offered',
   no_response: 'rejected',
+  applied: 'applied',
 };
 
 // Pull the resume version/label out of the notes field

@@ -30,6 +30,11 @@ export default function WorkspacePrepActions({ job, user }) {
       });
       setTracked(true);
       window.dispatchEvent(new Event('cff:pipeline-changed'));
+      // Learning engine: mark this recommendation pursued + applied.
+      base44.functions.invoke('recordRecommendation', { company, role, event: 'pursued' }).catch(() => {});
+      base44.functions.invoke('recordRecommendation', { company, role, event: 'applied' }).catch(() => {});
+      // TTFMP: log a meaningful-progress event.
+      base44.functions.invoke('logMeaningfulEvent', { event_name: 'application_submitted', company_name: company, source_feature: 'Workspace Prep', delivery_channel: 'External Application' }).catch(() => {});
     } catch (e) { console.error('Failed to track:', e); }
     setTracking(false);
   };

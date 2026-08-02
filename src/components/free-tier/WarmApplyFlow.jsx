@@ -117,7 +117,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
         job_title: role.trim() || null,
         job_url: jobUrl || null,
         application_path: contact ? 'alumni_outreach' : 'cold_apply',
-        status: contact ? 'reached_out' : 'identified',
+        status: contact ? 'reached_out' : (applyOnly ? 'applied' : 'identified'),
         status_date: new Date().toISOString(),
         reached_out_date: contact ? new Date().toISOString() : null,
         alumni_name: contact?.name || null,
