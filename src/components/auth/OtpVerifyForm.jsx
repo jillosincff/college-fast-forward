@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
@@ -16,6 +16,18 @@ export default function OtpVerifyForm({ email, password, onVerified }) {
   const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const [cooldown, setCooldown] = useState(0);
+  const inputRef = useRef(null);
+  const submittedRef = useRef(false);
+
+  // Land with the cursor already in the field — one less tap on mobile.
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   const inputStyle = {
     width: '100%', fontSize: 22, letterSpacing: '0.4em', textAlign: 'center',
@@ -24,10 +36,10 @@ export default function OtpVerifyForm({ email, password, onVerified }) {
   };
   const primaryBtn = (l) => ({ background: l ? '#cbd5e1' : GRAD_INDIGO, border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 700, color: '#fff', cursor: l ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto', boxShadow: l ? 'none' : '0 8px 24px rgba(109,40,217,0.28)' });
 
-  const handleVerify = async (e) => {
-    e.preventDefault();
+  const handleVerify = async (e, overrideCode) => {
+    if (e) e.preventDefault();
     setError(''); setInfo('');
-    const otpCode = code.trim();
+    const otpCode = (overrideCode ?? code).trim();
     if (otpCode.length < 4) { setError('Enter the code from your email.'); return; }
     setLoading(true);
     const cleanEmail = email.trim().toLowerCase();
@@ -65,6 +77,7 @@ export default function OtpVerifyForm({ email, password, onVerified }) {
         await onVerified();
         return;
       }
+      submittedRef.current = false;
       setError(detail || 'That code is incorrect or expired. Try again.');
     } finally {
       setLoading(false);
@@ -77,6 +90,10 @@ export default function OtpVerifyForm({ email, password, onVerified }) {
     try {
       await base44.auth.resendOtp(email.trim().toLowerCase());
       setInfo('A new code is on its way to your inbox.');
+      setCooldown(30);
+      submittedRef.current = false;
+      setCode('');
+      inputRef.current?.focus();
     } catch (err) {
       setError('Could not resend the code. Please wait a moment and try again.');
     } finally {
@@ -91,17 +108,26 @@ export default function OtpVerifyForm({ email, password, onVerified }) {
           We emailed a verification code to<br/><strong style={{ color: '#0f172a' }}>{email}</strong>.
         </p>
         <p style={{ fontFamily: dmSans, fontSize: 13, color: '#94a3b8', margin: '10px 0 0', lineHeight: 1.5 }}>
-          Don't see it? Check your <strong style={{ color: '#64748b' }}>spam / junk</strong> folder. If you requested more than one code, enter the <strong style={{ color: '#64748b' }}>most recent</strong> one.
+          It arrives within a few seconds. Don't see it? Check your <strong style={{ color: '#64748b' }}>spam / junk</strong> folder, or search your inbox for <strong style={{ color: '#64748b' }}>"verification code"</strong>. If you requested more than one, use the <strong style={{ color: '#64748b' }}>most recent</strong>.
         </p>
       </div>
       <div>
         <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', display: 'block', marginBottom: 6 }}>Verification Code</label>
         <input
+          ref={inputRef}
           type="text"
           inputMode="numeric"
           autoComplete="one-time-code"
           value={code}
-          onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))}
+          onChange={(e) => {
+            const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 8);
+            setCode(val);
+            // Six digits typed or pasted = go. No extra tap on the button.
+            if (val.length === 6 && !submittedRef.current) {
+              submittedRef.current = true;
+              handleVerify(null, val);
+            }
+          }}
           placeholder="000000"
           style={inputStyle}
         />
@@ -109,8 +135,8 @@ export default function OtpVerifyForm({ email, password, onVerified }) {
       <button type="submit" disabled={loading} style={primaryBtn(loading)}>
         {loading ? 'Verifying...' : 'Verify & Continue'}
       </button>
-      <button type="button" onClick={handleResend} disabled={resending} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: ACCENT, cursor: resending ? 'default' : 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>
-        {resending ? 'Sending...' : 'Resend code'}
+      <button type="button" onClick={handleResend} disabled={resending || cooldown > 0} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: cooldown > 0 ? '#94a3b8' : ACCENT, cursor: (resending || cooldown > 0) ? 'default' : 'pointer', textDecoration: cooldown > 0 ? 'none' : 'underline', minHeight: 'auto' }}>
+        {resending ? 'Sending...' : cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
       </button>
       {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px' }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#EF4444', margin: 0 }}>{error}</p></div>}
       {info && !error && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '12px 16px' }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#22C55E', margin: 0 }}>{info}</p></div>}
