@@ -20,7 +20,9 @@ function SideNav() {
     { icon: MessageSquare, page: 'MyMessages' },
   ];
   return (
-    <div style={{ width: 60, background: '#fff', borderRight: '1px solid #E5E5E5', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 20, position: 'sticky', top: 0, height: '100vh' }}>
+    <div className="mi-siderail" style={{ width: 60, background: '#fff', borderRight: '1px solid #E5E5E5', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 20, position: 'sticky', top: 0, height: '100vh' }}>
+      {/* The icon rail eats 60px of a phone screen and duplicates mobile nav — hide it there */}
+      <style>{`@media (max-width: 768px) { .mi-siderail { display: none !important; } }`}</style>
       {NAV.map(item => {
         const Icon = item.icon;
         return (
@@ -192,12 +194,12 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
     return (
       <>
         <TopNav />
-        <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: 'clamp(24px, 6vw, 48px) clamp(16px, 4vw, 24px)' }}>
         <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#64748b', marginBottom: 24, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
           ← Back to Dashboard
         </button>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 12px' }}>Mock Interview</p>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>
           Let's practice, {firstName}.
         </h1>
         {urlCompany && (
@@ -259,7 +261,8 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <SideNav />
-      <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '24px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 0px)', width: '100%' }}>
+      {/* dvh keeps the composer above the fold on mobile browsers with a collapsing URL bar */}
+      <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: 'clamp(14px, 4vw, 24px)', display: 'flex', flexDirection: 'column', height: '100vh', maxHeight: '100dvh', width: '100%', minWidth: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexShrink: 0 }}>
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 4px' }}>Mock Interview · Live</p>
@@ -313,7 +316,7 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
             rows={3}
             style={{ flex: 1, fontSize: 14, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 10, padding: '12px 16px', resize: 'none', fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }}
           />
-          <button onClick={sendMessage} disabled={!input.trim() || loading} style={{ background: !input.trim() || loading ? '#F0F0F0' : '#E85D20', border: 'none', borderRadius: 10, padding: '0 20px', fontSize: 20, color: !input.trim() || loading ? '#CCC' : '#fff', cursor: !input.trim() || loading ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+          <button onClick={sendMessage} disabled={!input.trim() || loading} style={{ background: !input.trim() || loading ? '#F0F0F0' : '#E85D20', border: 'none', borderRadius: 10, padding: '0 clamp(14px, 4vw, 20px)', minWidth: 52, fontSize: 20, color: !input.trim() || loading ? '#CCC' : '#fff', cursor: !input.trim() || loading ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
             →
           </button>
         </div>

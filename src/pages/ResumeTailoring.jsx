@@ -710,7 +710,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   // ── PHASE: tailor ────────────────────────────────────────────────────────
   if (phase === 'tailor') {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: 'clamp(24px, 6vw, 48px) clamp(16px, 4vw, 24px)' }}>
         <button
           onClick={() => setPhase(hasResumes ? 'hub' : 'uploaded')}
           style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', marginBottom: 32, padding: 0, minHeight: 'auto' }}
@@ -721,7 +721,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         {/* Header */}
         <div style={{ marginBottom: 40 }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>Resume Studio</p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
             Let the Agent optimize your resume
           </h1>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#666', margin: 0, lineHeight: 1.6 }}>
@@ -865,7 +865,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
             onClose={() => setShowProPaywall(false)}
           />
         )}
-        <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
+        <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: 'clamp(22px, 5vw, 40px) clamp(16px, 4vw, 24px)', width: '100%' }}>
           <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap'); @keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
           {/* Header */}
@@ -944,7 +944,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               )}
 
               {analysis && !analyzing && (
-                <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px' }}>
+                <div style={{ background: '#0A0A0A', borderRadius: 16, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)' }}>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>Resume Analysis • Matched to Your Career Goals</p>
 
                   <div style={{ display: 'flex', flexDirection: window.innerWidth < 600 ? 'column' : 'row', gap: 24, alignItems: window.innerWidth < 600 ? 'center' : 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
@@ -1116,7 +1116,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   return (
     <>
       {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
-      <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '48px 24px', width: '100%' }}>
+      <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: 'clamp(24px, 6vw, 48px) clamp(16px, 4vw, 24px)', width: '100%' }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');`}</style>
 
         {hasResumes && (
@@ -1133,7 +1133,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         </button>
         <div style={{ marginBottom: 40, textAlign: 'center' }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 12px' }}>Resume</p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
           Your resume is your first impression.
           </h1>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#666', margin: 0, lineHeight: 1.6 }}>

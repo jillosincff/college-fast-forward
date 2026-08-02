@@ -247,7 +247,7 @@ export default function ApplicationTracker() {
                 </div>
               )
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: 14 }}>
                 {visible.map(item => (
                   <MissionAppCard
                     key={item.app.id}
@@ -289,7 +289,7 @@ export default function ApplicationTracker() {
       <button
         onClick={() => setShowAddModal(true)}
         style={{
-          position: 'fixed', bottom: 32, right: 32, width: 56, height: 56, borderRadius: '50%',
+          position: 'fixed', bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 20, width: 56, height: 56, borderRadius: '50%',
           background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', fontSize: 24, cursor: 'pointer',
           boxShadow: '0 8px 24px rgba(109,40,217,0.35)', minHeight: 'auto', zIndex: 50,
         }}

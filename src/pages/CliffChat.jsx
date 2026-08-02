@@ -157,13 +157,14 @@ export default function CliffChatPage({ onOpenUpgrade }) {
       )}
 
       {/* Chat area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(14px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
         {messages.length === 0 && (
           <div style={{
             maxWidth: 640,
-            margin: '40px auto',
+            width: '100%',
+            margin: '24px auto',
             textAlign: 'center',
-            padding: '40px 24px',
+            padding: 'clamp(24px, 6vw, 40px) clamp(16px, 4vw, 24px)',
             background: '#fff',
             borderRadius: 16,
             border: '1px solid #e9d5ff',
@@ -178,7 +179,8 @@ export default function CliffChatPage({ onOpenUpgrade }) {
             
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              /* min() keeps the 280px track from forcing horizontal overflow on phones */
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))',
               gap: 12,
               textAlign: 'left',
             }}>
@@ -321,7 +323,7 @@ export default function CliffChatPage({ onOpenUpgrade }) {
       <div style={{
         background: '#fff',
         borderTop: '1px solid #e9d5ff',
-        padding: '20px 24px',
+        padding: 'clamp(12px, 3vw, 20px) clamp(14px, 4vw, 24px)',
         display: 'flex',
         gap: 12,
         flexShrink: 0,
@@ -354,7 +356,8 @@ export default function CliffChatPage({ onOpenUpgrade }) {
             background: !input.trim() || loading || !canSendMessage ? '#e9d5ff' : GRAD,
             border: 'none',
             borderRadius: 12,
-            padding: '0 24px',
+            padding: '0 clamp(14px, 4vw, 24px)',
+            minHeight: 48,
             fontFamily: FONT,
             fontSize: 14,
             fontWeight: 600,

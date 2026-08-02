@@ -14,7 +14,9 @@ function SideNav() {
     { icon: MessageSquare, page: 'MyMessages' },
   ];
   return (
-    <div style={{ width: 60, background: '#fff', borderRight: '1px solid #E5E5E5', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 20, position: 'sticky', top: 0, height: '100vh' }}>
+    <div className="li-siderail" style={{ width: 60, background: '#fff', borderRight: '1px solid #E5E5E5', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 20, position: 'sticky', top: 0, height: '100vh' }}>
+      {/* Hide the icon rail on phones — it steals width and duplicates mobile nav */}
+      <style>{`@media (max-width: 768px) { .li-siderail { display: none !important; } .li-url-row { flex-wrap: wrap; } .li-url-row > button { width: 100%; padding: 12px 24px !important; } }`}</style>
       {NAV.map(item => {
         const Icon = item.icon;
         return (
@@ -115,7 +117,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <SideNav />
-      <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
+      <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: 'clamp(22px, 5vw, 40px) clamp(16px, 4vw, 24px)', width: '100%', minWidth: 0 }}>
 
       <div style={{ marginBottom: 32 }}>
         <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#64748b', marginBottom: 16, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -135,7 +137,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
           <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 8 }}>
             Your LinkedIn URL
           </label>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div className="li-url-row" style={{ display: 'flex', gap: 10 }}>
             <input
               value={url}
               onChange={e => setUrl(e.target.value)}
@@ -190,7 +192,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             </div>
           )}
 
-          <div style={{ background: 'linear-gradient(135deg, #2e1065, #4c1d95)', borderRadius: 16, padding: '28px 32px', marginBottom: 24 }}>
+          <div style={{ background: 'linear-gradient(135deg, #2e1065, #4c1d95)', borderRadius: 16, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', marginBottom: 24 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#a78bfa', margin: '0 0 20px' }}>
               LINKEDIN ANALYSIS · MATCHED TO YOUR GOALS
             </p>
