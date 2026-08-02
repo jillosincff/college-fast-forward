@@ -144,7 +144,7 @@ export default function ParentProfileEdit() {
       <div style={{ flex: 1, maxWidth: 540, margin: '0 auto', width: '100%', padding: '40px 24px' }}>
         <button
           type="button"
-          onClick={() => navigate('/FreeTierDashboard')}
+          onClick={() => navigate('/ParentAllSet')}
           style={{
             background: 'none', border: 'none', padding: 0, cursor: 'pointer',
             fontFamily: SF, fontSize: 14, fontWeight: 600, color: INDIGO,
@@ -397,7 +397,7 @@ export default function ParentProfileEdit() {
               </p>
               <button
                 type="button"
-                onClick={() => navigate('/FreeTierDashboard')}
+                onClick={() => navigate('/ParentAllSet')}
                 style={{
                   width: '100%', padding: '14px 24px', borderRadius: 100,
                   border: `1.5px solid ${INDIGO_BORDER}`, background: INDIGO_LIGHT,
