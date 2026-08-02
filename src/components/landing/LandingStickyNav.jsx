@@ -31,7 +31,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
       <style>{`
         @media (max-width: 768px) {
           .sticky-nav-wrap { padding: 12px 16px !important; }
-          .sticky-nav-signin { display: none !important; }
+          .sticky-nav-signin { padding: 8px 6px !important; }
           .sticky-nav-trust { display: none !important; }
         }
       `}</style>
@@ -59,7 +59,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
             whiteSpace: 'nowrap',
           }}
         >
-          Free to join · FastIQ from $29/mo
+          Free to join · CLIFF Pro $19.96/mo
         </span>
 
         {/* Right — buttons */}
@@ -70,7 +70,7 @@ export default function LandingStickyNav({ onSignIn, onGetStarted }) {
               fontFamily: dmSans,
               fontSize: 14,
               fontWeight: 400,
-              color: 'rgba(244,240,232,0.5)',
+              color: 'rgba(244,240,232,0.75)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
