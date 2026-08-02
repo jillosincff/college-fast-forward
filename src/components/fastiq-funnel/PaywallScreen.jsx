@@ -108,14 +108,15 @@ export default function PaywallScreen() {
     base44.analytics.track({ eventName: 'checkout_started', properties: { plan: selectedPlan } });
 
     try {
-      const baseUrl = window.location.origin;
+      const baseUrl = window.location.origin || 'https://collegefastforward.com';
       const plan = selectedPlan === 'annual' ? 'fastiq_annual' : 'fastiq_monthly';
+      const me = await base44.auth.me();
       const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
       const response = await createCheckoutSession({
         plan,
-        successUrl: `${baseUrl}/#FastIQ?checkout=success`,
-        cancelUrl: `${baseUrl}/#FastIQ?checkout=cancel`,
-        metadata: {},
+        successUrl: `${baseUrl}/#/FastIQ?checkout=success`,
+        cancelUrl: `${baseUrl}/#/FastIQ?checkout=cancel`,
+        user: { id: me?.id, email: me?.email, persona: me?.persona, roles: me?.roles, full_name: me?.full_name },
       });
       const result = response?.data;
       if (result?.url) {

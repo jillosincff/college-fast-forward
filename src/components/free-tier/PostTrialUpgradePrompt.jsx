@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function PostTrialUpgradePrompt({ message }) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleUpgrade = async () => {
@@ -9,8 +11,9 @@ export default function PostTrialUpgradePrompt({ message }) {
     try {
       const res = await createCheckoutSession({
         plan: 'pro_monthly',
-        success_url: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
-        cancel_url: window.location.href,
+        successUrl: `${window.location.origin || 'https://collegefastforward.com'}/#/FreeTierDashboard?upgraded=true`,
+        cancelUrl: window.location.href,
+        user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name },
       });
       const url = res?.data?.url || res?.url;
       if (url) window.location.href = url;

@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 
 const dm = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 const GRAD = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
@@ -20,14 +21,38 @@ const logEvent = (event_name, properties) =>
  * @param {string}   contextLine - Optional value-specific line, e.g. "You've used this week's free CLIFF messages."
  */
 export default function CliffProPaywall({ onClose, onUpgrade, trigger = 'generic', contextLine }) {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   useEffect(() => { logEvent('paywall_viewed', { trigger }); }, [trigger]);
 
   const startPro = async () => {
     logEvent('upgrade_cta_clicked', { trigger });
     if (onUpgrade) { onUpgrade(); return; }
-    const res = await base44.functions.invoke('createCheckoutSession', { source: 'cliff_pro_paywall', trigger });
-    const url = res?.data?.url || res?.data?.checkout_url;
-    if (url) window.location.href = url;
+    if (!user?.id || !user?.email) {
+      setError('Please sign in to upgrade.');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const origin = window.location.origin || 'https://collegefastforward.com';
+    try {
+      const res = await base44.functions.invoke('createCheckoutSession', {
+        plan: 'pro_monthly',
+        source: 'cliff_pro_paywall',
+        trigger,
+        successUrl: `${origin}/#/FreeTierDashboard?upgraded=true`,
+        cancelUrl: `${origin}/#/FreeTierDashboard`,
+        user: { id: user.id, email: user.email, persona: user.persona, roles: user.roles, full_name: user.full_name },
+      });
+      const url = res?.data?.url || res?.url;
+      if (url) { window.location.href = url; return; }
+      setError(res?.data?.error || 'Could not start checkout. Please try again.');
+    } catch (e) {
+      setError(e?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,10 +93,13 @@ export default function CliffProPaywall({ onClose, onUpgrade, trigger = 'generic
           Free helps you make progress. Pro makes sure you never lose momentum.
         </p>
 
-        <button onClick={startPro} style={{ width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD, border: 'none', borderRadius: 14, padding: '15px 20px', cursor: 'pointer', minHeight: 52, boxShadow: '0 8px 24px rgba(109,40,217,0.30)', marginBottom: 8 }}>
-          Keep CLIFF Working
+        <button onClick={startPro} disabled={loading} style={{ width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD, border: 'none', borderRadius: 14, padding: '15px 20px', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, minHeight: 52, boxShadow: '0 8px 24px rgba(109,40,217,0.30)', marginBottom: 8 }}>
+          {loading ? 'Starting checkout…' : 'Keep CLIFF Working'}
         </button>
-        <button onClick={onClose} style={{ width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', padding: '10px', cursor: 'pointer', minHeight: 44 }}>
+        {error && (
+          <p style={{ fontFamily: dm, fontSize: 12.5, color: '#dc2626', textAlign: 'center', margin: '0 0 10px', lineHeight: 1.5 }}>{error}</p>
+        )}
+        <button onClick={onClose} disabled={loading} style={{ width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', padding: '10px', cursor: 'pointer', minHeight: 44 }}>
           Keep Using Free
         </button>
       </div>

@@ -30,8 +30,9 @@ export default function TrialBanner({ user }) {
     try {
       const res = await createCheckoutSession({
         plan: foundingActive ? 'founding_monthly' : 'monthly',
-        success_url: `${window.location.origin}/#/FreeTierDashboard?upgraded=true`,
-        cancel_url: window.location.href,
+        successUrl: `${window.location.origin || 'https://collegefastforward.com'}/#/FreeTierDashboard?upgraded=true`,
+        cancelUrl: window.location.href,
+        user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, family_id: user?.family_id, student_emails: user?.student_emails },
       });
       const url = res?.data?.url || res?.url;
       if (url) window.location.href = url;
