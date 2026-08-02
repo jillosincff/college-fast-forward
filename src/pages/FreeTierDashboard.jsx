@@ -366,8 +366,10 @@ export default function FreeTierDashboard() {
           </>
         )}
 
-        {/* Plan state: magic moment available reminder OR post-magic-moment Pro conversion */}
-        {!focusMode && <PlanStateBanner user={user} onUpgrade={triggerUpgrade} />}
+        {/* Plan state: magic moment available reminder OR post-magic-moment Pro conversion.
+            Rendered even during first-session focus mode once the Magic Moment is completed,
+            so a stale localStorage flag can never suppress the Pro conversion card. */}
+        {(!focusMode || magicMomentCompleted) && <PlanStateBanner user={user} onUpgrade={triggerUpgrade} />}
 
         {/* Done-For-You activation moment — a finished application package for one real job */}
         <FirstApplicationPackageCard user={user} />
