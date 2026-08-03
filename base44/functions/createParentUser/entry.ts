@@ -114,6 +114,16 @@ Deno.serve(async (req) => {
     // If a user with this email already exists, just update their profile
     const existingUsers = await base44.asServiceRole.entities.User.filter({ email: lowerEmail });
     if (existingUsers && existingUsers.length > 0) {
+      // Never let an unauthenticated caller overwrite an existing account's profile:
+      // only the account owner (or an admin) may update it.
+      const caller = await base44.auth.me().catch(() => null);
+      const isOwner = caller && caller.email?.toLowerCase() === lowerEmail;
+      if (!isOwner && caller?.role !== 'admin') {
+        return Response.json(
+          { error: 'An account with this email already exists. Please sign in to update your profile.' },
+          { status: 409, headers: corsHeaders }
+        );
+      }
       const updated = await base44.asServiceRole.entities.User.update(existingUsers[0].id, profileData);
       await upsertNetworkProfile();
       console.log('✅ Existing parent profile updated:', lowerEmail);

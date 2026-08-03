@@ -3,6 +3,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    // Admin-only: this grants paid access, so it must never be callable anonymously.
+    const caller = await base44.auth.me().catch(() => null);
+    if (!caller) return Response.json({ error: 'Authentication required' }, { status: 401 });
+    if (caller.role !== 'admin') return Response.json({ error: 'Admin access required' }, { status: 403 });
+
     const { user_id } = await req.json();
 
     if (!user_id) return Response.json({ error: 'user_id required' }, { status: 400 });
