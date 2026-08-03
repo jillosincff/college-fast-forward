@@ -59,6 +59,13 @@ export default function OnboardingSteps1to4({
       {/* ── SCREEN 2: What are we working toward? ── */}
       {screen === 2 && (
         <div style={{ ...card, maxWidth: 520 }}>
+          {/* Light greeting — no extra step, just a welcome before the question */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+            <span style={{ fontSize: 20, lineHeight: 1 }}>👋</span>
+            <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, letterSpacing: '0.02em' }}>
+              Hey, I'm CLIFF — let's get you hired.
+            </span>
+          </div>
           <h1 style={h1style}>What are we working toward?</h1>
           <p style={{ ...substyle, marginBottom: 28 }}>Everything I find, prepare, and prioritize starts with this answer.</p>
 
