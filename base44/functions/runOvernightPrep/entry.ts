@@ -12,6 +12,9 @@ import { normKey, daysSinceStatus } from '../../shared/studentSignals.ts';
 // Cost control: one tailoring per student per night, capped batch per run.
 
 const MAX_STUDENTS_PER_RUN = 25;
+// Free students get ONE overnight run, ever — it's the promise the landing page
+// makes, and it's the strongest possible demo of what Pro does every night.
+const MAX_FREE_PER_RUN = 15;
 
 function briefDate() {
   const et = new Date(Date.now() - 4 * 3600000);
@@ -33,18 +36,29 @@ export default async function (req: Request): Promise<Response> {
     const date = briefDate();
     const svc = base44.asServiceRole;
 
-    const plans = await svc.entities.UserAccessPlan.filter({ plan: 'pro' }, '-updated_date', 200).catch(() => []);
-    const eligible = (plans || []).filter(p => PRO_STATES.includes(p.access_state) && p.user_email);
+    const [proPlans, freePlans] = await Promise.all([
+      svc.entities.UserAccessPlan.filter({ plan: 'pro' }, '-updated_date', 200).catch(() => []),
+      svc.entities.UserAccessPlan.filter({ plan: 'free' }, '-created_date', 200).catch(() => []),
+    ]);
+    const pro = (proPlans || [])
+      .filter(p => PRO_STATES.includes(p.access_state) && p.user_email)
+      .slice(0, MAX_STUDENTS_PER_RUN)
+      .map(p => ({ email: p.user_email, tier: 'pro' }));
+    const free = (freePlans || [])
+      .filter(p => p.user_email)
+      .slice(0, MAX_FREE_PER_RUN)
+      .map(p => ({ email: p.user_email, tier: 'free' }));
+    const eligible = [...pro, ...free];
 
-    const results = { date, considered: eligible.length, prepared: 0, skipped: 0, reasons: {} as Record<string, number> };
+    const results = { date, considered: eligible.length, prepared: 0, prepared_free: 0, skipped: 0, reasons: {} as Record<string, number> };
     const skip = (why) => { results.skipped++; results.reasons[why] = (results.reasons[why] || 0) + 1; };
 
-    for (const plan of eligible.slice(0, MAX_STUDENTS_PER_RUN)) {
-      const email = plan.user_email;
-
-      // Never write two briefs for the same night.
-      const already = await svc.entities.NightlyBrief.filter({ user_email: email, brief_date: date }).catch(() => []);
-      if (already?.length) { skip('already_ran'); continue; }
+    for (const { email, tier } of eligible) {
+      // Free students get exactly one overnight run, ever. Pro students get one per night.
+      const priorBriefs = await svc.entities.NightlyBrief.filter(
+        tier === 'free' ? { user_email: email } : { user_email: email, brief_date: date }
+      ).catch(() => []);
+      if (priorBriefs?.length) { skip(tier === 'free' ? 'free_run_used' : 'already_ran'); continue; }
 
       const users = await svc.entities.User.filter({ email }).catch(() => []);
       const student = users?.[0];
@@ -151,6 +165,10 @@ Return original_score, tailored_score, keywords_added, keywords_missing, changes
         items.push(`Your ${r.company} follow-up came due — I have the draft ready.`);
       }
 
+      if (tier === 'free') {
+        items.push(`That was your free overnight run. On Pro I do this every night, automatically.`);
+      }
+
       await svc.entities.NightlyBrief.create({
         user_email: email,
         brief_date: date,
@@ -165,7 +183,8 @@ Return original_score, tailored_score, keywords_added, keywords_missing, changes
       });
 
       results.prepared++;
-      console.log(`[runOvernightPrep] Prepared ${target.company} package for ${email}`);
+      if (tier === 'free') results.prepared_free++;
+      console.log(`[runOvernightPrep] Prepared ${target.company} package for ${email} (${tier})`);
     }
 
     return Response.json(results);
