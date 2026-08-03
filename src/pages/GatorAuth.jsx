@@ -7,6 +7,7 @@ import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import OtpVerifyForm from '@/components/auth/OtpVerifyForm';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 import { buildLocationMemories } from '@/lib/locationPrefs';
+import { saveParsedResume } from '@/lib/resumeText';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -272,9 +273,19 @@ export default function GatorAuth() {
               resume_source: localStorage.getItem('cff_resume_source') || '',
               onboarding_resume_skipped: localStorage.getItem('cff_resume_skipped') === 'true',
               onboarding_resume_step_completed: true,
-              ...(resumeUrl ? { resume_file_url: resumeUrl, resume_uploaded_at: new Date().toISOString() } : {}),
+              ...(resumeUrl ? { resume_file_url: resumeUrl, resume_url: resumeUrl, resume_uploaded_at: new Date().toISOString() } : {}),
               ...locPrefs,
             });
+            // The funnel parsed their resume before sign-in — persist it now that
+            // there's an account to attach it to, or CLIFF has nothing to tailor.
+            try {
+              const rawParsed = localStorage.getItem('cff_resume_parsed');
+              if (rawParsed) {
+                await saveParsedResume(base44, user.email, JSON.parse(rawParsed), resumeUrl, localStorage.getItem('cff_resume_filename') || '');
+                localStorage.removeItem('cff_resume_parsed');
+                localStorage.removeItem('cff_resume_filename');
+              }
+            } catch (e) { console.warn('Resume save failed post-auth:', e); }
             // Work-location statements captured in the funnel → CLIFF memories
             try {
               const wl = JSON.parse(localStorage.getItem('cff_work_location') || 'null');

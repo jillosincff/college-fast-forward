@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 import { buildLocationPayload, buildLocationMemories, normalizeLocation } from '@/lib/locationPrefs';
 import { processReferralMilestone } from '@/functions/processReferralMilestone';
+import { saveParsedResume } from '@/lib/resumeText';
 import LiveEngineLoader from './LiveEngineLoader';
 import FunnelTransition from './FunnelTransition';
 import OnboardingSteps1to4 from './OnboardingSteps1to4';
@@ -279,6 +280,16 @@ CRITICAL RULES:
         (parsed.experience?.length || parsed.education?.length || parsed.skills?.length || (parsed.summary || '').trim());
       if (!hasContent) throw new Error('no_extractable_text');
       setResumeData({ original: parsed, optimized: { ...parsed, experience: result.optimized_experience } });
+      // Persist the parse. Authenticated students get a Resume record now; everyone
+      // else has it stashed and saved by GatorAuth after the OAuth round-trip.
+      // Without this the parsed text dies with the browser session and CLIFF can
+      // never tailor anything for them.
+      try { localStorage.setItem('cff_resume_parsed', JSON.stringify(parsed)); } catch {}
+      try { localStorage.setItem('cff_resume_filename', file.name || ''); } catch {}
+      try {
+        const authed = await base44.auth.me().catch(() => null);
+        if (authed?.email) await saveParsedResume(base44, authed.email, parsed, file_url, file.name);
+      } catch (saveErr) { console.warn('Resume save failed:', saveErr); }
       trackResume('onboarding_resume_parse_succeeded');
       setUploading(false);
       setDataInputMode('choose');
@@ -346,7 +357,7 @@ CRITICAL RULES:
               resume_source: resumeSource,
               onboarding_resume_skipped: resumeSkipped,
               onboarding_resume_step_completed: true,
-              ...(resumeUrl ? { resume_uploaded_at: new Date().toISOString() } : {}),
+              ...(resumeUrl ? { resume_file_url: resumeUrl, resume_url: resumeUrl, resume_uploaded_at: new Date().toISOString() } : {}),
               ...locPayload,
             });
           // Explicit location statements → high-confidence CLIFF memories
