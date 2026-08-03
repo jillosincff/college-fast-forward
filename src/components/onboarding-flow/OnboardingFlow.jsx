@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 import { buildLocationPayload, buildLocationMemories, normalizeLocation } from '@/lib/locationPrefs';
+import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
 import { processReferralMilestone } from '@/functions/processReferralMilestone';
 import { saveParsedResume } from '@/lib/resumeText';
 import LiveEngineLoader from './LiveEngineLoader';
@@ -359,6 +360,11 @@ CRITICAL RULES:
               onboarding_resume_step_completed: true,
               ...(resumeUrl ? { resume_file_url: resumeUrl, resume_url: resumeUrl, resume_uploaded_at: new Date().toISOString() } : {}),
               ...locPayload,
+              // Canonical search preferences — the same field the Edit Goals
+              // modal and job searches read. Without this, the profile's
+              // "My Search Preferences" section showed blank after onboarding.
+              career_goals: buildCareerGoalsFromOnboarding({ seeking, industries: selectedIndustries, targetRoles, location: loc }),
+              ...(loc ? { location: loc === 'remote' ? 'Remote' : loc } : {}),
             });
           // Explicit location statements → high-confidence CLIFF memories
           try {

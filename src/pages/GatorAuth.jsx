@@ -8,6 +8,7 @@ import OtpVerifyForm from '@/components/auth/OtpVerifyForm';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 import { buildLocationMemories } from '@/lib/locationPrefs';
 import { saveParsedResume } from '@/lib/resumeText';
+import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -261,6 +262,13 @@ export default function GatorAuth() {
             // attach it to the new account so the upload survives authentication.
             const resumeStatus = localStorage.getItem('cff_resume_status') || 'not_provided';
             const resumeUrl = localStorage.getItem('cff_resume_url') || '';
+            // Onboarding answers → canonical career_goals (what searches +
+            // the profile "My Search Preferences" section read).
+            let goalIndustries = [];
+            let goalRoles = [];
+            try { goalIndustries = JSON.parse(localStorage.getItem('cff_industries') || '[]'); } catch (e) {}
+            try { goalRoles = JSON.parse(localStorage.getItem('cff_target_roles') || '[]'); } catch (e) {}
+            const goalLocation = localStorage.getItem('cff_location') || '';
             await base44.auth.updateMe({
               persona: 'student',
               roles: ['student'],
@@ -275,6 +283,13 @@ export default function GatorAuth() {
               onboarding_resume_step_completed: true,
               ...(resumeUrl ? { resume_file_url: resumeUrl, resume_url: resumeUrl, resume_uploaded_at: new Date().toISOString() } : {}),
               ...locPrefs,
+              career_goals: buildCareerGoalsFromOnboarding({
+                seeking: localStorage.getItem('cff_seeking') || '',
+                industries: goalIndustries,
+                targetRoles: goalRoles,
+                location: goalLocation,
+              }),
+              ...(goalLocation ? { location: goalLocation === 'remote' ? 'Remote' : goalLocation } : {}),
             });
             // The funnel parsed their resume before sign-in — persist it now that
             // there's an account to attach it to, or CLIFF has nothing to tailor.

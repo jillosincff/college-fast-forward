@@ -6,6 +6,7 @@ import ProfileFooter from '@/components/profile/ProfileFooter';
 import ProfileCard from '@/components/profile/ProfileCard';
 import CareerGoalsSnapshot from '@/components/profile/CareerGoalsSnapshot';
 import { base44 } from '@/api/base44Client';
+import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
 
 function readOnboardingData() {
   try {
@@ -54,7 +55,24 @@ export default function Profile() {
       setOnboardingData(readOnboardingData());
 
       if (!id && currentUser) {
-        setProfileUser(currentUser);
+        let userForDisplay = currentUser;
+        // Self-heal: students who onboarded before career_goals was persisted
+        // have their answers only in localStorage — sync them to the account
+        // once so "My Search Preferences" matches the onboarding data above it.
+        try {
+          const goals = currentUser.career_goals || {};
+          const hasGoals = (goals.target_industries?.length || goals.target_roles?.length || goals.location_preference);
+          const ob = readOnboardingData();
+          if (!hasGoals && (ob.industries.length || ob.targetRoles.length || ob.seeking || ob.locationCity || ob.locationPref)) {
+            const location = ob.locationPref === 'remote' ? 'remote' : (ob.locationCity || '');
+            await base44.auth.updateMe({
+              career_goals: buildCareerGoalsFromOnboarding({ seeking: ob.seeking, industries: ob.industries, targetRoles: ob.targetRoles, location }),
+              ...(location ? { location: location === 'remote' ? 'Remote' : location } : {}),
+            });
+            userForDisplay = await base44.auth.me();
+          }
+        } catch (e) { /* non-blocking */ }
+        setProfileUser(userForDisplay);
         try {
           const records = await base44.entities.ParentNetworkProfile.filter({ created_by_id: currentUser.id });
           if (records?.length > 0) setParentInfo(records[0]);
