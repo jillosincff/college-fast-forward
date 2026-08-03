@@ -5,6 +5,7 @@ import {
   HelperText, PrimaryButton, BackLink, dmSans, playfair, ORANGE,
 } from './ParentOnboardingShell';
 import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
+import InvitePreview from './InvitePreview';
 import PostInviteConfirmation from './PostInviteConfirmation';
 import { useAuth } from '@/components/auth/AuthContext';
 
@@ -143,7 +144,7 @@ export default function ParentStep2InviteStudent({
 
     return (
       <OnboardingShell>
-        <ProgressDots current={1} total={2} />
+        <ProgressDots current={2} total={3} />
         <div style={{ marginBottom: 28 }}>
           {invitedStudents.map((s, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
@@ -180,7 +181,7 @@ export default function ParentStep2InviteStudent({
 
   return (
     <OnboardingShell>
-      <ProgressDots current={1} total={2} />
+      <ProgressDots current={2} total={3} />
 
       {/* Post-invite confirmation (no offer) */}
       {showConfirmation && (
@@ -286,6 +287,12 @@ export default function ParentStep2InviteStudent({
               </div>
             )}
           </div>
+
+          {/* Exactly what goes out under their name */}
+          <InvitePreview
+            parentName={formData.fullName}
+            studentName={formData.studentFirstName}
+          />
 
           {/* CTA */}
           <PrimaryButton onClick={handleInvite} disabled={isLoading}>

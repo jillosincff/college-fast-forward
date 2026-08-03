@@ -4,7 +4,8 @@ import { sendStudentInviteEmail } from '@/functions/sendStudentInviteEmail';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { deriveSchoolCode } from '@/lib/schoolNames';
-import ParentStep1AboutYou from '../components/onboarding/parent-v3/ParentStep1AboutYou';
+import ParentStep1Essentials from '../components/onboarding/parent-v3/ParentStep1Essentials';
+import ParentStep1bProfile from '../components/onboarding/parent-v3/ParentStep1bProfile';
 import ParentStep2InviteStudent from '../components/onboarding/parent-v3/ParentStep2InviteStudent';
 
 export default function ParentOnboarding() {
@@ -31,14 +32,14 @@ export default function ParentOnboarding() {
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
     if (hashParams.get('step') === 'invite' && user?.onboarding_completed === true) {
-      setStep(2);
+      setStep(3);
     }
   }, [user?.onboarding_completed]);
 
   const updateFormData = (updates) => setFormData(prev => ({ ...prev, ...updates }));
 
   const saveProfileAndContinue = async () => {
-    setStep(2); // advance immediately so auth refresh doesn't reset step
+    setStep(3); // advance immediately so auth refresh doesn't reset step
     const schoolName = formData.school?.trim() || '';
     const schoolCode = deriveSchoolCode(schoolName);
     const updateData = {
@@ -179,10 +180,10 @@ export default function ParentOnboarding() {
 
   if (step === 1) {
     return (
-      <ParentStep1AboutYou
+      <ParentStep1Essentials
         formData={formData}
         onUpdate={updateFormData}
-        onNext={saveProfileAndContinue}
+        onNext={() => setStep(2)}
         onBack={() => navigate('GatorAuth')}
         loading={isSaving}
       />
@@ -191,12 +192,24 @@ export default function ParentOnboarding() {
 
   if (step === 2) {
     return (
+      <ParentStep1bProfile
+        formData={formData}
+        onUpdate={updateFormData}
+        onNext={saveProfileAndContinue}
+        onBack={() => setStep(1)}
+        loading={isSaving}
+      />
+    );
+  }
+
+  if (step === 3) {
+    return (
       <ParentStep2InviteStudent
         formData={formData}
         onUpdate={updateFormData}
         onInvite={handleInviteStudent}
         onSkip={handleSkipInvite}
-        onBack={() => setStep(1)}
+        onBack={() => setStep(2)}
         isLoading={isSending}
         invitedStudents={invitedStudents}
       />
