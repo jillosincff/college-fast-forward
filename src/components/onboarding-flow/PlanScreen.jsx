@@ -8,6 +8,7 @@ import PremiumPaywallModal from './PremiumPaywallModal';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { getLandingTeaser } from '@/functions/getLandingTeaser';
 import PlanComparisonTable from './PlanComparisonTable';
+import OvernightPreviewCard from './OvernightPreviewCard';
 import FreeExitNudge from './FreeExitNudge';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -462,6 +463,23 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         </p>
         <PlanComparisonTable networkCount={networkCount} />
       </div>
+
+      {/* ─────────────────────────────────────────────────────
+          6.75 THE OVERNIGHT MOMENT — finished work, not a task list
+      ───────────────────────────────────────────────────── */}
+      <OvernightPreviewCard
+        firstName={firstName}
+        targetRole={targetRoles?.[0] || quickRole}
+        schoolName={college}
+        onUpgrade={() => {
+          if (!commitment) {
+            setShowCommitmentRequired(true);
+            document.getElementById('commitment-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+          launchCheckout();
+        }}
+      />
 
       {/* ─────────────────────────────────────────────────────
           7. THE CLOSE — Dark deployment CTA

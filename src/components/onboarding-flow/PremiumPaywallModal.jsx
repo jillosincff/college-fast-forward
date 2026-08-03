@@ -134,7 +134,7 @@ export default function PremiumPaywallModal({
             }}>
               {isDownsell
                 ? `We're offering you 50% off right now — this price disappears when you leave this page.`
-                : `Your ${resolvedSchool} alumni network and hidden job signals are ready. One step to unlock them.`}
+                : `Tonight CLiFF tailors your resume for a live opening, finds the ${resolvedSchool} contact inside, and writes your intro — so it's finished before you wake up.`}
             </p>
           </div>
 
