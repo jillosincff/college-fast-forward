@@ -7,6 +7,7 @@ import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput
 import StudentWelcomeScreen from '@/components/onboarding/student/StudentWelcomeScreen';
 import StudentMicroQuestions from '@/components/onboarding/student/StudentMicroQuestions';
 import { deriveSchoolCode } from '@/lib/schoolNames';
+import { isAppleRelayEmail, hasUsableName } from '@/lib/appleRelay';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -51,7 +52,7 @@ export default function StudentOnboarding() {
   useEffect(() => {
     if (!user || step !== 1) return;
     // Already onboarded — route them directly to the right dashboard
-    if (user.persona && user.onboarding_completed && user.full_name?.trim()) {
+    if (user.persona && user.onboarding_completed && hasUsableName(user.full_name, user.email)) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('ParentAllSet');
       } else if (user.persona === 'alumni' && user.alumni_intent === 'giving_help') {
@@ -61,7 +62,8 @@ export default function StudentOnboarding() {
       }
       return;
     }
-    const name = user.full_name?.split(' ')[0] || '';
+    // Apple sign-ins often carry no real name — never pre-fill an email-derived one
+    const name = hasUsableName(user.full_name, user.email) ? user.full_name.split(' ')[0] : '';
     setFirstName(name);
     setStep(2);
   }, [user, step]);
@@ -254,6 +256,11 @@ export default function StudentOnboarding() {
                 onFocus={e => { e.target.style.borderColor = ORANGE; }}
                 onBlur={e => { e.target.style.borderColor = '#2A2A2A'; }}
               />
+              {isAppleRelayEmail(user.email) && (
+                <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: '#888', marginTop: 8 }}>
+                  You signed in with a hidden email, so we need your name to personalize your applications.
+                </p>
+              )}
             </div>
 
             {/* School */}
