@@ -106,10 +106,10 @@ function OnboardingGuard({ children }) {
     if (user.persona === 'parent' || user.roles?.includes('parent')) {
       return <Navigate to="/ParentOnboarding" replace />;
     }
-    // Students who dropped off after signup but before the welcome moment get
-    // sent back to finish Flow B (which warms the job feed), not to GatorAuth.
+    // Students who dropped off mid-funnel resume the single onboarding flow,
+    // which GatorAuth restores at the screen they left.
     if (user.persona === 'student' || user.roles?.includes('student')) {
-      return <Navigate to="/StudentOnboarding" replace />;
+      return <Navigate to="/GatorAuth" replace />;
     }
     return <Navigate to="/GatorAuth" replace />;
   }
