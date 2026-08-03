@@ -1,6 +1,7 @@
 import CliffCommitmentScreen from './CliffCommitmentScreen';
 import ATSScoreRing from './ATSScoreRing';
 import ResumeStep from './ResumeStep';
+import ParentAdvantageCard from './ParentAdvantageCard';
 import {
   FONT, BG, CARD, TEXT, TEXT2, TEXT3, INDIGO,
   GRAD_INDIGO, SHADOW, SHADOW_MD, R, BLUE,
@@ -238,6 +239,9 @@ export default function OnboardingSteps9to13({
               </div>
             </div>
           </div>
+
+          {/* Unfair advantage — the school's parent + alumni network */}
+          <ParentAdvantageCard college={college} />
 
           {/* CTA */}
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
