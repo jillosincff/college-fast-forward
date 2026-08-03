@@ -69,7 +69,7 @@ function frustrationLabel(level) {
   return { emoji: '🆘', text: 'At breaking point', color: '#EF4444' };
 }
 
-export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingData, isMyProfile }) {
+export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingData, isMyProfile, afterHero = null }) {
   const displayName = formatName(user);
   const initials = getInitials(user);
   const school = user?.school_name || user?.school || user?.university || onboardingData?.college || '';
@@ -133,30 +133,21 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
         </div>
       </div>
 
-      {/* ── Career Coordinates Card ── */}
+      {/* ── Search Preferences (editable, single source of truth for own profile) ── */}
+      {afterHero}
+
+      {/* ── Academics / At a Glance Card ── */}
+      {(user?.major || user?.graduation_year || (!isMyProfile && (seekingInfo || locationLabel))) && (
       <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12 }}>
-          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, margin: 0 }}>
-            Career Coordinates
-          </p>
-          {isMyProfile && (
-            <button
-              onClick={() => { navigate('FreeTierDashboard'); setTimeout(() => window.dispatchEvent(new Event('cff:open-goals-modal')), 400); }}
-              style={{
-                fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
-                background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
-                borderRadius: 8, padding: '6px 14px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
-              }}
-            >
-              Edit Goals
-            </button>
-          )}
-        </div>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 16 }}>
+          {isMyProfile ? 'Academics' : 'At a Glance'}
+        </p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          {/* Seeking */}
-          {seekingInfo && (
+          {/* Seeking + Location live in "My Search Preferences" on your own
+              profile — only shown here when viewing someone else's profile. */}
+          {!isMyProfile && seekingInfo && (
             <div>
-              <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Focus</p>
+              <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Looking For</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 18 }}>{seekingInfo.emoji}</span>
                 <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT }}>{seekingInfo.label}</span>
@@ -164,10 +155,9 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
             </div>
           )}
 
-          {/* Location / Work Type */}
-          {locationLabel && (
+          {!isMyProfile && locationLabel && (
             <div>
-              <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Work Type</p>
+              <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Location</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 18 }}>{locationPref === 'remote' ? '🌐' : locationPref === 'hybrid' ? '🔀' : '📍'}</span>
                 <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT }}>{locationLabel}</span>
@@ -198,6 +188,7 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
           )}
         </div>
       </div>
+      )}
 
       {/* ── Frustration Level Card ── */}
       {frustInfo && (
@@ -222,8 +213,8 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
         </div>
       )}
 
-      {/* ── Industries Card ── */}
-      {industries.length > 0 && (
+      {/* ── Industries Card — own profile sees these in "My Search Preferences" ── */}
+      {!isMyProfile && industries.length > 0 && (
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
           <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 12 }}>
             Target Industries
@@ -246,8 +237,8 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
         </div>
       )}
 
-      {/* ── Target Roles Card ── */}
-      {targetRoles.length > 0 && (
+      {/* ── Target Roles Card — own profile sees these in "My Search Preferences" ── */}
+      {!isMyProfile && targetRoles.length > 0 && (
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
           <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 12 }}>
             Target Roles

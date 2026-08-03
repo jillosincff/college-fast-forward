@@ -30,7 +30,7 @@ export default function CareerGoalsSnapshot({ user: initialUser }) {
   );
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #E8EAF6', borderRadius: 16, padding: '22px 24px', marginTop: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+    <div style={{ background: '#fff', border: '1px solid #E8EAF6', borderRadius: 16, padding: '22px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h3 style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, fontWeight: 700, color: '#1E293B', margin: 0 }}>My Search Preferences</h3>
         <button

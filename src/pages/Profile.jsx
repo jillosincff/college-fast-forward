@@ -179,8 +179,8 @@ export default function Profile() {
           resumeInfo={resumeInfo}
           onboardingData={onboardingData}
           isMyProfile={isMyProfile}
+          afterHero={isMyProfile ? <CareerGoalsSnapshot user={profileUser} /> : null}
         />
-        {isMyProfile && <CareerGoalsSnapshot user={profileUser} />}
       </main>
 
       <ProfileFooter />
