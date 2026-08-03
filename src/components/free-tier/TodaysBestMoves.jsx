@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { getTodaysBestMoves } from '@/functions/getTodaysBestMoves';
-import { openCliffWorkspace } from '@/lib/cliffWorkspace';
+import { loadBestMoves, writeMovesCache, runMoveAction } from '@/lib/bestMoves';
 import MissionDraftModal from './MissionDraftModal';
 import { Sparkles, ArrowRight, Clock, Check } from 'lucide-react';
 
@@ -15,24 +13,11 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
   const [loading, setLoading] = useState(true);
   const [draftTask, setDraftTask] = useState(null);
   const [whyOpen, setWhyOpen] = useState(null); // index of the move showing "Why this, not that?"
-  const today = new Date().toISOString().slice(0, 10);
-  const storageKey = `cliff_best_moves_v2_${user?.email}_${today}`;
-
   useEffect(() => {
     if (!user?.email) return;
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey));
-      if (saved?.moves) { setState(saved); setLoading(false); return; }
-    } catch {}
     let cancelled = false;
-    getTodaysBestMoves({})
-      .then(res => {
-        if (cancelled) return;
-        const data = res?.data || res;
-        const s = { moves: data?.moves || [], done: (data?.moves || []).map(() => false) };
-        try { localStorage.setItem(storageKey, JSON.stringify(s)); } catch {}
-        setState(s);
-      })
+    loadBestMoves(user.email)
+      .then(s => { if (!cancelled) setState(s); })
       .catch(() => { if (!cancelled) setState({ moves: [], done: [] }); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -40,25 +25,14 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
 
   const save = (next) => {
     setState(next);
-    try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch {}
+    writeMovesCache(user.email, next);
   };
 
   const markDone = (i) => save({ ...state, done: state.done.map((d, j) => (j === i ? true : d)) });
 
   const go = (m, i) => {
-    if (m.discoveryId) base44.entities.CliffDiscovery.update(m.discoveryId, { status: 'actioned' }).catch(() => {});
-    const a = m.action || {};
-    if (a.type === 'followup') { setDraftTask({ ...a, kind: 'followup', index: i }); return; }
+    if (runMoveAction(m) === 'followup') { setDraftTask({ ...m.action, kind: 'followup', index: i }); return; }
     markDone(i);
-    if (a.type === 'workspace') openCliffWorkspace({ company: a.company, role: a.role || '', jobUrl: a.jobUrl || '', location: a.location || '' });
-    else if (a.route?.startsWith('#/')) {
-      let route = a.route;
-      // Keep Mission and Tracker synchronized: highlight the referenced application
-      if (a.company && route.toLowerCase().includes('applicationtracker')) {
-        route += (route.includes('?') ? '&' : '?') + 'highlight=' + encodeURIComponent(a.company);
-      }
-      window.location.hash = route;
-    }
   };
 
   if (loading) {

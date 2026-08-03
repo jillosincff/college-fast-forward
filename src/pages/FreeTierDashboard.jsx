@@ -22,6 +22,8 @@ import CliffChatWidget from '@/components/free-tier/CliffChatWidget';
 import AtsMatcher from '@/components/free-tier/AtsMatcher';
 import FirstWarmMatchCard from '@/components/free-tier/FirstWarmMatchCard';
 import FirstApplicationPackageCard from '@/components/free-tier/FirstApplicationPackageCard';
+import NextMoveHero from '@/components/free-tier/NextMoveHero';
+import TodaysBestMoves from '@/components/free-tier/TodaysBestMoves';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { getFirstName } from '@/lib/firstName';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
@@ -354,7 +356,16 @@ export default function FreeTierDashboard() {
         {/* One-time work-location question for students who onboarded before this step existed */}
         {!focusMode && !isTrialExpired && <LocationPrefPrompt user={user} onUpdated={setUser} />}
 
-        {/* CLIFF OS home: purple hero + stats row + goal + session memory */}
+        {/* THE decision surface. CLIFF's single highest-leverage move, with its
+            reasoning visible, above everything else that competes for attention. */}
+        {!isTrialExpired && !focusMode && (
+          <NextMoveHero
+            user={user}
+            onSeeAllMoves={() => document.getElementById('cff-all-moves')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          />
+        )}
+
+        {/* CLIFF OS home: context and progress — secondary to the next move */}
         {!isTrialExpired && !focusMode && (
           <>
             <DashboardHero user={user} firstName={firstName} />
@@ -380,6 +391,16 @@ export default function FreeTierDashboard() {
             {/* Day-one unlocked warm connection */}
             <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
           </>
+        )}
+
+        {/* The full ranked plan — reachable from the hero, never competing with it */}
+        {!isTrialExpired && !focusMode && (
+          <div id="cff-all-moves" style={{ marginTop: 16, marginBottom: 16 }}>
+            <TodaysBestMoves
+              user={user}
+              onShowMoreJobs={() => document.getElementById('cff-daily-feed')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            />
+          </div>
         )}
 
         {/* Daily Drop Feed - Job Opportunities */}
