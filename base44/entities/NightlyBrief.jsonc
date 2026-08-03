@@ -1,0 +1,86 @@
+{
+  "name": "NightlyBrief",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Student this overnight brief belongs to"
+    },
+    "brief_date": {
+      "type": "string",
+      "description": "YYYY-MM-DD date of the overnight run (one brief per student per day)"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Plain-language lines describing work CLIFF completed overnight"
+    },
+    "prepared_company": {
+      "type": "string",
+      "description": "Company the resume was pre-tailored for, if any"
+    },
+    "prepared_role": {
+      "type": "string",
+      "description": "Role the resume was pre-tailored for, if any"
+    },
+    "prepared_job_url": {
+      "type": "string",
+      "description": "Link to the posting the package was prepared for"
+    },
+    "tailored_resume_id": {
+      "type": "string",
+      "description": "TailoredResume record created overnight"
+    },
+    "warm_contact_name": {
+      "type": "string",
+      "description": "Network contact found at the prepared company, if any"
+    },
+    "warm_contact_role": {
+      "type": "string",
+      "description": "That contact's role at the company"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "viewed",
+        "actioned"
+      ],
+      "default": "new",
+      "description": "Whether the student has seen or acted on the brief"
+    }
+  },
+  "required": [
+    "user_email",
+    "brief_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { normText, daysSinceStatus } from '../../shared/studentSignals.ts';
 
 // CLIFF Discovery Engine (MVP): proactively scans for high-value, actionable
 // changes relevant to the student's pursuits. Runs at most once per 12 hours
@@ -32,7 +33,7 @@ Deno.serve(async (req) => {
     const seen = new Set((all || []).map(d => d.discovery_key).filter(Boolean));
     const found = [];
     const expiry = new Date(now + 3 * 86400000).toISOString();
-    const norm = (s) => (s || '').toLowerCase().trim();
+    const norm = normText;
     const tokens = (s) => norm(s).split(/[^a-z]+/).filter(w => w.length > 3 && !['intern', 'internship', 'summer'].includes(w));
     const activePursuits = (pursuits || []).filter(p => !['archived', 'rejected', 'withdrawn'].includes(p.application_status));
 
@@ -105,7 +106,7 @@ Deno.serve(async (req) => {
     }
 
     // 3. Follow-up opportunity — applied 10+ days ago, no movement
-    const daysSince = (r) => (now - new Date(r.status_date || r.created_date).getTime()) / 86400000;
+    const daysSince = daysSinceStatus;
     const staleApplied = (pipeline || []).find(r => r.status === 'applied' && daysSince(r) >= 10);
     if (staleApplied) {
       const key = `followup:${norm(staleApplied.company)}`;

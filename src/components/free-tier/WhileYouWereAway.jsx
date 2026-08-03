@@ -5,6 +5,7 @@ import { ArrowRight, Clock, Target } from 'lucide-react';
 import { useProPrompt } from '@/components/conversion/useProPrompt';
 import ProTriggerPrompt from '@/components/conversion/ProTriggerPrompt';
 import CliffProPaywall from '@/components/pro/CliffProPaywall';
+import OvernightBrief from '@/components/free-tier/OvernightBrief';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -45,6 +46,8 @@ export default function WhileYouWereAway({ user }) {
   };
 
   return (
+    <>
+    <OvernightBrief overnight={data.overnight} />
     <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
       <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 8px' }}>
         While you were away…
@@ -108,5 +111,6 @@ export default function WhileYouWereAway({ user }) {
       )}
       {showPaywall && <CliffProPaywall trigger="proactive_discovery" onClose={() => setShowPaywall(false)} />}
     </div>
+    </>
   );
 }

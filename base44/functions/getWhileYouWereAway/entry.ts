@@ -13,11 +13,18 @@ Deno.serve(async (req) => {
     const sinceTs = since ? new Date(since).getTime() : Date.now() - 24 * 3600000;
     const now = Date.now();
 
-    const [pipeline, resumes, plans] = await Promise.all([
+    const [pipeline, resumes, plans, briefs] = await Promise.all([
       base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 100).catch(() => []),
       base44.entities.TailoredResume.filter({ user_email: user.email }, '-created_date', 20).catch(() => []),
       base44.entities.CareerPlan.filter({ user_email: user.email, status: 'active' }, '-created_date', 1).catch(() => []),
+      base44.entities.NightlyBrief.filter({ user_email: user.email }, '-brief_date', 1).catch(() => []),
     ]);
+
+    // Work CLIFF finished overnight, before the student opened the app.
+    const latestBrief = (briefs || [])[0] || null;
+    const overnight = latestBrief && (now - new Date(latestBrief.created_date).getTime()) < 36 * 3600000
+      ? latestBrief
+      : null;
 
     const plan = plans?.[0] || null;
     const daysSince = (r) => (now - new Date(r.status_date || r.created_date).getTime()) / 86400000;
@@ -32,7 +39,9 @@ Deno.serve(async (req) => {
     }
 
     // Work CLIFF finished while they were away
-    const newResumes = (resumes || []).filter(r => r.status === 'completed' && changedSince(r.updated_date));
+    // The overnight package is reported in its own section — don't repeat it here.
+    const newResumes = (resumes || []).filter(r =>
+      r.status === 'completed' && changedSince(r.updated_date) && r.id !== latestBrief?.tailored_resume_id);
     for (const r of newResumes.slice(0, 2)) items.push(`✓ I finished tailoring your resume for ${r.company_name}.`);
     if (plan?.plan_built_at && changedSince(plan.plan_built_at) && plan.opportunities?.length) {
       items.push(`✓ I picked your ${plan.opportunities.length} best opportunities for "${plan.goal_summary}".`);
@@ -53,8 +62,17 @@ Deno.serve(async (req) => {
     const engine = engineRes?.data || engineRes || {};
 
     return Response.json({
+      overnight: overnight ? {
+        id: overnight.id,
+        items: overnight.items || [],
+        company: overnight.prepared_company || '',
+        role: overnight.prepared_role || '',
+        job_url: overnight.prepared_job_url || '',
+        contact_name: overnight.warm_contact_name || '',
+        contact_role: overnight.warm_contact_role || '',
+      } : null,
       items: items.slice(0, 5),
-      on_track: items.length === 0,
+      on_track: items.length === 0 && !overnight,
       brief: engine.urgency === 'high' ? 'Today is important.' : 'Today looks simple.',
       recommendation: engine.move || null,
       suppressed: engine.suppressed || [],
