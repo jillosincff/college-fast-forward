@@ -238,16 +238,16 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
         <div className="flex items-start justify-between gap-2">
           <div>
             <h2 className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-              📚 Opportunity Library
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              {isLoading
-                ? 'CLIFF is gathering opportunities…'
-                : allActioned
-                  ? 'All caught up for today'
-                  : `A reference shelf of ${librarySlots.length} opportunit${librarySlots.length === 1 ? 'y' : 'ies'} CLIFF has vetted — your best ones are already above`
-              }
-            </p>
+               📚 More Matches CLIFF Vetted
+             </h2>
+             <p className="text-xs sm:text-sm text-gray-500 mt-1">
+               {isLoading
+                 ? 'CLIFF is gathering opportunities…'
+                 : allActioned
+                   ? 'All caught up for today'
+                   : `${librarySlots.length} more opportunit${librarySlots.length === 1 ? 'y' : 'ies'} CLIFF checked for you today — the strongest are already above`
+               }
+             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0 mt-1">
             {!isLoading && slots.length > 0 && !allActioned && (
@@ -430,7 +430,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
           className="w-full py-2 text-xs font-semibold text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer"
           style={{ minHeight: 44 }}
         >
-          Collapse library ▲
+          Show fewer ▲
         </button>
       )}
 
