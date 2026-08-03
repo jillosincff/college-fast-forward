@@ -18,7 +18,7 @@ export default function OvernightPreviewCard({ firstName, targetRole, schoolName
   return (
     <div style={{ marginBottom: 28 }}>
       <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
-        What happens tonight while you sleep
+        Tomorrow morning, on your phone
       </p>
 
       <div style={{ background: 'linear-gradient(160deg, #1e1b4b 0%, #2e1065 100%)', border: '1.5px solid #4c1d95', borderRadius: 24, padding: '28px 24px', boxShadow: '0 12px 40px rgba(30,27,75,0.30)' }}>

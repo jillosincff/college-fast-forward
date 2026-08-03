@@ -9,12 +9,12 @@ export default function FreeExitNudge({ networkCount, onUpgrade, onContinueFree,
       <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 20, padding: '32px 28px', maxWidth: 440, width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.25)', textAlign: 'center' }}>
         <div style={{ fontSize: 36, marginBottom: 12 }}>✋</div>
         <h3 style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: '#111827', margin: '0 0 10px', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
-          Before you go the slow route…
+          Before you go back to doing it yourself…
         </h3>
         <p style={{ fontFamily: dm, fontSize: 14, color: '#4b5563', lineHeight: 1.65, margin: '0 0 20px' }}>
-          Referred candidates are far more likely to land interviews than cold applicants.{' '}
+          On free, you do the work. Tonight nothing gets prepared, and tomorrow you start from a blank page again.{' '}
           {networkCount > 0
-            ? <>You have <strong style={{ color: '#6d28d9' }}>{networkCount} verified warm connection{networkCount === 1 ? '' : 's'}</strong> waiting — the free plan keeps all but one locked.</>
+            ? <>You also have <strong style={{ color: '#6d28d9' }}>{networkCount} verified warm connection{networkCount === 1 ? '' : 's'}</strong> waiting — free keeps all but one locked.</>
             : <>Premium arms CLiFF's alumni scout to find insiders at every company you target.</>}
         </p>
         <button

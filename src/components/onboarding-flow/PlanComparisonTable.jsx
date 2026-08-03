@@ -6,7 +6,7 @@ export default function PlanComparisonTable({ networkCount = 0 }) {
     ['Warm connections', '1 unlocked', networkCount > 1 ? `All ${networkCount} + AI scout` : 'Unlimited + AI scout'],
     ['Resume tailoring', '1 instant, then 24h queue', 'Always instant'],
     ['AI outreach drafts', 'Drafts included', 'Drafts + automatic follow-ups'],
-    ['14-day sprint plan', '—', 'Included'],
+    ['Overnight prep', '—', 'Every night while you sleep'],
     ['Application tracker', 'Included', 'Included'],
   ];
 

@@ -244,7 +244,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           <FunnelProgress activeStep={2} />
         </div>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '6px 18px' }}>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.08em', textTransform: 'uppercase' }}>✅ Step 3 — Your 14-Day Action Plan</span>
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.08em', textTransform: 'uppercase' }}>✅ Step 3 — Put CLiFF To Work</span>
         </div>
       </div>
 
@@ -253,17 +253,30 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       ───────────────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', marginBottom: 28, padding: '0 4px' }}>
         <h1 style={{ fontFamily: sat, fontSize: 'clamp(26px, 4.5vw, 42px)', fontWeight: 900, color: TEXT, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-          {firstName ? `${firstName}, ` : ''}<span style={{ color: TEXT }}>let's stop blindly applying</span>{' '}
-          <span style={{ color: BLUE }}>and start interviewing.</span>
+          {firstName ? `${firstName}, ` : ''}<span style={{ color: TEXT }}>stop doing the work.</span>{' '}
+          <span style={{ color: BLUE }}>Wake up to it finished.</span>
         </h1>
         <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.65, margin: '0 auto', maxWidth: 560 }}>
-          {resumeData ? <>CLiFF has already <strong style={{ color: TEXT }}>rebuilt your resume + LinkedIn</strong> and </> : <>CLiFF has </>}
-          {networkCount > 0
-            ? <>found <strong style={{ color: BLUE }}>{networkCount} verified {schoolName} connection{networkCount === 1 ? '' : 's'}</strong> ready to open doors.</>
-            : <>armed its <strong style={{ color: BLUE }}>AI alumni scout</strong> to find {schoolName} insiders at every company you target.</>}{' '}
-          <strong style={{ color: GREEN }}>You're no longer playing the numbers game.</strong>
+          Every night CLiFF prepares your next application while you sleep — resume tailored to a real opening,
+          the <strong style={{ color: BLUE }}>{schoolName}</strong> insider found, your intro written.{' '}
+          <strong style={{ color: GREEN }}>You wake up and hit send.</strong>
         </p>
       </div>
+
+      {/* ── THE HERO MOMENT — finished work, not a task list ── */}
+      <OvernightPreviewCard
+        firstName={firstName}
+        targetRole={targetRoles?.[0] || quickRole}
+        schoolName={college}
+        onUpgrade={() => {
+          if (!commitment) {
+            setShowCommitmentRequired(true);
+            document.getElementById('commitment-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+          launchCheckout();
+        }}
+      />
 
       {/* ─────────────────────────────────────────────────────
           2. INSIDE TRACK — Dark highlight section
@@ -465,23 +478,6 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          6.75 THE OVERNIGHT MOMENT — finished work, not a task list
-      ───────────────────────────────────────────────────── */}
-      <OvernightPreviewCard
-        firstName={firstName}
-        targetRole={targetRoles?.[0] || quickRole}
-        schoolName={college}
-        onUpgrade={() => {
-          if (!commitment) {
-            setShowCommitmentRequired(true);
-            document.getElementById('commitment-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-          }
-          launchCheckout();
-        }}
-      />
-
-      {/* ─────────────────────────────────────────────────────
           7. THE CLOSE — Dark deployment CTA
       ───────────────────────────────────────────────────── */}
       <div className="plan-close-card plan-main-cta" style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)', border: '1.5px solid #ddd6fe', borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 8px 32px rgba(109,40,217,0.12)' }}>
@@ -495,7 +491,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             {firstName ? `${firstName}, let's get you hired.` : "Let's get you hired."}
           </h2>
           <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, margin: 0 }}>
-            Unlock Your Full 14-Day Sprint Plan
+            Your first package is prepared tonight
           </p>
         </div>
 
@@ -575,7 +571,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           Continue with the free version →
         </button>
         <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '10px 0 0', lineHeight: 1.5 }}>
-          Get started free with 5 daily job matches. Upgrade anytime to unlock alumni intros &amp; your full sprint plan.
+          Get started free with 5 daily job matches. Upgrade anytime to unlock warm intros &amp; overnight prep.
         </p>
       </div>
 
