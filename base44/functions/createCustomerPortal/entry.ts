@@ -8,7 +8,10 @@ Deno.serve(async (req) => {
     return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { customerId, returnUrl } = await req.json();
+  const { returnUrl } = await req.json();
+
+  // Never trust a customer id from the client — always use the caller's own record.
+  const customerId = user.stripe_customer_id;
 
   if (!customerId) {
     return Response.json({ success: false, error: 'No Stripe customer ID found. Please contact support.' }, { status: 400 });

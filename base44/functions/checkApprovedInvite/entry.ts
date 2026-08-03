@@ -110,13 +110,20 @@ Deno.serve(async (req) => {
       expires: code.expires_at
     });
 
+    // Only reveal the actual code to the person it belongs to (or an admin) —
+    // anonymous callers just learn that an approved invite exists.
+    const caller = await base44.auth.me().catch(() => null);
+    const maySeeCode =
+      caller && (caller.email?.toLowerCase() === email.toLowerCase() || caller.role === 'admin');
+
     return Response.json({
       success: true,
       has_approved_invite: true,
       code_valid: true,
-      invite_code: code.code,
+      ...(maySeeCode
+        ? { invite_code: code.code, inviter_name: code.inviter_name }
+        : { message: 'An approved invite exists for this email. Check the invite email for your code.' }),
       role: role,
-      inviter_name: code.inviter_name,
       approved_date: latestRequest.updated_date
     });
 
