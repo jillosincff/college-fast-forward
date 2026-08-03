@@ -27,27 +27,20 @@ Deno.serve(async (req) => {
     const lowerCaseEmail = email.toLowerCase();
     console.log("Creating user from verification for:", lowerCaseEmail);
 
-    // Check if user already exists
+    // Never mint credentials for an account that already exists — that path is
+    // an unauthenticated takeover vector (any email → fresh session token). A
+    // verified-email flow may only create a brand-new account; existing users
+    // must authenticate through the normal login flow.
     try {
       const existingUsers = await base44.asServiceRole.entities.User.filter({ email: lowerCaseEmail });
       if (existingUsers && existingUsers.length > 0) {
-        console.log("User already exists, returning existing user");
-        const existingUser = existingUsers[0];
-        
-        // Generate session token
-        const sessionToken = crypto.randomUUID();
-        const updatedUser = await base44.asServiceRole.entities.User.update(existingUser.id, { 
-          session_token: sessionToken,
-          email_verified: true 
-        });
-        
-        return new Response(JSON.stringify({ 
-          success: true, 
-          user: updatedUser,
-          session_token: sessionToken,
-          message: 'Account verified successfully!' 
-        }), { 
-          status: 200,
+        console.log("createUserFromVerification refused: account already exists for", lowerCaseEmail);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'An account with this email already exists. Please sign in instead.',
+          already_exists: true,
+        }), {
+          status: 409,
           headers: { 'Content-Type': 'application/json' }
         });
       }
