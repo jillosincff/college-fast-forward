@@ -8,7 +8,6 @@ const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
 const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
 
 const SEEKING_LABELS = { internship: 'Internships', fulltime: 'Full-time roles', both: 'Internships & full-time' };
-const SIZE_LABELS = { startup: 'Startup', midmarket: 'Mid-sized', enterprise: 'Enterprise', all: 'Open to all' };
 
 const Row = ({ label, children }) => (
   <div style={{ marginBottom: 14 }}>
@@ -52,10 +51,6 @@ export default function CareerFocusCard({ user, onUpdated }) {
 
       <Row label="Industries">
         {industries.length ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{industries.map(i => <Tag key={i} text={i} />)}</div> : <Empty />}
-      </Row>
-
-      <Row label="Company size">
-        {goals.company_size_preference ? <Tag text={SIZE_LABELS[goals.company_size_preference] || goals.company_size_preference} /> : <Empty />}
       </Row>
 
       <Row label="Preferred location">

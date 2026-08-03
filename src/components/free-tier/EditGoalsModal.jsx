@@ -9,20 +9,12 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
   const effectiveGoals = goals || user?.career_goals;
   const [roles, setRoles] = useState(effectiveGoals?.target_roles || []);
   const [industries, setIndustries] = useState(effectiveGoals?.target_industries || []);
-  const [companySize, setCompanySize] = useState(effectiveGoals?.company_size_preference || 'all');
   const [seeking, setSeeking] = useState(effectiveGoals?.seeking || 'both');
   const [location, setLocation] = useState(user?.location || '');
   const [roleInput, setRoleInput] = useState('');
   const [industryInput, setIndustryInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  const COMPANY_SIZE_OPTS = [
-    { key: 'startup', emoji: '🚀', label: 'Startup', sub: '1–50 team' },
-    { key: 'midmarket', emoji: '📈', label: 'Mid-Sized', sub: '51–500 team' },
-    { key: 'enterprise', emoji: '🏢', label: 'Enterprise', sub: '500+ team' },
-    { key: 'all', emoji: '💼', label: 'Open to All', sub: 'No preference' },
-  ];
 
   const handleAddRole = (role) => {
     if (role.trim() && !roles.includes(role.trim())) {
@@ -62,7 +54,6 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           ...effectiveGoals,
           target_roles: finalRoles,
           target_industries: finalIndustries,
-          company_size_preference: companySize,
           seeking,
           location_preference: location.trim() || undefined,
           saved_at: new Date().toISOString()
@@ -83,7 +74,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
       queryClient.invalidateQueries({ queryKey: ['personalizedNetworkCarousel'] });
       queryClient.invalidateQueries({ queryKey: ['dualConstraintLeads'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
-      onSave({ target_roles: finalRoles, target_industries: finalIndustries, company_size_preference: companySize }, refreshedUser);
+      onSave({ target_roles: finalRoles, target_industries: finalIndustries }, refreshedUser);
     } catch (e) {
       console.error('Save failed:', e);
       setError('Failed to save. Try again.');
@@ -174,26 +165,6 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
               placeholder="Add a role and press Enter..."
               style={{ width: '100%', padding: '10px 14px', border: '1px solid #E0E0E0', borderRadius: 8, fontSize: 14, fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
             />
-          </div>
-
-          {/* Company Size */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A', display: 'block', marginBottom: 8 }}>COMPANY SIZE</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {COMPANY_SIZE_OPTS.map(opt => (
-                <button
-                  key={opt.key}
-                  onClick={() => setCompanySize(opt.key)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${companySize === opt.key ? '#E85D20' : '#E0E0E0'}`, background: companySize === opt.key ? '#FFF5F0' : '#fff', cursor: 'pointer', minHeight: 'auto', textAlign: 'left' }}
-                >
-                  <span style={{ fontSize: 16 }}>{opt.emoji}</span>
-                  <div>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: companySize === opt.key ? 700 : 500, color: companySize === opt.key ? '#E85D20' : '#1A1A1A', margin: 0 }}>{opt.label}</p>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: 0 }}>{opt.sub}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Industries */}
