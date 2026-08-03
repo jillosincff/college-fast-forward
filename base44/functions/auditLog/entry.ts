@@ -1,17 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-const base44 = createClient({
-    appId: Deno.env.get('BASE44_APP_ID'),
-});
-
 Deno.serve(async (req) => {
     try {
-        const authHeader = req.headers.get('Authorization');
-        if (!authHeader) {
-            return new Response('Unauthorized', { status: 401 });
-        }
-        const token = authHeader.split(' ')[1];
-        base44.auth.setToken(token);
+        // Request-scoped client — a module-level singleton shared across
+        // concurrent requests causes token/identity race conditions.
+        const base44 = createClientFromRequest(req);
 
         const user = await base44.auth.me();
         if (!user) {

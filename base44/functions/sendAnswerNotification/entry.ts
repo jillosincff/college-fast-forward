@@ -19,6 +19,15 @@ const emailWrap = (pre, body) => `<!DOCTYPE html>
 
 function trunc(s,m) { return !s?'':s.length>m?s.substring(0,m-3)+'...':s; }
 function initials(name) { return (name||'?').split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]?.toUpperCase()).join(''); }
+// Escape user-supplied text before interpolating into HTML email markup.
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 Deno.serve(async (req) => {
   try {
@@ -33,15 +42,19 @@ Deno.serve(async (req) => {
 
     const aFirst = (answererName||'Someone').split(' ')[0];
     const answererRole = answererPersona==='parent'?'UF Parent':answererPersona==='alumni'?'UF Alumni':'Community Member';
-    const qPreview = trunc(questionTitle, 120);
-    const aPreview = trunc(answerPreview, 150);
-    const answerUrl = `${APP}/#QuestionDetail?id=${questionId}&type=${questionType||'help'}&utm_source=answer_notification&utm_medium=email&utm_campaign=answer_notification`;
+    const qPreview = esc(trunc(questionTitle, 120));
+    const aPreview = esc(trunc(answerPreview, 150));
+    const aFirstEsc = esc(aFirst);
+    const answererNameEsc = esc(answererName);
+    const answererTitleEsc = esc(answererTitle);
+    const answererCompanyEsc = esc(answererCompany);
+    const answerUrl = `${APP}/#QuestionDetail?id=${encodeURIComponent(questionId||'')}&type=${encodeURIComponent(questionType||'help')}&utm_source=answer_notification&utm_medium=email&utm_campaign=answer_notification`;
 
     const subject = `${answererName} just answered your question`;
-    const preheader = trunc(answerPreview, 100);
+    const preheader = esc(trunc(answerPreview, 100));
 
     const content = `
-<h1 style="font-family:${PF};font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.2;margin:0 0 8px;"><span style="color:#1a1a1a;">${aFirst} answered</span> <span style="font-style:italic;font-weight:400;color:#E85D20;">your question.</span></h1>
+<h1 style="font-family:${PF};font-size:28px;font-weight:700;letter-spacing:-0.02em;line-height:1.2;margin:0 0 8px;"><span style="color:#1a1a1a;">${aFirstEsc} answered</span> <span style="font-style:italic;font-weight:400;color:#E85D20;">your question.</span></h1>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;"><tr>
 <td style="border-left:3px solid #E85D20;padding:12px 16px;background-color:#fff9f7;">
@@ -54,8 +67,8 @@ Deno.serve(async (req) => {
 <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr><td width="40" height="40" align="center" valign="middle" style="width:40px;height:40px;border-radius:50%;background-color:#0d1117;color:#ffffff;font-family:${DM};font-size:13px;font-weight:500;">${initials(answererName)}</td></tr></table>
 </td>
 <td style="padding-left:12px;vertical-align:top;">
-<p style="font-family:${DM};font-size:14px;font-weight:500;color:#1a1a1a;margin:0 0 2px;">${answererName}</p>
-<p style="font-family:${DM};font-size:12px;font-weight:300;color:#888;margin:0;">${[answererRole, answererTitle, answererCompany].filter(Boolean).join(' &middot; ')}</p>
+<p style="font-family:${DM};font-size:14px;font-weight:500;color:#1a1a1a;margin:0 0 2px;">${answererNameEsc}</p>
+<p style="font-family:${DM};font-size:12px;font-weight:300;color:#888;margin:0;">${[answererRole, answererTitleEsc, answererCompanyEsc].filter(Boolean).join(' &middot; ')}</p>
 </td></tr></table></td></tr></table>
 
 <p style="font-family:${DM};font-size:15px;font-weight:300;color:#555;line-height:1.75;margin:16px 0;">&ldquo;${aPreview}&rdquo;</p>
