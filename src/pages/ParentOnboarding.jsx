@@ -16,7 +16,7 @@ export default function ParentOnboarding() {
   const [invitedStudents, setInvitedStudents] = useState([]);
 
   const [formData, setFormData] = useState({
-    fullName: '', school: '', company: '', industry: '', introWillingness: 'yes', directoryVisible: true,
+    fullName: '', school: '', company: '', industries: [], introWillingness: 'yes', directoryVisible: true,
     studentFirstName: '', studentEmail: '', studentUniversity: '',
   });
 
@@ -52,8 +52,9 @@ export default function ParentOnboarding() {
       current_company: formData.company.trim(),
       company: formData.company.trim(),
       career_background: formData.careerBackground?.trim() || '',
-      industry: formData.industry,
-      industries: [formData.industry],
+      // `industry` stays the primary one for existing single-value consumers.
+      industry: formData.industries?.[0] || '',
+      industries: formData.industries || [],
       intro_willingness: formData.introWillingness,
       visible_in_directory: formData.directoryVisible !== false,
       directory_consent_given: formData.directoryVisible !== false,
@@ -143,7 +144,7 @@ export default function ParentOnboarding() {
       try {
         base44.functions.invoke('sendWelcomeEmail', {
           userId: user.id, userEmail: user.email, userName: formData.fullName,
-          persona: 'parent', userIndustries: [formData.industry],
+          persona: 'parent', userIndustries: formData.industries || [],
         }).catch(() => {});
       } catch {}
 

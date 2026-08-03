@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  OnboardingShell, ProgressDots, FieldLabel, FieldInput, FieldSelect,
+  OnboardingShell, ProgressDots, FieldLabel, FieldInput,
   HelperText, PrimaryButton, BackLink, dmSans, playfair, ORANGE,
 } from './ParentOnboardingShell';
+import IndustryMultiSelect from './IndustryMultiSelect';
 
 const COMMON_UNIVERSITIES = [
   'University of Florida', 'Florida State University', 'University of Central Florida',
@@ -195,15 +196,15 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
       {/* Industry */}
       <div style={{ marginBottom: 24 }}>
         <FieldLabel>
-          What industry are you in or have you worked in?{' '}
+          What industries are you in or have you worked in?{' '}
           <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
         </FieldLabel>
-        <FieldSelect
-          value={formData.industry || ''}
-          onChange={e => onUpdate({ industry: e.target.value })}
-          placeholder="Select your industry"
+        <IndustryMultiSelect
           options={INDUSTRIES}
+          selected={formData.industries || []}
+          onChange={industries => onUpdate({ industries })}
         />
+        <HelperText>Select all that apply — more industries means more students can find you.</HelperText>
       </div>
 
       {/* Intro willingness */}
