@@ -10,6 +10,7 @@ import { getLandingTeaser } from '@/functions/getLandingTeaser';
 import PlanComparisonTable from './PlanComparisonTable';
 import OvernightPreviewCard from './OvernightPreviewCard';
 import FreeExitNudge from './FreeExitNudge';
+import QueuedWorkBanner from './QueuedWorkBanner';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -174,6 +175,9 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           <strong style={{ color: GREEN }}>You wake up and hit send.</strong>
         </p>
       </div>
+
+      {/* ── Work in progress — Pro means not interrupting it ── */}
+      <QueuedWorkBanner targetRole={targetRoles?.[0] || quickRole} schoolName={college} />
 
       {/* ── THE HERO MOMENT — finished work, not a task list ── */}
       <OvernightPreviewCard

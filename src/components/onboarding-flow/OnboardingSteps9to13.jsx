@@ -247,6 +247,7 @@ export default function OnboardingSteps9to13({
           <DownloadImprovedResume
             optimized={resumeData?.optimized}
             onDownloaded={() => trackResume && trackResume('onboarding_improved_resume_downloaded')}
+            onContinue={next}
           />
 
           {/* The reframe: the grind vs. what just happened */}

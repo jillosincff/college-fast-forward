@@ -38,8 +38,9 @@ function buildLines(r) {
  * The finished artifact, in their hands, before they pay for anything.
  * Downloads the CLIFF-improved resume as a real PDF with their name on it.
  */
-export default function DownloadImprovedResume({ optimized, onDownloaded }) {
+export default function DownloadImprovedResume({ optimized, onDownloaded, onContinue }) {
   const [busy, setBusy] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
   if (!optimized) return null;
 
   const download = () => {
@@ -67,11 +68,37 @@ export default function DownloadImprovedResume({ optimized, onDownloaded }) {
 
       const name = (str(optimized.name) || 'My').split(' ')[0];
       doc.save(`${name}_Resume_CLIFF.pdf`);
+      setDownloaded(true);
       if (onDownloaded) onDownloaded();
     } finally {
       setBusy(false);
     }
   };
+
+  // Post-download bridge — the hottest moment: convert the free artifact
+  // into the tailored-tonight promise.
+  if (downloaded) {
+    return (
+      <div style={{ background: '#F5F3FF', border: '1.5px solid #DDD6FE', borderRadius: R, padding: '20px 24px', marginBottom: 28, display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap', animation: 'fadeUp 0.3s ease' }}>
+        <div style={{ flex: '1 1 260px' }}>
+          <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 4px' }}>
+            ✓ It's in your downloads. One thing, though —
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
+            that version is still generic. The applications that get replies are tailored to one specific job. Want me to do that for you tonight?
+          </p>
+        </div>
+        {onContinue && (
+          <button
+            onClick={onContinue}
+            style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', border: 'none', borderRadius: 10, padding: '14px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 18px rgba(109,40,217,0.35)', whiteSpace: 'nowrap' }}
+          >
+            Tailor it tonight →
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: R, padding: '20px 24px', marginBottom: 28, display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>

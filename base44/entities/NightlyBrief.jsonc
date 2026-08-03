@@ -51,6 +51,11 @@
       ],
       "default": "new",
       "description": "Whether the student has seen or acted on the brief"
+    },
+    "morning_email_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the first-morning brief email was sent (one per brief, never re-sent)"
     }
   },
   "required": [
