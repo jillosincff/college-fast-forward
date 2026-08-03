@@ -11,6 +11,7 @@ import IntelligenceStackSection from '@/components/landing/IntelligenceStackSect
 import RoommateSection from '@/components/landing/RoommateSection';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
 import CareerMiniPlanDemo from '@/components/landing/CareerMiniPlanDemo';
+import MorningBriefSection from '@/components/landing/MorningBriefSection';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -424,6 +425,9 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── INTERACTIVE PROOF: Career Intelligence mini-plan ── */}
       <CareerMiniPlanDemo go={go} />
+
+      {/* ── THE WOW MOMENT: the 7am overnight brief ── */}
+      <MorningBriefSection go={go} />
 
       {/* ── SCHOOL MARQUEE ── */}
       <SchoolMarquee />
