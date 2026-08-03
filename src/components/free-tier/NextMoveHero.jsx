@@ -7,7 +7,14 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // The single most important thing on the dashboard: CLIFF's #1 move right now,
 // with the reasoning visible. If a student does only one thing, it's this.
-export default function NextMoveHero({ user, onSeeAllMoves }) {
+const greeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
+};
+
+export default function NextMoveHero({ user, firstName }) {
   const [state, setState] = useState(null);
   const [loading, setLoading] = useState(true);
   const [draftTask, setDraftTask] = useState(null);
@@ -53,6 +60,9 @@ export default function NextMoveHero({ user, onSeeAllMoves }) {
     return (
       <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 20, padding: '26px 22px', textAlign: 'center', marginBottom: 16 }}>
         <p style={{ fontSize: 26, margin: '0 0 6px' }}>🎉</p>
+        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#047857', margin: '0 0 6px' }}>
+          {greeting()}{firstName ? `, ${firstName}` : ''}.
+        </p>
         <p style={{ fontFamily: dm, fontSize: 17, fontWeight: 900, color: '#065f46', margin: '0 0 4px' }}>You're done for today.</p>
         <p style={{ fontFamily: dm, fontSize: 13, color: '#047857', margin: 0, lineHeight: 1.55 }}>
           That was the highest-leverage work available — no busywork needed. I'll have your next move ready tomorrow.
@@ -67,6 +77,9 @@ export default function NextMoveHero({ user, onSeeAllMoves }) {
       borderRadius: 20, padding: 'clamp(20px, 4vw, 28px)', marginBottom: 16,
       boxShadow: '0 8px 28px rgba(76,29,149,0.28)',
     }}>
+      <p style={{ fontFamily: dm, fontSize: 13.5, fontWeight: 800, color: 'rgba(255,255,255,0.75)', margin: '0 0 8px' }}>
+        {greeting()}{firstName ? `, ${firstName}` : ''}. Here's where I'd start.
+      </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
         <Sparkles size={14} color="#c4b5fd" />
         <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 900, color: '#c4b5fd', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -114,11 +127,10 @@ export default function NextMoveHero({ user, onSeeAllMoves }) {
         </span>
       </div>
 
-      {remaining > 0 && onSeeAllMoves && (
-        <button onClick={onSeeAllMoves}
-          style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer', padding: '14px 0 0', minHeight: 'auto', textDecoration: 'underline', display: 'block' }}>
-          {remaining} more move{remaining === 1 ? '' : 's'} after this
-        </button>
+      {remaining > 0 && (
+        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.6)', margin: '14px 0 0' }}>
+          {remaining} more move{remaining === 1 ? '' : 's'} after this — I'll surface them one at a time.
+        </p>
       )}
 
       {draftTask && (

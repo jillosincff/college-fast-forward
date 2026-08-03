@@ -24,15 +24,12 @@ import FirstWarmMatchCard from '@/components/free-tier/FirstWarmMatchCard';
 import FirstApplicationPackageCard from '@/components/free-tier/FirstApplicationPackageCard';
 import NextMoveHero from '@/components/free-tier/NextMoveHero';
 import ApplyConfirmToast from '@/components/free-tier/ApplyConfirmToast';
-import TodaysBestMoves from '@/components/free-tier/TodaysBestMoves';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { getFirstName } from '@/lib/firstName';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
-import GoalHero from '@/components/free-tier/GoalHero';
 import GoalMemoryStrip from '@/components/free-tier/GoalMemoryStrip';
-import DashboardHero from '@/components/free-tier/DashboardHero';
 import DashboardStatsRow from '@/components/free-tier/DashboardStatsRow';
 import CareerSeasonCard from '@/components/free-tier/CareerSeasonCard';
 import CliffTimeline from '@/components/free-tier/CliffTimeline';
@@ -360,19 +357,13 @@ export default function FreeTierDashboard() {
         {/* THE decision surface. CLIFF's single highest-leverage move, with its
             reasoning visible, above everything else that competes for attention. */}
         {!isTrialExpired && !focusMode && (
-          <NextMoveHero
-            user={user}
-            onSeeAllMoves={() => document.getElementById('cff-all-moves')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          />
+          <NextMoveHero user={user} firstName={firstName} />
         )}
 
-        {/* CLIFF OS home: context and progress — secondary to the next move */}
+        {/* Quiet context: what CLIFF remembers, and progress worth showing.
+            Both self-hide when there's nothing real to say. */}
         {!isTrialExpired && !focusMode && (
           <>
-            <DashboardHero user={user} firstName={firstName} />
-            <CareerSeasonCard user={user} />
-            <CliffTimeline user={user} />
-            <GoalHero user={user} />
             <GoalMemoryStrip user={user} />
             <DashboardStatsRow user={user} />
           </>
@@ -394,20 +385,18 @@ export default function FreeTierDashboard() {
           </>
         )}
 
-        {/* The full ranked plan — reachable from the hero, never competing with it */}
-        {!isTrialExpired && !focusMode && (
-          <div id="cff-all-moves" style={{ marginTop: 16, marginBottom: 16 }}>
-            <TodaysBestMoves
-              user={user}
-              onShowMoreJobs={() => document.getElementById('cff-daily-feed')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            />
-          </div>
-        )}
-
         {/* Daily Drop Feed - Job Opportunities */}
         <div id="cff-daily-feed">
           <CliffPrioritizedFeed user={user} schoolAbbr={schoolAbbr} onUpgrade={triggerUpgrade} />
         </div>
+
+        {/* Longer-horizon context — below the day's work, never above it */}
+        {!isTrialExpired && !focusMode && (
+          <>
+            <CareerSeasonCard user={user} />
+            <CliffTimeline user={user} />
+          </>
+        )}
       </div>
       )}
 
