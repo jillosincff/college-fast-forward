@@ -137,6 +137,15 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
+  // Lock background scrolling while the onboarding overlay is open — otherwise
+  // the landing page scrolls behind the flow on mobile.
+  useEffect(() => {
+    if (!showFunnel) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [showFunnel]);
+
   // Show sticky CTA bar after scrolling past ~50% of the viewport-height hero
   useEffect(() => {
     const onScroll = () => {
@@ -189,6 +198,11 @@ export default function StudentLandingPage({ onParentClick }) {
       } catch (e) {}
       // Value first: run the onboarding flow (resume read + plan) before asking
       // for an account. The flow handles auth itself at the end.
+      // Resume where they left off — otherwise a returning student who dropped
+      // off mid-flow has to answer every question again.
+      let savedScreen = null;
+      try { savedScreen = parseInt(localStorage.getItem('cff_onboarding_screen') || '', 10) || null; } catch {}
+      setFunnelStartScreen(savedScreen);
       setShowFunnel(true);
     }
   };
