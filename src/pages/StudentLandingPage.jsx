@@ -330,7 +330,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   Meet CLIFF.
                 </h2>
                 <p style={{ fontFamily: SF, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 500, color: '#334155', lineHeight: 1.4, letterSpacing: '-0.01em', margin: '0 0 clamp(24px, 6vw, 36px)' }}>
-                  He does the work that lands you interviews.
+                  He does the work while you sleep.
                 </p>
               </div>
             )}
@@ -339,11 +339,11 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(14px, 3.5vw, 18px)', margin: '0 0 clamp(36px, 8vw, 48px)' }}>
                 {[
-                  'Finds jobs worth applying to.',
-                  'Tailors every resume for every job.',
-                  'Finds warm connections inside companies.',
-                  'Preps you for interviews.',
-                  'Keeps you on track.',
+                  'Finds the job worth applying to.',
+                  'Tailors your resume to it overnight.',
+                  'Finds the insider who can refer you.',
+                  'Writes the intro before you wake up.',
+                  'You hit send.',
                 ].map((item, i) => (
                   <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 14, animation: `fadeUp 0.5s ${0.35 + i * 0.15}s ease both` }}>
                     <span style={{ width: 28, height: 28, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -614,7 +614,7 @@ export default function StudentLandingPage({ onParentClick }) {
         transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
       }}>
         <span style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 700, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          CLIFF already has a plan for you
+          CLIFF preps your next application tonight
         </span>
         <button onClick={go} style={{
           fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 700, color: '#fff',

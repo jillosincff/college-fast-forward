@@ -25,94 +25,6 @@ const BLUE_BORDER = '#bfdbfe';
 const GREEN = '#16a34a';
 const GREEN_LIGHT = '#f0fdf4';
 const GREEN_BORDER = '#bbf7d0';
-const LI_BG = '#F3F2EE';
-const LI_CARD = '#FFFFFF';
-const LI_BORDER_COLOR = '#E0DFDB';
-
-/* ── Mini LinkedIn profile card (static, no typing animation) ── */
-function MiniLinkedInCard({ name, college }) {
-  const initials = (name || 'S U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  const schoolShort = college ? college.split(' ').slice(-2).join(' ') : 'University';
-
-  return (
-    <div style={{ background: LI_BG, border: `1px solid ${LI_BORDER_COLOR}`, borderRadius: 12, overflow: 'hidden', fontSize: 0 }}>
-      {/* Banner */}
-      <div style={{ height: 56, background: 'linear-gradient(135deg, #0052CC 0%, #0066FF 45%, #0891B2 100%)' }} />
-      {/* Body */}
-      <div style={{ background: LI_CARD, padding: '0 14px 14px', borderTop: `1px solid ${LI_BORDER_COLOR}` }}>
-        {/* Avatar */}
-        <div style={{
-          width: 52, height: 52, borderRadius: '50%',
-          border: '3px solid #fff',
-          background: 'linear-gradient(135deg, #1D4ED8, #0066FF)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginTop: -26, marginBottom: 6,
-          boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
-        }}>
-          <span style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff' }}>{initials}</span>
-        </div>
-        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#1F2937', margin: '0 0 2px' }}>{name || 'Your Name'}</p>
-        <p style={{ fontFamily: dm, fontSize: 11, color: '#6B7280', margin: '0 0 8px', lineHeight: 1.4 }}>
-          Marketing Coordinator | Digital Strategy | {schoolShort} '26
-        </p>
-        {/* Stats row */}
-        <div style={{ display: 'flex', gap: 12, borderTop: `1px solid ${LI_BORDER_COLOR}`, paddingTop: 10 }}>
-          {[['87', 'Connections'], ['500+', 'Impressions'], ['Open', 'to Work']].map(([v, l], i) => (
-            <div key={i} style={{ flex: 1, textAlign: 'center' }}>
-              <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0A66C2', margin: 0 }}>{v}</p>
-              <p style={{ fontFamily: dm, fontSize: 9, color: '#6B7280', margin: 0, lineHeight: 1.3 }}>{l}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-      {/* Keywords strip */}
-      <div style={{ background: BLUE_LIGHT, borderTop: `1px solid ${LI_BORDER_COLOR}`, padding: '8px 14px' }}>
-        <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: BLUE, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 5px' }}>ATS Keywords Active</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {['Digital Marketing', 'SEO/SEM', 'Content Strategy', 'Analytics'].map(kw => (
-            <span key={kw} style={{ fontFamily: dm, fontSize: 9, fontWeight: 600, color: BLUE, background: '#fff', border: `1px solid ${BLUE_BORDER}`, borderRadius: 4, padding: '2px 7px' }}>{kw}</span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Old Way vs Fast Forward ── */
-function ComparisonTable() {
-  const rows = [
-    ['2% response rate on cold apps', '18% avg response on our leads'],
-    ['40 hrs searching per week', '4 hrs of focused work per week'],
-    ['~60% of postings are ghost jobs', '100% verified active hiring signals'],
-  ];
-  return (
-    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: 'hidden', marginBottom: 28 }}>
-      {/* Header row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1.5px solid ${BORDER}` }}>
-        <div style={{ padding: '12px 18px', borderRight: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#374151' }}>The Old Way</span>
-          <span style={{ fontSize: 14 }}>❌</span>
-        </div>
-        <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#374151' }}>The Fast Forward Way</span>
-          <span style={{ fontSize: 14 }}>✅</span>
-        </div>
-      </div>
-      {/* Data rows */}
-      {rows.map(([old, ff], i) => (
-        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: i < rows.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
-          <div style={{ padding: '14px 18px', borderRight: `1px solid ${BORDER}`, background: '#fafafa' }}>
-            <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0, lineHeight: 1.5 }}>{old}</p>
-          </div>
-          <div style={{ padding: '14px 18px' }}>
-            <p style={{ fontFamily: dm, fontSize: 13, color: GREEN, fontWeight: 600, margin: 0, lineHeight: 1.5 }}>{ff}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, selectedIndustries = [], targetRoles = [], onBack, saveAndAuth }) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [commitment, setCommitment] = useState(null);
@@ -429,42 +341,18 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          5. PROOF HUB — Mini LinkedIn + ATS Ring
+          5. PROOF — Resume already optimized
       ───────────────────────────────────────────────────── */}
       <div style={{ marginBottom: 28 }}>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
           ✅ What We've Already Built For You
         </p>
-        <div className="proof-hub" style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
-          <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-            <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 14 }}>💼</span>
-              <div>
-                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT, margin: 0 }}>LinkedIn Rebuilt</p>
-                <p style={{ fontFamily: dm, fontSize: 11, color: GREEN, fontWeight: 700, margin: 0 }}>→ Ready for recruiters &amp; warm intros</p>
-              </div>
-            </div>
-            <div style={{ padding: '14px 16px' }}>
-              <MiniLinkedInCard name={fullName} college={college} />
-            </div>
-          </div>
-          <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, alignSelf: 'stretch' }}>
-            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT, margin: 0, textAlign: 'center' }}>Resume Optimized</p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: GREEN, fontWeight: 700, margin: 0, textAlign: 'center' }}>ATS-Ready Formatting ✓</p>
-            <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 10px', textAlign: 'center' }}>Bullets rewritten for results &amp; keywords</p>
-            <ATSScoreRing />
-          </div>
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '24px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0, textAlign: 'center' }}>Resume Optimized</p>
+          <p style={{ fontFamily: dm, fontSize: 11, color: GREEN, fontWeight: 700, margin: 0, textAlign: 'center' }}>ATS-Ready Formatting ✓</p>
+          <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 10px', textAlign: 'center' }}>Bullets rewritten for results &amp; keywords</p>
+          <ATSScoreRing />
         </div>
-      </div>
-
-      {/* ─────────────────────────────────────────────────────
-          6. VALUE CONTRAST — Old Way vs Fast Forward
-      ───────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 28 }}>
-        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
-          Why the old way is failing you
-        </p>
-        <ComparisonTable />
       </div>
 
       {/* ─────────────────────────────────────────────────────
