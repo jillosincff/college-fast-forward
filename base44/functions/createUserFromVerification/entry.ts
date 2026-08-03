@@ -12,19 +12,73 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const { email, full_name, password } = body;
-    
-    if (!email || !full_name || !password) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'Missing required fields.' 
-      }), { 
+    const { token, password } = body;
+
+    // Proof of email ownership is MANDATORY. The identity of the new account is
+    // taken solely from the RegistrationAttempt that the emailed token points at
+    // — never from the request body. Without this, anyone could POST a victim's
+    // email plus their own password and receive a verified, attacker-controlled
+    // account for that address (pre-registration takeover).
+    if (!token || !password) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Missing required fields.'
+      }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const lowerCaseEmail = email.toLowerCase();
+    const attempts = await base44.asServiceRole.entities.RegistrationAttempt.filter({ token });
+    const attempt = attempts?.[0];
+    if (!attempt) {
+      console.log("createUserFromVerification refused: unknown token");
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Invalid or expired verification link. Please register again.'
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Single use — a redeemed token can never mint a second account.
+    if (attempt.status === 'account_created' || attempt.status === 'expired') {
+      console.log("createUserFromVerification refused: token already redeemed/expired");
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'This verification link has already been used. Please sign in instead.'
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Time-limited — 24h from the registration request.
+    const issuedAt = new Date(attempt.created_date).getTime();
+    if (!issuedAt || Date.now() - issuedAt > 24 * 60 * 60 * 1000) {
+      await base44.asServiceRole.entities.RegistrationAttempt.update(attempt.id, { status: 'expired' });
+      console.log("createUserFromVerification refused: token expired");
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'This verification link has expired. Please register again.'
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const lowerCaseEmail = String(attempt.email || '').toLowerCase();
+    const full_name = attempt.full_name;
+    if (!lowerCaseEmail || !full_name) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Invalid or expired verification link. Please register again.'
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
     console.log("Creating user from verification for:", lowerCaseEmail);
 
     // Never mint credentials for an account that already exists — that path is
@@ -79,6 +133,13 @@ Deno.serve(async (req) => {
     });
 
     console.log("User created successfully:", newUser.id);
+
+    // Burn the token immediately — it is now spent for this account.
+    try {
+      await base44.asServiceRole.entities.RegistrationAttempt.update(attempt.id, { status: 'account_created' });
+    } catch (burnErr) {
+      console.error('[createUserFromVerification] Failed to mark token redeemed:', burnErr.message);
+    }
 
     // Notify admin of the new signup (non-blocking — never fail signup over this)
     try {

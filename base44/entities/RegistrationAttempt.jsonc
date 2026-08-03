@@ -24,9 +24,11 @@
       "enum": [
         "pending",
         "processed",
-        "expired"
+        "expired",
+        "account_created"
       ],
-      "default": "pending"
+      "default": "pending",
+      "description": "account_created is terminal \u2014 the token has been redeemed for an account and can never be reused"
     },
     "persona": {
       "type": "string",
