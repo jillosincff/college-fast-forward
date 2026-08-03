@@ -106,7 +106,10 @@ ${pasteText}`,
           <p style={{ ...substyle, marginBottom: 8, fontWeight: 600, color: TEXT }}>
             Add your resume so I can personalize your opportunities, strengthen your applications, and tailor your first one for free.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#059669', margin: '0 0 22px', lineHeight: 1.6 }}>{reassurance}</p>
+          <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#059669', margin: '0 0 10px', lineHeight: 1.6 }}>{reassurance}</p>
+          <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 22px', lineHeight: 1.6 }}>
+            Most students' resumes aren't ready yet — that's literally why I exist. Upload whatever you have. No judgment.
+          </p>
 
           {/* Value statement — why this unlocks stronger personalization */}
           <div style={{ background: CARD, border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px 18px', textAlign: 'left', marginBottom: 20, boxShadow: SHADOW }}>

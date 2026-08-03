@@ -238,7 +238,10 @@ export default function CareerMiniPlanDemo({ go }) {
                 onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; }}
               >Build My Full Plan →</button>
-              <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '10px 0 0' }}>Free to start. No card required.</p>
+              <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: TEXT2, margin: '12px 0 0' }}>
+                About 2 minutes · mostly taps · CLIFF does the rest
+              </p>
+              <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '6px 0 0' }}>Free to start. No card required.</p>
               <button onClick={restart} style={{ fontFamily: SF, fontSize: 12, fontWeight: 600, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', marginTop: 10, minHeight: 44, textDecoration: 'underline', textUnderlineOffset: 3 }}>
                 Try a different combination
               </button>

@@ -24,8 +24,11 @@ export default function ProOfferStep({ onKeepWorking, onContinueFree, pitch }) {
   return (
     <div>
       <h2 style={{ fontFamily: dm, fontSize: 24, fontWeight: 900, color: '#111827', margin: '0 0 8px', lineHeight: 1.2 }}>
-        Keep CLIFF working.
+        That took CLIFF one night.
       </h2>
+      <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#6d28d9', margin: '0 0 8px', lineHeight: 1.45 }}>
+        Imagine every morning starting like this.
+      </p>
       <p style={{ fontFamily: dm, fontSize: 13.5, color: '#4b5563', margin: '0 0 18px', lineHeight: 1.6 }}>
         Your first CLIFF-powered application was free. CLIFF Pro prepares every opportunity worth pursuing and keeps your plan moving while you're away.
       </p>

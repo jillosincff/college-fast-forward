@@ -40,7 +40,7 @@ const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08
 
 const STORIES = [
   { quote: "I stopped wondering what I should do every day. CLIFF always had the next move ready — and I landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/c2df92fac_IMG_8456.png", tag: "Landed an internship", color: '#6d28d9' },
-  { quote: "CLIFF kept me on track without me constantly checking everything. I finally felt like someone was actually helping me.", name: "Maya R.", school: "UF '26, Business", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png", tag: "Off my mind", color: '#7c3aed' },
+  { quote: "I had zero internships and a one-page resume I was embarrassed by. CLIFF built it up from my classes and my campus job, then sent me 3 applications ready to go.", name: "Maya R.", school: "UF '26, Business", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png", tag: "Started with no experience", color: '#7c3aed' },
   { quote: "I spent less time searching and more time getting interviews. I heard back from an alumna within 48 hours.", name: "Nerissa R.", school: "USC '25, Marketing", photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png", tag: "More interviews, less searching", color: '#ec4899' },
 ];
 
@@ -566,6 +566,9 @@ export default function StudentLandingPage({ onParentClick }) {
               <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, margin: '0 0 12px', lineHeight: 1.65 }}>
                 CLIFF works in the background — watching deadlines, finding better opportunities, preparing everything ahead of time, and bringing you back only when something matters.
               </p>
+              <p style={{ fontFamily: SF, fontSize: 13.5, fontWeight: 700, color: INDIGO, margin: '0 0 6px', lineHeight: 1.6 }}>
+                By the end of your first week: 3 tailored applications ready to send.
+              </p>
               <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 14px', lineHeight: 1.6, fontStyle: 'italic' }}>
                 The value isn't more tools. It's less thinking.
               </p>
@@ -611,6 +614,9 @@ export default function StudentLandingPage({ onParentClick }) {
           >
             Build My Career Plan →
           </button>
+          <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 3.8vw, 16px)', fontWeight: 700, color: '#fff', margin: 'clamp(18px, 4vw, 24px) auto 0', maxWidth: 460, lineHeight: 1.6 }}>
+            Not sure where you'd even start? That's exactly who CLIFF is for.
+          </p>
           <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', color: 'rgba(255,255,255,0.85)', margin: 'clamp(20px, 5vw, 28px) 0 0', lineHeight: 1.6 }}>
             Got a parent or alum who can help students land?{' '}
             <button onClick={parent} style={{ fontFamily: SF, fontSize: 'inherit', fontWeight: 800, color: '#fff', background: 'none', border: 'none', borderBottom: '2px solid rgba(255,255,255,0.5)', padding: 0, cursor: 'pointer', minHeight: 'auto', transition: 'border-color 0.15s' }}
