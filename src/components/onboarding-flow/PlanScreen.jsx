@@ -28,8 +28,8 @@ const GREEN_LIGHT = '#f0fdf4';
 const GREEN_BORDER = '#bbf7d0';
 export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, selectedIndustries = [], targetRoles = [], onBack, saveAndAuth }) {
   const [showPaywall, setShowPaywall] = useState(false);
-  const [commitment, setCommitment] = useState(null);
-  const [showCommitmentRequired, setShowCommitmentRequired] = useState(false);
+  // Pre-selected — this is a preference, never a gate in front of checkout.
+  const [commitment, setCommitment] = useState('very');
   const [showExitNudge, setShowExitNudge] = useState(false);
   const [nudgeShown, setNudgeShown] = useState(false);
 
@@ -138,7 +138,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
       }}>
         <button
-          onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } launchCheckout(); }}
+          onClick={launchCheckout}
           disabled={checkoutLoading}
           style={{
             width: '100%', fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff',
@@ -147,7 +147,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             boxShadow: '0 4px 16px rgba(109,40,217,0.40)',
           }}
         >
-          {checkoutLoading ? 'Launching…' : 'Deploy CLiFF Agent — $4.99 →'}
+          {checkoutLoading ? 'Launching…' : 'Deploy CLIFF Agent — $4.99 →'}
         </button>
       </div>
 
@@ -157,7 +157,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           <FunnelProgress activeStep={2} />
         </div>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '6px 18px' }}>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.08em', textTransform: 'uppercase' }}>✅ Step 3 — Put CLiFF To Work</span>
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Step 3 — Put CLIFF to work</span>
         </div>
       </div>
 
@@ -170,9 +170,12 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           <span style={{ color: BLUE }}>Wake up to it finished.</span>
         </h1>
         <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.65, margin: '0 auto', maxWidth: 560 }}>
-          Every night CLiFF prepares your next application while you sleep — resume tailored to a real opening,
+          Every night CLIFF prepares your next application while you sleep — resume tailored to a real opening,
           the <strong style={{ color: BLUE }}>{schoolName}</strong> insider found, your intro written.{' '}
           <strong style={{ color: GREEN }}>You wake up and hit send.</strong>
+        </p>
+        <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, margin: '14px 0 0' }}>
+          <strong style={{ color: TEXT }}>$4.99/week</strong> — billed monthly at $19.96. Cancel anytime. Or keep using CLIFF free.
         </p>
       </div>
 
@@ -184,14 +187,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         firstName={firstName}
         targetRole={targetRoles?.[0] || quickRole}
         schoolName={college}
-        onUpgrade={() => {
-          if (!commitment) {
-            setShowCommitmentRequired(true);
-            document.getElementById('commitment-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-          }
-          launchCheckout();
-        }}
+        onUpgrade={launchCheckout}
       />
 
       {/* ─────────────────────────────────────────────────────
@@ -200,7 +196,6 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: 20, padding: '24px 24px 20px', marginBottom: 28, boxShadow: '0 4px 16px rgba(109,40,217,0.08)' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <span style={{ fontSize: 20 }}>🔥</span>
           <div>
             <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 800, color: '#1e1b4b', margin: 0, letterSpacing: '-0.01em' }}>Your Inside Track</p>
             <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>Real parents &amp; alumni from the verified CFF network.</p>
@@ -212,7 +207,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         <p style={{ fontFamily: dm, fontSize: 13, color: '#4b5563', margin: '0 0 18px', lineHeight: 1.6 }}>
           {teaserMatches.length > 0
             ? <>Real professionals in the verified <strong style={{ color: BLUE }}>{schoolName}</strong> network right now:</>
-            : <>How CLiFF finds <strong style={{ color: BLUE }}>{schoolName}</strong> insiders for you:</>}
+            : <>How CLIFF finds <strong style={{ color: BLUE }}>{schoolName}</strong> insiders for you:</>}
         </p>
 
         {/* Teaser cards — REAL network data (company + role, no names pre-signup) */}
@@ -258,9 +253,9 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           </div>
         ) : (
           <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: '16px 18px' }}>
-            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>🛰️ AI Alumni Scout — armed for {schoolName}</p>
+            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>AI Alumni Scout — searching for {schoolName}</p>
             <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
-              The verified {schoolName} network is still growing, so CLiFF searches the web live for {schoolName} alumni at every company you target — real people you can verify on LinkedIn before reaching out.
+              The verified {schoolName} network is still growing, so CLIFF searches the web live for {schoolName} alumni at every company you target — real people you can verify on LinkedIn before reaching out.
             </p>
           </div>
         )}
@@ -269,30 +264,24 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           3. COMMITMENT QUESTION — Pill toggle
       ───────────────────────────────────────────────────── */}
-      <div id="commitment-anchor" className="plan-commitment-card" style={{ background: CARD, border: `1.5px solid ${showCommitmentRequired && !commitment ? '#ef4444' : BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 28, boxShadow: showCommitmentRequired && !commitment ? '0 0 0 3px rgba(239,68,68,0.15)' : '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
+      <div id="commitment-anchor" className="plan-commitment-card" style={{ background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 28, boxShadow: '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
         {/* Network badge */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0f4ff', border: '1px solid #c7d7ff', borderRadius: 100, padding: '5px 16px' }}>
-            <span style={{ fontSize: 12 }}>⚡</span>
             <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.06em' }}>
-              Target Set: {college || 'Your University'} Network
+              Targeting the {college || 'your university'} network
             </span>
           </div>
         </div>
         <h3 style={{ fontFamily: sat, fontSize: 'clamp(16px, 2.5vw, 20px)', fontWeight: 800, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em', textAlign: 'center' }}>
           How aggressive is your search this semester?
         </h3>
-        {showCommitmentRequired && !commitment && (
-          <p style={{ fontFamily: dm, fontSize: 12, color: '#ef4444', fontWeight: 700, margin: '0 0 10px', textAlign: 'center' }}>
-            ↑ Pick a mode to continue.
-          </p>
-        )}
         {/* Pill row */}
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: commitment ? 14 : 0 }}>
           {[
-            { label: 'Just Browsing', value: 'somewhat', emoji: '🤔', response: "That's okay. Even 30 min/week with CLiFF beats 100 cold apps." },
+            { label: 'Just Browsing', value: 'somewhat', emoji: '🤔', response: "That's okay. Even 30 min/week with CLIFF beats 100 cold apps." },
             { label: 'Actively Hunting', value: 'very', emoji: '✅', response: "Solid — that's all it takes. Let's build your edge." },
-            { label: 'Absolute Blitzkrieg', value: 'extreme', emoji: '⚡', response: "Hell yes — CLiFF is ready when you are." },
+            { label: 'All In', value: 'extreme', emoji: '⚡', response: "Let's go — CLIFF is ready when you are." },
           ].map(opt => {
             const isActive = commitment === opt.value;
             const activeBg = opt.value === 'extreme' ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : opt.value === 'very' ? BLUE : '#4b5563';
@@ -318,7 +307,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           })}
         </div>
         {commitment && (() => {
-          const resp = { extreme: "Hell yes — CLiFF is ready when you are.", very: "Solid — that's all it takes. Let's build your edge.", somewhat: "That's okay. Even 30 min/week with CLiFF beats 100 cold apps." };
+          const resp = { extreme: "Let's go — CLIFF is ready when you are.", very: "Solid — that's all it takes. Let's build your edge.", somewhat: "That's okay. Even 30 min/week with CLIFF beats 100 cold apps." };
           const col = commitment === 'extreme' ? '#6d28d9' : commitment === 'very' ? BLUE : '#374151';
           const bg = commitment === 'extreme' ? '#f5f3ff' : commitment === 'very' ? BLUE_LIGHT : '#f9fafb';
           const bd = commitment === 'extreme' ? '#ddd6fe' : commitment === 'very' ? BLUE_BORDER : '#e5e7eb';
@@ -349,7 +338,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       ───────────────────────────────────────────────────── */}
       <div style={{ marginBottom: 28 }}>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
-          ✅ What We've Already Built For You
+          What we've already built for you
         </p>
         <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '24px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0, textAlign: 'center' }}>Resume Optimized</p>
@@ -376,8 +365,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 22 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(109,40,217,0.10)', border: '1px solid rgba(109,40,217,0.25)', borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
-            <span style={{ fontSize: 12 }}>⚡</span>
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase' }}>CLiFF Agent · Ready to Deploy</span>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase' }}>CLIFF Agent · Ready to Deploy</span>
           </div>
           <h2 style={{ fontFamily: sat, fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 900, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
             {firstName ? `${firstName}, let's get you hired.` : "Let's get you hired."}
@@ -410,15 +398,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
         {/* Deploy button — purple */}
         <button
-          onClick={() => {
-            if (!commitment) {
-              setShowCommitmentRequired(true);
-              const el = document.getElementById('commitment-anchor');
-              el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              return;
-            }
-            launchCheckout();
-          }}
+          onClick={launchCheckout}
           disabled={checkoutLoading}
           style={{
             maxWidth: 520, margin: '0 auto 20px',
@@ -437,7 +417,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
               <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
               Launching Stripe…
             </>
-          ) : 'Deploy CLiFF Agent — $4.99 →'}
+          ) : 'Deploy CLIFF Agent — $4.99 →'}
         </button>
         {checkoutError && (
           <p style={{ fontFamily: dm, fontSize: 13, color: '#ef4444', textAlign: 'center', margin: '-12px 0 16px', fontWeight: 600 }}>
@@ -447,7 +427,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
         {/* Trust signals */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>🏆 Join 2,400+ students landing interviews this month</p>
+          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>Join 5,000+ students building their future with CLIFF</p>
           <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>Cancel anytime</p>
         </div>
       </div>
@@ -463,7 +443,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           Continue with the free version →
         </button>
         <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '10px 0 0', lineHeight: 1.5 }}>
-          Get started free with 5 daily job matches. Upgrade anytime to unlock warm intros &amp; overnight prep.
+          Free includes your daily job matches and one complete CLIFF-powered application — on us. Upgrade anytime to unlock warm intros &amp; overnight prep.
         </p>
       </div>
 

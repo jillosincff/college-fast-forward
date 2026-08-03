@@ -187,7 +187,9 @@ export default function StudentLandingPage({ onParentClick }) {
         localStorage.setItem('pending_invite_role', 'student');
         sessionStorage.setItem('cff_onboarding_type', 'student');
       } catch (e) {}
-      navigate('GatorAuth');
+      // Value first: run the onboarding flow (resume read + plan) before asking
+      // for an account. The flow handles auth itself at the end.
+      setShowFunnel(true);
     }
   };
 
@@ -294,7 +296,7 @@ export default function StudentLandingPage({ onParentClick }) {
           {!(!isLoadingAuth && user) && (
             <button onClick={login} className="nav-secondary-link" style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Log In</button>
           )}
-          <button onClick={() => (!isLoadingAuth && user ? go() : scrollToSection('how-cliff-works'))} className="nav-cta-btn" style={{
+          <button onClick={go} className="nav-cta-btn" style={{
             fontFamily: SF, fontSize: 14, fontWeight: 700, color: INDIGO,
             background: 'transparent', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999,
             padding: '10px 20px', cursor: 'pointer', minHeight: 44, whiteSpace: 'nowrap',
@@ -304,7 +306,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = INDIGO_BORDER; }}
             onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)'; }}
             onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-          >{!isLoadingAuth && user ? 'Dashboard →' : 'Meet CLIFF'}</button>
+          >{!isLoadingAuth && user ? 'Dashboard →' : 'Build My Career Plan →'}</button>
         </div>
       </nav>
 
@@ -374,7 +376,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Get Started Free
+                  Build My Career Plan →
                 </button>
                 <button onClick={() => scrollToSection('how-cliff-works')} className="hero-cta-btn" style={{
                   fontFamily: SF, fontSize: 'clamp(15px, 3.5vw, 16px)', fontWeight: 700, color: INDIGO,
@@ -401,7 +403,7 @@ export default function StudentLandingPage({ onParentClick }) {
                     ))}
                   </div>
                   <p style={{ fontFamily: SF, fontSize: 13, color: '#64748b', margin: 0, fontWeight: 600, lineHeight: 1.5 }}>
-                    ⭐ Join 5,000+ students building their future with CLIFF
+                    Join 5,000+ students building their future with CLIFF
                   </p>
                 </div>
 
@@ -530,7 +532,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 You decide what to work on. CLIFF builds your plan, ranks your opportunities, and preps your next move whenever you show up.
               </p>
               <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 24px', lineHeight: 1.6, fontStyle: 'italic' }}>
-                Includes one complete CLIFF-powered application — on us.
+                Includes your daily job matches and one complete CLIFF-powered application — on us.
               </p>
               <button onClick={go} style={{ marginTop: 'auto', fontFamily: SF, fontSize: 15, fontWeight: 700, color: INDIGO, background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 52, width: '100%', transition: 'all 0.15s ease', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
                 onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; }}
@@ -628,7 +630,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-        >{!isLoadingAuth && user ? 'Dashboard →' : 'Build My Plan →'}</button>
+        >{!isLoadingAuth && user ? 'Dashboard →' : 'Build My Career Plan →'}</button>
       </div>
 
       {/* ── FOOTER ── */}
