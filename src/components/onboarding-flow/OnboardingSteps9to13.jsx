@@ -2,6 +2,8 @@ import CliffCommitmentScreen from './CliffCommitmentScreen';
 import ATSScoreRing from './ATSScoreRing';
 import ResumeStep from './ResumeStep';
 import ParentAdvantageCard from './ParentAdvantageCard';
+import RealityCheckStat from './RealityCheckStat';
+import DownloadImprovedResume from './DownloadImprovedResume';
 import {
   FONT, BG, CARD, TEXT, TEXT2, TEXT3, INDIGO,
   GRAD_INDIGO, SHADOW, SHADOW_MD, R, BLUE,
@@ -106,6 +108,7 @@ export default function OnboardingSteps9to13({
           uploading={uploading} setUploading={setUploading}
           dataInputMode={dataInputMode} setDataInputMode={setDataInputMode}
           college={college} seeking={seeking} yearLevel={yearLevel}
+          selectedIndustries={selectedIndustries}
           setResumeData={setResumeData}
           quickMajor={quickMajor} setQuickMajor={setQuickMajor}
           quickSkills={quickSkills} setQuickSkills={setQuickSkills}
@@ -240,7 +243,16 @@ export default function OnboardingSteps9to13({
             </div>
           </div>
 
-          {/* Unfair advantage — the school's parent + alumni network */}
+          {/* Finished artifact — theirs to take, before any paywall */}
+          <DownloadImprovedResume
+            optimized={resumeData?.optimized}
+            onDownloaded={() => trackResume && trackResume('onboarding_improved_resume_downloaded')}
+          />
+
+          {/* The reframe: the grind vs. what just happened */}
+          <RealityCheckStat />
+
+          {/* Unfair advantage — alumni at any company */}
           <ParentAdvantageCard college={college} />
 
           {/* CTA */}

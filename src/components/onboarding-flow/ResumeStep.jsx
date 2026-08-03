@@ -24,7 +24,7 @@ export default function ResumeStep({
   next, back, h1style, substyle,
   fileRef, handleFileUpload, uploading, setUploading,
   dataInputMode, setDataInputMode,
-  college, seeking, yearLevel, setResumeData,
+  college, seeking, yearLevel, selectedIndustries = [], setResumeData,
   quickMajor, setQuickMajor, quickSkills, setQuickSkills, quickRole, setQuickRole,
   onSkipConfirm, trackResume,
 }) {
@@ -97,7 +97,7 @@ ${pasteText}`,
     <div style={{ textAlign: 'center', maxWidth: 520, width: '100%' }}>
       <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
-      {uploading && <ResumeProcessing />}
+      {uploading && <ResumeProcessing college={college} seeking={seeking} industries={selectedIndustries} />}
 
       {/* ── Choose ── */}
       {!uploading && dataInputMode === 'choose' && (
