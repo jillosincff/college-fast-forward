@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft, Upload, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, Upload, CheckCircle2 } from 'lucide-react';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
+import CareerFocusCard from '@/components/profile/CareerFocusCard';
 
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
 const INDIGO = '#6d28d9';
@@ -20,22 +21,6 @@ const TEXT3 = '#94a3b8';
 const CARD = '#ffffff';
 const R = 14;
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
-
-const INDUSTRY_BUCKETS = [
-  { key: 'tech', emoji: '💻', label: 'Tech & Engineering', color: INDIGO, subs: ['Software Engineering', 'Product Management', 'Data Science', 'UX/UI Design', 'Cybersecurity', 'AI/ML'] },
-  { key: 'business', emoji: '📊', label: 'Business & Finance', color: VIOLET, subs: ['Investment Banking', 'Consulting', 'Private Equity', 'Corporate Finance', 'Accounting', 'Strategy'] },
-  { key: 'marketing', emoji: '📣', label: 'Marketing & Media', color: '#ec4899', subs: ['Social Media', 'Content Creation', 'Product Marketing', 'Brand Strategy', 'PR & Communications', 'Growth Marketing'] },
-  { key: 'healthcare', emoji: '🏥', label: 'Healthcare & Bio', color: TEAL, subs: ['Pre-Med / Clinical', 'Biotech Research', 'Health Policy', 'Pharma', 'Nursing', 'Public Health'] },
-  { key: 'law_gov', emoji: '⚖️', label: 'Law & Government', color: '#B45309', subs: ['Pre-Law', 'Public Policy', 'Government / Civil Service', 'Nonprofit', 'International Relations', 'Politics'] },
-  { key: 'creative', emoji: '🎨', label: 'Creative & Entertainment', color: '#ec4899', subs: ['Film & TV', 'Music Industry', 'Fashion & Retail', 'Sports Business', 'Gaming', 'Architecture & Design'] },
-];
-
-const SEEKING_OPTIONS = [
-  { key: 'internship', emoji: '🎓', label: 'Internship', sub: 'This semester or summer' },
-  { key: 'fulltime', emoji: '💼', label: 'Full-time job', sub: 'After graduation' },
-  { key: 'both', emoji: '🎯', label: 'Both', sub: 'Internships & full-time' },
-  { key: 'exploring', emoji: '🔭', label: 'Just exploring', sub: 'Not sure yet' },
-];
 
 const BLOCKERS = [
   { key: 'resume', icon: '📄', label: "Resume isn't getting responses" },
@@ -66,18 +51,13 @@ const sectionCard = {
 function readOnboardingData() {
   try {
     return {
-      seeking: localStorage.getItem('cff_seeking') || '',
       frustration: parseInt(localStorage.getItem('cff_frustration') || '5', 10) || 5,
       blockers: JSON.parse(localStorage.getItem('cff_blockers') || '[]'),
-      industries: JSON.parse(localStorage.getItem('cff_industries') || '[]'),
-      targetRoles: JSON.parse(localStorage.getItem('cff_target_roles') || '[]'),
-      locationPref: localStorage.getItem('cff_location_pref') || '',
-      locationCity: localStorage.getItem('cff_location_city') || '',
       college: localStorage.getItem('cff_college') || '',
       resumeUrl: localStorage.getItem('cff_resume_url') || '',
     };
   } catch {
-    return { seeking: '', frustration: 5, blockers: [], industries: [], targetRoles: [], locationPref: '', locationCity: '', college: '', resumeUrl: '' };
+    return { frustration: 5, blockers: [], college: '', resumeUrl: '' };
   }
 }
 
@@ -86,7 +66,6 @@ export default function ProfileEdit() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
-  const [expandedBucket, setExpandedBucket] = useState(null);
   const fileRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -130,24 +109,6 @@ export default function ProfileEdit() {
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
-  const toggleIndustry = (key) => {
-    setForm(prev => {
-      const has = prev.industries.includes(key);
-      const industries = has ? prev.industries.filter(k => k !== key) : [...prev.industries, key];
-      const targetRoles = has ? prev.targetRoles.filter(r => !INDUSTRY_BUCKETS.find(b => b.key === key)?.subs.includes(r)) : prev.targetRoles;
-      return { ...prev, industries, targetRoles };
-    });
-  };
-
-  const toggleRole = (bucketKey, sub) => {
-    setForm(prev => {
-      const has = prev.targetRoles.includes(sub);
-      const targetRoles = has ? prev.targetRoles.filter(r => r !== sub) : [...prev.targetRoles, sub];
-      const industries = (!has && !prev.industries.includes(bucketKey)) ? [...prev.industries, bucketKey] : prev.industries;
-      return { ...prev, targetRoles, industries };
-    });
-  };
-
   const toggleBlocker = (key) => {
     setForm(prev => {
       const has = prev.blockers.includes(key);
@@ -186,13 +147,8 @@ export default function ProfileEdit() {
     try {
       // Save to localStorage
       const lsMap = {
-        cff_seeking: form.seeking,
         cff_frustration: String(form.frustration),
         cff_blockers: JSON.stringify(form.blockers),
-        cff_industries: JSON.stringify(form.industries),
-        cff_target_roles: JSON.stringify(form.targetRoles),
-        cff_location_pref: form.locationPref,
-        cff_location_city: form.locationCity,
         cff_college: form.school,
       };
       if (form.resumeUrl) lsMap.cff_resume_url = form.resumeUrl;
@@ -208,8 +164,6 @@ export default function ProfileEdit() {
         graduation_year: form.gradYear,
         linkedin_url: form.linkedinUrl.trim(),
         career_blockers: form.blockers,
-        location_preference: form.locationPref,
-        location_city: form.locationCity,
       };
       await base44.auth.updateMe(updateData);
 
@@ -303,131 +257,8 @@ export default function ProfileEdit() {
             </div>
           </div>
 
-          {/* ── Section: Career Focus ── */}
-          <div style={sectionCard}>
-            <p style={{ ...labelStyle, marginBottom: 16 }}>Career Focus</p>
-
-            <div style={{ marginBottom: 20 }}>
-              <label style={labelStyle}>What are you looking for?</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {SEEKING_OPTIONS.map(opt => {
-                  const active = form.seeking === opt.key;
-                  return (
-                    <button key={opt.key} type="button" onClick={() => update('seeking', opt.key)} style={{
-                      display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
-                      borderRadius: 10, textAlign: 'left', cursor: 'pointer', minHeight: 'auto',
-                      border: `1.5px solid ${active ? INDIGO : '#E2E8F0'}`,
-                      background: active ? INDIGO_LIGHT : '#fff',
-                      transition: 'all 0.15s',
-                    }}>
-                      <span style={{ fontSize: 16 }}>{opt.emoji}</span>
-                      <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: active ? 600 : 400, color: active ? INDIGO : TEXT2 }}>{opt.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Industries */}
-            <div>
-              <label style={labelStyle}>Target Industries <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none' }}>(select multiple)</span></label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {INDUSTRY_BUCKETS.map(bucket => {
-                  const isSelected = form.industries.includes(bucket.key);
-                  const isExpanded = expandedBucket === bucket.key;
-                  return (
-                    <div key={bucket.key} style={{ gridColumn: isExpanded ? '1 / -1' : 'auto' }}>
-                      <button type="button" onClick={() => { toggleIndustry(bucket.key); setExpandedBucket(isExpanded ? null : bucket.key); }} style={{
-                        display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-                        padding: '10px 12px', borderRadius: 10, textAlign: 'left',
-                        cursor: 'pointer', minHeight: 'auto',
-                        border: `1.5px solid ${isSelected ? bucket.color : '#E2E8F0'}`,
-                        background: isSelected ? INDIGO_LIGHT : '#fff',
-                        transition: 'all 0.15s',
-                      }}>
-                        <span style={{ fontSize: 16 }}>{bucket.emoji}</span>
-                        <span style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: isSelected ? 600 : 400, color: isSelected ? bucket.color : TEXT2 }}>{bucket.label}</span>
-                        {isSelected && <CheckCircle2 size={16} style={{ color: bucket.color }} />}
-                      </button>
-                      {isExpanded && isSelected && (
-                        <div style={{ background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: '0 0 10px 10px', borderTop: 'none', padding: '10px 12px', marginTop: -2 }}>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                            {bucket.subs.map(sub => {
-                              const sel = form.targetRoles.includes(sub);
-                              return (
-                                <button key={sub} type="button" onClick={() => toggleRole(bucket.key, sub)} style={{
-                                  fontFamily: FONT, fontSize: 11, fontWeight: 600,
-                                  color: sel ? '#fff' : bucket.color,
-                                  background: sel ? bucket.color : '#fff',
-                                  border: `1px solid ${INDIGO_BORDER}`, borderRadius: 100,
-                                  padding: '5px 10px', cursor: 'pointer', minHeight: 'auto',
-                                }}>{sub}</button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              {/* Selected roles */}
-              {form.targetRoles.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
-                  {form.targetRoles.map(role => (
-                    <span key={role} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      fontFamily: FONT, fontSize: 11, fontWeight: 600, color: '#0891b2',
-                      background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`,
-                      borderRadius: 100, padding: '4px 10px',
-                    }}>
-                      {role}
-                      <button type="button" onClick={() => toggleRole('', role)} style={{
-                        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                        display: 'flex', color: '#0891b2', minHeight: 'auto',
-                      }}><X size={12} /></button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ── Section: Work Type ── */}
-          <div style={sectionCard}>
-            <p style={{ ...labelStyle, marginBottom: 16 }}>Work Preference</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[
-                { key: 'remote', emoji: '🌐', label: 'Remote', sub: 'Fully remote anywhere' },
-                { key: 'hybrid', emoji: '🔀', label: 'Hybrid / Flexible', sub: 'Mix of remote and in-office' },
-                { key: 'city', emoji: '🏙️', label: 'Specific City', sub: 'I have a target location' },
-              ].map(opt => {
-                const active = form.locationPref === opt.key;
-                return (
-                  <button key={opt.key} type="button" onClick={() => update('locationPref', opt.key)} style={{
-                    display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px',
-                    borderRadius: 10, textAlign: 'left', cursor: 'pointer', minHeight: 'auto',
-                    border: `1.5px solid ${active ? INDIGO : '#E2E8F0'}`,
-                    background: active ? INDIGO_LIGHT : '#fff',
-                    transition: 'all 0.15s',
-                  }}>
-                    <span style={{ fontSize: 18 }}>{opt.emoji}</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: active ? 600 : 500, color: active ? INDIGO : TEXT, margin: 0 }}>{opt.label}</p>
-                      <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT2, margin: '1px 0 0' }}>{opt.sub}</p>
-                    </div>
-                    {active && <CheckCircle2 size={18} style={{ color: INDIGO }} />}
-                  </button>
-                );
-              })}
-            </div>
-            {form.locationPref === 'city' && (
-              <div style={{ marginTop: 12 }}>
-                <input value={form.locationCity} onChange={e => update('locationCity', e.target.value)}
-                  placeholder="e.g. New York, NY or Austin, TX" style={inputStyle} autoFocus />
-              </div>
-            )}
-          </div>
+          {/* ── Section: Career Focus — single source of truth (career_goals) ── */}
+          <CareerFocusCard user={user} onUpdated={() => refreshUser?.()} />
 
           {/* ── Section: Frustration Level ── */}
           <div style={sectionCard}>
