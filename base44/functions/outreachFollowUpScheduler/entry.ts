@@ -66,6 +66,7 @@ Deno.serve(async (req) => {
             recipientName: contact.alumni_name,
             recipientTitle: contact.alumni_role || '',
             daysSinceSent,
+            internalSecret: Deno.env.get('BASE44_SERVICE_ROLE_KEY'),
           });
           if (res?.data?.error) throw new Error(res.data.error);
 

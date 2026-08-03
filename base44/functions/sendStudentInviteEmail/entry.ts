@@ -1,12 +1,25 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { escapeHtml, requireUser } from '../../shared/emailGuards.ts';
+
 Deno.serve(async (req) => {
-  // No auth check needed — this is called during onboarding before user is fully set up
+  const base44 = createClientFromRequest(req);
+
+  // Trust boundary — the parent sending the invite must be signed in.
+  // Without this the endpoint is an open mail relay for spam/phishing.
+  const { user, response } = await requireUser(base44);
+  if (response) return response;
+
   const { student_email, student_name, parent_name, student_university } = await req.json();
 
   if (!student_email) return Response.json({ error: 'Missing student_email' }, { status: 400 });
 
-  const firstName = student_name?.split(' ')[0] || student_name || 'there';
-  const parentFirst = parent_name?.split(' ')[0] || parent_name || 'Your parent';
-  const uni = student_university ? ` at ${student_university}` : '';
+  const firstName = escapeHtml(student_name?.split(' ')[0] || student_name || 'there');
+  // The inviter is always the authenticated caller — a spoofed parent_name
+  // can't be used to make the invite look like it came from someone else.
+  const parentFirst = escapeHtml(
+    (user.full_name || parent_name || '').split(' ')[0] || user.full_name || parent_name || 'Your parent'
+  );
+  const uni = student_university ? ` at ${escapeHtml(student_university)}` : '';
 
   const html = `
 <!DOCTYPE html>
@@ -40,7 +53,7 @@ Deno.serve(async (req) => {
         Hey ${firstName},
       </p>
       <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">
-        College Fast Forward is a career network built for students like you — connecting you directly with alumni and parents who work at your target companies and want to help you get hired.
+        College Fast Forward is a career network built for students like you${uni} — connecting you directly with alumni and parents who work at your target companies and want to help you get hired.
       </p>
       <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 24px;">
         ${parentFirst} already joined the network. You're next.
@@ -89,7 +102,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       personalizations: [{ to: [{ email: student_email }] }],
       from: { email: 'support@collegefastforward.com', name: 'College Fast Forward' },
-      subject: `${parentFirst} invited you to College Fast Forward 💙`,
+      subject: `${user.full_name || parent_name || 'Your parent'} invited you to College Fast Forward 💙`,
       content: [{ type: 'text/html', value: html }],
     }),
   });

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { escapeHtml, requireUser, isRegisteredUser } from '../../shared/emailGuards.ts';
 
 console.log('🚀 sendMessageNotification loaded v3');
 
@@ -6,6 +7,12 @@ Deno.serve(async (req) => {
     console.log('📨 sendMessageNotification called');
     
     try {
+        const base44Auth = createClientFromRequest(req);
+
+        // Trust boundary — without this the endpoint is an open mail relay.
+        const { user: caller, response: authResponse } = await requireUser(base44Auth);
+        if (authResponse) return authResponse;
+
         const body = await req.json();
         
         const {
@@ -43,11 +50,23 @@ Deno.serve(async (req) => {
             });
         }
 
-        const base44 = createClientFromRequest(req);
+        const base44 = base44Auth;
 
-        // Determine recipient first name for greeting
-        const recipientFirstName = recipientName?.split(' ')[0] || 'there';
-        const displayMessage = actualMessage.substring(0, 500);
+        // Notifications may only reach registered app users, never arbitrary inboxes.
+        if (!(await isRegisteredUser(base44, recipientEmail))) {
+            return new Response(JSON.stringify({ success: false, error: 'Recipient is not a registered user' }), {
+                status: 403,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        // The notification always attributes the message to the authenticated caller,
+        // so a spoofed senderName can't be used for phishing.
+        const safeSenderName = escapeHtml(caller.full_name || caller.email || senderName);
+
+        // Determine recipient first name for greeting — escaped before templating.
+        const recipientFirstName = escapeHtml(recipientName?.split(' ')[0] || 'there');
+        const displayMessage = escapeHtml(String(actualMessage).substring(0, 500));
         
         const emailHtmlBody = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #374151; background-color: #f9fafb; padding: 20px;">
@@ -58,10 +77,10 @@ Deno.serve(async (req) => {
                     
                     <p style="font-size: 16px;">Hi ${recipientFirstName},</p>
                     
-                    <p style="font-size: 16px;"><strong>${senderName}</strong> sent you a message:</p>
+                    <p style="font-size: 16px;"><strong>${safeSenderName}</strong> sent you a message:</p>
                     
                     <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0021A5;">
-                        <p style="margin: 0; font-size: 16px; font-style: italic; color: #1f2937;">"${displayMessage}${actualMessage.length > 500 ? '...' : ''}"</p>
+                        <p style="margin: 0; font-size: 16px; font-style: italic; color: #1f2937;">"${displayMessage}${String(actualMessage).length > 500 ? '...' : ''}"</p>
                     </div>
                     
                     <div style="text-align: center; margin: 30px 0;">
@@ -89,7 +108,7 @@ Deno.serve(async (req) => {
             
             await base44.asServiceRole.integrations.Core.SendEmail({
                 to: recipientEmail,
-                subject: `${senderName} sent you a message - College Fast Forward`,
+                subject: `${caller.full_name || caller.email} sent you a message - College Fast Forward`,
                 body: emailHtmlBody,
                 from_name: 'College Fast Forward'
             });

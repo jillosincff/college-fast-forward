@@ -1,14 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
-}
+import { escapeHtml, requireUser, canEmailSelf } from '../../shared/emailGuards.ts';
 
 const FROM = 'support@collegefastforward.com';
 const FROM_NAME = 'College Fast Forward';
@@ -56,8 +47,19 @@ function html({ firstName, alumni, targetRole, targetCompany }) {
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
-  const { to, firstName, alumni = [], targetRole, targetCompany } = await req.json();
+
+  const { to, firstName, alumni = [], targetRole, targetCompany, internalSecret } = await req.json();
+
+  // Trust boundary — without this the endpoint is an open mail relay.
+  const { user, response } = await requireUser(base44, internalSecret);
+  if (response) return response;
+
   if (!to || alumni.length === 0) return Response.json({ error: 'Missing required fields' }, { status: 400 });
+
+  // This is a self-notification: students only get their own alumni alerts.
+  if (!canEmailSelf(user, to)) {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
