@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { submitRecommendationFeedback } from '@/functions/submitRecommendationFeedback';
+import NextMoveAfterRejection from '@/components/tracker/NextMoveAfterRejection';
 
 const REASONS = [
   ['resume_screen', 'Resume screen'],
@@ -16,6 +17,7 @@ const REASONS = [
 export default function RecommendationFeedbackPrompt({ user }) {
   const [pending, setPending] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [cleared, setCleared] = useState(false);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -25,12 +27,14 @@ export default function RecommendationFeedbackPrompt({ user }) {
   }, [user?.email]);
 
   const current = pending[0];
-  if (!current) return null;
+  // A closed door always hands off to the next best opportunity.
+  if (!current) return cleared ? <NextMoveAfterRejection user={user} /> : null;
 
   const answer = async (key) => {
     setSaving(true);
     try { await submitRecommendationFeedback({ outcome_id: current.id, student_feedback: key }); } catch {}
     setPending(p => p.slice(1));
+    setCleared(true);
     setSaving(false);
   };
 
@@ -55,7 +59,7 @@ export default function RecommendationFeedbackPrompt({ user }) {
         ))}
         <button
           disabled={saving}
-          onClick={() => setPending(p => p.slice(1))}
+          onClick={() => { setPending(p => p.slice(1)); setCleared(true); }}
           style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto' }}
         >
           Skip

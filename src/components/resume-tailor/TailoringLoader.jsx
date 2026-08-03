@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import TailoringWaitTask from '@/components/resume-tailor/TailoringWaitTask';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -101,6 +102,8 @@ export default function TailoringLoader({ onCancel }) {
             );
           })}
         </div>
+
+        <TailoringWaitTask />
 
         {showEscape && onCancel && (
           <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #F1F5F9' }}>
