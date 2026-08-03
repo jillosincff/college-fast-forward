@@ -23,9 +23,18 @@ export default function ReadyToApplyCard({ job, pursuit, user }) {
   const rows = [
     { label: 'Resume', ready: isDone(pursuit?.resume_status), action: 'Tailor now →', onClick: goTailor },
     { label: 'Cover letter', ready: isDone(pursuit?.cover_letter_status), hint: 'Drafted during Apply' },
-    { label: 'Interview practice', ready: pursuit?.interview_status === 'completed', action: 'Practice →', onClick: () => { window.location.hash = '#/MockInterview'; } },
     { label: 'Connection', ready: isDone(pursuit?.connection_search_status), hint: 'Optional advantage' },
   ];
+
+  // Interview prep is only real work once an interview actually exists.
+  if (['scheduled', 'completed'].includes(pursuit?.interview_status)) {
+    rows.push({
+      label: 'Interview practice',
+      ready: pursuit?.interview_status === 'completed',
+      action: 'Practice →',
+      onClick: () => { window.location.hash = '#/MockInterview'; },
+    });
+  }
 
   return (
     <div style={{ background: '#fff', border: '1px solid #ddd6fe', borderRadius: 16, padding: '20px 24px', marginBottom: 16, boxShadow: '0 4px 16px rgba(109,40,217,0.08)' }}>
