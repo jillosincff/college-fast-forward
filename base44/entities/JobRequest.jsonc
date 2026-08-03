@@ -304,14 +304,15 @@
     "description"
   ],
   "rls": {
-    "read": {},
+    "create": null,
+    "read": null,
     "update": {
       "$or": [
         {
           "created_by": "{{user.email}}"
         },
         {
-          "poster_email": "{{user.email}}"
+          "data.poster_email": "{{user.email}}"
         },
         {
           "user_condition": {
@@ -326,7 +327,7 @@
           "created_by": "{{user.email}}"
         },
         {
-          "poster_email": "{{user.email}}"
+          "data.poster_email": "{{user.email}}"
         },
         {
           "user_condition": {

@@ -49,20 +49,31 @@
     "source_page"
   ],
   "rls": {
+    "create": null,
     "read": {
       "$or": [
         {
-          "user_email": "{{user.email}}"
+          "data.user_email": "{{user.email}}"
         },
         {
           "created_by": "{{user.email}}"
         }
       ]
     },
-    "write": {
+    "update": {
       "$or": [
         {
-          "user_email": "{{user.email}}"
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
         },
         {
           "created_by": "{{user.email}}"

@@ -81,14 +81,33 @@
     "answer_text"
   ],
   "rls": {
-    "read": {},
-    "write": {
+    "create": null,
+    "read": null,
+    "update": {
       "$or": [
         {
-          "answerer_user_id": "{{user.id}}"
+          "data.answerer_user_id": "{{user.id}}"
         },
         {
-          "answerer_email": "{{user.email}}"
+          "data.answerer_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.answerer_user_id": "{{user.id}}"
+        },
+        {
+          "data.answerer_email": "{{user.email}}"
         },
         {
           "created_by": "{{user.email}}"

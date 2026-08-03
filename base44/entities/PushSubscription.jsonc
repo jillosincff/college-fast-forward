@@ -66,11 +66,15 @@
     "endpoint"
   ],
   "rls": {
+    "create": null,
     "read": {
-      "user_email": "{{user.email}}"
+      "data.user_email": "{{user.email}}"
     },
-    "write": {
-      "user_email": "{{user.email}}"
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
     }
   }
 }

@@ -67,14 +67,30 @@
     "message"
   ],
   "rls": {
-    "read": {},
-    "write": {
+    "create": null,
+    "read": null,
+    "update": {
       "$or": [
         {
-          "responder_id": "{{user.id}}"
+          "data.responder_id": "{{user.id}}"
         },
         {
-          "responder_email": "{{user.email}}"
+          "data.responder_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.responder_id": "{{user.id}}"
+        },
+        {
+          "data.responder_email": "{{user.email}}"
         },
         {
           "user_condition": {

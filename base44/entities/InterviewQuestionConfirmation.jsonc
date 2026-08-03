@@ -25,9 +25,13 @@
     "user_id"
   ],
   "rls": {
-    "read": {},
-    "write": {
-      "user_id": "{{user.id}}"
+    "create": null,
+    "read": null,
+    "update": {
+      "data.user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.user_id": "{{user.id}}"
     }
   }
 }

@@ -82,11 +82,24 @@
     "body"
   ],
   "rls": {
-    "read": {},
-    "write": {
+    "create": null,
+    "read": null,
+    "update": {
       "$or": [
         {
-          "sender_email": "{{user.email}}"
+          "data.sender_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.sender_email": "{{user.email}}"
         },
         {
           "user_condition": {

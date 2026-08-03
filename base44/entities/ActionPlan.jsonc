@@ -91,10 +91,11 @@
     "student_email"
   ],
   "rls": {
+    "create": null,
     "read": {
       "$or": [
         {
-          "student_email": "{{user.email}}"
+          "data.student_email": "{{user.email}}"
         },
         {
           "created_by": "{{user.email}}"
@@ -106,10 +107,25 @@
         }
       ]
     },
-    "write": {
+    "update": {
       "$or": [
         {
-          "student_email": "{{user.email}}"
+          "data.student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.student_email": "{{user.email}}"
         },
         {
           "created_by": "{{user.email}}"

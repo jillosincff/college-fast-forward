@@ -75,23 +75,34 @@
     "candidate_name"
   ],
   "rls": {
+    "create": null,
     "read": {
       "$or": [
         {
-          "helper_id": "{{user.id}}"
+          "data.helper_id": "{{user.id}}"
         },
         {
-          "student_id": "{{user.id}}"
+          "data.student_id": "{{user.id}}"
         }
       ]
     },
-    "write": {
+    "update": {
       "$or": [
         {
-          "helper_id": "{{user.id}}"
+          "data.helper_id": "{{user.id}}"
         },
         {
-          "student_id": "{{user.id}}"
+          "data.student_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.helper_id": "{{user.id}}"
+        },
+        {
+          "data.student_id": "{{user.id}}"
         }
       ]
     }

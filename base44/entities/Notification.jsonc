@@ -88,23 +88,39 @@
     "message"
   ],
   "rls": {
+    "create": null,
     "read": {
       "$or": [
         {
-          "recipient_email": "{{user.email}}"
+          "data.recipient_email": "{{user.email}}"
         },
         {
-          "user_email": "{{user.email}}"
+          "data.user_email": "{{user.email}}"
         }
       ]
     },
-    "write": {
+    "update": {
       "$or": [
         {
-          "recipient_email": "{{user.email}}"
+          "data.recipient_email": "{{user.email}}"
         },
         {
-          "user_email": "{{user.email}}"
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.recipient_email": "{{user.email}}"
+        },
+        {
+          "data.user_email": "{{user.email}}"
         },
         {
           "user_condition": {

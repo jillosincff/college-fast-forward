@@ -54,15 +54,15 @@
     "participant_emails"
   ],
   "rls": {
+    "create": null,
     "read": {
-      "participant_emails": {
-        "$contains": "{{user.email}}"
-      }
+      "data.participant_emails": "{{user.email}}"
     },
-    "write": {
-      "participant_emails": {
-        "$contains": "{{user.email}}"
-      }
+    "update": {
+      "data.participant_emails": "{{user.email}}"
+    },
+    "delete": {
+      "data.participant_emails": "{{user.email}}"
     }
   }
 }

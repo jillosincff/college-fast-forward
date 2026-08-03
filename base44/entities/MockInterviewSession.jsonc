@@ -132,26 +132,40 @@
     "difficulty"
   ],
   "rls": {
+    "create": null,
     "read": {
       "$or": [
         {
-          "user_id": "{{user.id}}"
+          "data.user_id": "{{user.id}}"
         },
         {
-          "user_email": "{{user.email}}"
+          "data.user_email": "{{user.email}}"
         },
         {
           "created_by": "{{user.email}}"
         }
       ]
     },
-    "write": {
+    "update": {
       "$or": [
         {
-          "user_id": "{{user.id}}"
+          "data.user_id": "{{user.id}}"
         },
         {
-          "user_email": "{{user.email}}"
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "data.user_email": "{{user.email}}"
         },
         {
           "created_by": "{{user.email}}"

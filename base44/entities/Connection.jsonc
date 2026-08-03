@@ -53,17 +53,21 @@
     "connection_type"
   ],
   "rls": {
+    "create": null,
     "read": {
       "$or": [
         {
-          "request_creator_email": "{{user.email}}"
+          "data.request_creator_email": "{{user.email}}"
         },
         {
           "created_by": "{{user.email}}"
         }
       ]
     },
-    "write": {
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
       "created_by": "{{user.email}}"
     }
   }

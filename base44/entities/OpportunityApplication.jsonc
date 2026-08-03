@@ -68,20 +68,31 @@
     "method"
   ],
   "rls": {
+    "create": null,
     "read": {
       "$or": [
         {
-          "applicant_id": "{{user.id}}"
+          "data.applicant_id": "{{user.id}}"
         },
         {
           "created_by": "{{user.email}}"
         }
       ]
     },
-    "write": {
+    "update": {
       "$or": [
         {
-          "applicant_id": "{{user.id}}"
+          "data.applicant_id": "{{user.id}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.applicant_id": "{{user.id}}"
         },
         {
           "created_by": "{{user.email}}"

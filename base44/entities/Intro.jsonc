@@ -127,17 +127,21 @@
     "ask_type"
   ],
   "rls": {
+    "create": null,
     "read": {
       "$or": [
         {
-          "helper_user_id": "{{user.id}}"
+          "data.helper_user_id": "{{user.id}}"
         },
         {
-          "student_id": "{{user.id}}"
+          "data.student_id": "{{user.id}}"
         }
       ]
     },
-    "write": {
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
       "created_by": "{{user.email}}"
     }
   }
