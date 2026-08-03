@@ -71,7 +71,8 @@ Deno.serve(async (req) => {
       from: { email: FROM, name: FROM_NAME },
       personalizations: [{ to: [{ email: to }] }],
       subject: `${alumni.length} UF alumni match your search, ${firstName || to.split('@')[0]}`,
-      content: [{ type: 'text/html', value: html({ firstName: escapeHtml(firstName || to.split('@')[0]), alumni, targetRole: escapeHtml(targetRole), targetCompany: escapeHtml(targetCompany) }) }],
+      // html() escapes each value itself — pass raw values so names like O'Brien aren't double-escaped.
+      content: [{ type: 'text/html', value: html({ firstName: firstName || to.split('@')[0], alumni, targetRole, targetCompany }) }],
     }),
   });
 
