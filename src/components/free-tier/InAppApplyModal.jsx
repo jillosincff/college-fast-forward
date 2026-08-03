@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { findParentsAtCompany } from '@/functions/findParentsAtCompany';
+import { queueApplyConfirmation } from '@/lib/applyConfirmations';
 
 export default function InAppApplyModal({ lead, user, onClose, onSuccess, schoolAbbr, standoutTip, startAtResume = false }) {
   const [step, setStep] = useState(startAtResume ? 'resume' : 'network'); // 'network' | 'resume' | 'submit'
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [pipelineId, setPipelineId] = useState(null);
   const [error, setError] = useState('');
 
   // Resume state
@@ -131,6 +133,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
         throw new Error(result.message || 'Could not save to your tracker. Please try again.');
       }
 
+      setPipelineId(result?.record?.id || null);
       setSubmitted(true);
       // Notify the tracker to refresh so the new application shows immediately
       window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
@@ -180,6 +183,7 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess, school
                   href={jobUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => queueApplyConfirmation({ pipelineId, company: companyName, role: jobTitle })}
                   className="block w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition cursor-pointer text-center"
                   style={{ minHeight: 'auto' }}
                 >

@@ -23,6 +23,7 @@ import AtsMatcher from '@/components/free-tier/AtsMatcher';
 import FirstWarmMatchCard from '@/components/free-tier/FirstWarmMatchCard';
 import FirstApplicationPackageCard from '@/components/free-tier/FirstApplicationPackageCard';
 import NextMoveHero from '@/components/free-tier/NextMoveHero';
+import ApplyConfirmToast from '@/components/free-tier/ApplyConfirmToast';
 import TodaysBestMoves from '@/components/free-tier/TodaysBestMoves';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { getFirstName } from '@/lib/firstName';
@@ -409,6 +410,9 @@ export default function FreeTierDashboard() {
         </div>
       </div>
       )}
+
+      {/* "Did you finish?" — closes the Track & Redirect loop */}
+      <ApplyConfirmToast />
 
       {showWelcomeToast && (
         <FirstVisitToast firstName={firstName} focusMode={focusMode} onDismiss={() => setShowWelcomeToast(false)} />
