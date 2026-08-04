@@ -23,7 +23,12 @@ export default function LocationPrefPrompt({ user, onUpdated }) {
   });
   const viewedRef = useRef(false);
 
-  const alreadyAnswered = Array.isArray(user?.location_preference_type) && user.location_preference_type.length > 0;
+  // Answered = the onboarding location step, or any location already saved on
+  // the profile / career goals. Never re-ask for something we already know.
+  const alreadyAnswered =
+    (Array.isArray(user?.location_preference_type) && user.location_preference_type.length > 0) ||
+    !!user?.career_goals?.location_preference ||
+    !!user?.location;
   const show = user?.email && !alreadyAnswered && !hidden;
 
   useEffect(() => {
