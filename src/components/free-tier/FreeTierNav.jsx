@@ -77,28 +77,27 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated, navRef })
                     {/* Active file display */}
                     <div style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', borderBottom: '1px solid #f3f4f6' }}>
                       <span style={{ fontSize: 14 }}>📄</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {user?.resume_filename || 'Master_Resume.pdf'}
-                        </p>
-                        <p style={{ fontFamily: dm, fontSize: 10, color: '#16a34a', margin: 0, fontWeight: 600 }}>🟢 98% ATS Optimized</p>
-                      </div>
+                      <p style={{ flex: 1, minWidth: 0, fontFamily: dm, fontSize: 12, fontWeight: 700, color: user?.resume_url ? '#111827' : '#9ca3af', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {user?.resume_url ? (user?.resume_filename || 'Resume on file') : 'No resume on file'}
+                      </p>
                     </div>
+                    {user?.resume_url && (
+                      <button
+                        onClick={() => { setDropdownOpen(false); window.open(user.resume_url, '_blank'); }}
+                        style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '11px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                      >
+                        ⬇️ Download Resume
+                      </button>
+                    )}
                     <button
-                      onClick={() => { setDropdownOpen(false); /* download resume */ if (user?.resume_url) window.open(user.resume_url, '_blank'); else alert('No resume on file. Upload one in your profile.'); }}
-                      style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '11px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                    >
-                      ⬇️ Download File
-                    </button>
-                    <button
-                      onClick={() => { setDropdownOpen(false); navigate('ResumeTailoring'); }}
+                      onClick={() => { setDropdownOpen(false); navigate('ProfileEdit'); }}
                       style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '11px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8, transition: 'background 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                       onMouseLeave={e => e.currentTarget.style.background = 'none'}
                     >
-                      🔄 Swap / Update File
+                      {user?.resume_url ? '🔄 Replace Resume' : '⬆️ Upload Resume'}
                     </button>
                     {/* ── End Resume Management ── */}
 
