@@ -346,16 +346,6 @@ export default function ProfileEdit() {
             )}
           </div>
 
-          {/* ── Section: Parent Network ── */}
-          <div id="parent-network-section" style={sectionCard}>
-            <p style={{ ...labelStyle, marginBottom: 4 }}>Parent Network <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none' }}>(optional)</span></p>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, marginBottom: 16 }}>
-              Where do your parents or guardians work? This unlocks warm intro pathways for fellow students.
-            </p>
-            <input value={form.parentCompany} onChange={e => update('parentCompany', e.target.value)}
-              placeholder="e.g. Google, Deloitte, Mayo Clinic" style={inputStyle} />
-          </div>
-
           {/* Save Button */}
           <button onClick={handleSave} disabled={saving || saved} style={{
             width: '100%', padding: '14px 24px', borderRadius: 10, border: 'none',
