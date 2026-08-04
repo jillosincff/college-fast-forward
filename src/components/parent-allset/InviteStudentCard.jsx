@@ -26,6 +26,19 @@ export default function InviteStudentCard({ parentFirstName }) {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  // iOS needs "sms:&body=", Android/others use "sms:?body=". Desktop has no SMS
+  // handler at all, so there we just copy the message instead of dead-ending.
+  const isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const smsHref = `sms:${isIOS ? '&' : '?'}body=${encodeURIComponent(message)}`;
+
+  const handleText = (e) => {
+    if (!isMobile) {
+      e.preventDefault();
+      copy();
+    }
+  };
+
   return (
     <div style={{
       background: CARD, border: `1px solid ${INDIGO_BORDER}`,
@@ -49,7 +62,8 @@ export default function InviteStudentCard({ parentFirstName }) {
       </p>
 
       <a
-        href={`sms:?&body=${encodeURIComponent(message)}`}
+        href={smsHref}
+        onClick={handleText}
         style={{
           display: 'block', textAlign: 'center', fontFamily: SF, fontSize: 15, fontWeight: 700,
           color: '#fff', background: GRAD_INDIGO, borderRadius: 12,
@@ -57,7 +71,7 @@ export default function InviteStudentCard({ parentFirstName }) {
           boxShadow: '0 8px 24px rgba(109,40,217,0.30)', marginBottom: 10,
         }}
       >
-        Text my student the link →
+        {!isMobile && copied ? '✓ Message copied — paste it to your student' : 'Text my student the link →'}
       </a>
 
       <button
