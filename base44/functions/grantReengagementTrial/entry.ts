@@ -1,19 +1,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { escapeHtml } from '../../shared/emailGuards.ts';
+import { firstNameOf, unsubUrl } from '../../shared/emailIdentity.ts';
 
 // ONE-TIME REENGAGEMENT: Grants a 3-day CliFF Premium trial to the April CSV-import
 // cohort (source: csv_import_2026_04_25) and emails them that it's already live.
 // Idempotent via cliff_reengagement_trial_at marker. Run repeatedly until remaining = 0.
 // After granting: checkTrialExpiry auto-expires, cliffTrialEmailScheduler sends ending/ended emails.
 
-const escapeHtml = (str) => String(str || '')
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-
 const APP_BASE = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 const APP_URL = `${APP_BASE}/#/FreeTierDashboard`;
-
-const makeUnsubToken = (userId, email) => btoa(`${userId}:${email}`).replace(/=/g, '');
-const unsubUrl = (userId, email) => `${APP_BASE}/#/Unsubscribe?token=${makeUnsubToken(userId, email)}`;
 
 const emailWrapper = (content, unsubscribeUrl) => `
 <!DOCTYPE html>
@@ -147,8 +142,8 @@ Deno.serve(async (req) => {
         granted++;
 
         if (!unsubIds.has(u.id)) {
-          const firstName = (u.full_name || '').split(' ')[0] || 'there';
-          const { subject, html } = trialLiveEmail(firstName, endDateLabel, unsubUrl(u.id, u.email));
+          const firstName = firstNameOf(u.full_name);
+          const { subject, html } = trialLiveEmail(firstName, endDateLabel, unsubUrl(APP_BASE, u.id, u.email));
           await sendViaSendGrid(u.email, subject, html);
           emailed++;
         }
