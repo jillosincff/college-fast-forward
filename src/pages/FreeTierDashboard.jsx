@@ -35,6 +35,7 @@ import CareerSeasonCard from '@/components/free-tier/CareerSeasonCard';
 import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
 import PostMagicMomentFlow from '@/components/conversion/PostMagicMomentFlow';
+import PreparedWorkProPrompt from '@/components/conversion/PreparedWorkProPrompt';
 import LocationPrefPrompt from '@/components/free-tier/LocationPrefPrompt';
 import useAccessPlan from '@/hooks/useAccessPlan';
 
@@ -373,6 +374,9 @@ export default function FreeTierDashboard() {
             Rendered even during first-session focus mode once the Magic Moment is completed,
             so a stale localStorage flag can never suppress the Pro conversion card. */}
         {(!focusMode || magicMomentCompleted) && <PlanStateBanner user={user} onUpgrade={triggerUpgrade} />}
+
+        {/* Highest-intent Pro trigger: completed overnight package waiting */}
+        {!focusMode && !isTrialExpired && <PreparedWorkProPrompt user={user} onUpgrade={triggerUpgrade} />}
 
         {/* Done-For-You activation moment — a finished application package for one real job */}
         <FirstApplicationPackageCard user={user} />

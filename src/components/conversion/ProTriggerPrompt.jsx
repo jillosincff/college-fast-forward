@@ -8,6 +8,7 @@ const COPY = {
   proactive_discovery: { headline: 'I found something that changes your plan.', cta: 'Keep CLIFF Working' },
   tailored_resume: { headline: 'Your full tailored resume is ready to generate.', cta: 'Keep CLIFF Working' },
   follow_up_draft: { headline: 'Your follow-up draft is ready.', cta: 'Keep CLIFF Working' },
+  prepared_work_waiting: { headline: 'Your application package is ready — prepared overnight.', cta: 'Unlock My Package' },
   usage_limit: { headline: "You've used today's free CLIFF guidance.", cta: 'Keep CLIFF Working' },
 };
 
