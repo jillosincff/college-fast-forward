@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
+import InviteStudentCard from '@/components/parent-allset/InviteStudentCard';
 
 // ── Brand tokens (matched to StudentLandingPage) ──
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -112,17 +113,19 @@ export default function ParentAllSet() {
           The moment a student reaches out — we'll let you know immediately. Until then, you don't need to do a thing.
         </p>
 
-        {/* Share box */}
+        {/* Primary share — invite your own student */}
+        <InviteStudentCard parentFirstName={firstName} />
+
+        {/* Secondary share — other parents */}
         <div style={{
-          background: CARD, border: `1px solid ${INDIGO_BORDER}`,
-          borderRadius: 18, padding: 'clamp(20px, 5vw, 28px)',
-          boxShadow: SHADOW_LG, marginBottom: 28,
+          background: 'transparent', border: `1px solid ${INDIGO_BORDER}`,
+          borderRadius: 14, padding: '16px 18px', marginBottom: 28,
         }}>
           <p style={{
-            fontFamily: SF, fontSize: 14, color: TEXT2,
-            margin: '0 0 18px', lineHeight: 1.6, fontWeight: 500,
+            fontFamily: SF, fontSize: 13.5, color: TEXT2,
+            margin: '0 0 10px', lineHeight: 1.6, fontWeight: 500,
           }}>
-            Know another parent who'd want to help? Every parent makes the network stronger for everyone's kids.
+            Know another parent who'd want to help? Every parent makes the network stronger.
           </p>
           <button
             onClick={() => {
@@ -131,16 +134,13 @@ export default function ParentAllSet() {
               setTimeout(() => setCopied(false), 2500);
             }}
             style={{
-              width: '100%', fontFamily: SF, fontSize: 15, fontWeight: 700,
-              color: '#fff', background: GRAD_INDIGO, border: 'none',
-              borderRadius: 12, padding: '14px 20px', cursor: 'pointer',
-              minHeight: 52, boxShadow: '0 8px 24px rgba(109,40,217,0.30)',
-              transition: 'all 0.2s ease', touchAction: 'manipulation',
+              fontFamily: SF, fontSize: 13.5, fontWeight: 700,
+              color: INDIGO, background: 'transparent', border: 'none',
+              padding: 0, cursor: 'pointer', minHeight: 'auto',
+              touchAction: 'manipulation',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
           >
-            {copied ? '✓ Link copied!' : 'Share College Fast Forward →'}
+            {copied ? '✓ Link copied!' : 'Share with other parents →'}
           </button>
         </div>
 
