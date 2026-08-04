@@ -93,6 +93,27 @@ function parentWelcome(firstName, unsubscribeUrl) {
   };
 }
 
+function alumniWelcome(firstName, school, unsubscribeUrl) {
+  const name = escapeHtml(firstName);
+  const schoolStr = school ? escapeHtml(school) : 'your school';
+  return {
+    subject: 'Welcome to CliFF — you just became someone’s way in',
+    html: emailWrapper(`
+      ${darkHero('🎓 WELCOME', `Thanks for joining, ${name}.`, 'Students from your school now have a real person on the inside.')}
+      <div style="padding: 28px 36px 32px;">
+        ${bodyText(`Hi ${name},`)}
+        ${bodyText(`Welcome to College Fast Forward. You know how the search actually works: the students who break in are the ones who found a real person before they applied. Now you're that person for ${schoolStr}.`)}
+        ${bodyText(`Here's what happens next:`)}
+        ${bodyText(`<strong>•</strong> Students researching your company or industry can discover you.<br>
+        <strong>•</strong> If one reaches out, a two-sentence reply is genuinely enough.<br>
+        <strong>•</strong> You choose what you give — there's no commitment or quota.`)}
+        ${ctaButton('See Your Network')}
+        ${bodyText(`<br>— Jill`)}
+        <p style="font-size: 13px; color: #888; margin: 0;">P.S. If you're navigating your own move, CliFF works for you too — the same job matching, resume tailoring, and warm-path tools are on your dashboard.</p>
+      </div>`, unsubscribeUrl),
+  };
+}
+
 async function sendViaSendGrid(toEmail, subject, html) {
   const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
@@ -158,13 +179,18 @@ Deno.serve(async (req) => {
       if (prefs?.[0]?.all_emails === false) continue;
 
       const firstName = (userRecord.full_name || '').split(' ')[0] || 'there';
-      const isParent = userRecord.persona === 'parent' || (Array.isArray(userRecord.roles) && userRecord.roles.includes('parent'));
+      const hasRole = (r) => userRecord.persona === r || (Array.isArray(userRecord.roles) && userRecord.roles.includes(r));
+      const isParent = hasRole('parent');
+      const isAlumni = !isParent && hasRole('alumni');
+      const persona = isParent ? 'parent' : isAlumni ? 'alumni' : 'student';
       const school = userRecord.school_name || userRecord.school || '';
       const unsubscribeUrl = unsubUrl(userRecord.id, userRecord.email);
 
       const { subject, html } = isParent
         ? parentWelcome(firstName, unsubscribeUrl)
-        : studentWelcome(firstName, school, unsubscribeUrl);
+        : isAlumni
+          ? alumniWelcome(firstName, school, unsubscribeUrl)
+          : studentWelcome(firstName, school, unsubscribeUrl);
 
       try {
         if (!dryRun) {
@@ -173,14 +199,14 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.EmailLog.create({
             user_id: userRecord.id,
             user_email: userRecord.email,
-            persona: isParent ? 'parent' : 'student',
+            persona,
             email_type: 'welcome',
             subject,
             status: 'sent',
             sent_at: new Date().toISOString(),
           }).catch(() => {});
         }
-        sent.push({ email: userRecord.email, variant: isParent ? 'parent' : 'student', subject });
+        sent.push({ email: userRecord.email, variant: persona, subject });
       } catch (e) {
         errors.push({ email: userRecord.email, error: e.message });
       }
