@@ -720,7 +720,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
         {/* Header */}
         <div style={{ marginBottom: 40 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>Resume Studio</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 12px' }}>Resume Studio</p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(24px, 6vw, 32px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
             Let the Agent optimize your resume
           </h1>
@@ -797,7 +797,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     return (
       <div style={{ maxWidth: 480, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', border: '4px solid #F0F0F0', borderTop: '4px solid #E85D20', margin: '0 auto 24px', animation: 'spin 1s linear infinite' }} />
+        <div style={{ width: 64, height: 64, borderRadius: '50%', border: '4px solid #F0F0F0', borderTop: '4px solid #7c3aed', margin: '0 auto 24px', animation: 'spin 1s linear infinite' }} />
         <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Uploading your resume...</p>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>This will only take a moment.</p>
       </div>
@@ -817,7 +817,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
             ← Back
           </button>
           <div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 4px' }}>RESUME BUILDER</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 4px' }}>RESUME BUILDER</p>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Let's build your resume.</h1>
           </div>
         </div>
@@ -871,7 +871,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: window.innerWidth < 600 ? 'wrap' : 'nowrap' }}>
             <div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>Resume Studio</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 8px' }}>Resume Studio</p>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Resumes</h1>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -891,7 +891,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               ) : (
                 <button
                   onClick={() => onOpenUpgrade()}
-                  style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
+                  style={{ background: 'none', border: '1px solid #7c3aed', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#7c3aed', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
                 >
                   + Add Resume
                 </button>
@@ -913,7 +913,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
           {/* Free tier gate banner */}
           {!isFastIQ && resumes.length >= 1 && (
-            <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ background: '#F5F3FF', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0 }}>
                 Free accounts can have 1 master resume. Upgrade to store unlimited versions and get advanced tailoring.
               </p>
@@ -928,7 +928,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
             <div style={{ marginBottom: 32 }}>
               {analyzing && (
                 <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '28px 32px', display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #F0F0F0', borderTop: '3px solid #E85D20', animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #F0F0F0', borderTop: '3px solid #7c3aed', animation: 'spin 1s linear infinite', flexShrink: 0 }} />
                   <div>
                     <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>The Agent is reviewing your resume...</p>
                     <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Scoring against your career goals</p>
@@ -939,13 +939,13 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               {analysisError && !analyzing && (
                 <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Resume analysis couldn't load.</p>
-                  <button onClick={() => { setAnalysisError(false); setAnalysis(null); }} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}>Try Again</button>
+                  <button onClick={() => { setAnalysisError(false); setAnalysis(null); }} style={{ background: '#7c3aed', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}>Try Again</button>
                 </div>
               )}
 
               {analysis && !analyzing && (
                 <div style={{ background: '#0A0A0A', borderRadius: 16, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)' }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>Resume Analysis • Matched to Your Career Goals</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 20px' }}>Resume Analysis • Matched to Your Career Goals</p>
 
                   <div style={{ display: 'flex', flexDirection: window.innerWidth < 600 ? 'column' : 'row', gap: 24, alignItems: window.innerWidth < 600 ? 'center' : 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
                     <div style={{ textAlign: 'center', flexShrink: 0 }}>
@@ -957,18 +957,18 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                     </div>
 
                     <div style={{ flex: 1, minWidth: 200 }}>
-                      <div style={{ background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
-                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top Priority</p>
+                      <div style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
+                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#7c3aed', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top Priority</p>
                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>{analysis.top_fix}</p>
                        </div>
                        <div style={{ marginTop: 12 }}>
                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Analyzing Against</p>
                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                            {user?.career_goals?.target_roles?.slice(0, 3).map((role, i) => (
-                             <span key={i} style={{ background: 'rgba(232,93,32,0.2)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{role}</span>
+                             <span key={i} style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{role}</span>
                            ))}
                            {user?.career_goals?.target_industries?.slice(0, 2).map((ind, i) => (
-                             <span key={i} style={{ background: 'rgba(232,93,32,0.2)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{ind}</span>
+                             <span key={i} style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{ind}</span>
                            ))}
                          </div>
                        </div>
@@ -1019,8 +1019,8 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#AAAAAA', margin: '0 0 12px' }}>MASTER RESUMES</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {resumes.map(resume => (
-                <div key={resume.id} style={{ background: '#fff', border: `2px solid ${resume.is_active ? '#E85D20' : '#E5E5E5'}`, borderRadius: 14, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 10, background: resume.is_active ? '#FFF5F0' : '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>📄</div>
+                <div key={resume.id} style={{ background: '#fff', border: `2px solid ${resume.is_active ? '#7c3aed' : '#E5E5E5'}`, borderRadius: 14, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 10, background: resume.is_active ? '#F5F3FF' : '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>📄</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1038,7 +1038,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                   <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                     <button
                       onClick={() => (isFastIQ || magicMomentAvailable) ? handleTailor(resume) : setShowProPaywall(true)}
-                      style={{ background: (isFastIQ || magicMomentAvailable) ? '#E85D20' : '#F5F5F5', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: (isFastIQ || magicMomentAvailable) ? '#fff' : '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+                      style={{ background: (isFastIQ || magicMomentAvailable) ? '#7c3aed' : '#F5F5F5', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: (isFastIQ || magicMomentAvailable) ? '#fff' : '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
                     >
                       {isFastIQ ? 'Tailor →' : magicMomentAvailable ? 'Tailor free →' : 'Tailor'}
                     </button>
@@ -1102,7 +1102,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                 const targetCompany = user?.career_goals?.target_companies?.[0] || '';
                 navigate(`FreeTierDashboard${targetCompany ? `?company=${encodeURIComponent(targetCompany)}` : ''}`);
               }}
-              style={{ background: 'linear-gradient(135deg, #E85D20, #d44e14)', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
               >
               Go to Job Discovery →
             </button>
