@@ -28,47 +28,38 @@ Deno.serve(async (req) => {
         const results = {
             total: usersWithoutPersona.length,
             students: [],
-            parents: [],
+            skipped: [],
             errors: [],
             dryRun
         };
 
         for (const u of usersWithoutPersona) {
             const email = u.email?.toLowerCase() || '';
-            const isUFLEmail = email.endsWith('@ufl.edu');
-            
-            const assignedPersona = isUFLEmail ? 'student' : 'parent';
-            const assignedRoles = isUFLEmail ? ['student'] : ['parent'];
+            // Only a school email is confident evidence of a student. Everyone else
+            // is left untouched — guessing "parent" mislabels students at schools
+            // we don't recognize. They pick their own persona when they finish onboarding.
+            const isSchoolEmail = email.endsWith('.edu');
 
-            console.log(`Processing user: ${u.email}, isUFL: ${isUFLEmail}, will assign: ${assignedPersona}`);
+            if (!isSchoolEmail) {
+                results.skipped.push({ id: u.id, email: u.email, name: u.full_name, reason: 'no_reliable_signal' });
+                continue;
+            }
 
             if (dryRun) {
-                // Just categorize, don't update
-                if (isUFLEmail) {
-                    results.students.push({ id: u.id, email: u.email, name: u.full_name });
-                } else {
-                    results.parents.push({ id: u.id, email: u.email, name: u.full_name });
-                }
-            } else {
-                // Actually update the user
-                try {
-                    console.log(`Updating user ${u.email} with persona=${assignedPersona}`);
-                    await base44.asServiceRole.entities.User.update(u.id, {
-                        persona: assignedPersona,
-                        roles: assignedRoles,
-                        onboarding_completed: false // They still need to complete onboarding
-                    });
-                    console.log(`Successfully updated user ${u.email}`);
+                results.students.push({ id: u.id, email: u.email, name: u.full_name });
+                continue;
+            }
 
-                    if (isUFLEmail) {
-                        results.students.push({ id: u.id, email: u.email, name: u.full_name, status: 'updated' });
-                    } else {
-                        results.parents.push({ id: u.id, email: u.email, name: u.full_name, status: 'updated' });
-                    }
-                } catch (err) {
-                    console.error('Failed to update user:', u.email, err.message, err);
-                    results.errors.push({ id: u.id, email: u.email, error: err.message });
-                }
+            try {
+                await base44.asServiceRole.entities.User.update(u.id, {
+                    persona: 'student',
+                    roles: ['student'],
+                    onboarding_completed: false // They still need to complete onboarding
+                });
+                results.students.push({ id: u.id, email: u.email, name: u.full_name, status: 'updated' });
+            } catch (err) {
+                console.error('Failed to update user:', u.email, err.message);
+                results.errors.push({ id: u.id, email: u.email, error: err.message });
             }
         }
 
@@ -77,11 +68,11 @@ Deno.serve(async (req) => {
             summary: {
                 total: results.total,
                 students: results.students.length,
-                parents: results.parents.length,
+                skipped: results.skipped.length,
                 errors: results.errors.length
             },
             students: results.students,
-            parents: results.parents,
+            skipped: results.skipped,
             errors: results.errors,
             dryRun: results.dryRun
         });
