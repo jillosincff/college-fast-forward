@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import InviteStudentCard from '@/components/parent-allset/InviteStudentCard';
+import GiftProCard from '@/components/parent-allset/GiftProCard';
 
 // ── Brand tokens (matched to StudentLandingPage) ──
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -25,12 +26,18 @@ export default function ParentAllSet() {
 
   // Show a thank-you confirmation when returning from a successful FastIQ checkout
   const [showUpgradeThanks, setShowUpgradeThanks] = useState(false);
+  // Show a gift confirmation when returning from a successful CLIFF Pro gift checkout
+  const [showGiftThanks, setShowGiftThanks] = useState(false);
   useEffect(() => {
     const hashQuery = window.location.hash.split('?')[1] || '';
     const params = new URLSearchParams(hashQuery);
     if (params.get('upgraded') === 'true') {
       setShowUpgradeThanks(true);
       // Clean the param so a refresh doesn't re-trigger the banner
+      window.history.replaceState({}, '', window.location.origin + '/#/ParentAllSet');
+    }
+    if (params.get('gift') === 'success') {
+      setShowGiftThanks(true);
       window.history.replaceState({}, '', window.location.origin + '/#/ParentAllSet');
     }
   }, []);
@@ -112,6 +119,24 @@ export default function ParentAllSet() {
         }}>
           The moment a student reaches out — we'll let you know immediately. Until then, you don't need to do a thing.
         </p>
+
+        {showGiftThanks && (
+          <div style={{
+            background: GRAD_INDIGO, color: '#fff',
+            borderRadius: 16, padding: '18px 22px', marginBottom: 24,
+            boxShadow: '0 12px 32px rgba(109,40,217,0.32)',
+          }}>
+            <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, margin: '0 0 4px' }}>
+              Your student's CLIFF Pro is on its way. 🎁
+            </p>
+            <p style={{ fontFamily: SF, fontSize: 13, color: 'rgba(255,255,255,0.82)', margin: 0, lineHeight: 1.5 }}>
+              We've emailed them the good news. If they haven't signed up yet, Pro activates the moment they do.
+            </p>
+          </div>
+        )}
+
+        {/* Highest-conversion moment: gift CLIFF Pro to their student */}
+        {!showGiftThanks && <GiftProCard />}
 
         {/* Primary share — invite your own student */}
         <InviteStudentCard parentFirstName={firstName} />

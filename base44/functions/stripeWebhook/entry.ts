@@ -24,7 +24,10 @@ async function findUserByCustomerId(customerId) {
 }
 
 async function findStudentByGiftSubscriptionId(subscriptionId) {
-  const users = await base44.asServiceRole.entities.User.filter({ fastiq_gift_subscription_id: subscriptionId });
+  let users = await base44.asServiceRole.entities.User.filter({ fastiq_gift_subscription_id: subscriptionId });
+  if (!users?.length) {
+    users = await base44.asServiceRole.entities.User.filter({ pro_gift_subscription_id: subscriptionId });
+  }
   return users?.length > 0 ? users[0] : null;
 }
 
@@ -42,6 +45,7 @@ async function revokeGiftedStudentAccess(subscriptionId) {
     // Clear stale gift fields so re-gifting works cleanly
     fastiq_gifted_by_user_id: null,
     fastiq_gift_subscription_id: null,
+    pro_gift_subscription_id: null,
   });
   console.log('[stripeWebhook] Gifted FastIQ revoked for student:', student.id, 'sub:', subscriptionId);
 }
@@ -174,6 +178,8 @@ Deno.serve(async (req) => {
         const billingUserId = session.metadata?.user_id;
         const isFoundingMember = session.metadata?.is_founding_member === 'true';
         const plan = session.metadata?.plan;
+        // Parent gift purchase: Pro goes to the STUDENT, not the buyer
+        const giftStudentEmail = session.metadata?.gift_student_email?.trim().toLowerCase() || null;
 
         console.log('Checkout completed:', { subscriptionTier, customerId, familyId, billingUserEmail, isFoundingMember, plan });
 
@@ -251,8 +257,8 @@ Deno.serve(async (req) => {
           await updateAllFamilyMembers(family, memberUpdates);
         }
 
-        // Send confirmation email to the buyer
-        if (billingUser?.email) {
+        // Send confirmation email to the buyer (gifts get their own receipt below)
+        if (billingUser?.email && !giftStudentEmail) {
           const userName = billingUser.full_name?.split(' ')[0] || 'there';
           const isFoundingEmail = isFoundingMember;
           try {
@@ -345,6 +351,109 @@ Deno.serve(async (req) => {
             } catch (giftErr) {
               console.error('[stripeWebhook] Parent gift FastIQ error for', studentEmail, ':', giftErr.message);
             }
+          }
+        }
+
+        // ── CLIFF Pro gift: parent bought Pro for a specific student email ──
+        if (giftStudentEmail) {
+          try {
+            const parentFirst = billingUser?.full_name?.split(' ')[0] || 'Your parent';
+            const studentMatches = await base44.asServiceRole.entities.User.filter({ email: giftStudentEmail });
+            const giftStudent = studentMatches?.[0];
+
+            if (giftStudent) {
+              // Student is registered — activate Pro immediately
+              await base44.asServiceRole.entities.User.update(giftStudent.id, {
+                subscription_status: 'active',
+                subscription_tier: 'cff',
+                membership_tier: 'cff',
+                fastiq_active: true,
+                is_fastiq: true,
+                gifted_by_parent_email: billingUser?.email || '',
+                linked_parent_name: parentFirst,
+                pro_gift_subscription_id: subscriptionId,
+              });
+              console.log('[stripeWebhook] CLIFF Pro gifted to student:', giftStudentEmail);
+
+              try {
+                await base44.asServiceRole.integrations.Core.SendEmail({
+                  to: giftStudent.email,
+                  subject: `${parentFirst} just got you CLIFF Pro 🎁`,
+                  body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:40px 24px;">
+  <div style="background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);border-radius:20px;padding:32px;text-align:center;margin-bottom:32px;">
+    <p style="color:rgba(255,255,255,0.7);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">🎁 A GIFT FROM ${escapeHtml(parentFirst.toUpperCase())}</p>
+    <h1 style="color:#fff;font-size:28px;margin:0 0 8px;">CLIFF Pro is now yours, ${escapeHtml(giftStudent.full_name?.split(' ')[0] || 'there')}!</h1>
+    <p style="color:rgba(255,255,255,0.8);font-size:15px;margin:0;">${escapeHtml(parentFirst)} just upgraded your account. CLIFF now works for you around the clock.</p>
+  </div>
+  <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:20px;margin:16px 0;">
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ Unlimited CLIFF-powered applications</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ Unlimited resume, interview &amp; company prep</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ Unlimited outreach &amp; follow-ups</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0;">✓ Proactive background work — CLIFF preps while you sleep</p>
+  </div>
+  <div style="text-align:center;margin:32px 0;">
+    <a href="https://collegefastforward.com/#/FreeTierDashboard" style="background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;">Open My Dashboard</a>
+  </div>
+</div>`,
+                });
+              } catch (e) { console.error('[stripeWebhook] Student Pro gift email failed:', e.message); }
+            } else {
+              // Student hasn't signed up yet — store the pending gift on the parent
+              if (billingUser) {
+                await base44.asServiceRole.entities.User.update(billingUser.id, {
+                  pending_pro_gift_email: giftStudentEmail,
+                  pending_pro_gift_subscription_id: subscriptionId,
+                });
+              }
+              console.log('[stripeWebhook] Pro gift pending — student not signed up yet:', giftStudentEmail);
+
+              // Invite email via SendGrid (recipient isn't a registered app user yet)
+              try {
+                const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
+                await fetch('https://api.sendgrid.com/v3/mail/send', {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    personalizations: [{ to: [{ email: giftStudentEmail }] }],
+                    from: { email: 'jill@collegefastforward.com', name: 'Jill at College Fast Forward' },
+                    subject: `${parentFirst} got you CLIFF Pro — claim it 🎁`,
+                    content: [{ type: 'text/html', value: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+  <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">${escapeHtml(parentFirst)} just bought you CLIFF Pro 🎁</h1>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">CLIFF is an AI career agent that finds internships and jobs for you, tailors your resume for each one, preps you for interviews, and follows up — automatically.</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">Your Pro access is paid for and waiting. Just sign up with this email address and it activates instantly.</p>
+  <a href="https://collegefastforward.com/#/GatorAuth" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Claim My CLIFF Pro →</a>
+  <p style="font-size:13px;color:#94a3b8;margin-top:32px;">Warmly,<br><strong>Jill Osinoff</strong><br>Founder, College Fast Forward</p>
+</div>` }],
+                  }),
+                });
+              } catch (e) { console.error('[stripeWebhook] Pending gift invite email failed:', e.message); }
+            }
+
+            // Receipt email to the parent
+            if (billingUser?.email) {
+              try {
+                await base44.asServiceRole.integrations.Core.SendEmail({
+                  to: billingUser.email,
+                  subject: `You just gave ${giftStudentEmail} a real edge 💜`,
+                  body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+  <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">Your gift is on its way</h1>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Hi ${escapeHtml(parentFirst)},</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">You've gifted <strong>CLIFF Pro</strong> to <strong>${escapeHtml(giftStudentEmail)}</strong>. ${giftStudent ? "It's active on their account right now, and we've emailed them the good news." : "The moment they sign up with that email, Pro activates automatically — we've sent them an invite."}</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">CLIFF will now find opportunities, tailor their resume, prep them for interviews, and follow up on applications — around the clock. You'll be billed $19.96/month; cancel anytime.</p>
+  <p style="font-size:13px;color:#94a3b8;margin-top:32px;">Thank you for investing in their search.<br>The College Fast Forward Team</p>
+</div>`,
+                });
+              } catch (e) { console.error('[stripeWebhook] Parent gift receipt email failed:', e.message); }
+            }
+
+            base44.asServiceRole.entities.AnalyticsEvent.create({
+              event_name: 'pro_gift_purchased',
+              user_id: billingUser?.id || '',
+              user_email: billingUser?.email || '',
+              properties: { student_email: giftStudentEmail, student_registered: !!giftStudent },
+            }).catch(() => {});
+          } catch (proGiftErr) {
+            console.error('[stripeWebhook] CLIFF Pro gift error:', proGiftErr.message);
           }
         }
 

@@ -176,6 +176,12 @@ export default function FreeTierDashboard() {
         return;
       }
       setUser(u);
+      // Redeem a pending parent-purchased Pro gift (parent paid before the student signed up)
+      if (u?.subscription_status !== 'active') {
+        base44.functions.invoke('redeemPendingProGift', {}).then(res => {
+          if (res?.data?.redeemed) base44.auth.me().then(setUser).catch(() => {});
+        }).catch(() => {});
+      }
       // Show first-visit toast once per session
       const key = 'cff_ftd_welcomed';
       try {
