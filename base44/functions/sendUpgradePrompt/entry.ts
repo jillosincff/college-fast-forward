@@ -1,6 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// Inlined email utilities
+// CLIFF Pro upgrade email — current branding (purple), current pricing ($19.96/mo),
+// current destination (#/FreeTierDashboard). Replaces the retired FastIQ template.
+
 const escapeHtml = (str) => {
   if (!str) return '';
   return String(str)
@@ -11,6 +13,9 @@ const escapeHtml = (str) => {
     .replace(/'/g, '&#039;');
 };
 
+const GRAD = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
+const APP_BASE = 'https://collegefastforward.com';
+
 const emailWrapper = (content) => `
 <!DOCTYPE html>
 <html>
@@ -19,22 +24,19 @@ const emailWrapper = (content) => `
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>College Fast Forward</title>
 </head>
-<body style="margin: 0; padding: 0; background: #F5F5F5; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+<body style="margin: 0; padding: 0; background: #f8f9ff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
   <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-    <div style="text-align: center; margin-bottom: 32px;">
-      <p style="font-size: 13px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #E85D20; margin: 0;">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <p style="font-size: 13px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; color: #6d28d9; margin: 0;">
         COLLEGE FAST FORWARD
       </p>
     </div>
-    <div style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <div style="background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(109,40,217,0.12);">
       ${content}
     </div>
     <div style="text-align: center; margin-top: 24px;">
-      <p style="font-size: 12px; color: #AAAAAA; margin: 0 0 4px;">
+      <p style="font-size: 12px; color: #94a3b8; margin: 0;">
         College Fast Forward · support@collegefastforward.com
-      </p>
-      <p style="font-size: 11px; color: #CCCCCC; margin: 0;">
-        You're receiving this because you joined College Fast Forward.
       </p>
     </div>
   </div>
@@ -42,15 +44,15 @@ const emailWrapper = (content) => `
 </html>
 `;
 
-const darkHero = (orangeLabel, headline, subtext) => `
-  <div style="background: #0A0A0A; padding: 36px 36px 32px;">
-    <p style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #E85D20; margin: 0 0 12px;">
-      ${orangeLabel}
+const hero = (label, headline, subtext) => `
+  <div style="background: ${GRAD}; padding: 36px 36px 32px;">
+    <p style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin: 0 0 12px;">
+      ${label}
     </p>
-    <h1 style="font-size: 26px; font-weight: 700; color: #fff; margin: 0 0 10px; line-height: 1.3;">
+    <h1 style="font-size: 26px; font-weight: 800; color: #fff; margin: 0 0 10px; line-height: 1.3; letter-spacing: -0.02em;">
       ${headline}
     </h1>
-    <p style="font-size: 15px; color: rgba(255,255,255,0.55); margin: 0; line-height: 1.6;">
+    <p style="font-size: 15px; color: rgba(255,255,255,0.8); margin: 0; line-height: 1.6;">
       ${subtext}
     </p>
   </div>
@@ -58,44 +60,11 @@ const darkHero = (orangeLabel, headline, subtext) => `
 
 const ctaButton = (label, url) => `
   <div style="text-align: center; margin: 8px 0 4px;">
-    <a href="${url}" style="display: inline-block; background: #E85D20; color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 10px;">
+    <a href="${url}" style="display: inline-block; background: ${GRAD}; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 14px;">
       ${label} →
     </a>
   </div>
 `;
-
-const bodySection = (content) => `
-  <div style="padding: 28px 36px 32px;">
-    ${content}
-  </div>
-`;
-
-const bodyText = (text) => `
-  <p style="font-size: 15px; color: #444; line-height: 1.7; margin: 0 0 16px;">
-    ${text}
-  </p>
-`;
-
-const featureList = (items) => `
-  <div style="background: #F9F9F9; border-radius: 10px; padding: 16px 20px; margin: 16px 0;">
-    ${items.map(item => `
-      <p style="font-size: 14px; color: #1A1A1A; margin: 0 0 8px; line-height: 1.5;">
-        ${item}
-      </p>
-    `).join('')}
-  </div>
-`;
-
-const divider = () => `
-  <div style="height: 1px; background: #F0F0F0; margin: 0 36px;"></div>
-`;
-
-// SYNC NOTE: Founding offer deadline must align across:
-// - sendUpgradePrompt.js (this file)
-// - PaywallScreen.jsx (component)
-// - createCheckoutSession.js (backend)
-// If deadline changes, update all three.
-const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
 Deno.serve(async (req) => {
   try {
@@ -108,48 +77,37 @@ Deno.serve(async (req) => {
     const { userEmail, firstName, featureHit } = await req.json();
 
     const featureMessages = {
-      alumni_search: 'unlimited alumni searches at any company',
-      resume_tailor: 'resume tailoring to specific job descriptions',
-      outreach: 'AI outreach drafts that actually get replies',
-      mock_interview: 'full STAR method mock interview practice',
+      alumni_search: 'unlimited warm-connection searches at any company',
+      resume_tailor: 'unlimited CLIFF-tailored resumes for specific jobs',
+      outreach: 'unlimited AI outreach drafts that actually get replies',
+      mock_interview: 'unlimited mock interview practice',
       linkedin_review: 'LinkedIn profile scoring and optimization',
     };
 
-    const featureText = featureMessages[featureHit] || 'the full FastIQ AI career engine';
-
-    // Dynamic pricing based on founding offer status
-    const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
-    const priceDisplay = foundingOfferActive ? '$14.50/month' : '$29/month';
-    const ctaLabel = foundingOfferActive ? `Unlock FastIQ — ${priceDisplay}` : `Unlock FastIQ — ${priceDisplay}`;
-    const priceNote = foundingOfferActive 
-      ? '🎖 Founding member offer — <strong>50% off forever</strong> if you upgrade before April 30. That\'s $14.50/month, locked in permanently.'
-      : 'Start your 5-day trial. Credit card required, converts to $29/month unless cancelled.';
+    const featureText = featureMessages[featureHit] || 'everything CLIFF Pro does for you';
 
     const html = emailWrapper(`
-      ${darkHero(
-        '⚡ UNLOCK FASTIQ',
-        `You just found something good.`,
-        `FastIQ powers ${featureText} — and a lot more.`
+      ${hero(
+        '✨ CLIFF PRO',
+        'Let CLIFF take it from here.',
+        `CLIFF Pro powers ${featureText} — and keeps working in the background even when you're not.`
       )}
-      ${bodySection(`
-        ${bodyText(`Hey ${escapeHtml(firstName)}, you tried to access a FastIQ feature. Here's everything you unlock with FastIQ:`)}
-        ${featureList([
-          '🔍 Unlimited alumni searches at any company',
-          '📄 Resume tailoring to any job description',
-          '🎤 Full STAR method mock interview practice',
-          '🔗 LinkedIn profile scoring and optimization',
-          '✉️ AI outreach drafts with follow-up nudges',
-          '🧠 Career archetype assessment',
-          '📊 Company hiring signals and intel',
-        ])}
-        ${ctaButton(ctaLabel, 'https://collegefastforward.com/#FastIQDashboard')}
-        ${divider()}
-        <div style="padding-top: 20px;">
-          <p style="font-size: 13px; color: #888; text-align: center; margin: 0;">
-            ${priceNote}
-          </p>
+      <div style="padding: 28px 36px 32px;">
+        <p style="font-size: 15px; color: #475569; line-height: 1.7; margin: 0 0 16px;">
+          Hey ${escapeHtml(firstName)}, you just hit a CLIFF Pro feature. Here's everything Pro unlocks:
+        </p>
+        <div style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 14px; padding: 16px 20px; margin: 16px 0;">
+          <p style="font-size: 14px; color: #4c1d95; margin: 0 0 8px; line-height: 1.5;">✓ Unlimited CLIFF-powered applications</p>
+          <p style="font-size: 14px; color: #4c1d95; margin: 0 0 8px; line-height: 1.5;">✓ Unlimited resume, interview &amp; company prep</p>
+          <p style="font-size: 14px; color: #4c1d95; margin: 0 0 8px; line-height: 1.5;">✓ Unlimited outreach &amp; follow-ups</p>
+          <p style="font-size: 14px; color: #4c1d95; margin: 0 0 8px; line-height: 1.5;">✓ Proactive background work — CLIFF preps while you sleep</p>
+          <p style="font-size: 14px; color: #4c1d95; margin: 0; line-height: 1.5;">✓ Brings you back only when it matters</p>
         </div>
-      `)}
+        ${ctaButton('Unlock CLIFF Pro — $4.99/wk', `${APP_BASE}/#/FreeTierDashboard`)}
+        <p style="font-size: 13px; color: #94a3b8; text-align: center; margin: 20px 0 0;">
+          Billed monthly at $19.96/mo · Cancel anytime
+        </p>
+      </div>
     `);
 
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
@@ -160,8 +118,8 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         personalizations: [{ to: [{ email: userEmail }] }],
-        from: { email: 'support@collegefastforward.com', name: 'College Fast Forward' },
-        subject: `You found a FastIQ feature, ${firstName} ⚡`,
+        from: { email: 'hello@collegefastforward.com', name: 'College Fast Forward' },
+        subject: `You found a CLIFF Pro feature, ${firstName} ✨`,
         content: [{ type: 'text/html', value: html }],
       }),
     });

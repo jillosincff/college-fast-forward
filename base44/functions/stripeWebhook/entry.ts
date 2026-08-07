@@ -258,27 +258,26 @@ Deno.serve(async (req) => {
           try {
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: billingUser.email,
-              subject: `Welcome to FastIQ${isFoundingEmail ? ' - Founding Member' : ''}! 🎉`,
+              subject: `Welcome to CLIFF Pro${isFoundingEmail ? ' — Founding Member' : ''}! 🎉`,
               body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:40px 24px;">
-  <div style="background:#0A0A0A;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
-    <p style="color:#E85D20;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">FASTIQ ACTIVATED</p>
+  <div style="background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);border-radius:20px;padding:32px;text-align:center;margin-bottom:32px;">
+    <p style="color:rgba(255,255,255,0.7);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">✨ CLIFF PRO ACTIVATED</p>
     <h1 style="color:#fff;font-size:28px;margin:0 0 8px;">You're in, ${escapeHtml(userName)}!</h1>
-    <p style="color:rgba(255,255,255,0.6);font-size:15px;margin:0;">Your FastIQ career engine is now active.</p>
+    <p style="color:rgba(255,255,255,0.8);font-size:15px;margin:0;">CLIFF is now working for you around the clock.</p>
   </div>
-  <p style="font-size:15px;color:#1A1A1A;line-height:1.6;">Here's what just unlocked for you:</p>
-  <div style="background:#F5F5F5;border-radius:12px;padding:20px;margin:16px 0;">
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">Unlimited alumni searches</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">Resume tailoring to any job description</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">AI outreach drafts</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">Company hiring signals</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">Full CFF network access</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0;">Follow-up nudges</p>
+  <p style="font-size:15px;color:#0f172a;line-height:1.6;">Here's what just unlocked for you:</p>
+  <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:20px;margin:16px 0;">
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ Unlimited CLIFF-powered applications</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ Unlimited resume, interview &amp; company prep</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ Unlimited outreach &amp; follow-ups</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ Warm-connection searches at any company</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0;">✓ Proactive background work — CLIFF preps while you sleep</p>
   </div>
-  ${isFoundingEmail ? '<div style="background:#FFF5F0;border:1px solid rgba(232,93,32,0.3);border-radius:12px;padding:16px 20px;margin:16px 0;"><p style="font-size:13px;color:#E85D20;font-weight:700;margin:0 0 4px;">FOUNDING MEMBER</p><p style="font-size:13px;color:#555;margin:0;">You locked in 50% off forever. Your rate never goes up.</p></div>' : ''}
+  ${isFoundingEmail ? '<div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:14px;padding:16px 20px;margin:16px 0;"><p style="font-size:13px;color:#6d28d9;font-weight:700;margin:0 0 4px;">FOUNDING MEMBER</p><p style="font-size:13px;color:#475569;margin:0;">You locked in 50% off forever. Your rate never goes up.</p></div>' : ''}
   <div style="text-align:center;margin:32px 0;">
-    <a href="https://collegefastforward.com/#FreeTierDashboard" style="background:#E85D20;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">Go to My Dashboard</a>
+    <a href="https://collegefastforward.com/#/FreeTierDashboard" style="background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;">Go to My Dashboard</a>
   </div>
-  <p style="font-size:12px;color:#AAAAAA;text-align:center;">Questions? Reply to this email - we're real people.</p>
+  <p style="font-size:12px;color:#94a3b8;text-align:center;">Questions? Reply to this email — we're real people.</p>
 </div>`,
             });
             console.log('[stripeWebhook] Confirmation email sent to:', billingUser.email);
@@ -453,14 +452,14 @@ Deno.serve(async (req) => {
           try {
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: billingUser.email,
-              subject: 'Your FastIQ subscription has been canceled',
+              subject: 'Your CLIFF Pro subscription has been canceled',
               body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
-  <h1 style="font-size:24px;font-weight:700;margin-bottom:16px;color:#333;">Your FastIQ subscription has been canceled</h1>
-  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${escapeHtml(billingUser.full_name?.split(' ')[0] || 'there')},</p>
-  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Your FastIQ subscription has been canceled. Your student will revert to the free tier and lose access to full alumni contacts, personalized outreach, and the AI career engine.</p>
-  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">If this was a mistake, you can reactivate anytime from your dashboard.</p>
-  <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Go to Dashboard</a>
-  <p style="font-size:13px;color:#999;margin-top:32px;">The College Fast Forward Team</p>
+  <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">Your CLIFF Pro subscription has been canceled</h1>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">Hi ${escapeHtml(billingUser.full_name?.split(' ')[0] || 'there')},</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">Your CLIFF Pro subscription has been canceled. The account will revert to the free tier — CLIFF stops working in the background, and unlimited applications, outreach, and prep are paused.</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">If this was a mistake, you can reactivate anytime from your dashboard.</p>
+  <a href="https://collegefastforward.com/#/FreeTierDashboard" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Go to Dashboard</a>
+  <p style="font-size:13px;color:#94a3b8;margin-top:32px;">The College Fast Forward Team</p>
 </div>`,
             });
             console.log('[stripeWebhook] Cancellation email sent:', billingUser.email);
@@ -525,13 +524,13 @@ Deno.serve(async (req) => {
           try {
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: billingUser.email,
-              subject: `Action required: Payment failed for FastIQ - ${urgency}`,
+              subject: `Action required: Payment failed for CLIFF Pro — ${urgency}`,
               body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
-  <h1 style="font-size:24px;font-weight:700;margin-bottom:16px;color:#333;">Payment failed</h1>
-  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${escapeHtml(billingUser.full_name?.split(' ')[0] || 'there')},</p>
-  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">We couldn't process your payment for FastIQ. ${isDay3 ? "Your student's access will be deactivated within 24 hours unless payment is resolved." : "Please update your payment method to keep your student's access active."}</p>
-  <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Update Payment</a>
-  <p style="font-size:13px;color:#999;margin-top:32px;">The College Fast Forward Team</p>
+  <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">Payment failed</h1>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">Hi ${escapeHtml(billingUser.full_name?.split(' ')[0] || 'there')},</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">We couldn't process your payment for CLIFF Pro. ${isDay3 ? "Access will be deactivated within 24 hours unless payment is resolved." : "Please update your payment method to keep CLIFF Pro active."}</p>
+  <a href="https://collegefastforward.com/#/FreeTierDashboard" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Update Payment</a>
+  <p style="font-size:13px;color:#94a3b8;margin-top:32px;">The College Fast Forward Team</p>
 </div>`,
             });
             console.log('[stripeWebhook] Payment failed email sent:', billingUser.email, 'attempt:', attemptCount);
