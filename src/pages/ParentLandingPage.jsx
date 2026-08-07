@@ -564,6 +564,36 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
       </div>
 
+      {/* ── PRIVACY REASSURANCE ── */}
+      <div style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', borderTop: '1px solid #f1f5f9', padding: 'clamp(48px, 10vw, 80px) clamp(20px, 5vw, 40px)' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <SectionLabel text="Your privacy is the whole model" color={TEAL_DARK} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 36px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(20px, 4vw, 28px)', textAlign: 'center' }}>
+            You&rsquo;re not posted in a directory.<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>You&rsquo;re a door, opened only when it fits.</span>
+          </h2>
+          <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 3vw, 17px)', color: TEXT2, lineHeight: 1.7, textAlign: 'center', maxWidth: 520, margin: '0 auto clamp(24px, 5vw, 32px)' }}>
+            We built this the way we&rsquo;d want our own information treated. Here&rsquo;s exactly who can see you and how it works.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 560, margin: '0 auto' }}>
+            {[
+              ['🏫', 'Only students from your school', 'Your profile surfaces only when a student from your school searches your industry. It is never public, never listed in a directory, never searchable by strangers.'],
+              ['🚫', 'No cold outreach from strangers', 'A student can only reach you through a matched CLIFF introduction \u2014 not by finding your email or contact info. No spam, no LinkedIn scraping, no surprise messages.'],
+              ['🎛️', 'You\u2019re in control, always', 'Pause your visibility, edit what\u2019s shown, or remove your profile entirely at any time from your account. One click. No phone calls, no retention guilt.'],
+              ['🔒', 'We never sell or share your data', 'Your information stays inside College Fast Forward to power matching. We do not sell it, rent it, or share it with third parties. Ever.'],
+            ].map(([emoji, title, desc], i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: '18px 20px', boxShadow: SHADOW }}>
+                <span style={{ fontSize: 22, flexShrink: 0, lineHeight: 1.2 }}>{emoji}</span>
+                <div>
+                  <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 4px' }}>{title}</p>
+                  <p style={{ fontFamily: SF, fontSize: 13.5, color: TEXT2, margin: 0, lineHeight: 1.6 }}>{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* ── FAQ ── */}
       <div style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(48px, 10vw, 80px) clamp(20px, 5vw, 40px)' }}>
         <div style={{ maxWidth: 640, margin: '0 auto' }}>

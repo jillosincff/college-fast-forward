@@ -36,6 +36,24 @@ const STORIES = [
     photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png",
     tag: "Beat the ghosting streak", color: '#ec4899',
   },
+  {
+    quote: "I was about to give up on summer internships. CLIFF prepped 3 applications overnight and one turned into an offer 9 days later.",
+    name: "Devin K.", school: "UF '26, Computer Science",
+    photo: "", initials: "DK",
+    tag: "Offer in 9 days", color: '#0891b2',
+  },
+  {
+    quote: "A recruiter ghosted me for 3 weeks. CLIFF drafted a follow-up, I sent it, and she replied the next morning with an interview slot.",
+    name: "Priya S.", school: "Michigan '25, Data Science",
+    photo: "", initials: "PS",
+    tag: "Un-ghosted in 24 hrs", color: '#f59e0b',
+  },
+  {
+    quote: "I'd never gotten past a resume screen. CLIFF found an alum at my target company, I messaged them, and they forwarded my resume \u2014 first interview of my life.",
+    name: "Jordan T.", school: "OSU '26, Supply Chain",
+    photo: "", initials: "JT",
+    tag: "First real interview", color: '#10b981',
+  },
 ];
 
 // Pain-relief framing (not feature lists). Each one names the pain it kills.
@@ -84,7 +102,11 @@ export default function Customers() {
               </div>
               <p style={{ fontFamily: SF, fontSize: 'clamp(15px,3vw,17px)', fontWeight: 500, color: TEXT, lineHeight: 1.65, margin: '0 0 20px', fontStyle: 'italic' }}>&ldquo;{s.quote}&rdquo;</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <img src={s.photo} alt={s.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${s.color}40`, flexShrink: 0 }} />
+                {s.photo ? (
+                  <img src={s.photo} alt={s.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${s.color}40`, flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${s.color}1a`, border: `2px solid ${s.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontSize: 14, fontWeight: 800, color: s.color, flexShrink: 0 }}>{s.initials}</div>
+                )}
                 <div>
                   <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>{s.name}</p>
                   <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '2px 0 0' }}>{s.school}</p>
