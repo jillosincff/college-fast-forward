@@ -58,9 +58,15 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     } catch {}
     return null;
   });
+  // Mirrors resumeData synchronously — next() is called in the same tick as
+  // setResumeData(), before the state update re-renders, so reading the
+  // `resumeData` closure there would still see the old (null) value and
+  // wrongly skip the reveal screen (10) even after a successful parse.
+  const hasResumeRef = useRef(!!resumeData);
   // Wrap setter so any resume data we produce is cached for 24h (zero server complexity).
   const setResumeData = (data) => {
     setResumeDataRaw(data);
+    hasResumeRef.current = !!data;
     try {
       if (data) localStorage.setItem('cachedResumeData', JSON.stringify({ data, ts: Date.now() }));
     } catch {}
@@ -156,7 +162,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     let newScreen = screen + 1;
     // Skippers have no resume — bypass the reveal screen (10),
     // which would otherwise render infinite "parsing" spinners.
-    if (newScreen === 10 && !resumeData) newScreen = 11;
+    if (newScreen === 10 && !hasResumeRef.current) newScreen = 11;
     saveProgress(newScreen, {
       cff_seeking: seeking,
       cff_college: college,
@@ -180,7 +186,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     setScreen(s => {
       let prev = Math.max(1, s - 1);
       // Mirror the forward skip: no resume → reveal (10) doesn't exist for this user
-      if (prev === 10 && !resumeData) prev = 9;
+      if (prev === 10 && !hasResumeRef.current) prev = 9;
       // Reset resume screen sub-mode when leaving via back
       if (s === 9) setDataInputMode('choose');
       return prev;
