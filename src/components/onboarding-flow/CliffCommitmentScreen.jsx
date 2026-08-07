@@ -3,6 +3,7 @@ import {
   FONT, CARD, TEXT, TEXT2, TEXT3, INDIGO, GRAD_INDIGO,
   GREEN, GREEN_LIGHT, GREEN_BORDER, SHADOW,
 } from './onboardingShared';
+import EmailSignupFallback from './EmailSignupFallback';
 
 const PLAN_STEPS = [
   { icon: '🧠', text: 'Learning about you…' },
@@ -124,6 +125,10 @@ export default function CliffCommitmentScreen({
         >
           Show My Plan →
         </button>
+
+        <div style={{ marginTop: 16, textAlign: 'center' }}>
+          <EmailSignupFallback defaultFirstName={firstName || ''} onAuthed={handleShowPlan} />
+        </div>
       </div>
     );
   }
