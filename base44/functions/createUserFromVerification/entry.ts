@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import bcrypt from 'npm:bcryptjs@2.4.3';
 
 function buf2hex(buffer) {
   return [...new Uint8Array(buffer)]
@@ -80,6 +81,22 @@ Deno.serve(async (req) => {
       });
     }
     console.log("Creating user from verification for:", lowerCaseEmail);
+
+    // The redeemer must also know the password chosen at registration — so a
+    // leaked or forwarded verification link alone can never mint credentials.
+    // The RegistrationAttempt stores the bcrypt hash created by registerUser.
+    const storedHash = attempt.password_hash || '';
+    const passwordMatches = storedHash ? await bcrypt.compare(password, storedHash) : false;
+    if (!passwordMatches) {
+      console.log("createUserFromVerification refused: password does not match registration");
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Verification failed. Please register again.'
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     // Never mint credentials for an account that already exists — that path is
     // an unauthenticated takeover vector (any email → fresh session token). A
