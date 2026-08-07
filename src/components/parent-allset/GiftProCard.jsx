@@ -47,8 +47,23 @@ export default function GiftProCard() {
       <h2 style={{ fontFamily: SF, fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 8px', lineHeight: 1.2 }}>
         Give your student CLIFF Pro
       </h2>
-      <p style={{ fontFamily: SF, fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, margin: '0 0 18px' }}>
-        CLIFF applies, preps, and follows up for them — unlimited, around the clock. $19.96/mo, cancel anytime. They get an email the moment it's active.
+      <p style={{ fontFamily: SF, fontSize: 14, color: 'rgba(255,255,255,0.9)', lineHeight: 1.6, margin: '0 0 14px' }}>
+        You're not buying another app your kid has to remember to open. CLIFF does the work <em>for</em> them — overnight, with no prompting.
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9, margin: '0 0 18px' }}>
+        {[
+          ['3 resumes', 'tailored to real openings before they wake up'],
+          ['2 warm intros', 'to alumni at their target companies, drafted and ready'],
+          ['1 follow-up', 'sent on every application that goes quiet'],
+        ].map(([n, t]) => (
+          <div key={n} style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+            <span style={{ fontFamily: SF, fontSize: 13, fontWeight: 800, color: '#fff', minWidth: 92, flexShrink: 0 }}>{n}</span>
+            <span style={{ fontFamily: SF, fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.45 }}>{t}</span>
+          </div>
+        ))}
+      </div>
+      <p style={{ fontFamily: SF, fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6, margin: '0 0 18px' }}>
+        They get an email each morning with what CLIFF finished overnight. $19.96/mo, cancel anytime.
       </p>
       <input
         type="email"
