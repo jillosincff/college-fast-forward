@@ -9,6 +9,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const APP_BASE = 'https://collegefastforward.com';
 const EMAIL_TYPE = 'onboarding_abandonment';
+// Don't chase someone who signed up minutes ago and may still be mid-flow.
+const MIN_AGE_HOURS = 24;
 
 const escapeHtml = (str) =>
   String(str || '')
@@ -61,8 +63,9 @@ const buildHtml = (firstName) => `
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const admin = await base44.auth.me();
-    if (!admin || admin.role !== 'admin') {
+    // Allow system/scheduled runs (no user context) or admins only.
+    const caller = await base44.auth.me().catch(() => null);
+    if (caller && caller.role !== 'admin' && !caller.roles?.includes('admin')) {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
@@ -70,9 +73,11 @@ Deno.serve(async (req) => {
 
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
 
+    const ageCutoff = Date.now() - MIN_AGE_HOURS * 3600000;
     const stranded = allUsers.filter((u) => {
       const noPersona = !String(u.persona || '').trim();
-      return noPersona && u.role !== 'admin' && u.email && !isTestAccount(u.email);
+      const oldEnough = u.created_date && new Date(u.created_date).getTime() < ageCutoff;
+      return noPersona && oldEnough && u.role !== 'admin' && u.email && !isTestAccount(u.email);
     });
 
     // Skip anyone who already received this email.

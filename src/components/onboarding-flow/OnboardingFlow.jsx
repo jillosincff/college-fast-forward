@@ -14,6 +14,7 @@ import {
   FONT, BG, CARD, TEXT, TEXT2, TEXT3, SHADOW, GREEN,
   saveProgress, loadSavedProgress,
 } from './onboardingShared';
+import { saveServerProgress, loadServerProgress } from './serverProgress';
 
 /**
  * The agent-hiring flow — 11 screens:
@@ -130,6 +131,33 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     } catch {}
   };
 
+  // Restore progress from the account when this browser has none (new device,
+  // cleared storage). Local progress always wins — it's the more recent source.
+  useEffect(() => {
+    let cancelled = false;
+    const hasLocal = (() => {
+      try { return !!localStorage.getItem('cff_onboarding_screen'); } catch { return false; }
+    })();
+    if (hasLocal) return;
+
+    loadServerProgress().then((saved) => {
+      if (cancelled || !saved) return;
+      if (saved.seeking) setSeeking(saved.seeking);
+      if (saved.college) setCollege(saved.college);
+      if (saved.yearLevel) setYearLevel(saved.yearLevel);
+      if (saved.goalText) setGoalText(saved.goalText);
+      if (saved.blockers) setBlockers(saved.blockers);
+      if (saved.selectedIndustries) setSelectedIndustries(saved.selectedIndustries);
+      if (saved.targetRoles) setTargetRoles(saved.targetRoles);
+      if (saved.locationPref) setLocationPref(saved.locationPref);
+      if (saved.locationCity) setLocationCity(saved.locationCity);
+      if (saved.workLocation) setWorkLocation(saved.workLocation);
+      if (saved.resumeUrl) setResumeUrl(saved.resumeUrl);
+      if (saved.screen >= 2 && saved.screen <= 11) setScreen(saved.screen);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
   useEffect(() => {
     // pagehide = real navigation away / tab close (does NOT fire on tab switch)
     const onPageHide = () => logAbandonment('left_page');
@@ -163,7 +191,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     // Skippers have no resume — bypass the reveal screen (10),
     // which would otherwise render infinite "parsing" spinners.
     if (newScreen === 10 && !hasResumeRef.current) newScreen = 11;
-    saveProgress(newScreen, {
+    const answers = {
       cff_seeking: seeking,
       cff_college: college,
       cff_year: yearLevel,
@@ -175,7 +203,11 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       cff_location_city: locationCity,
       cff_work_location: workLocation,
       cff_resume_url: resumeUrl,
-    });
+    };
+    saveProgress(newScreen, answers);
+    // Authenticated users also keep their progress on their account, so a return
+    // visit on any device picks up where they left off.
+    saveServerProgress(newScreen, answers);
     if (newScreen > 11) {
       if (onClose) onClose();
     } else {
