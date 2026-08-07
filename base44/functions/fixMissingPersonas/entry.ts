@@ -37,8 +37,8 @@ Deno.serve(async (req) => {
             const email = u.email?.toLowerCase() || '';
             const isUFLEmail = email.endsWith('@ufl.edu');
             
-            const assignedPersona = isUFLEmail ? 'gator' : 'parent';
-            const assignedRoles = isUFLEmail ? ['gator'] : ['parent'];
+            const assignedPersona = isUFLEmail ? 'student' : 'parent';
+            const assignedRoles = isUFLEmail ? ['student'] : ['parent'];
 
             console.log(`Processing user: ${u.email}, isUFL: ${isUFLEmail}, will assign: ${assignedPersona}`);
 
