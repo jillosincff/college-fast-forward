@@ -9,7 +9,7 @@ const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
 const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
 
-const LINK = 'https://collegefastforward.com';
+const LINK = 'https://collegefastforward.com/#/GetStarted';
 
 /**
  * Primary post-signup share for parents: get their own student on CFF.
@@ -58,7 +58,7 @@ export default function InviteStudentCard({ parentFirstName }) {
         Get your student on College Fast Forward.
       </h2>
       <p style={{ fontFamily: SF, fontSize: 14.5, color: TEXT2, lineHeight: 1.65, margin: '0 0 18px' }}>
-        The network only works for your kid once they have an account. Send them the link — it takes them about two minutes to set up.
+        Your student gets an AI career agent that finds internships and preps their applications for them. Send them the link — it takes about two minutes to set up.
       </p>
 
       <a

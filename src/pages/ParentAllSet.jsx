@@ -115,9 +115,9 @@ export default function ParentAllSet() {
 
         <p style={{
           fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: TEXT2,
-          lineHeight: 1.7, margin: '0 0 40px',
+          lineHeight: 1.7, margin: '0 0 32px',
         }}>
-          The moment a student reaches out — we'll let you know immediately. Until then, you don't need to do a thing.
+          The moment a student reaches out — we'll let you know immediately. There's nothing you need to do to be found — but if you want to speed things up, the fastest move is getting your own student on here.
         </p>
 
         {showGiftThanks && (
