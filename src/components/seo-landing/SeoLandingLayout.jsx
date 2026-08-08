@@ -170,6 +170,9 @@ export default function SeoLandingLayout({ title, description, slug, children })
               <a href="#/pricing" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Pricing</a>
               <a href="#/about" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>About</a>
               <a href="#/customers" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Customer Stories</a>
+              <a href="#/changelog" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Changelog</a>
+              <a href="#/vs/jobright" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>CLIFF vs Jobright</a>
+              <a href="#/vs/simplify" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>CLIFF vs Simplify</a>
               <a href="#/GatorAuth" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Log In</a>
               <a href="#/GetStarted" style={{ fontFamily: INTER, fontSize: 13, color: 'rgba(244,240,232,0.45)', textDecoration: 'none' }}>Sign Up</a>
             </div>

@@ -12,6 +12,8 @@ import RoommateSection from '@/components/landing/RoommateSection';
 import SchoolMarquee from '@/components/landing/SchoolMarquee';
 import CareerMiniPlanDemo from '@/components/landing/CareerMiniPlanDemo';
 import MorningBriefSection from '@/components/landing/MorningBriefSection';
+import FounderBlock from '@/components/landing/FounderBlock';
+import ProductShowcase from '@/components/landing/ProductShowcase';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -511,6 +513,9 @@ export default function StudentLandingPage({ onParentClick }) {
         </div></Reveal>
       </div>
 
+      {/* ── FOUNDER ── */}
+      <FounderBlock />
+
       {/* ── 7. NETWORKING (one capability, not the product) ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: BG, borderTop: '1px solid #f1f5f9' }}>
         <Reveal><div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
@@ -524,6 +529,9 @@ export default function StudentLandingPage({ onParentClick }) {
           </p>
         </div></Reveal>
       </div>
+
+      {/* ── 7b. PRODUCT SHOWCASE ── */}
+      <ProductShowcase go={go} />
 
       {/* ── 8. CLIFFING CAMPAIGN ── */}
       <RoommateSection go={go} />

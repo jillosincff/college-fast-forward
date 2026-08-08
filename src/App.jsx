@@ -64,6 +64,9 @@ import LinkedinReview from '@/pages/seo/LinkedinReview';
 import Pricing from '@/pages/seo/Pricing';
 import About from '@/pages/seo/About';
 import Customers from '@/pages/seo/Customers';
+import VsJobright from '@/pages/seo/VsJobright';
+import VsSimplify from '@/pages/seo/VsSimplify';
+import Changelog from '@/pages/Changelog';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -137,6 +140,9 @@ function RootRoute() {
     '/pricing': Pricing,
     '/about': About,
     '/customers': Customers,
+    '/vs/jobright': VsJobright,
+    '/vs/simplify': VsSimplify,
+    '/changelog': Changelog,
   };
   const SeoPage = seoPages[realPath];
   if (SeoPage) return <SeoPage />;
@@ -205,6 +211,9 @@ const AuthenticatedApp = () => {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/about" element={<About />} />
       <Route path="/customers" element={<Customers />} />
+      <Route path="/vs/jobright" element={<VsJobright />} />
+      <Route path="/vs/simplify" element={<VsSimplify />} />
+      <Route path="/changelog" element={<Changelog />} />
 
       {/* Onboarding routes — no guard */}
       <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
