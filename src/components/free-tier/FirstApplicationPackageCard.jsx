@@ -39,9 +39,19 @@ export default function FirstApplicationPackageCard({ user }) {
         const lsLocation = localStorage.getItem('cff_location') || '';
         const lsSeeking = localStorage.getItem('cff_seeking') || '';
         const cg = user?.career_goals || {};
+        let role = lsRoles[0] || (cg.target_roles?.[0]) || '';
+        let industries = lsIndustries.length ? lsIndustries : (cg.target_industries || []);
+        // Recovery fallback: students who closed the funnel early have empty
+        // career_goals, and getLiveJobMatchesFn returns no jobs when role AND
+        // industries are both empty — which silently hides this card. Fall back
+        // to the student's major as the search term so they still get a real
+        // first application package instead of a blank dashboard.
+        if (!role && industries.length === 0 && user?.major) {
+          role = user.major;
+        }
         return {
-          role: lsRoles[0] || (cg.target_roles?.[0]) || '',
-          industries: lsIndustries.length ? lsIndustries : (cg.target_industries || []),
+          role,
+          industries,
           locations: [lsLocation || cg.location_preference || ''].filter(Boolean),
           seeking: lsSeeking || cg.seeking || 'both',
         };

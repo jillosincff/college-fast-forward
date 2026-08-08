@@ -455,9 +455,35 @@ export default function GatorAuth() {
     const handleOnboardingComplete = async () => {
       // Clear funnel flags so returning visits don't re-trigger funnel
       try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); localStorage.removeItem('cff_onboarding_screen'); } catch (e) {}
-      // After funnel, set persona and go to dashboard
+      // After funnel, set persona and go to dashboard.
+      // CRITICAL: persist career_goals from the funnel answers saved to
+      // localStorage. OnboardingFlow's X-close (onClose) and skip paths reach
+      // here WITHOUT running saveAndAuth, so without this write the student is
+      // marked onboarding_complete with empty career_goals — and
+      // getLiveJobMatchesFn returns no jobs for empty role+industries, which
+      // makes FirstApplicationPackageCard silently not render (no magic moment).
       try {
-        await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
+        const college = localStorage.getItem('cff_college') || '';
+        let goalIndustries = [];
+        let goalRoles = [];
+        try { goalIndustries = JSON.parse(localStorage.getItem('cff_industries') || '[]'); } catch (e) {}
+        try { goalRoles = JSON.parse(localStorage.getItem('cff_target_roles') || '[]'); } catch (e) {}
+        const goalLocation = localStorage.getItem('cff_location') || '';
+        const goalSeeking = localStorage.getItem('cff_seeking') || '';
+        await base44.auth.updateMe({
+          persona: 'student',
+          roles: ['student'],
+          onboarding_completed: true,
+          is_new_signup: true,
+          ...(college ? { school: college, school_code: (deriveSchoolCode(college) || '').toUpperCase() } : {}),
+          career_goals: buildCareerGoalsFromOnboarding({
+            seeking: goalSeeking,
+            industries: goalIndustries,
+            targetRoles: goalRoles,
+            location: goalLocation,
+          }),
+          ...(goalLocation ? { location: goalLocation === 'remote' ? 'Remote' : goalLocation } : {}),
+        });
       } catch (e) {}
       // Full reload so the auth context re-fetches the now-onboarded user —
       // otherwise OnboardingGuard sees the stale (no persona) user and loops
