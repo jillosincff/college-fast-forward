@@ -22,6 +22,7 @@ import CliffChatWidget from '@/components/free-tier/CliffChatWidget';
 import AtsMatcher from '@/components/free-tier/AtsMatcher';
 import FirstWarmMatchCard from '@/components/free-tier/FirstWarmMatchCard';
 import FirstApplicationPackageCard from '@/components/free-tier/FirstApplicationPackageCard';
+import GoalsCaptureCard from '@/components/free-tier/GoalsCaptureCard';
 import NextMoveHero from '@/components/free-tier/NextMoveHero';
 import ApplyConfirmToast from '@/components/free-tier/ApplyConfirmToast';
 import { getThemeForSchool } from '@/lib/campusThemes';
@@ -245,6 +246,24 @@ export default function FreeTierDashboard() {
 
   const isTrialExpired = checkIsTrialExpired(user);
 
+  // Students who closed onboarding early can land here with no career_goals AND
+  // no major — getLiveJobMatchesFn has nothing to search, so the magic-moment
+  // package card can't build a job. Show a goals-capture card in that slot so
+  // they self-serve goals; on save the user refreshes and the package card
+  // renders next.
+  const needsGoalsCapture = (() => {
+    if (!user) return false;
+    const cg = user.career_goals || {};
+    if (cg.target_roles?.length || cg.target_industries?.length) return false;
+    if (user.major) return false;
+    try {
+      const lsR = JSON.parse(localStorage.getItem('cff_target_roles') || '[]');
+      const lsI = JSON.parse(localStorage.getItem('cff_industries') || '[]');
+      if (lsR.length || lsI.length) return false;
+    } catch {}
+    return true;
+  })();
+
   const triggerUpgrade = (featureName, trigger) => {
     setUpgradeFeature(featureName);
     setUpgradeTrigger(trigger || 'dashboard_pro_card');
@@ -384,8 +403,12 @@ export default function FreeTierDashboard() {
         {/* Highest-intent Pro trigger: completed overnight package waiting */}
         {!focusMode && !isTrialExpired && <PreparedWorkProPrompt user={user} onUpgrade={triggerUpgrade} />}
 
-        {/* Done-For-You activation moment — a finished application package for one real job */}
-        <FirstApplicationPackageCard user={user} />
+        {/* Done-For-You activation moment — a finished application package for one real job.
+            Students with no goals at all get a goals-capture card here instead, so CLIFF
+            has something to match a real opening to. */}
+        {needsGoalsCapture
+          ? <GoalsCaptureCard user={user} onSaved={setUser} />
+          : <FirstApplicationPackageCard user={user} />}
 
         {/* Everything below competes with the package card — hidden during first-session focus */}
         {!focusMode && (
