@@ -26,25 +26,25 @@ const ENTRIES = [
   {
     date: 'Jul 2026',
     title: 'Warm-intro composer shipped to the beta cohort',
-    body: 'CLIFF now drafts the outreach message to a matched parent or alum in the student\u2019s own voice, with a one-tap send. First beta replies came back within 48 hours.',
+    body: 'CLIFF now drafts the outreach message to a matched parent or alum in the student’s own voice, with a one-tap send. First beta replies came back within 48 hours.',
     by: 'Jill Osinoff, Founder',
   },
   {
     date: 'Jun 2026',
     title: 'Overnight prep agent goes live',
-    body: 'CLIFF now pre-tailors a resume and queues the best job\u2019s outreach overnight, so students wake up to a finished package instead of a to-do list. The morning brief email launched alongside it.',
+    body: 'CLIFF now pre-tailors a resume and queues the best job’s outreach overnight, so students wake up to a finished package instead of a to-do list. The morning brief email launched alongside it.',
     by: 'Jill Osinoff, Founder',
   },
   {
     date: 'May 2026',
     title: 'ATS resume tailoring + instant match score',
-    body: 'Paste a job description, get a tailored resume and a 0\u2013100 ATS match score in seconds. Free for every student\u2019s first application.',
+    body: 'Paste a job description, get a tailored resume and a 0–100 ATS match score in seconds. Free for every student’s first application.',
     by: 'Jill Osinoff, Founder',
   },
   {
     date: 'Apr 2026',
     title: 'Parent & alumni network crosses 4,000 members',
-    body: 'Parents and alumni across 15+ universities are now opted in to help students from their school \u2014 the warm-intro moat that powers every CLIFF application.',
+    body: 'Parents and alumni across 15+ universities are now opted in to help students from their school — the warm-intro moat that powers every CLIFF application.',
     by: 'Jill Osinoff, Founder',
   },
 ];
@@ -53,7 +53,7 @@ export default function Changelog() {
   return (
     <SeoLandingLayout
       title="CLIFF Changelog | What We Shipped | College Fast Forward"
-      description="See what CLIFF shipped, month by month \u2014 the warm-intro composer, overnight agent, ATS tailoring, and the parent & alumni network. Dated updates from the founder."
+      description="See what CLIFF shipped, month by month — the warm-intro composer, overnight agent, ATS tailoring, and the parent & alumni network. Dated updates from the founder."
       slug="changelog"
     >
       {/* Hero */}
@@ -64,7 +64,7 @@ export default function Changelog() {
           <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>shipped.</span>
         </h1>
         <p style={{ fontFamily: INTER, fontSize: 'clamp(17px,3.5vw,20px)', color: TEXT2, lineHeight: 1.6, margin: '0 auto', maxWidth: 600 }}>
-          We&rsquo;re pre-launch and shipping fast. Here&rsquo;s the real record \u2014 dated, founder-bylined, no vapor.
+          We&rsquo;re pre-launch and shipping fast. Here&rsquo;s the real record — dated, founder-bylined, no vapor.
         </p>
       </section>
 

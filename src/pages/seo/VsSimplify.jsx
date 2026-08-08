@@ -16,8 +16,8 @@ const CARD = '#ffffff';
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
 
 const CLIFF_ONLY = [
-  { title: 'Parent & alumni warm intros', desc: 'Simplify is a job board. CLIFF finds a real parent or alum at the company you\u2019re applying to and drafts the intro \u2014 the thing that actually gets you the interview.' },
-  { title: 'An AI agent, not a browser extension', desc: 'Simplify autofills applications. CLIFF decides which jobs to apply to, tailors your resume to each, and preps the outreach \u2014 before you even sit down.' },
+  { title: 'Parent & alumni warm intros', desc: 'Simplify is a job board. CLIFF finds a real parent or alum at the company you’re applying to and drafts the intro — the thing that actually gets you the interview.' },
+  { title: 'An AI agent, not a browser extension', desc: 'Simplify autofills applications. CLIFF decides which jobs to apply to, tailors your resume to each, and preps the outreach — before you even sit down.' },
   { title: 'Mock interviews + LinkedIn review', desc: 'Built-in, unlimited on Pro. Simplify has no interview prep or LinkedIn optimization.' },
 ];
 
@@ -29,19 +29,19 @@ const WHERE_SIMPLIFY_WINS = [
 const COMPARISON = [
   { feature: 'Job board & autofill', cliff: 'Verdicts on every job + tracker', simp: 'Large board + autofill extension' },
   { feature: 'AI resume tailoring per job', cliff: 'One-click + ATS score', simp: 'Basic' },
-  { feature: 'Warm networking (parents & alumni)', cliff: 'Included', simp: '\u2014' },
-  { feature: 'AI-drafted outreach messages', cliff: 'Included', simp: '\u2014' },
-  { feature: 'Mock interviews', cliff: 'Unlimited (Pro)', simp: '\u2014' },
-  { feature: 'LinkedIn profile review', cliff: 'Included (Pro)', simp: '\u2014' },
-  { feature: 'Overnight agent (works while you sleep)', cliff: 'Included (Pro)', simp: '\u2014' },
+  { feature: 'Warm networking (parents & alumni)', cliff: 'Included', simp: '—' },
+  { feature: 'AI-drafted outreach messages', cliff: 'Included', simp: '—' },
+  { feature: 'Mock interviews', cliff: 'Unlimited (Pro)', simp: '—' },
+  { feature: 'LinkedIn profile review', cliff: 'Included (Pro)', simp: '—' },
+  { feature: 'Overnight agent (works while you sleep)', cliff: 'Included (Pro)', simp: '—' },
   { feature: 'Free plan', cliff: 'Free for students', simp: 'Free job board' },
 ];
 
 const FAQS = [
-  { q: 'Is CLIFF better than Simplify?', a: 'Different jobs. Simplify is a great internship job board with autofill. CLIFF is a career agent \u2014 it tells you which jobs are worth applying to, tailors your resume to each, finds a warm contact at the company, and preps your interview. If you want to browse and autofill, Simplify helps. If you want the warm intro that gets the reply, CLIFF is built for it.' },
-  { q: 'Does CLIFF have a job board like Simplify?', a: 'CLIFF surfaces a ranked feed of jobs matched to your background and goals \u2014 not 10,000 listings to scroll. It gives you a verdict on each (pursue / consider / skip) and the 3 best moves for today, so you apply to fewer jobs with higher hit rates.' },
-  { q: 'What\u2019s CLIFF\u2019s biggest advantage over Simplify?', a: 'Warm networking. Simplify has no way to connect you to a person at the company. CLIFF finds a parent or alum already in the network and drafts the intro \u2014 the single biggest lever for getting off the resume pile and into an interview.' },
-  { q: 'Is CLIFF free?', a: 'CLIFF is free for college students \u2014 resume tailoring for your first application, job verdicts, the application tracker, and Today\u2019s Best Moves. CLIFF Pro is $19.96/month for unlimited tailoring, mock interviews, LinkedIn review, and warm networking.' },
+  { q: 'Is CLIFF better than Simplify?', a: 'Different jobs. Simplify is a great internship job board with autofill. CLIFF is a career agent — it tells you which jobs are worth applying to, tailors your resume to each, finds a warm contact at the company, and preps your interview. If you want to browse and autofill, Simplify helps. If you want the warm intro that gets the reply, CLIFF is built for it.' },
+  { q: 'Does CLIFF have a job board like Simplify?', a: 'CLIFF surfaces a ranked feed of jobs matched to your background and goals — not 10,000 listings to scroll. It gives you a verdict on each (pursue / consider / skip) and the 3 best moves for today, so you apply to fewer jobs with higher hit rates.' },
+  { q: 'What’s CLIFF’s biggest advantage over Simplify?', a: 'Warm networking. Simplify has no way to connect you to a person at the company. CLIFF finds a parent or alum already in the network and drafts the intro — the single biggest lever for getting off the resume pile and into an interview.' },
+  { q: 'Is CLIFF free?', a: 'CLIFF is free for college students — resume tailoring for your first application, job verdicts, the application tracker, and Today’s Best Moves. CLIFF Pro is $19.96/month for unlimited tailoring, mock interviews, LinkedIn review, and warm networking.' },
 ];
 
 export default function VsSimplify() {
@@ -60,7 +60,7 @@ export default function VsSimplify() {
           <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>CLIFF gets you the intro.</span>
         </h1>
         <p style={{ fontFamily: INTER, fontSize: 'clamp(17px,3.5vw,20px)', color: TEXT2, lineHeight: 1.6, margin: '0 auto', maxWidth: 640 }}>
-          Simplify helps you apply to more jobs, faster. But more cold applications is the problem, not the solution. CLIFF picks the few worth applying to \u2014 and finds the person who can refer you.
+          Simplify helps you apply to more jobs, faster. But more cold applications is the problem, not the solution. CLIFF picks the few worth applying to — and finds the person who can refer you.
         </p>
         <a href="#/GetStarted" style={{ display: 'inline-block', marginTop: 28, fontFamily: SF, fontSize: 17, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, borderRadius: 14, padding: '16px 34px', textDecoration: 'none', boxShadow: '0 10px 30px rgba(109,40,217,0.32)' }}>Try CLIFF Free →</a>
       </section>
@@ -68,7 +68,7 @@ export default function VsSimplify() {
       {/* The moat */}
       <Section>
         <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px,5vw,30px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.02em', margin: '0 0 8px' }}>What only CLIFF does</h2>
-        <p style={{ fontFamily: INTER, fontSize: 16, color: TEXT2, margin: '0 0 24px' }}>The three things a job board can&rsquo;t do \u2014 because applying to more jobs isn&rsquo;t the bottleneck.</p>
+        <p style={{ fontFamily: INTER, fontSize: 16, color: TEXT2, margin: '0 0 24px' }}>The three things a job board can&rsquo;t do — because applying to more jobs isn&rsquo;t the bottleneck.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16 }}>
           {CLIFF_ONLY.map((w, i) => (
             <div key={i} style={{ background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: '22px 20px', boxShadow: SHADOW }}>

@@ -1,4 +1,17 @@
+# College Fast Forward — marketing pages are crawlable by default.
 User-agent: *
 Allow: /
+
+# Keep app, auth, and internal routes out of the index
+Disallow: /admin
+Disallow: /engagement-agent
+Disallow: /paywall-analytics
+Disallow: /jill-osinoff-dashboard
+Disallow: /company-intel
+Disallow: /cliff-chat
+Disallow: /cliff-scout
+Disallow: /action-plan-architect
+Disallow: /email-callback
+Disallow: /join
 
 Sitemap: https://collegefastforward.com/sitemap.xml
