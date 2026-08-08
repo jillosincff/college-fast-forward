@@ -22,7 +22,6 @@ import LinkedInReview from '@/pages/LinkedInReview';
 import CareerAssessment from '@/pages/CareerAssessment';
 import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
-import StudentWelcome from '@/pages/StudentWelcome';
 import SetSearchGoals from '@/pages/SetSearchGoals';
 import ApplicationTracker from '@/pages/ApplicationTracker';
 import EmailConnectionSettings from '@/pages/EmailConnectionSettings';
@@ -217,8 +216,8 @@ const AuthenticatedApp = () => {
 
       {/* Onboarding routes — no guard */}
       <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
-      <Route path="/GatorWelcome" element={<Navigate to="/StudentWelcome" replace />} />
-      <Route path="/StudentWelcome" element={<StudentWelcome />} />
+      <Route path="/GatorWelcome" element={<Navigate to="/GatorAuth" replace />} />
+      <Route path="/StudentWelcome" element={<Navigate to="/GatorAuth" replace />} />
       <Route path="/ParentWelcome" element={<Navigate to="/ParentAllSet" replace />} />
       <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
       <Route path="/ParentUpsell" element={<Navigate to="/ParentAllSet" replace />} />
