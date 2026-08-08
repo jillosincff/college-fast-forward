@@ -42,7 +42,7 @@ export default function GiftProCard() {
       textAlign: 'left', boxShadow: '0 16px 40px rgba(109,40,217,0.28)',
     }}>
       <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em', color: 'rgba(255,255,255,0.75)', margin: '0 0 10px' }}>
-        🎁 The most helpful thing you can do today
+        🎁 Want to go further?
       </p>
       <h2 style={{ fontFamily: SF, fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 8px', lineHeight: 1.2 }}>
         Give your student CLIFF Pro

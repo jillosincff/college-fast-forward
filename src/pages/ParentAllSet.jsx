@@ -135,11 +135,11 @@ export default function ParentAllSet() {
           </div>
         )}
 
-        {/* Highest-conversion moment: gift CLIFF Pro to their student */}
-        {!showGiftThanks && <GiftProCard />}
-
-        {/* Primary share — invite your own student */}
+        {/* Primary share — invite your own student (lowest-friction first step) */}
         <InviteStudentCard parentFirstName={firstName} />
+
+        {/* Optional upsell — gift CLIFF Pro once their student has the link */}
+        {!showGiftThanks && <GiftProCard />}
 
         {/* Secondary share — other parents */}
         <div style={{
