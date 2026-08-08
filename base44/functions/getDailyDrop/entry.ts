@@ -660,9 +660,10 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const dropDate = getDailyDropDate();
 
-    // ── Daily limit: free = 5 (matches UI copy + preserves scarcity), premium = 30 ──
+    // ── Daily limit: free = 3 (single source of truth: entitlements
+    //    daily_job_recommendations), premium = 30 ──
     const isPremium = checkIsFastIQ(user);
-    const dailyLimit = isPremium ? 30 : 5;
+    const dailyLimit = isPremium ? 30 : 3;
 
     // ALWAYS force refresh - no caching
     console.log(`[getDailyDrop] User: ${user.email}, dropDate: ${dropDate}`);

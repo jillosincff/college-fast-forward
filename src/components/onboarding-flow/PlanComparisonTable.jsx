@@ -2,7 +2,7 @@ const dm = "'DM Sans', system-ui, sans-serif";
 
 export default function PlanComparisonTable({ networkCount = 0 }) {
   const rows = [
-    ['Daily job matches', '5 per day', 'Unlimited'],
+    ['Daily job matches', '3 per day', 'Unlimited'],
     ['Warm connections', '1 unlocked', networkCount > 1 ? `All ${networkCount} + AI scout` : 'Unlimited + AI scout'],
     ['Resume tailoring', '1 instant, then 24h queue', 'Always instant'],
     ['AI outreach drafts', 'Drafts included', 'Drafts + automatic follow-ups'],

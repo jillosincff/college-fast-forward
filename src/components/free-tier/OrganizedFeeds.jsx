@@ -99,7 +99,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }, []);
 
   const PAGE_SIZE = 20;
-  const FREE_DAILY_LIMIT = 5;
+  const FREE_DAILY_LIMIT = 3;
   const FIRST_DAY_BONUS = 5;
   const PREMIUM_DAILY_LIMIT = 25;
   const [refreshKey, setRefreshKey] = useState(0);
