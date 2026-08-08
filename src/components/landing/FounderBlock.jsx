@@ -43,7 +43,7 @@ export default function FounderBlock() {
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <a
-                href="https://www.linkedin.com/search/results/all/?keywords=Jill%20Osinoff%20College%20Fast%20Forward"
+                href="https://www.linkedin.com/in/jillosinoff"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff', background: GRAD_INDIGO, borderRadius: 999, padding: '12px 24px', textDecoration: 'none', boxShadow: '0 8px 28px rgba(109,40,217,0.30)' }}
