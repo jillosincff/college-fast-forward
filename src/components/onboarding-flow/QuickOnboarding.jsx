@@ -8,6 +8,7 @@ import {
   INDIGO, INDIGO_DIM, INDIGO_BORDER, VIOLET, GRAD_INDIGO, SHADOW, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
 import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Loader2 } from 'lucide-react';
+import { trackOnboardingCompleted } from '@/lib/tracking';
 
 // Lean first-session onboarding for the Free → Paid conversion rebuild.
 // Collects ONLY what the Magic Moment needs: school, target role/industry,
@@ -99,6 +100,7 @@ export default function QuickOnboarding({ onDone }) {
         } : { resume_status: 'not_provided' }),
       });
       try { await refreshUser(); } catch (e) {}
+      trackOnboardingCompleted({ school: schoolValue, target_field: chips.join(', '), target_role: roleText.trim(), has_resume: !!resumeUrl });
       onDone?.();
     } catch (e) {
       setError('Something went wrong saving. Try again.');

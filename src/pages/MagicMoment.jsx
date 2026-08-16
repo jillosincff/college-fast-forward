@@ -10,6 +10,7 @@ import {
 import {
   Copy, Download, Linkedin, Save, Check, Loader2, Briefcase, Users, Mail, FileText, Lock, Sparkles,
 } from 'lucide-react';
+import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied, trackUpgradeModalViewed } from '@/lib/tracking';
 
 // The free Magic Moment — one complete plan cycle shown on a single screen:
 // a high-fit job, a tailored resume, real alumni at the company, and a
@@ -68,6 +69,11 @@ export default function MagicMoment() {
   useEffect(() => {
     if (!user || ranRef.current) return;
     ranRef.current = true;
+    trackMagicMomentStarted({
+      target_field: ((user.career_goals?.target_industries) || []).join(', '),
+      target_role: (user.career_goals?.target_roles || [])[0] || '',
+      school: user.school || '',
+    });
     (async () => {
       try {
         const cg = user.career_goals || {};
@@ -142,6 +148,12 @@ export default function MagicMoment() {
           } catch (e) { /* outreach best-effort */ }
         }
 
+        trackMagicMomentCompleted({
+          job_title: topJob?.job_title || '',
+          company: topJob?.name || '',
+          alumni_count: conns?.length || 0,
+          has_tailored_resume: !!tailored,
+        });
         setPhase(null);
       } catch (e) {
         setError('CLIFF hit a snag building your plan. Please try again in a moment.');
@@ -157,7 +169,7 @@ export default function MagicMoment() {
   const copyMessage = async () => {
     const text = outreach?.message || '';
     if (!text) return;
-    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch (e) {}
+    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); trackOutreachCopied({ company: job?.name || '', alumni: connections[0]?.name || '' }); } catch (e) {}
   };
   const openLinkedIn = () => {
     const top = connections[0];
@@ -310,7 +322,7 @@ export default function MagicMoment() {
         <div style={{ marginTop: 20, background: 'linear-gradient(135deg, #2e1065 0%, #4c1d95 100%)', borderRadius: R, padding: '22px 20px', textAlign: 'center', boxShadow: '0 12px 30px rgba(76,29,149,0.28)' }}>
           <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>This was your free cycle.</p>
           <p style={{ fontFamily: FONT, fontSize: 13.5, color: 'rgba(255,255,255,0.8)', margin: '0 0 16px', lineHeight: 1.5 }}>Unlock unlimited so CLIFF can run this plan for every job you actually want.</p>
-          <button onClick={() => navigate('/pricing')} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#4c1d95', background: '#fff', border: 'none', borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 18px rgba(0,0,0,0.18)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => { trackUpgradeModalViewed({ source: 'magic_moment', company: job?.name || '' }); navigate('/pricing'); }} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#4c1d95', background: '#fff', border: 'none', borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 18px rgba(0,0,0,0.18)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <Lock size={15} /> Unlock CLIFF Pro →
           </button>
         </div>
