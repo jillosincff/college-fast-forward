@@ -34,6 +34,7 @@ import StudentLandingPage from '@/pages/StudentLandingPage';
 import RegistrationSuccess from '@/pages/RegistrationSuccess';
 import VerifyEmail from '@/pages/VerifyEmail';
 import OnboardingQuestions from '@/pages/OnboardingQuestions';
+import MagicMoment from '@/pages/MagicMoment';
 
 import Profile from '@/pages/Profile';
 import ProfileEdit from '@/pages/ProfileEdit';
@@ -227,6 +228,7 @@ const AuthenticatedApp = () => {
           link dead-ended on the platform's generic "Thank you for joining" screen. */}
       <Route path="/VerifyEmail" element={<VerifyEmail />} />
       <Route path="/OnboardingQuestions" element={<OnboardingQuestions />} />
+      <Route path="/MagicMoment" element={<MagicMoment />} />
       <Route path="/SetSearchGoals" element={<SetSearchGoals />} />
 
       {/* Guarded dashboard routes */}

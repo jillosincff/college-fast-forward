@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Loader2 } from 'lucide-react';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
+import QuickOnboarding from '@/components/onboarding-flow/QuickOnboarding';
 import OtpVerifyForm from '@/components/auth/OtpVerifyForm';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 import { buildLocationMemories } from '@/lib/locationPrefs';
@@ -488,10 +489,19 @@ export default function GatorAuth() {
       // Full reload so the auth context re-fetches the now-onboarded user —
       // otherwise OnboardingGuard sees the stale (no persona) user and loops
       // the student back to onboarding screen 1.
-      window.location.hash = '#/FreeTierDashboard';
+      window.location.hash = '#/MagicMoment';
       window.location.reload();
     };
-    return <OnboardingFlow postAuth={true} onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} resumeAtScreen={null} />;
+    // Lean Free→Paid conversion flow: QuickOnboarding already persisted persona +
+    // goals + resume, so the done handler only clears flags and routes to the
+    // Magic Moment. (The old OnboardingFlow path re-persisted goals from
+    // localStorage — which would wipe what QuickOnboarding just saved.)
+    const handleQuickOnboardingDone = async () => {
+      try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); localStorage.removeItem('cff_onboarding_screen'); localStorage.removeItem('cff_funnel_completed'); } catch (e) {}
+      window.location.hash = '#/MagicMoment';
+      window.location.reload();
+    };
+    return <QuickOnboarding onDone={handleQuickOnboardingDone} />;
   }
 
   if (step === 'auth') {
