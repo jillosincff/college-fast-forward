@@ -6,6 +6,7 @@ import { navigate } from '@/components/utils/navigation';
 import ColdInroadScout from '@/components/free-tier/ColdInroadScout';
 import AutomatedAlumniActionPanel from '@/components/free-tier/AutomatedAlumniActionPanel';
 import { findPipelineMatch } from '@/components/pipeline/findPipelineMatch';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
 
 const CONTEXTS = [
   { id: 'alumni_search', label: 'Alumni Outreach', icon: '🔍', desc: 'Reaching out to a UF alumni you found' },
@@ -141,6 +142,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               jobDescription: formData.jobDescription,
               conversationContext: formData.conversationContext,
             });
+            if (res?.data?.upgrade_required) { setShowSoftWall(true); setPhase('form'); return; }
             const msg = res?.data?.message || '';
             setGeneratedMessage(msg);
             setEditedMessage(msg);
@@ -175,6 +177,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   const [copyToast, setCopyToast] = useState(null);
   const [followUpDraft, setFollowUpDraft] = useState(null);
   const [followUpMessage, setFollowUpMessage] = useState('');
+  const [showSoftWall, setShowSoftWall] = useState(false);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
 
@@ -227,6 +230,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         jobDescription: form.jobDescription,
         conversationContext: form.conversationContext,
       });
+      if (res?.data?.upgrade_required) { setShowSoftWall(true); setGenerating(false); return; }
       const msg = res?.data?.message || '';
       setGeneratedMessage(msg);
       setEditedMessage(msg);
@@ -395,6 +399,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         school: user?.school_name || 'University of Florida',
         conversationContext: `This is a follow-up to a message sent 5 days ago that hasn't received a reply yet. Original message: "${draft.message?.slice(0, 200)}"`,
       });
+      if (res?.data?.upgrade_required) { setShowSoftWall(true); setGenerating(false); return; }
       setFollowUpMessage(res?.data?.message || '');
       setPhase('followup');
     } catch (e) {
@@ -475,6 +480,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         jobUrl: form.jobUrl || '',
         conversationContext: form.conversationContext || `Cold outreach for a role at ${scoutResult.company || form.recipientCompany}`,
       });
+      if (res?.data?.upgrade_required) { setShowSoftWall(true); setGenerating(false); return; }
       const msg = res?.data?.message || '';
       setGeneratedMessage(msg);
       setEditedMessage(msg);
@@ -501,24 +507,13 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     color: '#888', display: 'block', marginBottom: 6,
   };
 
-  // FastIQ gate — only show when embedded as a component (onOpenUpgrade provided), not as a standalone page route
-  if (!isFastIQ && phase === 'list' && typeof onOpenUpgrade === 'function') {
-    const handleTryTrial = async () => {
-      const activated = await maybeActivateTrial(user);
-      if (!activated) onOpenUpgrade?.();
-    };
-    return (
-      <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 24px' }}>✉️</div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Outreach Drafts</h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Draft AI-written messages for any outreach context, track who you've contacted, and get follow-up nudges 5 days after sending.
-        </p>
-        <button onClick={handleTryTrial} style={{ background: '#1e3a5f', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-          Start Free 7-Day Trial →
-        </button>
-      </div>
-    );
+  // Soft wall: outreach drafts are a Pro feature (free only during the Magic Moment).
+  if (!isFastIQ) {
+    return <SoftWallModal user={user} onClose={() => navigate('FreeTierDashboard')} source="outreach" />;
+  }
+
+  if (showSoftWall) {
+    return <SoftWallModal user={user} onClose={() => { setShowSoftWall(false); setPhase('list'); }} source="outreach" />;
   }
 
   // Follow-up nudge banner — plain JSX variable (not a component) to avoid remount on every render

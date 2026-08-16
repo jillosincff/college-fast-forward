@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
 
 function SideNav() {
   const NAV = [
@@ -70,6 +71,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [analysis, setAnalysis] = useState(null);
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState('');
+  const [showSoftWall, setShowSoftWall] = useState(false);
 
   const handleReview = async () => {
     if (!url.trim()) return;
@@ -82,6 +84,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
         careerGoals: user?.career_goals,
         major: user?.major,
       });
+      if (res?.data?.upgrade_required) { setShowSoftWall(true); setLoading(false); return; }
       if (res?.data?.success) {
         const analysisData = res.data.analysis?.response || res.data.analysis;
         setAnalysis(analysisData);
@@ -100,18 +103,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
   };
 
   if (!isFastIQ) {
-    return (
-      <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#E8F4FD', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 24px' }}>🔗</div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>LinkedIn Profile Review</h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Paste your LinkedIn URL and CLIFF will score every section of your profile against your target role — with specific rewrites for your headline, about section, and more.
-        </p>
-        <button onClick={() => onOpenUpgrade()} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-          Unlock CLIFF →
-        </button>
-      </div>
-    );
+    return <SoftWallModal user={user} onClose={() => navigate('FreeTierDashboard')} source="linkedin_review" />;
   }
 
   return (
@@ -297,6 +289,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
         </div>
       )}
       </div>
+      {showSoftWall && <SoftWallModal user={user} onClose={() => setShowSoftWall(false)} source="linkedin_review" />}
     </div>
   );
 }

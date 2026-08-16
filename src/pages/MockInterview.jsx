@@ -6,6 +6,7 @@ import { navigate } from '@/components/utils/navigation';
 import PostTrialUpgradePrompt from '@/components/free-tier/PostTrialUpgradePrompt';
 import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
 
 function TopNav() {
   return null;
@@ -160,33 +161,9 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
     setLoading(false);
   };
 
-  // Trial expired gate
-  if (trialExpired) {
-    return (
-      <>
-        <TopNav />
-        <PostTrialUpgradePrompt message="Practice AI mock interviews, get STAR method feedback, and sharpen your answers." />
-      </>
-    );
-  }
-
-  // FastIQ gate
-  if (!isFastIQ) {
-    return (
-      <>
-        <TopNav />
-        <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 24px' }}>🎤</div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Mock Interview</h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Practice with an AI interviewer that knows your target role and gives real STAR method feedback. FastIQ only.
-        </p>
-        <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
-          Unlock FastIQ to Practice →
-        </button>
-      </div>
-      </>
-    );
+  // Soft wall: mock interviews are a Pro feature (free only during the Magic Moment).
+  if (!isFastIQ || trialExpired) {
+    return <SoftWallModal user={user} onClose={() => navigate('FreeTierDashboard')} source="mock_interview" />;
   }
 
   // Pre-start screen

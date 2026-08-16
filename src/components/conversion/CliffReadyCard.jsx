@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { getCliffReadiness } from '@/functions/getCliffReadiness';
-import CliffProPaywall from '@/components/pro/CliffProPaywall';
+import { useAuth } from '@/lib/AuthContext';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 const device = () => (window.innerWidth < 768 ? 'mobile' : 'desktop');
@@ -12,6 +13,7 @@ const device = () => (window.innerWidth < 768 ? 'mobile' : 'desktop');
 export default function CliffReadyCard({ job }) {
   const [data, setData] = useState(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!job?.company) return;
@@ -73,12 +75,8 @@ export default function CliffReadyCard({ job }) {
         Let CLIFF Prepare It
       </button>
 
-      {showPaywall && (
-        <CliffProPaywall
-          trigger="cliff_ready_card"
-          contextLine={`I've already assessed the ${job.company} opportunity — I know exactly what I'd do.`}
-          onClose={() => setShowPaywall(false)}
-        />
+      {showPaywall && user && (
+        <SoftWallModal user={user} onClose={() => setShowPaywall(false)} source="cliff_ready_card" />
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -21,7 +22,13 @@ Deno.serve(async (req) => {
     jobUrl,
     conversationContext,
     isLinkedInRoute,
+    magic_moment,
   } = await req.json();
+
+  // Soft wall: outreach drafts are a Pro feature (free only during the Magic Moment).
+  if (!(await canRunGated(base44, user, magic_moment))) {
+    return Response.json({ success: false, error: SOFT_WALL_MESSAGE, upgrade_required: true });
+  }
 
   const schoolAbbrev = school || 'UF';
   const firstName = (studentName || '').split(' ')[0] || studentName;
