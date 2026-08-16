@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
 
 // The free Magic Moment — one complete plan cycle shown on a single screen:
 // a high-fit job, a tailored resume, real alumni at the company, and a
@@ -66,6 +67,7 @@ export default function MagicMoment() {
   const [outreach, setOutreach] = useState(null);
   const [copied, setCopied] = useState(false);
   const [showPro, setShowPro] = useState(false);
+  const [showSoftWall, setShowSoftWall] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -126,7 +128,8 @@ export default function MagicMoment() {
         setPhase(`Surfacing alumni at ${topJob.name}…`);
         let conns = [];
         try {
-          const connRes = await base44.functions.invoke('findWorkspaceConnections', { companyName: topJob.name });
+          const connRes = await base44.functions.invoke('findWorkspaceConnections', { companyName: topJob.name, magic_moment: true });
+          if (connRes?.data?.upgrade_required || connRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
           conns = connRes?.data?.connections || connRes?.connections || [];
           setConnections(conns.slice(0, 3));
         } catch (e) { /* alumni search best-effort */ }
@@ -145,11 +148,14 @@ export default function MagicMoment() {
               alumniName: top.name,
               alumniTitle: top.role_title || '',
               alumniCompany: topJob.name,
+              magic_moment: true,
             });
+            if (outRes?.data?.upgrade_required || outRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
             setOutreach(outRes?.data || outRes);
           } catch (e) { /* outreach best-effort */ }
         }
 
+        base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
         trackMagicMomentCompleted({
           job_title: topJob?.job_title || '',
           company: topJob?.name || '',
@@ -330,6 +336,7 @@ export default function MagicMoment() {
         </div>
       </div>
       {showPro && <ProUpgradeModal user={user} onClose={() => setShowPro(false)} source="magic_moment" />}
+      {showSoftWall && <SoftWallModal user={user} onClose={() => setShowSoftWall(false)} source="soft_wall" />}
     </div>
   );
 }

@@ -234,9 +234,11 @@ Return as JSON.`;
     // Consumed only now: the tailored resume completed and is about to be shown.
     if (isFreeMagicMoment) {
       if (reservedPlan) {
+        // Keep the magic moment reserved (in_progress) so the rest of the free
+        // cycle (alumni + outreach) still clears the soft-wall gate. The cycle
+        // is marked 'completed' once, at the end, by completeMagicMoment.
         await base44.asServiceRole.entities.UserAccessPlan.update(reservedPlan.id, {
-          magic_moment_status: 'completed',
-          magic_moment_completed_at: new Date().toISOString(),
+          magic_moment_status: 'in_progress',
           magic_moment_job_id: tailoredResume.id,
         }).catch(() => {});
         reservedPlan = null;

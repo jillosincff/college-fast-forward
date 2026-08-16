@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -6,16 +7,11 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { action, sessionId, interviewType, difficulty, companyName, jobTitle, questionCount, questionIndex, studentResponse } = await req.json();
+    const { action, sessionId, interviewType, difficulty, companyName, jobTitle, questionCount, questionIndex, studentResponse, magic_moment } = await req.json();
 
-    // Server-side trial enforcement
-    const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active';
-    if (trialExpired) {
-      return Response.json({
-        success: false,
-        error: 'Upgrade to FastIQ to access mock interviews.',
-        upgrade_required: true,
-      });
+    // Soft wall: mock interviews are a Pro feature (free only during the Magic Moment).
+    if (!(await canRunGated(base44, user, magic_moment))) {
+      return Response.json({ success: false, error: SOFT_WALL_MESSAGE, upgrade_required: true });
     }
 
     // ACTION: generate — create questions for a new interview

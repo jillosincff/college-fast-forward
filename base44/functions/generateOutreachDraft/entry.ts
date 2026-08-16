@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 import Anthropic from 'npm:@anthropic-ai/sdk@0.27.3';
+import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
 
 const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
@@ -20,16 +21,11 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { studentName, major, targetRole, graduationYear, school, alumniName, alumniTitle, alumniCompany } = await req.json();
+    const { studentName, major, targetRole, graduationYear, school, alumniName, alumniTitle, alumniCompany, magic_moment } = await req.json();
 
-    // Server-side trial enforcement — never trust client
-    const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active';
-    if (trialExpired) {
-      return Response.json({
-        success: false,
-        error: 'Your FastIQ trial has ended. Upgrade to continue drafting messages.',
-        upgrade_required: true,
-      });
+    // Soft wall: outreach drafts are a Pro feature (free only during the Magic Moment).
+    if (!(await canRunGated(base44, user, magic_moment))) {
+      return Response.json({ success: false, error: SOFT_WALL_MESSAGE, upgrade_required: true });
     }
 
     const schoolLabel = user.school_name || user.school || school || '';

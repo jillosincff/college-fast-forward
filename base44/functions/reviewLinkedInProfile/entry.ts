@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
 
 const extractLinkedInId = (url) => {
   const match = url.match(/linkedin\.com\/in\/([^\/\?]+)/);
@@ -11,7 +12,12 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { linkedinUrl, careerGoals, major } = await req.json();
+    const { linkedinUrl, careerGoals, major, magic_moment } = await req.json();
+
+    // Soft wall: full LinkedIn review is a Pro feature (free only during the Magic Moment).
+    if (!(await canRunGated(base44, user, magic_moment))) {
+      return Response.json({ success: false, error: SOFT_WALL_MESSAGE, upgrade_required: true });
+    }
     if (!linkedinUrl) return Response.json({ success: false, error: 'LinkedIn URL is required.' }, { status: 400 });
 
     // DEBUG LOGS

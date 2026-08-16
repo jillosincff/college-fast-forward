@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
 
 // Ordered, permission-respecting connection search for the CLIFF Job Workspace.
 // Search order: (1) own-school parents/helpers, (2) cached school alumni found via
@@ -11,7 +12,12 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { companyName } = await req.json().catch(() => ({}));
+    const { companyName, magic_moment } = await req.json().catch(() => ({}));
+
+    // Soft wall: alumni matches are a Pro feature (free only during the Magic Moment).
+    if (!(await canRunGated(base44, user, magic_moment))) {
+      return Response.json({ connections: [], recommended: null, upgrade_required: true, message: SOFT_WALL_MESSAGE });
+    }
     const norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const target = norm(companyName);
     if (!target) return Response.json({ connections: [], recommended: null });
