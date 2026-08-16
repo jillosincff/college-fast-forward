@@ -72,35 +72,13 @@ Deno.serve(async (req) => {
       }
 
       if (!isFreeMagicMoment) {
-        // Not first freebie — queue it for 24 hours
-        const availableAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-        const pendingRecord = await base44.entities.TailoredResume.create({
-          user_email: user.email,
-          source_resume_id: sourceResumeId || '',
-          company_name: companyName || '',
-          role_title: jobTitle || '',
-          job_description_text: jobDescription.substring(0, 5000),
-          tailored_content: '',
-          changes: [],
-          original_score: 0,
-          ats_score: 0,
-          keywords_added: [],
-          keywords_missing: [],
-          status: 'pending',
-          available_at: availableAt,
-          resume_text_snapshot: resumeText.substring(0, 6000),
-        });
-
+        // No 24-hour queue — the free cycle is one-time. Any further tailoring
+        // hits the hard paywall; the client shows the upgrade modal.
         return Response.json({
-          success: true,
-          queued: true,
-          available_at: availableAt,
-          pending_id: pendingRecord.id,
-          role_title: jobTitle || '',
-          company_name: companyName || '',
-          message: 'Your resume is in the batch queue. Expected in ~24 hours.',
-        });
+          success: false,
+          upgrade_required: true,
+          message: "That was your free cycle. Upgrade to CLIFF Pro to tailor your resume for every job.",
+        }, { status: 402 });
       }
 
       // Reserve the magic moment so duplicate clicks can't start two free workflows.

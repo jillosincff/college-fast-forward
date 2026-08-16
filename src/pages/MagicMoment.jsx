@@ -10,7 +10,8 @@ import {
 import {
   Copy, Download, Linkedin, Save, Check, Loader2, Briefcase, Users, Mail, FileText, Lock, Sparkles,
 } from 'lucide-react';
-import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied, trackUpgradeModalViewed } from '@/lib/tracking';
+import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied } from '@/lib/tracking';
+import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 
 // The free Magic Moment — one complete plan cycle shown on a single screen:
 // a high-fit job, a tailored resume, real alumni at the company, and a
@@ -64,6 +65,7 @@ export default function MagicMoment() {
   const [connections, setConnections] = useState([]);
   const [outreach, setOutreach] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [showPro, setShowPro] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -322,11 +324,12 @@ export default function MagicMoment() {
         <div style={{ marginTop: 20, background: 'linear-gradient(135deg, #2e1065 0%, #4c1d95 100%)', borderRadius: R, padding: '22px 20px', textAlign: 'center', boxShadow: '0 12px 30px rgba(76,29,149,0.28)' }}>
           <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>This was your free cycle.</p>
           <p style={{ fontFamily: FONT, fontSize: 13.5, color: 'rgba(255,255,255,0.8)', margin: '0 0 16px', lineHeight: 1.5 }}>Unlock unlimited so CLIFF can run this plan for every job you actually want.</p>
-          <button onClick={() => { trackUpgradeModalViewed({ source: 'magic_moment', company: job?.name || '' }); navigate('/pricing'); }} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#4c1d95', background: '#fff', border: 'none', borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 18px rgba(0,0,0,0.18)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => setShowPro(true)} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#4c1d95', background: '#fff', border: 'none', borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 18px rgba(0,0,0,0.18)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <Lock size={15} /> Unlock CLIFF Pro →
           </button>
         </div>
       </div>
+      {showPro && <ProUpgradeModal user={user} onClose={() => setShowPro(false)} source="magic_moment" />}
     </div>
   );
 }

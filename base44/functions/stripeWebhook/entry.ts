@@ -211,6 +211,16 @@ Deno.serve(async (req) => {
             school_code: billingUser.school_name || billingUser.school || '',
             properties: { plan: plan || subscriptionTier, is_founding: isFoundingMember, persona: billingUser.persona || '' },
           }).catch(() => {});
+          // Canonical conversion event — student self-pay activation.
+          if (!giftStudentEmail) {
+            base44.asServiceRole.entities.AnalyticsEvent.create({
+              event_name: 'pro_activated',
+              user_id: billingUser.id,
+              user_email: billingUser.email,
+              school_code: billingUser.school_name || billingUser.school || '',
+              properties: { plan: plan || subscriptionTier, source: 'self_pay' },
+            }).catch(() => {});
+          }
 
           if (isFoundingMember) {
             try {
@@ -374,6 +384,19 @@ Deno.serve(async (req) => {
                 pro_gift_subscription_id: subscriptionId,
               });
               console.log('[stripeWebhook] CLIFF Pro gifted to student:', giftStudentEmail);
+              // Canonical conversion events — parent paid + student upgraded.
+              base44.asServiceRole.entities.AnalyticsEvent.create({
+                event_name: 'parent_payment_completed',
+                user_id: giftStudent.id,
+                user_email: giftStudent.email,
+                properties: { parent_email: billingUser?.email || '', source: 'parent_invite' },
+              }).catch(() => {});
+              base44.asServiceRole.entities.AnalyticsEvent.create({
+                event_name: 'pro_activated',
+                user_id: giftStudent.id,
+                user_email: giftStudent.email,
+                properties: { source: 'parent_gift' },
+              }).catch(() => {});
 
               try {
                 await base44.asServiceRole.integrations.Core.SendEmail({
