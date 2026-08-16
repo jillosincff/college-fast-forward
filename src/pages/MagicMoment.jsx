@@ -10,7 +10,7 @@ import {
 import {
   Copy, Download, Linkedin, Save, Check, Loader2, Briefcase, Users, Mail, FileText, Lock, Sparkles,
 } from 'lucide-react';
-import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied } from '@/lib/tracking';
+import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied, markMagicMomentCompleted } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import SoftWallModal from '@/components/conversion/SoftWallModal';
 
@@ -162,6 +162,7 @@ export default function MagicMoment() {
           alumni_count: conns?.length || 0,
           has_tailored_resume: !!tailored,
         });
+        markMagicMomentCompleted();
         setPhase(null);
       } catch (e) {
         setError('CLIFF hit a snag building your plan. Please try again in a moment.');

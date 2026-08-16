@@ -1,14 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FONT, TEXT, TEXT2, INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO,
 } from '@/components/onboarding-flow/onboardingShared';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
+import { trackSoftWallViewed, trackSoftWallUpgradeClicked } from '@/lib/tracking';
 import { X, Lock, Gift } from 'lucide-react';
 
 // Compact soft-wall sheet shown when a free user tries a gated action outside
 // the one-time Magic Moment. Both buttons open the existing hard paywall.
 export default function SoftWallModal({ user, onClose, source = 'soft_wall' }) {
   const [showPro, setShowPro] = useState(false);
+
+  useEffect(() => { trackSoftWallViewed({ source }); }, []);
+
+  const goPro = (cta) => { trackSoftWallUpgradeClicked({ source, cta }); setShowPro(true); };
+
   if (showPro) {
     return <ProUpgradeModal user={user} onClose={onClose} source={source} />;
   }
@@ -24,10 +30,10 @@ export default function SoftWallModal({ user, onClose, source = 'soft_wall' }) {
           </div>
           <h1 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, margin: '0 0 6px' }}>You've used your free cycle.</h1>
           <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 22px', lineHeight: 1.5 }}>Unlock CLIFF Pro to keep running the plan.</p>
-          <button onClick={() => setShowPro(true)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '15px', cursor: 'pointer', boxShadow: '0 6px 18px rgba(109,40,217,0.32)', marginBottom: 10 }}>
+          <button onClick={() => goPro('upgrade')} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '15px', cursor: 'pointer', boxShadow: '0 6px 18px rgba(109,40,217,0.32)', marginBottom: 10 }}>
             Upgrade to Pro
           </button>
-          <button onClick={() => setShowPro(true)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '14px', cursor: 'pointer' }}>
+          <button onClick={() => goPro('parent')} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '14px', cursor: 'pointer' }}>
             <Gift size={15} color={INDIGO} /> Send to a parent
           </button>
         </div>
