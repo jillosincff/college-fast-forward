@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
 
 /**
  * Verify that an Exa people-search result represents someone who actually
@@ -58,7 +59,12 @@ Deno.serve(async (req) => {
       }, { status: 401 });
     }
 
-    const { jobId, companyName, cacheOnly } = await req.json().catch(() => ({}));
+    const { jobId, companyName, cacheOnly, magic_moment } = await req.json().catch(() => ({}));
+
+    // Soft wall: surfacing people at a target company is a Pro feature (free only during the Magic Moment).
+    if (!(await canRunGated(base44, user, magic_moment))) {
+      return Response.json({ success: false, upgrade_required: true, message: SOFT_WALL_MESSAGE, alumni: [], connectionsCount: 0 });
+    }
 
     if (!jobId || !companyName) {
       return Response.json({ 

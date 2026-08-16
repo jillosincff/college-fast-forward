@@ -4,6 +4,7 @@ import { findParentsAtCompany } from '@/functions/findParentsAtCompany';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { Users, Copy, Check, Loader2, FileText, ClipboardList } from 'lucide-react';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const isUrl = (s) => /^https?:\/\//i.test((s || '').trim());
@@ -30,6 +31,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
 
   const [tracking, setTracking] = useState(false);
   const [trackError, setTrackError] = useState('');
+  const [showSoftWall, setShowSoftWall] = useState(false);
 
   const school = (user?.school_code || 'your school').toUpperCase();
   const firstName = user?.full_name?.split(' ')[0] || '';
@@ -59,6 +61,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
     try {
       const res = await findParentsAtCompany({ companyName: company.trim() });
       const data = res?.data || res;
+      if (data?.upgrade_required) { setShowSoftWall(true); setSearching(false); return; }
       found = data?.parents || [];
     } catch {}
     // 2) Fallback: the AI alumni scout (same engine the feed cards use)
@@ -67,6 +70,7 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
       try {
         const res = await scoutCompanyBackdoor({ jobId: company.trim(), companyName: company.trim() });
         const data = res?.data || res;
+        if (data?.upgrade_required) { setShowSoftWall(true); setSearching(false); return; }
         found = (data?.alumni || []).slice(0, 5).map(a => ({
           name: a.name,
           role_title: a.role_title || null,
@@ -160,6 +164,10 @@ export default function WarmApplyFlow({ rawInput, job, user, onClose, applyOnly 
     onClose();
     window.location.hash = `#/ResumeTailoring?${params.toString()}`;
   };
+
+  if (showSoftWall) {
+    return <SoftWallModal user={user} onClose={() => { setShowSoftWall(false); onClose(); }} source="warm_apply" />;
+  }
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(3px)', zIndex: 60000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={onClose}>

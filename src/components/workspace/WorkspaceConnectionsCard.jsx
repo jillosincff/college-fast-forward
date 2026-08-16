@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { findWorkspaceConnections } from '@/functions/findWorkspaceConnections';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 const card = { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', marginBottom: 16 };
@@ -43,6 +44,7 @@ export default function WorkspaceConnectionsCard({ job, user }) {
   const [showAll, setShowAll] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const [showSoftWall, setShowSoftWall] = useState(false);
 
   const company = job.company || '';
   const role = job.role || job.job_title || '';
@@ -53,7 +55,9 @@ export default function WorkspaceConnectionsCard({ job, user }) {
     findWorkspaceConnections({ companyName: company })
       .then(res => {
         const data = res?.data || res;
-        if (!cancelled) setConnections(data?.connections || []);
+        if (cancelled) return;
+        if (data?.upgrade_required) { setShowSoftWall(true); }
+        else setConnections(data?.connections || []);
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -66,6 +70,7 @@ export default function WorkspaceConnectionsCard({ job, user }) {
     try {
       const res = await scoutCompanyBackdoor({ jobId: company, companyName: company });
       const data = res?.data || res;
+      if (data?.upgrade_required) { setShowSoftWall(true); setScanning(false); return; }
       const found = (data?.alumni || []).map(a => ({
         tier: 4, source: 'external', name: a.name, role_title: a.role_title,
         linkedin_url: a.linkedin_url || null, persona: 'alumni',
@@ -135,6 +140,7 @@ export default function WorkspaceConnectionsCard({ job, user }) {
         </div>
       )}
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+      {showSoftWall && user && <SoftWallModal user={user} onClose={() => setShowSoftWall(false)} source="workspace_connections" />}
     </div>
   );
 }
