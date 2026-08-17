@@ -73,6 +73,19 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
           Draft my intro <ArrowRight size={14} />
         </button>
       </div>
+      {total_pool > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 12, paddingTop: 10, borderTop: '1px solid #ede9fe' }}>
+          <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
+            1 of <strong style={{ color: '#4f46e5' }}>{total_pool}</strong> warm connections in your network
+          </p>
+          <button
+            onClick={() => onUpgrade?.()}
+            style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6d28d9', background: 'none', border: 'none', padding: 0, cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 3 }}
+          >
+            Unlock the rest <ArrowRight size={11} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

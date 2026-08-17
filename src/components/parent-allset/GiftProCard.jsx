@@ -131,7 +131,10 @@ export default function GiftProCard() {
           {error}
         </p>
       )}
-      <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: '12px 0 0', lineHeight: 1.5 }}>
+      <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.92)', margin: '14px 0 0', lineHeight: 1.5 }}>
+        🔒 Founding family pricing — this rate locks in while your student is still in school.
+      </p>
+      <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: '10px 0 0', lineHeight: 1.5 }}>
         Haven't they signed up yet? No problem — Pro activates automatically when they join with this email.
       </p>
     </div>

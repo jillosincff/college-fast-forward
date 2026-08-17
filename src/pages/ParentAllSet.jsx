@@ -145,17 +145,8 @@ export default function ParentAllSet() {
         {/* Optional upsell — gift CLIFF Pro once their student has the link */}
         {!showGiftThanks && <GiftProCard />}
 
-        {/* Secondary share — other parents */}
-        <div style={{
-          background: 'transparent', border: `1px solid ${INDIGO_BORDER}`,
-          borderRadius: 14, padding: '16px 18px', marginBottom: 28,
-        }}>
-          <p style={{
-            fontFamily: SF, fontSize: 13.5, color: TEXT2,
-            margin: '0 0 10px', lineHeight: 1.6, fontWeight: 500,
-          }}>
-            Know another parent who'd want to help? Every parent makes the network stronger.
-          </p>
+        {/* Tertiary share — other parents (demoted; no border/card, text link only) */}
+        <div style={{ marginTop: 8, marginBottom: 28, paddingTop: 20, borderTop: `1px solid ${INDIGO_BORDER}` }}>
           <button
             onClick={() => {
               navigator.clipboard.writeText('https://collegefastforward.com');
@@ -163,13 +154,13 @@ export default function ParentAllSet() {
               setTimeout(() => setCopied(false), 2500);
             }}
             style={{
-              fontFamily: SF, fontSize: 13.5, fontWeight: 700,
-              color: INDIGO, background: 'transparent', border: 'none',
+              fontFamily: SF, fontSize: 13, fontWeight: 500,
+              color: TEXT3, background: 'transparent', border: 'none',
               padding: 0, cursor: 'pointer', minHeight: 'auto',
               touchAction: 'manipulation',
             }}
           >
-            {copied ? '✓ Link copied!' : 'Share with other parents →'}
+            {copied ? '✓ Link copied' : "Know another parent who'd want to help? Share →"}
           </button>
         </div>
 
