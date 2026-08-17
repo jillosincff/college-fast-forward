@@ -36,8 +36,13 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
     let t = (parent.role_title || '').trim();
     if (!t) return '';
     t = t.replace(/^i\s*am\s+(a|an|the)\s+/i, '').replace(/^i'm\s+(a|an|the)\s+/i, '').replace(/^i\s+have\s+/i, '');
-    t = t.split(/[.\n;]| — | – | \| | at /i)[0].trim();
-    if (t.length > 42) t = t.slice(0, 41).trim() + '…';
+    // Cut at the first natural break — title ends at "at", "and", a line break, etc.
+    t = t.split(/[.\n;]| — | – | \| | at | and /i)[0].trim();
+    if (t.length > 38) {
+      const cut = t.slice(0, 38);
+      const lastSpace = cut.lastIndexOf(' ');
+      t = (lastSpace > 18 ? cut.slice(0, lastSpace) : cut).trim() + '…';
+    }
     return t;
   })();
   return (
@@ -55,10 +60,10 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
             <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#16a34a', background: '#dcfce7', padding: '2px 6px', borderRadius: 999, letterSpacing: '0.04em' }}>FREE</span>
           </p>
           <p style={{ fontFamily: dm, fontSize: 12, color: '#4b5563', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {hasRealTitle && shortRole ? <>{shortRole} · </> : null}<strong style={{ color: '#111827' }}>{parent.company_name}</strong>
+            {school_code} parent{hasRealTitle && shortRole ? ` · ${shortRole}` : ''}
           </p>
           <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
-            {school_code} parent network
+            Works at <strong style={{ color: '#111827' }}>{parent.company_name}</strong>
           </p>
         </div>
         <button
