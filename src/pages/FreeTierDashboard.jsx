@@ -348,8 +348,8 @@ export default function FreeTierDashboard() {
         {/* 6. Longer-horizon context — below the day's work */}
         {!isTrialExpired && !focusMode && (
           <>
-            <CareerSeasonCard user={user} />
             <CliffTimeline user={user} />
+            <CareerSeasonCard user={user} />
           </>
         )}
       </div>
