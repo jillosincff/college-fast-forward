@@ -50,6 +50,7 @@ export default function MinimalOnboarding({ onClose }) {
   const [city, setCity] = useState('');
   const [locChips, setLocChips] = useState([]);
   const [resumeUrl, setResumeUrl] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
   const [resumeName, setResumeName] = useState('');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -94,6 +95,7 @@ export default function MinimalOnboarding({ onClose }) {
         localStorage.setItem('cff_resume_status', 'not_provided');
         localStorage.setItem('cff_resume_skipped', 'true');
       }
+      if (linkedinUrl.trim()) localStorage.setItem('cff_linkedin_url', linkedinUrl.trim());
     } catch (e) {}
 
     // If already authenticated, finalize in-place and go straight to the Magic Moment.
@@ -108,6 +110,7 @@ export default function MinimalOnboarding({ onClose }) {
           career_goals: buildCareerGoalsFromOnboarding({ seeking: 'both', industries: chips, targetRoles, location: locationForGoals }),
           ...(locationForGoals ? { location: isRemote ? 'Remote' : locationForGoals } : {}),
           ...(resumeUrl ? { resume_url: resumeUrl, resume_file_url: resumeUrl, resume_uploaded_at: new Date().toISOString(), resume_status: 'provided' } : { resume_status: 'not_provided' }),
+          ...(linkedinUrl.trim() ? { linkedin_url: linkedinUrl.trim() } : {}),
         });
       } catch (e) {}
       window.location.hash = '#/MagicMoment';
@@ -251,6 +254,12 @@ export default function MinimalOnboarding({ onClose }) {
                 <button onClick={() => { setResumeUrl(''); setResumeName(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', color: TEXT3 }}><X size={16} /></button>
               </div>
             )}
+
+            <div style={{ margin: '14px 0 0' }}>
+              <label style={labelStyle}>Or paste your LinkedIn URL</label>
+              <input type="url" value={linkedinUrl} placeholder="linkedin.com/in/you"
+                onChange={(e) => setLinkedinUrl(e.target.value)} style={inputStyle} />
+            </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 28 }}>
               <button onClick={() => setStep(2)} style={{ ...chipBtn(false), flex: '0 0 auto' }}>← Back</button>

@@ -270,6 +270,7 @@ export default function GatorAuth() {
             try { goalIndustries = JSON.parse(localStorage.getItem('cff_industries') || '[]'); } catch (e) {}
             try { goalRoles = JSON.parse(localStorage.getItem('cff_target_roles') || '[]'); } catch (e) {}
             const goalLocation = localStorage.getItem('cff_location') || '';
+            const linkedinUrl = localStorage.getItem('cff_linkedin_url') || '';
             await base44.auth.updateMe({
               persona: 'student',
               roles: ['student'],
@@ -291,6 +292,7 @@ export default function GatorAuth() {
                 location: goalLocation,
               }),
               ...(goalLocation ? { location: goalLocation === 'remote' ? 'Remote' : goalLocation } : {}),
+              ...(linkedinUrl ? { linkedin_url: linkedinUrl } : {}),
             });
             // The funnel parsed their resume before sign-in — persist it now that
             // there's an account to attach it to, or CLIFF has nothing to tailor.

@@ -153,7 +153,16 @@ export default function MagicMoment() {
           });
           if (outRes?.data?.upgrade_required || outRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
           setOutreach({ ...(outRes?.data || outRes), cold: !hasAlumni });
-        } catch (e) { /* outreach best-effort */ }
+        } catch (e) {
+          // Graceful fallback — never leave the user with an empty outreach block.
+          const roleLabel = topJob.job_title || role || 'this role';
+          const schoolLabel = user.school ? ` at ${user.school}` : '';
+          const first = hasAlumni ? (top.name.split(' ')[0] || 'there') : '';
+          const msg = hasAlumni
+            ? `Hey ${first} — I'm a student${schoolLabel} and just applied to the ${roleLabel} role at ${topJob.name}. I saw you're on the team and would love any quick advice on standing out. Thanks either way.`
+            : `Hi — I'm a student${schoolLabel} interested in the ${roleLabel} role at ${topJob.name}. I'd value any quick advice on how to stand out. Thanks either way.`;
+          setOutreach({ message: msg, cold: !hasAlumni });
+        }
 
         base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
         trackMagicMomentCompleted({
