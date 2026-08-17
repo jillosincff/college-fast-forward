@@ -241,43 +241,21 @@ export default function ParentLandingPage({ onStudentClick }) {
           <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>⚡ JOIN 4100+ PARENTS & ALUMNI</span>
         </div>
 
-        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 620, textAlign: 'center', marginBottom: 16 }}>
-          <h1 style={{ fontFamily: SF, fontSize: 'clamp(32px, 5.5vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, color: TEXT, margin: '0 0 16px' }}>
+        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 560, textAlign: 'center', marginBottom: 28 }}>
+          <h1 style={{ fontFamily: SF, fontSize: 'clamp(32px, 5.5vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, color: TEXT, margin: '0 0 18px' }}>
             Your network is someone's{' '}
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>big break.</span>
           </h1>
-          <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 2vw, 19px)', color: TEXT2, lineHeight: 1.65, maxWidth: 500, margin: '0 auto 8px' }}>
-            Open a door for a student from your school's community — and other parents do the same for yours.
+          <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 2vw, 19px)', color: TEXT2, lineHeight: 1.6, maxWidth: 520, margin: '0 auto' }}>
+            Add yourself in under 2 minutes. Students from your school can reach out only when it matches — and you choose how to help.
           </p>
-          <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 15, color: TEXT3, margin: 0 }}>
-            Add your information below — it only takes 30 seconds.
-          </p>
-        </div>
-
-        {/* ── HOW IT WORKS (above the form) ── */}
-        <div style={{ width: '100%', maxWidth: 480, marginTop: 8, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease 0.2s' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
-            {[
-              ['📝', 'Add yourself in 2 minutes', 'Your industry, company, and how you\'re open to help.'],
-              ['🔍', 'Students find you when it matches', 'Only students from your school searching your industry can reach out.'],
-              ['🤝', 'Help on your terms', 'Advice, a referral, or an intro — you decide. No spam, no pressure.'],
-            ].map(([emoji, title, desc], i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 14, padding: '14px 16px', boxShadow: SHADOW }}>
-                <span style={{ fontSize: 20, flexShrink: 0, lineHeight: 1.2 }}>{emoji}</span>
-                <div>
-                  <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 2px' }}>{title}</p>
-                  <p style={{ fontFamily: SF, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* ── SIGNUP FORM ── */}
         <div id="parent-signup-form" style={{
           width: '100%', maxWidth: 480,
           background: CARD, borderRadius: 20, boxShadow: SHADOW_LG, border: `1px solid ${INDIGO_BORDER}`,
-          padding: 'clamp(28px, 6vw, 36px)', marginTop: 32,
+          padding: 'clamp(28px, 6vw, 36px)', marginTop: 8,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s',
           textAlign: 'left', position: 'relative',
         }}>
@@ -463,12 +441,11 @@ export default function ParentLandingPage({ onStudentClick }) {
                 {submitting ? 'Setting up your profile…' : 'Join the Network →'}
               </button>
 
-              {/* Trust lines */}
+              {/* Two trust points — no more */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '4px 0' }}>
                 {[
-                  'Your information is only shown to relevant students from the same school',
-                  'Free to join. No spam. No obligation.',
-                  'You control what\'s visible',
+                  'Only students from your school can contact you',
+                  'You control whether to advise, refer, or intro',
                 ].map((line, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div style={{ width: 18, height: 18, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -478,11 +455,6 @@ export default function ParentLandingPage({ onStudentClick }) {
                   </div>
                 ))}
               </div>
-
-              {/* Match note */}
-              <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: 0, textAlign: 'center', fontStyle: 'italic', borderTop: '1px solid #f1f5f9', paddingTop: 12 }}>
-                Your profile will only be surfaced when a student matches your school + industry.
-              </p>
             </form>
           )}
         </div>
