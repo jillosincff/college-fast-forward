@@ -129,7 +129,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             </button>
 
             <button onClick={openParent} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '14px', cursor: 'pointer', marginTop: 10 }}>
-              <Gift size={15} color={INDIGO} /> Send this to a parent →
+              <Gift size={15} color={INDIGO} /> Ask a parent to unlock
             </button>
 
             <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.5 }}>Cancel anytime. Students who use CLIFF Pro apply to 3× more roles.</p>
@@ -141,7 +141,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             <button onClick={() => { setView('main'); setError(''); }} style={{ background: 'none', border: 'none', fontFamily: FONT, fontSize: 13, color: TEXT3, cursor: 'pointer', minHeight: 'auto', padding: 0, marginBottom: 14 }}>← Back</button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <Gift size={16} color={INDIGO} />
-              <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Send to a parent</span>
+              <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Ask a parent to unlock</span>
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>Have a parent unlock it for you</h1>
             <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px', lineHeight: 1.5 }}>Enter your parent's email and we'll send them a link to pay. The moment they pay, your account upgrades.</p>

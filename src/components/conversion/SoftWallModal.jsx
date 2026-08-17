@@ -34,7 +34,7 @@ export default function SoftWallModal({ user, onClose, source = 'soft_wall' }) {
             Upgrade to Pro
           </button>
           <button onClick={() => goPro('parent')} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '14px', cursor: 'pointer' }}>
-            <Gift size={15} color={INDIGO} /> Send to a parent
+            <Gift size={15} color={INDIGO} /> Ask a parent to unlock
           </button>
         </div>
       </div>
