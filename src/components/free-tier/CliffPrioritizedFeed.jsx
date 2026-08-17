@@ -318,7 +318,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
       <section className="space-y-3">
         {isLoading ? (
           <div className="space-y-3">
-            {[1, 2, 3].map(n => <div key={n} className="h-40 bg-gray-100 rounded-2xl animate-pulse" />)}
+            {[1, 2].map(n => <div key={n} className="h-20 bg-gray-100 rounded-xl animate-pulse" />)}
           </div>
         ) : allActioned ? (
           <AllCaughtUpCard dropDate={payload?.drop_date} onUpgrade={() => onUpgrade?.('Unlimited Daily Matches')} />

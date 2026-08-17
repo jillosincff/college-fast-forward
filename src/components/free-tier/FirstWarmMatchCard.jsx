@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
-import { Unlock, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -31,21 +31,15 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
   // showing a meaningless "Professional at X" line.
   const hasRealTitle = parent.role_title && !/^(professional|n\/a|unknown)$/i.test(parent.role_title.trim());
   return (
-    <div style={{ background: '#fff', border: '1px solid #c7d2fe', borderRadius: 16, padding: '16px 18px', marginBottom: 16, boxShadow: '0 4px 16px rgba(79,70,229,0.08)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-        <Unlock size={13} color="#16a34a" />
-        <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#16a34a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          Your free warm connection
-        </span>
-      </div>
-
+    <div style={{ background: '#fff', border: '1px solid #c7d2fe', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 4px 16px rgba(79,70,229,0.08)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
         <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <span style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff' }}>{initial}</span>
         </div>
         <div style={{ flex: 1, minWidth: 160 }}>
-          <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#111827', margin: '0 0 2px' }}>
+          <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#111827', margin: '0 0 2px', display: 'flex', alignItems: 'center', gap: 6 }}>
             {parent.first_name}
+            <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#16a34a', background: '#dcfce7', padding: '2px 6px', borderRadius: 999, letterSpacing: '0.04em' }}>FREE</span>
           </p>
           <p style={{ fontFamily: dm, fontSize: 12, color: '#4b5563', margin: '0 0 2px' }}>
             {hasRealTitle ? <>{parent.role_title} · </> : null}<strong style={{ color: '#111827' }}>{parent.company_name}</strong>
