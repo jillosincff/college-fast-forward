@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
 import Reveal from '@/components/landing/Reveal';
+import MagicMomentVisual from '@/components/landing/MagicMomentVisual';
 
 // ── Design Tokens ───────────────────────────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -182,6 +183,10 @@ export default function StudentLandingPage({ onParentClick }) {
         .hero-2 { animation: fadeUp 0.6s 0.15s ease both; }
         .hero-3 { animation: fadeUp 0.6s 0.25s ease both; }
         .hero-4 { animation: fadeUp 0.6s 0.35s ease both; }
+        @media (max-width: 880px) {
+          .hero-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+          .hero-visual { order: 2; }
+        }
         @media (max-width: 640px) {
           .nav-cta { padding: 10px 14px !important; font-size: 13px !important; }
         }
@@ -218,54 +223,59 @@ export default function StudentLandingPage({ onParentClick }) {
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{
-        minHeight: '92vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      <section className="hero-section" style={{
+        minHeight: '92vh', display: 'flex', alignItems: 'center',
         padding: 'clamp(96px, 14vw, 120px) clamp(20px, 5vw, 32px) clamp(48px, 7vw, 64px)',
-        background: GRAD_HERO, position: 'relative', overflow: 'hidden', textAlign: 'center',
+        background: GRAD_HERO, position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: '30%', left: '50%', width: 620, height: 620, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.10) 0%, transparent 70%)', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 760, width: '100%', position: 'relative', zIndex: 1 }}>
-          {mounted && (
-            <>
-              <h1 className="hero-1" style={{ fontFamily: SF, fontSize: 'clamp(34px, 9vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, color: '#030712', margin: '0 0 18px' }}>
-                Getting your first job is brutal.
-              </h1>
+        <div style={{ position: 'absolute', top: '18%', left: '72%', width: 620, height: 620, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.10) 0%, transparent 70%)', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+        <div className="hero-grid" style={{ maxWidth: 1180, width: '100%', margin: '0 auto', position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr)', gap: 'clamp(32px, 6vw, 72px)', alignItems: 'center' }}>
+          <div className="hero-text">
+            {mounted && (
+              <>
+                <h1 className="hero-1" style={{ fontFamily: SF, fontSize: 'clamp(32px, 6vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.06, color: '#030712', margin: '0 0 18px' }}>
+                  Getting your first job is brutal.
+                </h1>
 
-              <p className="hero-2" style={{ fontFamily: SF, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 500, color: TEXT2, lineHeight: 1.45, margin: '0 auto clamp(28px, 6vw, 36px)', maxWidth: 620 }}>
-                Most students apply into the void.<br />
-                <span style={{ color: TEXT, fontWeight: 700 }}>CLIFF gives you a real plan — and the warm intro most people never get.</span>
-              </p>
-
-              {/* Benefit lines */}
-              <div className="hero-3" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(10px, 2.5vw, 14px)', margin: '0 auto clamp(32px, 7vw, 44px)', maxWidth: 480, textAlign: 'left' }}>
-                {[
-                  'Finds jobs actually worth your time',
-                  'Tailors your resume for that role',
-                  'Surfaces alumni and writes the outreach for you',
-                ].map((b) => (
-                  <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <span style={{ width: 28, height: 28, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Check size={16} color={INDIGO} strokeWidth={3} />
-                    </span>
-                    <span style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 600, color: TEXT, lineHeight: 1.4, letterSpacing: '-0.01em' }}>{b}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTA */}
-              <div className="hero-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 420, margin: '0 auto' }}>
-                <PrimaryCTA label={ctaLabel} onClick={go} />
-                <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, margin: 0, fontWeight: 600 }}>
-                  Free to start · No credit card required
+                <p className="hero-2" style={{ fontFamily: SF, fontSize: 'clamp(17px, 3.5vw, 21px)', fontWeight: 500, color: TEXT2, lineHeight: 1.45, margin: '0 0 clamp(26px, 5vw, 32px)', maxWidth: 560 }}>
+                  Most students apply into the void.<br />
+                  <span style={{ color: TEXT, fontWeight: 700 }}>CLIFF gives you a real plan — and the warm intro most people never get.</span>
                 </p>
-              </div>
 
-              {/* Light social proof */}
-              <p className="hero-4" style={{ fontFamily: SF, fontSize: 13.5, color: TEXT3, margin: 'clamp(20px, 5vw, 28px) 0 0', fontWeight: 600 }}>
-                Join 5,000+ students using CLIFF
-              </p>
-            </>
-          )}
+                {/* Benefit lines */}
+                <div className="hero-3" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(10px, 2vw, 14px)', margin: '0 0 clamp(28px, 6vw, 40px)' }}>
+                  {[
+                    'Finds jobs actually worth your time',
+                    'Tailors your resume for that role',
+                    'Surfaces alumni and writes the outreach for you',
+                  ].map((b) => (
+                    <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <span style={{ width: 28, height: 28, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Check size={16} color={INDIGO} strokeWidth={3} />
+                      </span>
+                      <span style={{ fontFamily: SF, fontSize: 'clamp(15px, 3vw, 18px)', fontWeight: 600, color: TEXT, lineHeight: 1.4, letterSpacing: '-0.01em' }}>{b}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA + microcopy + social proof */}
+                <div className="hero-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ width: '100%', maxWidth: 380 }}>
+                    <PrimaryCTA label={ctaLabel} onClick={go} />
+                  </div>
+                  <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, margin: 0, fontWeight: 600 }}>
+                    Free to start · No credit card required
+                  </p>
+                  <p style={{ fontFamily: SF, fontSize: 13.5, color: TEXT3, margin: 'clamp(6px, 1.5vw, 8px) 0 0', fontWeight: 600 }}>
+                    Join 5,000+ students using CLIFF
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="hero-visual">
+            {mounted && <MagicMomentVisual />}
+          </div>
         </div>
       </section>
 
