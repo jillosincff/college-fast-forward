@@ -120,7 +120,6 @@ export default function ProfileEdit() {
 
       const updateData = {
         full_name: form.fullName.trim(),
-        first_name: form.fullName.trim().split(' ')[0],
         school: schoolValue,
         school_name: schoolValue,
         university: schoolValue,
