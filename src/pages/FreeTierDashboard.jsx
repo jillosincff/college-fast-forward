@@ -79,7 +79,7 @@ function FirstVisitToast({ firstName, onDismiss, focusMode }) {
           Welcome, {firstName}!
         </p>
         <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.6 }}>
-          Your first application package is ready. Run your free cycle below — then unlock CLIFF Pro to repeat it for every job.
+          Your first application package is ready — a tailored resume, a warm intro, and the job link.
         </p>
       </div>
       <button
@@ -134,10 +134,7 @@ export default function FreeTierDashboard() {
 
   // Listen for goals modal open event from child components
   useEffect(() => {
-    const handleOpenGoals = () => {
-      console.log('Opening goals modal from event');
-      setShowGoalsModal(true);
-    };
+    const handleOpenGoals = () => setShowGoalsModal(true);
     window.addEventListener('cff:open-goals-modal', handleOpenGoals);
     return () => window.removeEventListener('cff:open-goals-modal', handleOpenGoals);
   }, []);
