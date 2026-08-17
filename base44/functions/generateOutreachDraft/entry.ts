@@ -75,10 +75,10 @@ Alumni: ${alumniName}${alumniTitle ? `, ${alumniTitle}` : ''}${alumniCompany ? `
 Return a JSON object with exactly these two fields:
 {
   "subject": "${schoolLabel} connection / Question about ${alumniTitle || targetRole || 'your career'} roles at ${alumniCompany || 'your company'}",
-  "body": "Hi ${alumniName?.split(' ')[0] || alumniName}!\\n\\nI'm a fellow ${schoolLabel} student studying ${major || '[major]'}, and I saw your path to becoming a ${alumniTitle || '[title]'} at ${alumniCompany || '[company]'}.\\n\\nYour background in this space is exactly where I'm trying to grow. If you have any availability over the next couple of weeks, I'd love to grab a quick 15-minute virtual coffee to ask you a couple of questions about your journey.\\n\\nGo ${schoolNickname}!\\n\\nBest,\\n${firstName}"
+  "body": "Hi ${alumniName?.split(' ')[0] || alumniName} — I'm a ${schoolLabel} student studying ${major || '[major]'}, and I came across your path to ${alumniTitle || '[title]'} at ${alumniCompany || '[company]'}. Your background is exactly where I'm trying to grow. If you have any time over the next couple of weeks, I'd love a quick 15-minute chat to ask a couple of questions about how you got there. No stress if not.\\n\\nBest,\\n${firstName}"
 }
 
-The body field MUST follow that 4-part structure — (1) school connection opener, (2) one line on the role/path, (3) a low-pressure 15-min ask, (4) clean sign-off — but make the middle feel genuine and personal, not copy-pasted. Keep the opening line and closing exactly as shown. Return ONLY the JSON object, no extra text.`;
+The body field MUST follow that 4-part structure — (1) school connection opener, (2) one line on the role/path, (3) a low-pressure 15-min ask, (4) clean sign-off — but make the middle feel genuine and personal, not copy-pasted. Do NOT use "fellow student," school mascot cheers like "Go Gators," or any banned opener. Keep the opening line and closing exactly as shown. Return ONLY the JSON object, no extra text.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
