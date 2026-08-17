@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Check, Linkedin, Copy, FileText, Sparkles } from 'lucide-react';
 
 // A realistic "completed free cycle" product card for the homepage hero.
@@ -31,9 +32,28 @@ const ALUMNI = [
 const OUTREACH = "Hi Jordan — fellow UF student here. Your path into brand at Nike is exactly where I'm hoping to go. If you ever have 10 minutes, I'd love to hear how you got your start. Go Gators! – Maya";
 
 export default function MagicMomentVisual() {
+  const rootRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+
+  // Play the assembly sequence once when the card first scrolls into view,
+  // then hold on the completed state (no continuous looping).
+  useEffect(() => {
+    if (playing) return;
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        setPlaying(true);
+        io.disconnect();
+      }
+    }, { threshold: 0.2 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [playing]);
+
   return (
     <div style={{ width: '100%', maxWidth: 400, margin: '0 auto' }}>
-      <div className="mmv-card" style={{
+      <div ref={rootRef} className={`mmv-card ${playing ? 'mmv-playing' : ''}`} style={{
         background: '#fff', borderRadius: 20, boxShadow: SHADOW_LG,
         border: '1px solid #f1e9ff', padding: '18px 16px', fontFamily: SF,
         position: 'relative', overflow: 'hidden',
@@ -42,44 +62,44 @@ export default function MagicMomentVisual() {
           @keyframes mmv-job {
             0%, 3.75% { opacity: 0; transform: translateY(10px); }
             10% { opacity: 1; transform: translateY(0); }
-            93.75% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(0); }
+            100% { opacity: 1; transform: translateY(0); }
           }
           @keyframes mmv-resume {
             0%, 11.25% { opacity: 0; transform: translateY(10px); }
             20% { opacity: 1; transform: translateY(0); }
-            93.75% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(0); }
+            100% { opacity: 1; transform: translateY(0); }
           }
           @keyframes mmv-alumni1 {
             0%, 21.25% { opacity: 0; transform: translateY(10px); }
             30% { opacity: 1; transform: translateY(0); }
-            93.75% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(0); }
+            100% { opacity: 1; transform: translateY(0); }
           }
           @keyframes mmv-alumni2 {
             0%, 31.25% { opacity: 0; transform: translateY(10px); }
             40% { opacity: 1; transform: translateY(0); }
-            93.75% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(0); }
+            100% { opacity: 1; transform: translateY(0); }
           }
           @keyframes mmv-outreach-anim {
             0%, 41.25% { opacity: 0; transform: translateY(10px); }
             62.5% { opacity: 1; transform: translateY(0); }
-            93.75% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(0); }
+            100% { opacity: 1; transform: translateY(0); }
           }
           @keyframes mmv-pulse {
             0%, 62.5% { transform: scale(1); box-shadow: 0 6px 16px rgba(109,40,217,0.30); }
             67.5% { transform: scale(1.06); box-shadow: 0 12px 26px rgba(109,40,217,0.45); }
             72.5%, 100% { transform: scale(1); box-shadow: 0 6px 16px rgba(109,40,217,0.30); }
           }
-          .mmv-a-job { animation: mmv-job 8s ease infinite; }
-          .mmv-a-resume { animation: mmv-resume 8s ease infinite; }
-          .mmv-a-alumni1 { animation: mmv-alumni1 8s ease infinite; }
-          .mmv-a-alumni2 { animation: mmv-alumni2 8s ease infinite; }
-          .mmv-a-outreach { animation: mmv-outreach-anim 8s ease infinite; }
-          .mmv-a-pulse { animation: mmv-pulse 8s ease infinite; }
+          .mmv-card .mmv-a-job,
+          .mmv-card .mmv-a-resume,
+          .mmv-card .mmv-a-alumni1,
+          .mmv-card .mmv-a-alumni2,
+          .mmv-card .mmv-a-outreach { opacity: 0; transform: translateY(10px); }
+          .mmv-card.mmv-playing .mmv-a-job { animation: mmv-job 8s ease both; }
+          .mmv-card.mmv-playing .mmv-a-resume { animation: mmv-resume 8s ease both; }
+          .mmv-card.mmv-playing .mmv-a-alumni1 { animation: mmv-alumni1 8s ease both; }
+          .mmv-card.mmv-playing .mmv-a-alumni2 { animation: mmv-alumni2 8s ease both; }
+          .mmv-card.mmv-playing .mmv-a-outreach { animation: mmv-outreach-anim 8s ease both; }
+          .mmv-card.mmv-playing .mmv-a-pulse { animation: mmv-pulse 8s ease both; }
           @media (max-width: 600px) {
             .mmv-card { padding: 20px 16px !important; }
             .mmv-outreach { padding: 14px !important; }
