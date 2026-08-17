@@ -242,7 +242,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   {[
                     'Finds jobs actually worth your time',
                     'Tailors your resume for that role',
-                    'Surfaces alumni or parents and writes the outreach for you',
+                    'Finds your warm intro — and writes the message',
                   ].map((b) => (
                     <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                       <span style={{ width: 28, height: 28, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -290,9 +290,11 @@ export default function StudentLandingPage({ onParentClick }) {
                 </div>
               ))}
             </div>
-            <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 700, color: INDIGO_DIM, margin: 'clamp(28px, 6vw, 36px) 0 0', lineHeight: 1.5 }}>
-              CLIFF runs the first full cycle for you for free.
-            </p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '10px 18px', margin: 'clamp(28px, 6vw, 36px) 0 0' }}>
+              <span style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 800, color: INDIGO_DIM, lineHeight: 1.4 }}>
+                Your first full cycle is on CLIFF — free.
+              </span>
+            </div>
           </div>
         </Reveal>
       </section>
@@ -366,8 +368,13 @@ export default function StudentLandingPage({ onParentClick }) {
         transform: showStickyCTA ? 'translateY(0)' : 'translateY(110%)',
         transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
       }}>
-        <span style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 700, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          Stop applying into the void.
+        <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <span style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            Your first warm intro is free.
+          </span>
+          <span style={{ fontFamily: SF, fontSize: 11.5, fontWeight: 600, color: TEXT3, whiteSpace: 'nowrap' }}>
+            2 min · no credit card
+          </span>
         </span>
         <button onClick={go} style={{
           fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', fontWeight: 800, color: '#fff',
