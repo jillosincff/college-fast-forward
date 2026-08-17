@@ -201,10 +201,14 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
   const memoryRef = memoryHits[0];
   const allActioned = slots.length > 0 && visibleSlots.length === 0;
   const noGoals = !target_industries?.length && !effectiveRole;
-  // CLIFF's Best Opportunities: top 3 non-skip verdicts lead; the rest is the collapsed library
-  const bestSlots = visibleSlots.filter(s => verdictOf(s)?.verdict !== 'skip').slice(0, 3);
+  // CLIFF's Best Opportunities: only worth-acting jobs surface. Skip verdicts are
+  // filtered in the background — they never render as cards on the home feed. A
+  // reviewed summary carries the selectivity signal instead of noisy skip cards.
+  const actionableSlots = visibleSlots.filter(s => verdictOf(s)?.verdict !== 'skip');
+  const skipCount = visibleSlots.length - actionableSlots.length;
+  const bestSlots = actionableSlots.slice(0, 3);
   const bestKeys = new Set(bestSlots.map(s => `${s.company}||${s.role}`));
-  const librarySlots = visibleSlots.filter(s => !bestKeys.has(`${s.company}||${s.role}`));
+  const librarySlots = actionableSlots.filter(s => !bestKeys.has(`${s.company}||${s.role}`));
   // Empty/error/caught-up states must always render — treat as open when there's no best section
   const effectiveOpen = libraryOpen || bestSlots.length === 0;
   const paginatedSlots = librarySlots.slice(0, visibleCount);
@@ -228,8 +232,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
               onDetails={setSelectedLead}
             />
           ))}
-          {bestSlots.length < 3 && (
-            <p className="text-xs text-gray-500 italic">I'm still evaluating the rest. I won't waste your time with weak matches.</p>
+          {slots.length > bestSlots.length && (
+            <p className="text-xs text-gray-500">
+              Reviewed {slots.length} roles · {actionableSlots.length} worth pursuing{skipCount > 0 ? ` · ${skipCount} filtered out` : ''}
+            </p>
           )}
         </div>
       )}
@@ -326,7 +332,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
           <div className="border border-dashed border-red-200 rounded-2xl p-8 text-center text-red-400 text-xs">
             Failed to load today's opportunities. Please refresh to try again.
           </div>
-        ) : visibleSlots.length > 0 ? (
+        ) : librarySlots.length > 0 ? (
           <>
             {/* View toggle + legend */}
             <div className="flex items-center justify-between flex-wrap gap-2">
