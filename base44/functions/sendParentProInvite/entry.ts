@@ -6,7 +6,11 @@ import { secrets } from 'base44:runtime';
 // attributed to THIS student, then email the parent the link. When the parent
 // pays, the existing stripeWebhook activates the student's Pro (gift_student_email).
 
-const PRO_MONTHLY_PRICE = 'price_1TZyJ8873TV7WMcTiMisnPsg';
+// CLIFF Pro prices — annual is the recommended gift (best value).
+const PRO_PRICES = {
+  pro_monthly: 'price_1TZyJ8873TV7WMcTiMisnPsg', // $19.96/month
+  pro_annual: 'price_1U5EEH873TV7WMcTOOnQNksc',  // $149/year
+};
 
 const escapeHtml = (str) => String(str || '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -18,8 +22,10 @@ export default async function (req) {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { parentEmail: rawEmail, note } = await req.json();
+    const { parentEmail: rawEmail, note, plan: rawPlan } = await req.json();
     const parentEmail = rawEmail?.trim().toLowerCase();
+    const plan = PRO_PRICES[rawPlan] ? rawPlan : 'pro_annual'; // default gift = annual (best value)
+    const priceText = plan === 'pro_annual' ? '$149/year (~$12.42/month)' : '$19.96/month';
     if (!parentEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail)) {
       return Response.json({ success: false, error: 'Please enter a valid email address.' }, { status: 400 });
     }
@@ -31,7 +37,7 @@ export default async function (req) {
 
     const body = new URLSearchParams({
       mode: 'subscription',
-      'line_items[0][price]': PRO_MONTHLY_PRICE,
+      'line_items[0][price]': PRO_PRICES[plan],
       'line_items[0][quantity]': '1',
       success_url: 'https://collegefastforward.com/#/ParentAllSet?gift=success',
       cancel_url: 'https://collegefastforward.com/#/ParentAllSet',
@@ -40,8 +46,10 @@ export default async function (req) {
       'metadata[gift_student_email]': user.email,
       'metadata[student_name]': user.full_name || '',
       'metadata[parent_invite]': 'true',
+      'metadata[plan]': plan,
       'subscription_data[metadata][gift_student_email]': user.email,
       'subscription_data[metadata][gifted_by_parent_invite]': 'true',
+      'subscription_data[metadata][plan]': `${plan}_gift`,
     });
     body.append('payment_method_collection', 'always');
 
@@ -68,7 +76,7 @@ export default async function (req) {
   <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Hi,</p>
   <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">${escapeHtml(studentFirst)} is using CLIFF to find internships and jobs. They just finished their free cycle and asked you to unlock CLIFF Pro so CLIFF can keep working for them — finding roles, tailoring their resume, surfacing connections, and following up.</p>
   ${note ? `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:14px 16px;margin:16px 0;"><p style="font-size:13px;color:#6d28d9;font-weight:700;margin:0 0 4px;">A note from ${escapeHtml(studentFirst)}:</p><p style="font-size:15px;color:#0f172a;margin:0;line-height:1.5;">${escapeHtml(note)}</p></div>` : ''}
-  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">It's $19.96/month and you can cancel anytime. Your payment activates their account immediately.</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">It's ${priceText} and you can cancel anytime. Your payment activates their account immediately.</p>
   <a href="${escapeHtml(checkoutUrl)}" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Unlock ${escapeHtml(studentFirst)}'s CLIFF Pro →</a>
   <p style="font-size:13px;color:#94a3b8;margin-top:32px;">Warmly,<br><strong>Jill Osinoff</strong><br>Founder, College Fast Forward</p>
 </div>` }],

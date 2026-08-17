@@ -389,13 +389,13 @@ Deno.serve(async (req) => {
                 event_name: 'parent_payment_completed',
                 user_id: giftStudent.id,
                 user_email: giftStudent.email,
-                properties: { parent_email: billingUser?.email || '', source: 'parent_invite' },
+                properties: { parent_email: billingUser?.email || '', source: 'parent_invite', plan: plan || 'pro_monthly' },
               }).catch(() => {});
               base44.asServiceRole.entities.AnalyticsEvent.create({
                 event_name: 'pro_activated',
                 user_id: giftStudent.id,
                 user_email: giftStudent.email,
-                properties: { source: 'parent_gift' },
+                properties: { source: 'parent_gift', plan: plan || 'pro_monthly' },
               }).catch(() => {});
 
               try {

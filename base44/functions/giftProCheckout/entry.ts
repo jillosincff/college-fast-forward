@@ -1,8 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 
-// Same CLIFF Pro price the student self-serve paywall uses ($19.96/month).
-const PRO_MONTHLY_PRICE = 'price_1TZyJ8873TV7WMcTiMisnPsg';
+// CLIFF Pro prices — annual is the recommended gift (best value).
+const PRO_PRICES = {
+  pro_monthly: 'price_1TZyJ8873TV7WMcTiMisnPsg', // $19.96/month
+  pro_annual: 'price_1U5EEH873TV7WMcTOOnQNksc',  // $149/year
+};
 
 export default async function(req) {
   try {
@@ -10,8 +13,9 @@ export default async function(req) {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { studentEmail: rawEmail, successUrl, cancelUrl } = await req.json();
+    const { studentEmail: rawEmail, successUrl, cancelUrl, plan: rawPlan } = await req.json();
     const studentEmail = rawEmail?.trim().toLowerCase();
+    const plan = PRO_PRICES[rawPlan] ? rawPlan : 'pro_annual'; // default gift = annual (best value)
 
     if (!studentEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentEmail)) {
       return Response.json({ success: false, error: 'Please enter a valid email address.' }, { status: 400 });
@@ -33,7 +37,7 @@ export default async function(req) {
 
     const body = new URLSearchParams({
       mode: 'subscription',
-      'line_items[0][price]': PRO_MONTHLY_PRICE,
+      'line_items[0][price]': PRO_PRICES[plan],
       'line_items[0][quantity]': '1',
       success_url: successUrl || 'https://collegefastforward.com/#/ParentAllSet?gift=success',
       cancel_url: cancelUrl || 'https://collegefastforward.com/#/ParentAllSet',
@@ -41,11 +45,11 @@ export default async function(req) {
       customer_email: user.email,
       'metadata[user_id]': user.id,
       'metadata[user_email]': user.email,
-      'metadata[plan]': 'pro_monthly',
+      'metadata[plan]': plan,
       'metadata[subscription_tier]': 'cff',
       'metadata[gift_student_email]': studentEmail,
       'subscription_data[metadata][subscription_tier]': 'cff',
-      'subscription_data[metadata][plan]': 'pro_monthly_gift',
+      'subscription_data[metadata][plan]': `${plan}_gift`,
       'subscription_data[metadata][gifted_by_parent_id]': user.id,
       'subscription_data[metadata][gift_student_email]': studentEmail,
     });

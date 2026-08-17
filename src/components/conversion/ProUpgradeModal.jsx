@@ -25,17 +25,18 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState('annual'); // 'annual' | 'monthly'
 
   useEffect(() => { trackUpgradeModalViewed({ source }); }, []);
 
   const startPro = async () => {
     setBusy(true); setError('');
-    trackUpgradeClicked({ plan: 'monthly', source });
+    trackUpgradeClicked({ plan: selectedPlan, source });
     try {
       // createCheckoutSession defaults success/cancel to the production URLs,
       // which avoids the sandboxed `window.location.origin === null` bug.
       const res = await base44.functions.invoke('createCheckoutSession', {
-        plan: 'pro_monthly',
+        plan: selectedPlan === 'annual' ? 'pro_annual' : 'pro_monthly',
         user: { id: user.id, email: user.email },
       });
       const url = res?.data?.url || res?.url;
@@ -52,7 +53,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { setError('Enter a valid email.'); return; }
     setBusy(true); setError('');
     try {
-      const res = await base44.functions.invoke('sendParentProInvite', { parentEmail: e, note: note.trim() });
+      const res = await base44.functions.invoke('sendParentProInvite', { parentEmail: e, note: note.trim(), plan: selectedPlan === 'annual' ? 'pro_annual' : 'pro_monthly' });
       if (res?.data?.success || res?.success) {
         trackParentSendCompleted({ parent_email_domain: e.split('@')[1] });
         setView('sent');
@@ -93,30 +94,33 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
               ))}
             </div>
 
-            {/* Billing options — Monthly (active) / Annual (presented) */}
+            {/* Billing options — select Monthly or Annual (Annual = best value) */}
             <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
-              <div style={{ flex: 1, border: `2px solid ${INDIGO}`, borderRadius: 12, padding: '12px 14px', background: '#fff' }}>
+              <div onClick={() => setSelectedPlan('monthly')} style={{ flex: 1, cursor: 'pointer', borderRadius: 12, padding: '12px 14px', border: selectedPlan === 'monthly' ? `2px solid ${INDIGO}` : `1.5px solid #e2e8f0`, background: selectedPlan === 'monthly' ? '#fff' : '#fafafa' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                  <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 800, color: TEXT }}>Monthly</span>
-                  <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#fff', background: GRAD_INDIGO, padding: '2px 8px', borderRadius: 999 }}>SELECTED</span>
+                  <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 800, color: selectedPlan === 'monthly' ? TEXT : TEXT2 }}>Monthly</span>
+                  {selectedPlan === 'monthly' && <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#fff', background: GRAD_INDIGO, padding: '2px 8px', borderRadius: 999 }}>SELECTED</span>}
                 </div>
-                <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 800, color: TEXT }}>$19.96</span>
+                <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 800, color: selectedPlan === 'monthly' ? TEXT : TEXT2 }}>$19.96</span>
                 <span style={{ fontFamily: FONT, fontSize: 12, color: TEXT2 }}> /month</span>
               </div>
-              <div style={{ flex: 1, border: `1.5px solid #e9d5ff`, borderRadius: 12, padding: '12px 14px', background: '#fafafa', opacity: 0.85 }}>
+              <div onClick={() => setSelectedPlan('annual')} style={{ flex: 1, cursor: 'pointer', borderRadius: 12, padding: '12px 14px', border: selectedPlan === 'annual' ? `2px solid ${INDIGO}` : `1.5px solid #e9d5ff`, background: selectedPlan === 'annual' ? '#fff' : '#fafafa' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                  <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 800, color: TEXT2 }}>Annual</span>
-                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: INDIGO_DIM, background: '#ede9fe', padding: '2px 8px', borderRadius: 999 }}>SOON</span>
+                  <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 800, color: selectedPlan === 'annual' ? TEXT : TEXT2 }}>Annual</span>
+                  {selectedPlan === 'annual'
+                    ? <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#fff', background: GRAD_INDIGO, padding: '2px 8px', borderRadius: 999 }}>SELECTED</span>
+                    : <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: INDIGO_DIM, background: '#ede9fe', padding: '2px 8px', borderRadius: 999 }}>BEST VALUE</span>}
                 </div>
-                <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 800, color: TEXT2 }}>$199</span>
-                <span style={{ fontFamily: FONT, fontSize: 12, color: TEXT3 }}> /year · save 17%</span>
+                <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 800, color: selectedPlan === 'annual' ? TEXT : TEXT2 }}>$149</span>
+                <span style={{ fontFamily: FONT, fontSize: 12, color: TEXT3 }}> /year</span>
+                <p style={{ fontFamily: FONT, fontSize: 10.5, color: TEXT3, margin: '4px 0 0', lineHeight: 1.4 }}>$12.42/mo billed annually</p>
               </div>
             </div>
 
             {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '8px 12px', borderRadius: 8, marginBottom: 12, fontSize: 12.5, fontFamily: FONT }}>{error}</div>}
 
             <button onClick={startPro} disabled={busy} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '15px', cursor: busy ? 'default' : 'pointer', boxShadow: '0 6px 18px rgba(109,40,217,0.32)', opacity: busy ? 0.7 : 1 }}>
-              {busy ? <><Loader2 size={16} className="animate-spin" /> Starting checkout…</> : <>Start CLIFF Pro — $19.96/mo</>}
+              {busy ? <><Loader2 size={16} className="animate-spin" /> Starting checkout…</> : <>Start CLIFF Pro — {selectedPlan === 'annual' ? '$149/year' : '$19.96/mo'}</>}
             </button>
 
             <button onClick={openParent} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '14px', cursor: 'pointer', marginTop: 10 }}>
@@ -136,6 +140,12 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>Have a parent unlock it for you</h1>
             <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px', lineHeight: 1.5 }}>Enter your parent's email and we'll send them a link to pay. The moment they pay, your account upgrades.</p>
+
+            {/* Plan selector for the gift — default Annual (best value) */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+              <button type="button" onClick={() => setSelectedPlan('annual')} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: selectedPlan === 'annual' ? '#fff' : INDIGO_DIM, background: selectedPlan === 'annual' ? GRAD_INDIGO : '#fff', border: `1.5px solid ${selectedPlan === 'annual' ? 'transparent' : INDIGO_BORDER}`, borderRadius: 10, padding: '10px', cursor: 'pointer', minHeight: 'auto' }}>Annual · $149/yr <span style={{ fontSize: 10, opacity: 0.9 }}>· Best value</span></button>
+              <button type="button" onClick={() => setSelectedPlan('monthly')} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: selectedPlan === 'monthly' ? '#fff' : INDIGO_DIM, background: selectedPlan === 'monthly' ? GRAD_INDIGO : '#fff', border: `1.5px solid ${selectedPlan === 'monthly' ? 'transparent' : INDIGO_BORDER}`, borderRadius: 10, padding: '10px', cursor: 'pointer', minHeight: 'auto' }}>Monthly · $19.96/mo</button>
+            </div>
 
             <label style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Parent's email</label>
             <input type="email" value={parentEmail} placeholder="parent@email.com" onChange={(e) => setParentEmail(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', fontFamily: FONT, fontSize: 15, color: TEXT, background: '#fafafa', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '13px 14px', outline: 'none', marginBottom: 12 }} />

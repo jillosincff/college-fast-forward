@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const PRICES = {
   pro_monthly: 'price_1TZyJ8873TV7WMcTiMisnPsg',  // $19.96/month ($4.99/week × 4)
+  pro_annual: 'price_1U5EEH873TV7WMcTOOnQNksc',   // $149/year (~$12.42/mo) — best value
 };
 
 Deno.serve(async (req) => {
@@ -27,11 +28,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
     
-    // Force plan to pro_monthly to ensure only one price is used.
-    plan = 'pro_monthly';
-
-    if (!PRICES[plan]) {
-      return Response.json({ success: false, error: `Unknown plan: ${plan}` }, { status: 400 });
+    // Default to monthly for backward compatibility; annual is selectable on the paywall.
+    if (!plan || !PRICES[plan]) {
+      plan = 'pro_monthly';
     }
 
     const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
