@@ -74,7 +74,7 @@ export default function CareerSeasonCard({ user }) {
                 <Check size={14} color="#7c3aed" style={{ flexShrink: 0, marginTop: 2 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>
-                    {rec.title} <span style={{ fontWeight: 600, color: '#9ca3af', fontSize: 11 }}>· {rec.estimated_time}</span>
+                    {rec.title}
                   </p>
                   <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '2px 0 0', lineHeight: 1.5 }}>{rec.description}</p>
                 </div>
