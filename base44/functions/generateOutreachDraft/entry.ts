@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { studentName, major, targetRole, graduationYear, school, alumniName, alumniTitle, alumniCompany, magic_moment } = await req.json();
+    const { studentName, major, targetRole, graduationYear, school, alumniName, alumniTitle, alumniCompany, cold, magic_moment } = await req.json();
 
     // Soft wall: outreach drafts are a Pro feature (free only during the Magic Moment).
     if (!(await canRunGated(base44, user, magic_moment))) {
@@ -51,7 +51,21 @@ TONE RULES:
 - Keep it warm, specific, and low-pressure
 - The ask should be a simple 15-minute virtual coffee chat`;
 
-    const prompt = `${systemPrompt}
+    const prompt = cold
+      ? `${systemPrompt}
+
+Write a short cold outreach MESSAGE (for LinkedIn) from a ${schoolLabel} student to a hiring manager or recruiter at ${alumniCompany || 'the company'}. The student is targeting the ${targetRole || 'open'} role there. There is NO shared school connection — do not assume one.
+
+Student: ${firstName}, studying ${major || 'business'}${targetRole ? `, aiming for ${targetRole} roles` : ''}${graduationYear ? `, graduating ${graduationYear}` : ''}.
+
+Use EXACTLY this 4-part structure — no corporate openers, no banned phrases:
+1. One line: a genuine, specific reason this role at ${alumniCompany || 'the company'} caught their attention (tie it to what they're hiring for).
+2. One line: who they are — ${schoolLabel} student, ${major || 'their major'}, graduating ${graduationYear || 'soon'}.
+3. One low-pressure ask: a 10-minute chat OR one quick insight on what stands out in candidates for this role.
+4. Clean sign-off: "Thanks for your time,\\n${firstName}"
+
+Greeting: "Hi," (they'll add the name once they find the person on LinkedIn). Keep it under 120 words. Return JSON: {"subject": "${schoolLabel} student / Question about ${targetRole || 'the role'} at ${alumniCompany || 'the company'}", "body": "..."}. Return ONLY the JSON object.`
+      : `${systemPrompt}
 
 Write a short outreach EMAIL (not LinkedIn message) from a ${schoolLabel} student to a ${schoolLabel} alumni.
 
@@ -64,7 +78,7 @@ Return a JSON object with exactly these two fields:
   "body": "Hi ${alumniName?.split(' ')[0] || alumniName}!\\n\\nI'm a fellow ${schoolLabel} student studying ${major || '[major]'}, and I saw your path to becoming a ${alumniTitle || '[title]'} at ${alumniCompany || '[company]'}.\\n\\nYour background in this space is exactly where I'm trying to grow. If you have any availability over the next couple of weeks, I'd love to grab a quick 15-minute virtual coffee to ask you a couple of questions about your journey.\\n\\nGo ${schoolNickname}!\\n\\nBest,\\n${firstName}"
 }
 
-The body field MUST follow that template structure but make the middle paragraph feel genuine and personal — not copy-pasted. Keep the opening line and closing exactly as shown. Return ONLY the JSON object, no extra text.`;
+The body field MUST follow that 4-part structure — (1) school connection opener, (2) one line on the role/path, (3) a low-pressure 15-min ask, (4) clean sign-off — but make the middle feel genuine and personal, not copy-pasted. Keep the opening line and closing exactly as shown. Return ONLY the JSON object, no extra text.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',

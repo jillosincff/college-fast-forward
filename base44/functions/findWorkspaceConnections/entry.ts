@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { companyName, magic_moment } = await req.json().catch(() => ({}));
+    const { companyName, targetRole, magic_moment } = await req.json().catch(() => ({}));
 
     // Soft wall: alumni matches are a Pro feature (free only during the Magic Moment).
     if (!(await canRunGated(base44, user, magic_moment))) {
@@ -101,8 +101,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Dedupe by normalized name, preserve tier order
-    connections.sort((a, b) => a.tier - b.tier);
+    // Rank: tier first (same school before cross-school), then role similarity to the target role
+    const roleTokens = (s) => (s || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    const targetTokens = new Set(roleTokens(targetRole));
+    const roleRelevance = (c) => {
+      if (!targetTokens.size || !c.role_title) return 0;
+      let hits = 0;
+      for (const t of roleTokens(c.role_title)) if (targetTokens.has(t)) hits++;
+      return hits;
+    };
+    connections.sort((a, b) => (a.tier - b.tier) || (roleRelevance(b) - roleRelevance(a)));
     const seen = new Set();
     const deduped = connections.filter((c) => {
       const k = norm(c.name);

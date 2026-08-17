@@ -128,32 +128,32 @@ export default function MagicMoment() {
         setPhase(`Surfacing alumni at ${topJob.name}…`);
         let conns = [];
         try {
-          const connRes = await base44.functions.invoke('findWorkspaceConnections', { companyName: topJob.name, magic_moment: true });
+          const connRes = await base44.functions.invoke('findWorkspaceConnections', { companyName: topJob.name, targetRole: topJob.job_title || role, magic_moment: true });
           if (connRes?.data?.upgrade_required || connRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
           conns = connRes?.data?.connections || connRes?.connections || [];
           setConnections(conns.slice(0, 3));
         } catch (e) { /* alumni search best-effort */ }
 
-        // 4. Write the warm outreach
+        // 4. Write the outreach — warm if an alum was found, cold fallback otherwise
         const top = conns[0];
-        if (top) {
-          setPhase('Writing your warm outreach…');
-          try {
-            const outRes = await base44.functions.invoke('generateOutreachDraft', {
-              studentName: user.full_name || '',
-              major: cg.target_industries?.[0] || '',
-              targetRole: topJob.job_title || role,
-              graduationYear: user.graduation_year || '',
-              school: user.school || '',
-              alumniName: top.name,
-              alumniTitle: top.role_title || '',
-              alumniCompany: topJob.name,
-              magic_moment: true,
-            });
-            if (outRes?.data?.upgrade_required || outRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
-            setOutreach(outRes?.data || outRes);
-          } catch (e) { /* outreach best-effort */ }
-        }
+        const hasAlumni = !!top;
+        setPhase(hasAlumni ? 'Writing your warm outreach…' : 'Writing your outreach…');
+        try {
+          const outRes = await base44.functions.invoke('generateOutreachDraft', {
+            studentName: user.full_name || '',
+            major: cg.target_industries?.[0] || '',
+            targetRole: topJob.job_title || role,
+            graduationYear: user.graduation_year || '',
+            school: user.school || '',
+            alumniName: hasAlumni ? top.name : '',
+            alumniTitle: hasAlumni ? (top.role_title || '') : (topJob.job_title || role),
+            alumniCompany: topJob.name,
+            cold: !hasAlumni,
+            magic_moment: true,
+          });
+          if (outRes?.data?.upgrade_required || outRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
+          setOutreach({ ...(outRes?.data || outRes), cold: !hasAlumni });
+        } catch (e) { /* outreach best-effort */ }
 
         base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
         trackMagicMomentCompleted({
@@ -161,6 +161,7 @@ export default function MagicMoment() {
           company: topJob?.name || '',
           alumni_count: conns?.length || 0,
           has_tailored_resume: !!tailored,
+          outreach_cold: !conns?.[0],
         });
         markMagicMomentCompleted();
         setPhase(null);
@@ -175,15 +176,38 @@ export default function MagicMoment() {
     ? `Hiring now for ${job.job_title}${job.location ? ` in ${job.location}` : ''} — matches your ${((user?.career_goals?.target_industries) || [])[0] || (user?.career_goals?.target_roles || [])[0] || 'target'}.`
     : '';
 
-  const copyMessage = async () => {
+  const handlePrimaryAction = async () => {
     const text = outreach?.message || '';
     if (!text) return;
-    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); trackOutreachCopied({ company: job?.name || '', alumni: connections[0]?.name || '' }); } catch (e) {}
-  };
-  const openLinkedIn = () => {
+    // 1. Copy the full draft to the clipboard (with a fallback for insecure contexts)
+    let copiedOk = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      copiedOk = true;
+    } catch (e) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        copiedOk = true;
+      } catch (e2) {}
+    }
+    // 2. Track reliably
+    trackOutreachCopied({ company: job?.name || '', alumni: connections[0]?.name || '', cold: !!outreach?.cold });
+    // 3. Open LinkedIn — alum's profile if we have it, else a people search for hiring managers at the company
     const top = connections[0];
-    const url = top?.linkedin_url || `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent((top?.name || '') + ' ' + (job?.name || ''))}`;
-    window.open(url, '_blank', 'noopener');
+    let url;
+    if (top?.linkedin_url) {
+      url = top.linkedin_url;
+    } else if (outreach?.cold) {
+      url = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${job?.name || ''} ${job?.job_title || ''} recruiter OR hiring`)}`;
+    } else {
+      url = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent((top?.name || '') + ' ' + (job?.name || ''))}`;
+    }
+    try { window.open(url, '_blank', 'noopener'); } catch (e) {}
+    // 4. Confirmation — tells them the draft is on the clipboard even if the popup was blocked
+    if (copiedOk) { setCopied(true); setTimeout(() => setCopied(false), 2600); }
   };
 
   const downloadResume = () => {
@@ -299,7 +323,11 @@ export default function MagicMoment() {
               ))}
             </div>
           ) : (
-            <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>CLIFF didn't find a direct alumni match at {job?.name} yet — your plan still works with a cold application.</p>
+            <div>
+              <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>No strong alumni match found at {job?.name} yet.</p>
+              <p style={{ fontFamily: FONT, fontSize: 12.5, color: TEXT2, margin: '0 0 10px', lineHeight: 1.55 }}>CLIFF still wrote you a sendable cold outreach below — search LinkedIn for a hiring manager or recruiter at {job?.name} and paste it in. Pro surfaces same-industry alumni automatically.</p>
+              <button onClick={() => setShowPro(true)} style={ghostBtn({})}>See how Pro finds alumni →</button>
+            </div>
           )}
         </Block>
 
@@ -307,20 +335,23 @@ export default function MagicMoment() {
         <Block icon={<Mail size={16} color={INDIGO} />} label="Your warm outreach">
           {outreach?.message ? (
             <div>
+              {outreach.cold && (
+                <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>Cold outreach · no alumni found</p>
+              )}
               {outreach.subject && <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT3, margin: '0 0 8px' }}>Subject: {outreach.subject}</p>}
               <div style={{ background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '14px 16px', fontFamily: FONT, fontSize: 13.5, color: TEXT, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                 {outreach.message}
               </div>
             </div>
           ) : (
-            <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>CLIFF will draft your outreach once an alumni match is found.</p>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>CLIFF will draft your outreach once a connection is found.</p>
           )}
         </Block>
 
         {/* Primary + secondary CTAs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-          <button onClick={() => { copyMessage(); openLinkedIn(); }} style={pill({ width: '100%', justifyContent: 'center', padding: '16px' })}>
-            {copied ? <><Check size={16} /> Copied — opening LinkedIn</> : <><Copy size={16} /> Copy message &amp; open LinkedIn</>}
+          <button onClick={handlePrimaryAction} style={pill({ width: '100%', justifyContent: 'center', padding: '16px' })}>
+            {copied ? <><Check size={16} /> Message copied — paste it into LinkedIn</> : <><Copy size={16} /> Copy message &amp; open LinkedIn</>}
           </button>
           <button onClick={() => navigate('/FreeTierDashboard')} style={ghostBtn({ width: '100%', justifyContent: 'center', padding: '15px' })}>
             <Save size={15} /> Save for later
