@@ -25,11 +25,11 @@ const PLAN = [
 ];
 
 const ALUMNI = [
-  { name: 'Jordan Avery', title: 'Brand Marketing Manager', note: 'UF alum · Possible connection', initials: 'JA' },
-  { name: 'Priya Shah', title: 'Senior Recruiter', note: 'UF alum', initials: 'PS' },
+  { name: 'Jordan Avery', title: 'Brand Marketing Manager', note: 'From your school · Possible connection', initials: 'JA' },
+  { name: 'Priya Shah', title: 'Senior Recruiter', note: 'From your school', initials: 'PS' },
 ];
 
-const OUTREACH = "Hey Jordan — I'm a UF student and just applied to a marketing role at Nike. Saw you work on the brand side and would love any advice if you have a sec. Thanks either way.";
+const OUTREACH = "Hey Jordan — I'm a marketing student and just applied to a role at Nike. Saw you work on the brand side and would love any advice if you have a sec. Thanks either way.";
 
 export default function MagicMomentVisual() {
   const rootRef = useRef(null);
@@ -159,7 +159,7 @@ export default function MagicMomentVisual() {
           </div>
           <div style={{ background: '#f8fafc', borderRadius: 10, padding: '10px 11px' }}>
             <p style={{ fontFamily: SF, fontSize: 12.5, fontWeight: 800, color: TEXT, margin: '0 0 2px' }}>Maya Rodriguez</p>
-            <p style={{ fontFamily: SF, fontSize: 10.5, color: TEXT3, margin: '0 0 8px' }}>UF · Marketing, Class of 2026</p>
+            <p style={{ fontFamily: SF, fontSize: 10.5, color: TEXT3, margin: '0 0 8px' }}>State University · Marketing, Class of 2026</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               <p style={{ fontFamily: SF, fontSize: 11, color: TEXT2, margin: 0, lineHeight: 1.4 }}>• Led campus brand campaign — +28% engagement</p>
               <p style={{ fontFamily: SF, fontSize: 11, color: TEXT2, margin: 0, lineHeight: 1.4 }}>• Grew org Instagram to 12k followers</p>

@@ -262,7 +262,7 @@ export default function StudentLandingPage({ onParentClick }) {
                     Free to start · No credit card required
                   </p>
                   <p style={{ fontFamily: SF, fontSize: 13.5, color: TEXT3, margin: 'clamp(6px, 1.5vw, 8px) 0 0', fontWeight: 600 }}>
-                    Join 5,000+ students using CLIFF
+                    Join 5,000+ students from colleges across the U.S.
                   </p>
                 </div>
               </>
