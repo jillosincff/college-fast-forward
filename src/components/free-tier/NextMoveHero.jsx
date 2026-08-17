@@ -19,6 +19,7 @@ export default function NextMoveHero({ user, firstName }) {
   const [loading, setLoading] = useState(true);
   const [draftTask, setDraftTask] = useState(null);
   const [whyOpen, setWhyOpen] = useState(false);
+  const [justDone, setJustDone] = useState(false);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -41,6 +42,8 @@ export default function NextMoveHero({ user, firstName }) {
     setState(next);
     writeMovesCache(user.email, next);
     setWhyOpen(false);
+    setJustDone(true);
+    setTimeout(() => setJustDone(false), 1600);
   };
 
   const go = () => {
@@ -77,13 +80,10 @@ export default function NextMoveHero({ user, firstName }) {
       borderRadius: 20, padding: 'clamp(20px, 4vw, 28px)', marginBottom: 16,
       boxShadow: '0 8px 28px rgba(76,29,149,0.28)',
     }}>
-      <p style={{ fontFamily: dm, fontSize: 13.5, fontWeight: 800, color: 'rgba(255,255,255,0.75)', margin: '0 0 8px' }}>
-        {greeting()}{firstName ? `, ${firstName}` : ''}. Here's where I'd start.
-      </p>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
         <Sparkles size={14} color="#c4b5fd" />
         <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 900, color: '#c4b5fd', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          Your next move
+          {greeting()}{firstName ? `, ${firstName}` : ''} · Your next move
         </span>
       </div>
 
@@ -119,8 +119,16 @@ export default function NextMoveHero({ user, firstName }) {
           {move.action_label || 'Go'} <ArrowRight size={16} />
         </button>
         <button onClick={() => markDone(idx)}
-          style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', background: 'none', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 999, padding: '12px 18px', cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 5 }}>
-          <Check size={14} /> Did it
+          style={{
+            fontFamily: dm, fontSize: 13, fontWeight: 700,
+            color: justDone ? '#065f46' : 'rgba(255,255,255,0.85)',
+            background: justDone ? '#a7f3d0' : 'transparent',
+            border: justDone ? '1px solid #6ee7b7' : '1px solid rgba(255,255,255,0.3)',
+            borderRadius: 999, padding: '12px 18px', cursor: 'pointer',
+            minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 5,
+            transition: 'all 0.25s ease',
+          }}>
+          <Check size={14} /> {justDone ? 'Nice — logged' : 'Did it'}
         </button>
         <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center', gap: 4 }}>
           <Clock size={12} /> {move.time}

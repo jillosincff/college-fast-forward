@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 import { deriveStudentProfile, getCareerIntelligence } from '@/lib/careerIntelligence/engine';
 import YourPathForward from '@/components/trajectory/YourPathForward';
 import { Check, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
@@ -69,13 +70,26 @@ export default function CareerSeasonCard({ user }) {
             {voice} This {monthName}, I'd focus on:
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {monthlyFocus.slice(0, 3).map(rec => (
+            {monthlyFocus.slice(0, 3).map((rec, i) => (
               <div key={rec.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, background: '#faf9ff', border: '1px solid #ede9fe', borderRadius: 10, padding: '9px 12px' }}>
                 <Check size={14} color="#7c3aed" style={{ flexShrink: 0, marginTop: 2 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>
-                    {rec.title}
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>
+                      {rec.title}
+                    </p>
+                    {i === 0 && rec.action_route && (
+                      <button
+                        onClick={() => {
+                          try { base44.analytics.track({ eventName: 'monthly_focus_started', properties: { route: rec.action_route } }); } catch {}
+                          navigate(rec.action_route);
+                        }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6d28d9', background: '#fff', border: '1px solid #ddd6fe', borderRadius: 999, padding: '4px 10px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }}
+                      >
+                        Start <ArrowRight size={11} />
+                      </button>
+                    )}
+                  </div>
                   <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '2px 0 0', lineHeight: 1.5 }}>{rec.description}</p>
                 </div>
               </div>
