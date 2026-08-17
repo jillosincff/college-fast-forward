@@ -1,0 +1,52 @@
+# Copy this file to .github/workflows/magic-moment-pr.yml
+# (The Base44 GitHub sync app cannot modify .github/workflows/ directly.)
+name: Magic Moment — PR (critical subset)
+
+on:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'src/pages/MagicMoment.jsx'
+      - 'src/components/conversion/**'
+      - 'base44/functions/generateOutreachDraft/**'
+      - 'base44/functions/seedMagicMomentFixtures/**'
+      - 'tests/magic-moment/**'
+      - 'playwright.config.js'
+
+jobs:
+  critical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run critical Magic Moment tests
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          ADMIN_EMAIL: ${{ secrets.MM_ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.MM_ADMIN_PASSWORD }}
+          USER_EMAIL: ${{ secrets.MM_USER_EMAIL }}
+          USER_PASSWORD: ${{ secrets.MM_USER_PASSWORD }}
+          NO_RESUME_EMAIL: ${{ secrets.MM_NO_RESUME_EMAIL }}
+          NO_RESUME_PASSWORD: ${{ secrets.MM_NO_RESUME_PASSWORD }}
+          ZERO_ALUMNI_EMAIL: ${{ secrets.MM_ZERO_ALUMNI_EMAIL }}
+          ZERO_ALUMNI_PASSWORD: ${{ secrets.MM_ZERO_ALUMNI_PASSWORD }}
+          API_EMAIL: ${{ secrets.MM_API_EMAIL }}
+          API_PASSWORD: ${{ secrets.MM_API_PASSWORD }}
+          FIXTURE_SCHOOL_CODE: ${{ secrets.MM_FIXTURE_SCHOOL_CODE }}
+          FIXTURE_ALUMNI_COMPANY: ${{ secrets.MM_FIXTURE_ALUMNI_COMPANY }}
+          FIXTURE_ZERO_ALUMNI_COMPANY: ${{ secrets.MM_FIXTURE_ZERO_ALUMNI_COMPANY }}
+          CI: 'true'
+        run: npx playwright test --grep critical
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: magic-moment-pr-report
+          path: playwright-report
+          retention-days: 7

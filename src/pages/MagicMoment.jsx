@@ -286,7 +286,7 @@ export default function MagicMoment() {
       <div style={{ maxWidth: 620, margin: '0 auto', padding: '28px 16px' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '6px 14px', marginBottom: 14 }}>
+          <div data-testid="mm-free-cycle-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '6px 14px', marginBottom: 14 }}>
             <Sparkles size={13} color={INDIGO} />
             <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your free cycle</span>
           </div>
@@ -308,7 +308,7 @@ export default function MagicMoment() {
         </div>
 
         {/* The job */}
-        <Block icon={<Briefcase size={16} color={INDIGO} />} label="The job">
+        <Block icon={<Briefcase size={16} color={INDIGO} />} label="The job" testId="mm-job">
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
             {job?.logo_url && <img src={job.logo_url} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', flex: '0 0 auto' }} onError={(e) => { e.target.style.display = 'none'; }} />}
             <div style={{ flex: 1 }}>
@@ -320,7 +320,7 @@ export default function MagicMoment() {
         </Block>
 
         {/* Tailored resume */}
-        <Block icon={<FileText size={16} color={INDIGO} />} label="Tailored resume">
+        <Block icon={<FileText size={16} color={INDIGO} />} label="Tailored resume" testId="mm-resume">
           {tailored ? (
             <div>
               {!tailored.starter_untailored && tailored.originalScore != null && tailored.tailoredScore != null && (
@@ -340,9 +340,9 @@ export default function MagicMoment() {
         </Block>
 
         {/* Alumni cards */}
-        <Block icon={<Users size={16} color={INDIGO} />} label="Alumni at this company">
+        <Block icon={<Users size={16} color={INDIGO} />} label="Alumni at this company" testId="mm-alumni">
           {connections.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div data-testid="mm-alumni-list" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {connections.map((c) => (
                 <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: '#faf7ff', borderRadius: 12, border: `1px solid ${INDIGO_BORDER}` }}>
                   <div style={{ width: 36, height: 36, borderRadius: 999, background: GRAD_INDIGO, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT, fontWeight: 800, fontSize: 14, flex: '0 0 auto' }}>
@@ -358,7 +358,7 @@ export default function MagicMoment() {
               ))}
             </div>
           ) : (
-            <div>
+            <div data-testid="mm-alumni-fallback">
               <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>No strong alumni match found at {job?.name} yet.</p>
               <p style={{ fontFamily: FONT, fontSize: 12.5, color: TEXT2, margin: '0 0 10px', lineHeight: 1.55 }}>CLIFF still wrote you a sendable cold outreach below — search LinkedIn for a hiring manager or recruiter at {job?.name} and paste it in. Pro surfaces same-industry alumni automatically.</p>
               <button onClick={() => setShowPro(true)} style={ghostBtn({})}>See how Pro finds alumni →</button>
@@ -374,7 +374,7 @@ export default function MagicMoment() {
                 <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>Cold outreach · no alumni found</p>
               )}
               {outreach.subject && <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT3, margin: '0 0 8px' }}>Subject: {outreach.subject}</p>}
-              <div style={{ background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '14px 16px', fontFamily: FONT, fontSize: 13.5, color: TEXT, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+              <div data-testid="mm-outreach-draft" style={{ background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '14px 16px', fontFamily: FONT, fontSize: 13.5, color: TEXT, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                 {outreach.message}
               </div>
             </div>
@@ -385,8 +385,8 @@ export default function MagicMoment() {
 
         {/* Primary + secondary CTAs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-          <button onClick={handlePrimaryAction} style={pill({ width: '100%', justifyContent: 'center', padding: '16px' })}>
-            {copied ? <><Check size={16} /> Message copied — paste it into LinkedIn</> : <><Copy size={16} /> Copy message &amp; open LinkedIn</>}
+          <button data-testid="mm-copy-send" onClick={handlePrimaryAction} style={pill({ width: '100%', justifyContent: 'center', padding: '16px' })}>
+            {copied ? <><Check size={16} /> <span data-testid="mm-copy-confirmation">Message copied — paste it into LinkedIn</span></> : <><Copy size={16} /> Copy message &amp; open LinkedIn</>}
           </button>
           <button onClick={() => navigate('/FreeTierDashboard')} style={ghostBtn({ width: '100%', justifyContent: 'center', padding: '15px' })}>
             <Save size={15} /> Save for later
@@ -398,7 +398,7 @@ export default function MagicMoment() {
         <div style={{ marginTop: 20, background: 'linear-gradient(135deg, #2e1065 0%, #4c1d95 100%)', borderRadius: R, padding: '22px 20px', textAlign: 'center', boxShadow: '0 12px 30px rgba(76,29,149,0.28)' }}>
           <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>This was your free cycle.</p>
           <p style={{ fontFamily: FONT, fontSize: 13.5, color: 'rgba(255,255,255,0.8)', margin: '0 0 16px', lineHeight: 1.5 }}>Unlock unlimited so CLIFF can run this plan for every job you actually want.</p>
-          <button onClick={() => setShowPro(true)} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#4c1d95', background: '#fff', border: 'none', borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 18px rgba(0,0,0,0.18)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <button data-testid="cta-upgrade" onClick={() => setShowPro(true)} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#4c1d95', background: '#fff', border: 'none', borderRadius: 999, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 18px rgba(0,0,0,0.18)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <Lock size={15} /> Unlock CLIFF Pro →
           </button>
         </div>
@@ -463,9 +463,9 @@ function buildStarterResumeText(user, job) {
   return lines.join('\n');
 }
 
-function Block({ icon, label, children }) {
+function Block({ icon, label, children, testId }) {
   return (
-    <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '18px 20px', marginBottom: 14, border: '1px solid #f1e9ff' }}>
+    <div data-testid={testId} style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '18px 20px', marginBottom: 14, border: '1px solid #f1e9ff' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         {icon}
         <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
