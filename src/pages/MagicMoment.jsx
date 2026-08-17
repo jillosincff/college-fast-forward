@@ -100,29 +100,40 @@ export default function MagicMoment() {
         setJob(topJob);
         const targetField = industries[0] || role || 'your target';
 
-        // 2. Tailor the resume (if the student uploaded one)
-        if (user.resume_url || user.resume_file_url) {
-          setPhase('Tailoring your resume for this role…');
-          try {
-            const resumeUrl = user.resume_url || user.resume_file_url;
+        // 2. Tailor the resume — uploaded if present, otherwise a starter built
+        //    from the student's profile so the cycle always shows a resume
+        //    artifact (never an empty slot).
+        setPhase('Tailoring your resume for this role…');
+        let tailoredResult = null;
+        let isStarter = false;
+        try {
+          let resumeText = '';
+          const resumeUrl = user.resume_url || user.resume_file_url;
+          if (resumeUrl) {
             let resumes = [];
             try { resumes = await base44.entities.Resume.filter({ student_email: user.email }, '-created_date', 5); } catch (e) {}
-            let resumeText = resumes?.[0]?.parsed_text || '';
+            resumeText = resumes?.[0]?.parsed_text || '';
             if (!resumeText) {
               const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({ file_url: resumeUrl, json_schema: RESUME_SCHEMA });
               const parsed = extracted?.output || extracted;
               resumeText = parsedResumeToText(parsed);
               if (resumeText.length > 100) await saveParsedResume(base44, user.email, parsed, resumeUrl, '').catch(() => {});
             }
-            if (resumeText.length > 100) {
-              const tailRes = await base44.functions.invoke('tailorResume', {
-                resumeText, jobTitle: topJob.job_title, companyName: topJob.name,
-                jobDescription: topJob.hiring_description || '',
-              });
-              setTailored(tailRes?.data || tailRes);
-            }
-          } catch (e) { /* resume tailoring is best-effort — don't block the plan */ }
-        }
+          }
+          if (!resumeText || resumeText.length <= 100) {
+            // No usable uploaded resume — generate a starter from profile + target role
+            resumeText = buildStarterResumeText(user, topJob);
+            isStarter = true;
+          }
+          if (resumeText.length > 100) {
+            const tailRes = await base44.functions.invoke('tailorResume', {
+              resumeText, jobTitle: topJob.job_title, companyName: topJob.name,
+              jobDescription: topJob.hiring_description || '',
+            });
+            tailoredResult = tailRes?.data || tailRes;
+          }
+        } catch (e) { /* resume tailoring is best-effort — don't block the plan */ }
+        if (tailoredResult) setTailored({ ...tailoredResult, starter: isStarter });
 
         // 3. Surface alumni at the company
         setPhase(`Surfacing alumni at ${topJob.name}…`);
@@ -304,6 +315,9 @@ export default function MagicMoment() {
             <div>
               <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 6px' }}>Match score improved from <strong style={{ color: TEXT }}>{tailored.originalScore}%</strong> to <strong style={{ color: INDIGO }}>{tailored.tailoredScore}%</strong> for this role.</p>
               <button onClick={downloadResume} style={ghostBtn({ marginBottom: 8 })}><Download size={14} /> Download tailored resume</button>
+              {tailored.starter && (
+                <p style={{ fontFamily: FONT, fontSize: 12, color: INDIGO_DIM, margin: '8px 0 0', lineHeight: 1.5 }}>Starter version built from your profile — <button onClick={() => navigate('/FreeTierDashboard')} style={{ background: 'none', border: 'none', padding: 0, color: INDIGO, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>upload your resume</button> for a stronger match.</p>
+              )}
             </div>
           ) : (
             <div>
@@ -382,6 +396,39 @@ export default function MagicMoment() {
       {showSoftWall && <SoftWallModal user={user} onClose={() => setShowSoftWall(false)} source="soft_wall" />}
     </div>
   );
+}
+
+// Builds a starter resume text from the student's profile + target role when
+// they haven't uploaded one — so the Magic Moment always shows a resume
+// artifact. It's honestly labeled in the UI as a starter version.
+function buildStarterResumeText(user, job) {
+  const cg = user?.career_goals || {};
+  const role = job?.job_title || (cg.target_roles || [])[0] || 'your target role';
+  const industry = (cg.target_industries || [])[0] || '';
+  const school = user?.school_name || user?.school || '';
+  const grad = user?.graduation_year || '';
+  const name = user?.full_name || '';
+  const email = user?.email || '';
+  const linkedin = user?.linkedin_url || '';
+  const lines = [];
+  if (name) lines.push(name);
+  const contact = [email, linkedin].filter(Boolean).join(' | ');
+  if (contact) lines.push(contact);
+  lines.push('');
+  lines.push('SUMMARY');
+  lines.push(`${school ? school + ' student' : 'Student'}${industry ? ` interested in ${industry}` : ''}${grad ? `, graduating ${grad}` : ''}. Targeting ${role} roles.`);
+  lines.push('');
+  if (school) {
+    lines.push('EDUCATION');
+    lines.push(`${school}${grad ? ` — Expected ${grad}` : ''}`);
+    lines.push('');
+  }
+  lines.push('SKILLS');
+  lines.push([role, industry, 'communication', 'teamwork', 'problem-solving'].filter(Boolean).join(', '));
+  lines.push('');
+  lines.push('EXPERIENCE');
+  lines.push('Relevant coursework, projects, and campus involvement — add your experience here.');
+  return lines.join('\n');
 }
 
 function Block({ icon, label, children }) {
