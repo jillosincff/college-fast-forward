@@ -190,29 +190,6 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
       </div>
       )}
 
-      {/* ── Frustration Level Card ── */}
-      {frustInfo && (
-        <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px', border: `1px solid ${INDIGO_BORDER}` }}>
-          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 16 }}>
-            Frustration Level
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <span style={{ fontSize: 32, lineHeight: 1 }}>{frustInfo.emoji}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
-                <span style={{ fontFamily: FONT, fontSize: 28, fontWeight: 800, color: frustInfo.color }}>{frustration}</span>
-                <span style={{ fontFamily: FONT, fontSize: 14, color: TEXT3 }}>/10</span>
-              </div>
-              <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>{frustInfo.text}</p>
-            </div>
-          </div>
-          {/* Mini progress bar */}
-          <div style={{ marginTop: 14, height: 6, background: '#E2E8F0', borderRadius: 100 }}>
-            <div style={{ height: '100%', width: `${((Number(frustration) || 1) / 10) * 100}%`, background: frustInfo.color, borderRadius: 100, transition: 'width 0.4s ease' }} />
-          </div>
-        </div>
-      )}
-
       {/* ── Industries Card — own profile sees these in "My Search Preferences" ── */}
       {!isMyProfile && industries.length > 0 && (
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
@@ -253,28 +230,6 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
                 {role}
               </span>
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Blockers Card ── */}
-      {blockers.length > 0 && (
-        <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
-          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 12 }}>
-            Your Roadblocks
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {blockers.map((key, i) => {
-              const b = BLOCKER_LABELS[key] || (typeof key === 'string' ? { icon: '•', label: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) } : { icon: '•', label: String(key) });
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 16, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: TEAL_LIGHT, borderRadius: 8, border: `1px solid ${TEAL_BORDER}`, flexShrink: 0 }}>
-                    {b.icon}
-                  </span>
-                  <span style={{ fontFamily: FONT, fontSize: 14, color: TEXT, fontWeight: 500 }}>{b.label}</span>
-                </div>
-              );
-            })}
           </div>
         </div>
       )}
@@ -331,54 +286,6 @@ export default function ProfileCard({ user, parentInfo, resumeInfo, onboardingDa
                 <Upload size={14} /> Upload
               </button>
             )}
-          </div>
-        )}
-      </div>
-
-      {/* ── Parent Network Card ── */}
-      <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px' }}>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 16 }}>
-          Parent Network
-        </p>
-        {parentCompany ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Building2 size={22} style={{ color: INDIGO }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT, margin: 0 }}>
-                {parentName || 'Parent connection'}
-              </p>
-              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>
-                Works at <strong style={{ color: INDIGO }}>{parentCompany}</strong>{parentRole ? ` · ${parentRole}` : ''}
-              </p>
-              <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '4px 0 0' }}>
-                This opens warm intro pathways for fellow students.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Building2 size={22} style={{ color: '#94a3b8' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT, margin: 0 }}>
-                No parent connection added
-              </p>
-              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>
-                Add where your parents work to unlock the Inside Track network.
-              </p>
-              {isMyProfile && (
-                <button onClick={() => navigate('ProfileEdit', { focus: 'parent' })} style={{
-                  marginTop: 8, fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
-                  background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
-                  borderRadius: 8, padding: '6px 14px', cursor: 'pointer', minHeight: 'auto',
-                }}>
-                  + Add Parent Info
-                </button>
-              )}
-            </div>
           </div>
         )}
       </div>

@@ -2,19 +2,16 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
+import { deriveSchoolCode } from '@/lib/schoolNames';
 import { ArrowLeft, Upload, CheckCircle2 } from 'lucide-react';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
 import CareerFocusCard from '@/components/profile/CareerFocusCard';
 
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
 const INDIGO = '#6d28d9';
-const VIOLET = '#7c3aed';
 const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
 const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
-const TEAL = '#06b6d4';
-const TEAL_LIGHT = 'rgba(6,182,212,0.08)';
-const TEAL_BORDER = 'rgba(6,182,212,0.22)';
 const TEXT = '#0f172a';
 const TEXT2 = '#475569';
 const TEXT3 = '#94a3b8';
@@ -22,15 +19,7 @@ const CARD = '#ffffff';
 const R = 14;
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
 
-const BLOCKERS = [
-  { key: 'resume', icon: '📄', label: "Resume isn't getting responses" },
-  { key: 'ghosted', icon: '👻', label: 'Getting ghosted after applying' },
-  { key: 'no_direction', icon: '🧩', label: 'Not sure what I want to do' },
-  { key: 'which_jobs', icon: '🔍', label: "Don't know which jobs to apply for" },
-  { key: 'outreach', icon: '🤝', label: "Don't know how to reach the right people" },
-  { key: 'disorganized', icon: '📁', label: 'Disorganized and losing track' },
-  { key: 'interviews', icon: '🎤', label: 'Interviewing makes me nervous' },
-];
+const NOT_ENROLLED = 'Recent grad / not enrolled';
 
 const inputStyle = {
   width: '100%', background: '#f8f9ff',
@@ -41,25 +30,21 @@ const inputStyle = {
 
 const labelStyle = {
   display: 'block', fontFamily: FONT, fontSize: 11, fontWeight: 700,
-  textTransform: 'uppercase', letterSpacing: '0.1em', color: VIOLET, marginBottom: 8,
+  textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7c3aed', marginBottom: 8,
 };
 
 const sectionCard = {
   background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px',
 };
 
-function readOnboardingData() {
-  try {
-    return {
-      frustration: parseInt(localStorage.getItem('cff_frustration') || '5', 10) || 5,
-      blockers: JSON.parse(localStorage.getItem('cff_blockers') || '[]'),
-      college: localStorage.getItem('cff_college') || '',
-      resumeUrl: localStorage.getItem('cff_resume_url') || '',
-    };
-  } catch {
-    return { frustration: 5, blockers: [], college: '', resumeUrl: '' };
-  }
-}
+const chipBtn = (active) => ({
+  fontFamily: FONT, fontSize: 13, fontWeight: active ? 700 : 600,
+  color: active ? '#fff' : '#6d28d9',
+  background: active ? GRAD_INDIGO : '#fff',
+  border: `1.5px solid ${active ? INDIGO : INDIGO_BORDER}`,
+  borderRadius: 999, padding: '10px 16px', cursor: 'pointer', minHeight: 'auto',
+  transition: 'all 0.15s', textAlign: 'left',
+});
 
 export default function ProfileEdit() {
   const { user, refreshUser } = useAuth();
@@ -69,54 +54,30 @@ export default function ProfileEdit() {
   const fileRef = useRef(null);
 
   const [form, setForm] = useState({
-    fullName: '', school: '', gradYear: '', linkedinUrl: '',
-    parentCompany: '',
-    ...readOnboardingData(),
+    fullName: '',
+    school: '',
+    notEnrolled: false,
+    linkedinUrl: '',
+    resumeUrl: '',
+    resumeName: '',
   });
 
   useEffect(() => {
     if (user) {
+      const storedResume = localStorage.getItem('cff_resume_url') || '';
       setForm(prev => ({
         ...prev,
         fullName: user.full_name || user.first_name || '',
-        school: user.school || user.school_name || user.university || prev.college || '',
-        gradYear: user.graduation_year || '',
+        school: user.school || user.school_name || user.university || '',
+        notEnrolled: (user.school || '') === NOT_ENROLLED,
         linkedinUrl: user.linkedin_url || '',
+        resumeUrl: user.resume_url || user.resume_file_url || storedResume,
+        resumeName: user.resume_url || user.resume_file_url ? 'Resume on file' : '',
       }));
     }
-    // Load parent company
-    (async () => {
-      if (user?.id) {
-        try {
-          const records = await base44.entities.ParentNetworkProfile.filter({ created_by_id: user.id });
-          if (records?.length > 0) {
-            setForm(prev => ({ ...prev, parentCompany: records[0].company_name || '' }));
-          }
-        } catch (e) { /* non-blocking */ }
-      }
-    })();
   }, [user]);
 
-  // If navigated here to add parent info, scroll straight to that section
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
-    if (params.get('focus') === 'parent') {
-      setTimeout(() => {
-        document.getElementById('parent-network-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300);
-    }
-  }, []);
-
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
-
-  const toggleBlocker = (key) => {
-    setForm(prev => {
-      const has = prev.blockers.includes(key);
-      if (has) return { ...prev, blockers: prev.blockers.filter(k => k !== key) };
-      if (prev.blockers.length >= 2) return prev;
-      return { ...prev, blockers: [...prev.blockers, key] };
-    });
-  };
 
   const handleResumeUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -125,7 +86,7 @@ export default function ProfileEdit() {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       update('resumeUrl', file_url);
-      // Save to Resume entity
+      update('resumeName', file.name);
       if (user?.email) {
         await base44.entities.Resume.create({
           student_email: user.email,
@@ -145,50 +106,46 @@ export default function ProfileEdit() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Save to localStorage
-      const lsMap = {
-        cff_frustration: String(form.frustration),
-        cff_blockers: JSON.stringify(form.blockers),
-        cff_college: form.school,
-      };
-      if (form.resumeUrl) lsMap.cff_resume_url = form.resumeUrl;
-      Object.entries(lsMap).forEach(([k, v]) => { try { localStorage.setItem(k, v); } catch (e) {} });
+      const schoolValue = form.notEnrolled ? NOT_ENROLLED : form.school.trim();
+      // Keep localStorage in sync with onboarding keys so the profile,
+      // onboarding, and CLIFF never disagree.
+      try {
+        localStorage.setItem('cff_college', schoolValue);
+        if (form.resumeUrl) {
+          localStorage.setItem('cff_resume_url', form.resumeUrl);
+          localStorage.setItem('cff_resume_status', 'provided');
+        }
+        if (form.linkedinUrl.trim()) localStorage.setItem('cff_linkedin_url', form.linkedinUrl.trim());
+      } catch (e) {}
 
-      // Save to User entity
       const updateData = {
         full_name: form.fullName.trim(),
         first_name: form.fullName.trim().split(' ')[0],
-        school: form.school.trim(),
-        school_name: form.school.trim(),
-        university: form.school.trim(),
-        graduation_year: form.gradYear,
-        linkedin_url: form.linkedinUrl.trim(),
-        career_blockers: form.blockers,
+        school: schoolValue,
+        school_name: schoolValue,
+        university: schoolValue,
+        ...(form.linkedinUrl.trim() ? { linkedin_url: form.linkedinUrl.trim() } : {}),
+        ...(form.resumeUrl ? { resume_url: form.resumeUrl, resume_file_url: form.resumeUrl, resume_status: 'provided' } : {}),
       };
+      // Derive school_code for alumni / parent surfacing when actually enrolled.
+      if (!form.notEnrolled && form.school.trim()) {
+        const code = deriveSchoolCode(form.school.trim());
+        if (code) updateData.school_code = code.toUpperCase();
+      }
       await base44.auth.updateMe(updateData);
 
-      // Save parent company to ParentNetworkProfile
-      if (form.parentCompany.trim()) {
-        try {
-          const existing = await base44.entities.ParentNetworkProfile.filter({ created_by_id: user.id });
-          if (existing?.length > 0) {
-            await base44.entities.ParentNetworkProfile.update(existing[0].id, { company_name: form.parentCompany.trim() });
-          } else {
-            await base44.entities.ParentNetworkProfile.create({
-              first_name: form.fullName.trim().split(' ')[0] || 'Student',
-              last_name: form.fullName.trim().split(' ').slice(1).join(' ') || 'Student',
-              company_name: form.parentCompany.trim(),
-              company_domain: form.parentCompany.trim().toLowerCase().replace(/[^a-z0-9]/g, '') + '.com',
-              role_title: 'Parent/Guardian',
-              is_active: true,
-            });
-          }
-        } catch (e) { /* non-blocking */ }
-      }
+      // Rebuild career_goals location if the student previously had one,
+      // so school + goals stay consistent for matching.
+      try {
+        const existingGoals = user?.career_goals || {};
+        if (existingGoals && Object.keys(existingGoals).length) {
+          await base44.functions.invoke('refreshDailyDrop', {}).catch(() => {});
+        }
+      } catch (e) {}
 
       if (refreshUser) { try { await refreshUser(); } catch (e) {} }
       setSaved(true);
-      setTimeout(() => { setSaved(false); navigate('Profile'); }, 1200);
+      setTimeout(() => { setSaved(false); navigate('Profile'); }, 1000);
     } catch (err) {
       console.error('Profile save failed:', err);
     } finally {
@@ -197,10 +154,6 @@ export default function ProfileEdit() {
   };
 
   if (!user) return null;
-
-  const frustEmoji = form.frustration <= 2 ? '😌' : form.frustration <= 4 ? '😐' : form.frustration <= 6 ? '😟' : form.frustration <= 8 ? '😰' : '🆘';
-  const frustColor = form.frustration <= 3 ? '#10b981' : form.frustration <= 6 ? '#F59E0B' : '#EF4444';
-  const frustPct = ((form.frustration - 1) / 9) * 100;
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9ff', display: 'flex', flexDirection: 'column' }}>
@@ -224,101 +177,45 @@ export default function ProfileEdit() {
           Edit Profile
         </h1>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, marginBottom: 28 }}>
-          Keep your career data current so your agent can match you with the right opportunities.
+          Keep your search details current — CLIFF uses these to match jobs, alumni, and your plan.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* ── Section: Basic Info ── */}
+          {/* ── School ── */}
           <div style={sectionCard}>
-            <p style={{ ...labelStyle, marginBottom: 16 }}>Basic Info</p>
-
-            <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Full Name</label>
-              <input value={form.fullName} onChange={e => update('fullName', e.target.value)}
-                placeholder="Your full name" style={inputStyle} />
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>School / University</label>
-              <SchoolSearchInput value={form.school} onChange={val => update('school', val)} light />
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Graduation Year</label>
-              <input value={form.gradYear}
-                onChange={e => update('gradYear', e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="e.g. 2026" maxLength={4} style={inputStyle} />
-            </div>
-
-            <div>
-              <label style={labelStyle}>LinkedIn URL <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
-              <input value={form.linkedinUrl} onChange={e => update('linkedinUrl', e.target.value)}
-                placeholder="https://linkedin.com/in/yourname" style={inputStyle} />
-            </div>
+            <p style={{ ...labelStyle, marginBottom: 16 }}>School</p>
+            <SchoolSearchInput
+              value={form.notEnrolled ? '' : form.school}
+              onChange={(val) => { update('school', val); update('notEnrolled', false); }}
+              light
+            />
+            <button
+              type="button"
+              onClick={() => { update('notEnrolled', !form.notEnrolled); if (!form.notEnrolled) update('school', ''); }}
+              style={{ marginTop: 12, ...chipBtn(form.notEnrolled) }}
+            >
+              {form.notEnrolled ? '✓ Recent grad / not currently enrolled' : 'Recent grad / not currently enrolled'}
+            </button>
           </div>
 
-          {/* ── Section: Career Focus — single source of truth (career_goals) ── */}
+          {/* ── Career Focus (target role / industry + location) — single source of truth ── */}
           <CareerFocusCard user={user} onUpdated={() => refreshUser?.()} />
 
-          {/* ── Section: Frustration Level ── */}
+          {/* ── LinkedIn ── */}
           <div style={sectionCard}>
-            <p style={{ ...labelStyle, marginBottom: 16 }}>Frustration Level</p>
-            <div style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: 36, lineHeight: 1 }}>{frustEmoji}</span>
-              <div style={{ marginTop: 8 }}>
-                <span style={{ fontFamily: FONT, fontSize: 36, fontWeight: 800, color: frustColor }}>{form.frustration}</span>
-                <span style={{ fontFamily: FONT, fontSize: 16, color: TEXT3 }}> /10</span>
-              </div>
-            </div>
-            <div style={{ marginTop: 12 }}>
-              <style>{`.frust-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 100px; outline: none; cursor: pointer; background: linear-gradient(to right, ${frustColor} 0%, ${frustColor} ${frustPct}%, #E2E8F0 ${frustPct}%, #E2E8F0 100%); }
-              .frust-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2.5px solid ${frustColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: grab; }
-              .frust-slider::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2.5px solid ${frustColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: grab; }`}</style>
-              <input type="range" min="1" max="10" value={form.frustration}
-                onChange={e => update('frustration', Number(e.target.value))}
-                className="frust-slider" />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-              <span style={{ fontFamily: FONT, fontSize: 10, color: TEXT3 }}>Not at all</span>
-              <span style={{ fontFamily: FONT, fontSize: 10, color: TEXT3 }}>Losing my mind</span>
-            </div>
+            <p style={{ ...labelStyle, marginBottom: 16 }}>LinkedIn <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none' }}>(optional)</span></p>
+            <input value={form.linkedinUrl} onChange={e => update('linkedinUrl', e.target.value)}
+              placeholder="https://linkedin.com/in/yourname" style={inputStyle} />
           </div>
 
-          {/* ── Section: Roadblocks ── */}
+          {/* ── Resume ── */}
           <div style={sectionCard}>
-            <p style={{ ...labelStyle, marginBottom: 4 }}>Your Roadblocks <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none' }}>(max 2)</span></p>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, marginBottom: 16 }}>These tell your agent which tools to prioritize for you.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {BLOCKERS.map(b => {
-                const active = form.blockers.includes(b.key);
-                const maxed = form.blockers.length >= 2 && !active;
-                return (
-                  <button key={b.key} type="button" onClick={() => !maxed && toggleBlocker(b.key)} style={{
-                    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-                    padding: '10px 14px', borderRadius: 10, textAlign: 'left',
-                    cursor: maxed ? 'default' : 'pointer', minHeight: 'auto',
-                    border: `1.5px solid ${active ? TEAL : '#E2E8F0'}`,
-                    background: active ? TEAL_LIGHT : '#fff',
-                    opacity: maxed ? 0.4 : 1,
-                    transition: 'all 0.15s',
-                  }}>
-                    <span style={{ fontSize: 18, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: active ? TEAL_LIGHT : '#f8f9ff', borderRadius: 8, border: `1px solid ${TEAL_BORDER}`, flexShrink: 0 }}>{b.icon}</span>
-                    <span style={{ flex: 1, fontFamily: FONT, fontSize: 13, fontWeight: active ? 600 : 400, color: active ? '#065F46' : TEXT2 }}>{b.label}</span>
-                    {active && <CheckCircle2 size={18} style={{ color: TEAL }} />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── Section: Resume ── */}
-          <div style={sectionCard}>
-            <p style={{ ...labelStyle, marginBottom: 16 }}>Resume</p>
+            <p style={{ ...labelStyle, marginBottom: 16 }}>Resume <span style={{ color: TEXT3, fontWeight: 400, textTransform: 'none' }}>(optional)</span></p>
             <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} style={{ display: 'none' }} />
             {form.resumeUrl ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 10, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.22)' }}>
                 <CheckCircle2 size={20} style={{ color: '#10b981', flexShrink: 0 }} />
-                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT, margin: 0, flex: 1 }}>Resume on file</p>
+                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT, margin: 0, flex: 1 }}>{form.resumeName || 'Resume on file'}</p>
                 <button type="button" onClick={() => fileRef.current?.click()} style={{
                   fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO,
                   background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
