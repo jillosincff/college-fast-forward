@@ -26,19 +26,6 @@ Deno.serve(async (req) => {
 
     const candidates = [];
 
-    // Interview scheduled → highest leverage today
-    const interviewing = (pipeline || []).find(r => r.status === 'interview');
-    if (interviewing) {
-      candidates.push({
-        score: 100, kind: 'interview',
-        title: `Practice your ${interviewing.company} interview`,
-        reasons: [`You have an interview in play at ${interviewing.company}`, 'I prepared company-specific practice questions'],
-        time: '8 min', action_label: 'Practice',
-        action: { type: 'route', route: '#/MockInterview' },
-        company: interviewing.company,
-      });
-    }
-
     // Resume already prepared → apply is nearly free
     const readyResume = (resumes || []).find(r => r.status === 'completed' && !r.downloaded_at);
     if (readyResume) {
@@ -176,14 +163,13 @@ Deno.serve(async (req) => {
 
     // "Why This, Not That?" — explain each pick against what it beat
     const EDGE = {
-      interview: 'your interview is time-sensitive — nothing on your plate matters more today',
       apply: 'your resume there is already prepared, so applying costs you almost nothing',
       followup: 'this follow-up window is closing — other opportunities will still be there tomorrow',
       discovery: 'it changes what your best next step is right now',
       newjob: 'it matches your goals and preferences more closely',
       complete: "you've already invested in it — finishing beats starting something new",
     };
-    const label = (c) => c.kind === 'interview' ? `practicing for ${c.company}` : c.kind === 'followup' ? `following up with ${c.company}` : (c.company || c.title);
+    const label = (c) => c.kind === 'followup' ? `following up with ${c.company}` : (c.company || c.title);
     const chosen = new Set(moves.map(m => m.title));
     const passedOver = candidates.filter(c => !chosen.has(c.title));
     moves.forEach((m, i) => {
