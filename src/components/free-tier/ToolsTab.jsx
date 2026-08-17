@@ -12,7 +12,7 @@ const GROUPS = [
     label: 'Primary tools',
     tools: [
       { id: 'chat', icon: MessageCircle, title: 'Ask CLIFF', desc: 'Ask about any job, application or career decision.', route: 'cliff-chat' },
-      { id: 'resume', icon: FileText, title: 'Resume Studio', desc: 'Manage your master resume or tailor one without starting from a job.', route: 'ResumeTailoring' },
+      { id: 'resume', icon: FileText, title: 'Resume Tailor', desc: 'Tailor a resume for any role — or manage your master resume.', route: 'ResumeTailoring' },
       { id: 'mock_interview', icon: Mic, title: 'Mock Interviews', desc: 'Practice for a role or upcoming interview.', route: 'MockInterview' },
     ],
   },
