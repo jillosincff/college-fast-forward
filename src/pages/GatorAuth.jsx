@@ -311,7 +311,7 @@ export default function GatorAuth() {
             localStorage.removeItem('cff_funnel_completed');
             try { sessionStorage.removeItem('cff_funnel_completed'); sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); } catch (e) {}
             try { await refreshUser(); } catch (e) {}
-            window.location.hash = '#/FreeTierDashboard';
+            window.location.hash = '#/MagicMoment';
             return;
           } catch (e) { /* fall through to normal routing */ }
         } else {

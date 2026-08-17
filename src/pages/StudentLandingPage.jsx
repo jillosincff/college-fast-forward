@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { Check } from 'lucide-react';
-import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
+import MinimalOnboarding from '@/components/onboarding-flow/MinimalOnboarding';
 import { useAuth } from '@/lib/AuthContext';
 import Reveal from '@/components/landing/Reveal';
 import MagicMomentVisual from '@/components/landing/MagicMomentVisual';
@@ -63,7 +63,6 @@ function PrimaryCTA({ label, onClick, fullWidth = true, dark = false, style: ext
 export default function StudentLandingPage({ onParentClick }) {
   const [mounted, setMounted] = useState(false);
   const [showFunnel, setShowFunnel] = useState(false);
-  const [funnelStartScreen, setFunnelStartScreen] = useState(null);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const { user, isLoadingAuth } = useAuth();
 
@@ -138,9 +137,6 @@ export default function StudentLandingPage({ onParentClick }) {
         localStorage.setItem('pending_invite_role', 'student');
         sessionStorage.setItem('cff_onboarding_type', 'student');
       } catch (e) {}
-      let savedScreen = null;
-      try { savedScreen = parseInt(localStorage.getItem('cff_onboarding_screen') || '', 10) || null; } catch {}
-      setFunnelStartScreen(savedScreen);
       setShowFunnel(true);
     }
   };
@@ -171,9 +167,8 @@ export default function StudentLandingPage({ onParentClick }) {
   return (
     <div style={{ background: BG, fontFamily: SF, color: TEXT, overflowX: 'hidden' }}>
       {showFunnel && (
-        <OnboardingFlow
-          onClose={() => { setShowFunnel(false); setFunnelStartScreen(null); }}
-          resumeAtScreen={funnelStartScreen}
+        <MinimalOnboarding
+          onClose={() => setShowFunnel(false)}
         />
       )}
 
