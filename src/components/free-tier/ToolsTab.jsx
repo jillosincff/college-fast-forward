@@ -1,5 +1,5 @@
 import { navigate } from '@/components/utils/navigation';
-import { MessageCircle, FileText, Mic, Linkedin, Brain, Mail } from 'lucide-react';
+import { MessageCircle, FileText, Mic, Linkedin, Mail } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -20,7 +20,6 @@ const GROUPS = [
     label: 'Profile & exploration',
     tools: [
       { id: 'linkedin', icon: Linkedin, title: 'LinkedIn Optimizer', desc: 'Get a full review of your LinkedIn profile with specific rewrites.', route: 'LinkedInReview' },
-      { id: 'career_assessment', icon: Brain, title: 'Career Archetype', desc: 'Discover how you think, what drives you, and which roles fit.', route: 'CareerAssessment' },
     ],
   },
   {
