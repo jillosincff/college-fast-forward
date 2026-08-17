@@ -29,7 +29,7 @@ const ALUMNI = [
   { name: 'Priya Shah', title: 'Senior Recruiter', note: 'UF alum', initials: 'PS' },
 ];
 
-const OUTREACH = "Hi Jordan — fellow UF student here. Your path into brand at Nike is exactly where I'm hoping to go. If you ever have 10 minutes, I'd love to hear how you got your start. Go Gators! – Maya";
+const OUTREACH = "Hey Jordan — I'm a UF student and just applied to a marketing role at Nike. Saw you work on the brand side and would love any advice if you have a sec. Thanks either way.";
 
 export default function MagicMomentVisual() {
   const rootRef = useRef(null);
