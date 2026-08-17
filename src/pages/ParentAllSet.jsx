@@ -56,7 +56,7 @@ export default function ParentAllSet() {
   }, []);
 
   return (
-    <div style={{
+    <div className="onb-screen" style={{
       minHeight: '100vh', background: BG, fontFamily: SF,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '48px 24px',
