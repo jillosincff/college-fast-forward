@@ -30,6 +30,16 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
   // Many imported contacts only have a placeholder title — hide it rather than
   // showing a meaningless "Professional at X" line.
   const hasRealTitle = parent.role_title && !/^(professional|n\/a|unknown)$/i.test(parent.role_title.trim());
+  // Imported contacts often store a full LinkedIn bio in role_title — collapse it
+  // to a single short role line so the card stays one tight row.
+  const shortRole = (() => {
+    let t = (parent.role_title || '').trim();
+    if (!t) return '';
+    t = t.replace(/^i\s*am\s+(a|an|the)\s+/i, '').replace(/^i'm\s+(a|an|the)\s+/i, '').replace(/^i\s+have\s+/i, '');
+    t = t.split(/[.\n;]| — | – | \| | at /i)[0].trim();
+    if (t.length > 42) t = t.slice(0, 41).trim() + '…';
+    return t;
+  })();
   return (
     <div style={{ background: '#fff', border: '1px solid #c7d2fe', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 4px 16px rgba(79,70,229,0.08)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
@@ -41,8 +51,8 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
             {parent.first_name}
             <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#16a34a', background: '#dcfce7', padding: '2px 6px', borderRadius: 999, letterSpacing: '0.04em' }}>FREE</span>
           </p>
-          <p style={{ fontFamily: dm, fontSize: 12, color: '#4b5563', margin: '0 0 2px' }}>
-            {hasRealTitle ? <>{parent.role_title} · </> : null}<strong style={{ color: '#111827' }}>{parent.company_name}</strong>
+          <p style={{ fontFamily: dm, fontSize: 12, color: '#4b5563', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {hasRealTitle && shortRole ? <>{shortRole} · </> : null}<strong style={{ color: '#111827' }}>{parent.company_name}</strong>
           </p>
           <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
             {school_code} parent network
