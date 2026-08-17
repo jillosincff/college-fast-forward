@@ -7,6 +7,7 @@ const GRAD = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 // Parent-facing gift card: buy CLIFF Pro for their student, right after signup.
 export default function GiftProCard() {
   const [email, setEmail] = useState('');
+  const [plan, setPlan] = useState('pro_annual'); // annual = best value (matches backend default)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,6 +25,7 @@ export default function GiftProCard() {
     try {
       const res = await giftProCheckout({
         studentEmail: email.trim(),
+        plan,
         successUrl: `${origin}/#/ParentAllSet?gift=success`,
         cancelUrl: `${origin}/#/ParentAllSet`,
       });
@@ -45,7 +47,7 @@ export default function GiftProCard() {
         🎁 Want to go further?
       </p>
       <h2 style={{ fontFamily: SF, fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 8px', lineHeight: 1.2 }}>
-        Give your student CLIFF Pro
+        Give your student the unfair advantage
       </h2>
       <p style={{ fontFamily: SF, fontSize: 14, color: 'rgba(255,255,255,0.9)', lineHeight: 1.6, margin: '0 0 14px' }}>
         You're not buying another app your kid has to remember to open. CLIFF does the work <em>for</em> them — overnight, with no prompting.
@@ -62,8 +64,44 @@ export default function GiftProCard() {
           </div>
         ))}
       </div>
+      {/* Plan toggle — Annual (best value) vs Monthly */}
+      <div style={{ display: 'flex', gap: 8, margin: '0 0 14px' }}>
+        <button
+          type="button"
+          onClick={() => setPlan('pro_annual')}
+          style={{
+            flex: 1, fontFamily: SF, fontSize: 13, fontWeight: 800,
+            color: plan === 'pro_annual' ? '#6d28d9' : 'rgba(255,255,255,0.85)',
+            background: plan === 'pro_annual' ? '#fff' : 'rgba(255,255,255,0.12)',
+            border: 'none', borderRadius: 12, padding: '12px 10px',
+            cursor: 'pointer', minHeight: 'auto', position: 'relative',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+          }}
+        >
+          <span>Annual</span>
+          <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.9 }}>$149/yr</span>
+          {plan === 'pro_annual' && (
+            <span style={{ position: 'absolute', top: -9, right: 8, background: '#34d399', color: '#064e3b', fontSize: 9, fontWeight: 800, padding: '2px 7px', borderRadius: 999, letterSpacing: '0.04em' }}>BEST VALUE</span>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setPlan('pro_monthly')}
+          style={{
+            flex: 1, fontFamily: SF, fontSize: 13, fontWeight: 800,
+            color: plan === 'pro_monthly' ? '#6d28d9' : 'rgba(255,255,255,0.85)',
+            background: plan === 'pro_monthly' ? '#fff' : 'rgba(255,255,255,0.12)',
+            border: 'none', borderRadius: 12, padding: '12px 10px',
+            cursor: 'pointer', minHeight: 'auto',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+          }}
+        >
+          <span>Monthly</span>
+          <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.9 }}>$19.96/mo</span>
+        </button>
+      </div>
       <p style={{ fontFamily: SF, fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 1.6, margin: '0 0 18px' }}>
-        They get an email each morning with what CLIFF finished overnight. $19.96/mo, cancel anytime.
+        They get an email each morning with what CLIFF finished overnight. {plan === 'pro_annual' ? '$149/yr' : '$19.96/mo'}, cancel anytime.
       </p>
       <input
         type="email"
@@ -86,7 +124,7 @@ export default function GiftProCard() {
           opacity: loading ? 0.7 : 1, touchAction: 'manipulation',
         }}
       >
-        {loading ? 'Opening secure checkout…' : 'Gift CLIFF Pro — $19.96/mo →'}
+        {loading ? 'Opening secure checkout…' : `Gift CLIFF Pro — ${plan === 'pro_annual' ? '$149/yr' : '$19.96/mo'} →`}
       </button>
       {error && (
         <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: '#fde68a', margin: '10px 0 0', lineHeight: 1.5 }}>

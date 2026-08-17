@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
+import { normalizeSchool } from '@/lib/schoolNames';
 import InviteStudentCard from '@/components/parent-allset/InviteStudentCard';
 import GiftProCard from '@/components/parent-allset/GiftProCard';
 
@@ -21,7 +22,10 @@ const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08
 export default function ParentAllSet() {
   const { user } = useAuth();
   const firstName = user?.full_name?.split(' ')[0] || '';
-  const schoolName = user?.school_name || user?.school || 'the network';
+  // Resolve the full school name from whatever the parent record stores —
+  // school_name ("University of Florida"), school_code ("uf"), or a fallback.
+  const rawSchool = user?.school_name || user?.school || '';
+  const schoolName = normalizeSchool(rawSchool) || rawSchool || 'the network';
   const [copied, setCopied] = useState(false);
 
   // Show a thank-you confirmation when returning from a successful FastIQ checkout
