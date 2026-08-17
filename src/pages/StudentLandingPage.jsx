@@ -247,7 +247,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   {[
                     'Finds jobs actually worth your time',
                     'Tailors your resume for that role',
-                    'Surfaces alumni and writes the outreach for you',
+                    'Surfaces alumni or parents and writes the outreach for you',
                   ].map((b) => (
                     <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                       <span style={{ width: 28, height: 28, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
