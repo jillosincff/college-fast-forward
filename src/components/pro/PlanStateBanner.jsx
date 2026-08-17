@@ -54,21 +54,21 @@ export default function PlanStateBanner({ user, onUpgrade }) {
       }}>
         <div style={{ flex: 1, minWidth: 220 }}>
           <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 900, color: '#fff', margin: '0 0 4px' }}>
-            CLIFF built your first application end-to-end. ✅
+            You've used your free cycle.
           </p>
-          <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5 }}>
-            On CLIFF Pro, that happens for every job — instant tailored resumes, outreach, and follow-ups, done for you.
+          <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.78)', margin: 0, lineHeight: 1.5 }}>
+            Unlock CLIFF Pro to run this for every job — unlimited tailored resumes, alumni or parent matches, and ready-to-send outreach.
           </p>
         </div>
         <button
           onClick={handleCta}
           style={{
-            fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#5b21b6',
-            background: '#fff', border: 'none', borderRadius: 999, padding: '11px 22px',
+            fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#5b21b6',
+            background: '#fff', border: 'none', borderRadius: 999, padding: '12px 24px',
             cursor: 'pointer', flexShrink: 0, minHeight: 44,
           }}
         >
-          Let CLIFF do the work →
+          Upgrade to Pro
         </button>
       </div>
     );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
-import { Unlock, Lock, ArrowRight } from 'lucide-react';
+import { Unlock, ArrowRight } from 'lucide-react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -30,52 +30,37 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
   // Many imported contacts only have a placeholder title — hide it rather than
   // showing a meaningless "Professional at X" line.
   const hasRealTitle = parent.role_title && !/^(professional|n\/a|unknown)$/i.test(parent.role_title.trim());
-  const lockedCount = Math.max(0, (total_pool || 1) - 1);
-
   return (
-    <div style={{ background: '#fff', border: '1px solid #c7d2fe', borderRadius: 16, padding: '18px 20px', marginBottom: 16, boxShadow: '0 4px 16px rgba(79,70,229,0.08)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+    <div style={{ background: '#fff', border: '1px solid #c7d2fe', borderRadius: 16, padding: '16px 18px', marginBottom: 16, boxShadow: '0 4px 16px rgba(79,70,229,0.08)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
         <Unlock size={13} color="#16a34a" />
         <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#16a34a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          Your first warm connection — unlocked free
+          Your free warm connection
         </span>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-        <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <span style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#fff' }}>{initial}</span>
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff' }}>{initial}</span>
         </div>
-        <div style={{ flex: 1, minWidth: 180 }}>
+        <div style={{ flex: 1, minWidth: 160 }}>
           <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#111827', margin: '0 0 2px' }}>
             {parent.first_name}
           </p>
-          <p style={{ fontFamily: dm, fontSize: 12, color: '#4b5563', margin: 0 }}>
-            {hasRealTitle ? <>{parent.role_title} at </> : <>Works at </>}<strong style={{ color: '#111827' }}>{parent.company_name}</strong>
+          <p style={{ fontFamily: dm, fontSize: 12, color: '#4b5563', margin: '0 0 2px' }}>
+            {hasRealTitle ? <>{parent.role_title} · </> : null}<strong style={{ color: '#111827' }}>{parent.company_name}</strong>
           </p>
-          <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '2px 0 0' }}>
-            {school_code} parent network — willing to help students like you
+          <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
+            {school_code} parent network
           </p>
         </div>
         <button
           onClick={() => navigate('/OutreachDrafts')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '12px 18px', cursor: 'pointer', minHeight: 44, whiteSpace: 'nowrap' }}
         >
-          Draft my intro <ArrowRight size={13} />
+          Draft my intro <ArrowRight size={14} />
         </button>
       </div>
-
-      {lockedCount > 0 && (
-        <button
-          onClick={() => onUpgrade?.('Warm Network')}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', marginTop: 14, background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left' }}
-        >
-          <Lock size={13} color="#94a3b8" style={{ flexShrink: 0 }} />
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 600, color: '#64748b', flex: 1 }}>
-            <strong style={{ color: '#374151' }}>{lockedCount} more warm connection{lockedCount === 1 ? '' : 's'}</strong> at other companies in your network
-          </span>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#4f46e5', whiteSpace: 'nowrap' }}>Unlock all →</span>
-        </button>
-      )}
     </div>
   );
 }

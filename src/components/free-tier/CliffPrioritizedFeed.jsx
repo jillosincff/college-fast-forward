@@ -234,6 +234,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
         </div>
       )}
 
+      {librarySlots.length > 0 && (
       <div className="border-b border-gray-100 pb-4">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -243,14 +244,12 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                {isLoading
                  ? 'CLIFF is gathering opportunities…'
-                 : allActioned
-                   ? 'All caught up for today'
-                   : `${librarySlots.length} more opportunit${librarySlots.length === 1 ? 'y' : 'ies'} CLIFF checked for you today — the strongest are already above`
+                 : `${librarySlots.length} more opportunit${librarySlots.length === 1 ? 'y' : 'ies'} CLIFF checked for you today — the strongest are already above`
                }
              </p>
           </div>
           <div className="flex items-center gap-2 shrink-0 mt-1">
-            {!isLoading && slots.length > 0 && !allActioned && (
+            {!isLoading && slots.length > 0 && (
               <div className="flex gap-1.5 items-center">
                 {slots.map((s, i) => {
                   const key = `${s.company}||${s.role}`;
@@ -272,9 +271,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
           </div>
         </div>
       </div>
+      )}
 
       {/* Collapsed library: one calm CTA instead of a long feed */}
-      {!effectiveOpen && !isLoading && (
+      {!effectiveOpen && !isLoading && librarySlots.length > 0 && (
         <button
           onClick={openLibrary}
           className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-bold hover:bg-gray-50 transition-colors cursor-pointer"

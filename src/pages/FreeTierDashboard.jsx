@@ -76,10 +76,10 @@ function FirstVisitToast({ firstName, onDismiss, focusMode }) {
       <Sparkles size={20} color="#a78bfa" style={{ flexShrink: 0, marginTop: 2 }} />
       <div style={{ flex: 1 }}>
         <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
-          Welcome to your Command Center, {firstName}!
+          Welcome, {firstName}!
         </p>
         <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.6 }}>
-          We've saved your onboarding data. Track up to 5 jobs below. Your AI-optimized assets and active campus signals are locked and updating live in the sidebar whenever you're ready to sprint.
+          Your first application package is ready. Run your free cycle below — then unlock CLIFF Pro to repeat it for every job.
         </p>
       </div>
       <button
@@ -270,70 +270,6 @@ export default function FreeTierDashboard() {
     setShowUpgrade(true);
   };
 
-  // Dynamic empathy banner driven by onboarding blocker selection
-  const primaryBlocker = (() => {
-    try {
-      const stored = localStorage.getItem('cff_blockers');
-      return stored ? JSON.parse(stored)[0] : null;
-    } catch { return null; }
-  })();
-
-  // Psychological Blueprint: "They Heard Me" - Dynamic emotional matching
-  const PAIN_POINT_CONFIG = {
-    interviews: {
-      title: "Hey {name}, we know interviewing can be incredibly stressful.",
-      subtitle: "But you don't have to walk into the room nervous. CLiFF didn't just find hidden slots—our agent is fully locked and loaded to run custom mock prep sessions specifically for these exact teams before you talk to them.",
-      badge: "Interview Shield Activated",
-      cta: 'Unlock AI Interview Coach',
-      feature: 'Mock Interview Coach',
-    },
-    ghosted: {
-      title: "Hey {name}, let's permanently end the job application black hole.",
-      subtitle: "We know you are completely exhausted from getting ghosted by automated resume filters. That's why CLiFF completely bypasses the public job boards and plugs you directly into people ready to hire.",
-      badge: "Ghosting Bypass Active",
-      cta: 'Unlock the Inside Track Network',
-      feature: 'Inside Track Signals',
-    },
-    outreach: {
-      title: "Hey {name}, you don't need a massive personal network to break in.",
-      subtitle: "If you feel like you don't have the right inside connections, don't worry. CLiFF has mapped out your entire school's active alumni ecosystem to open those closed doors for you.",
-      badge: "Network Multiplier Engaged",
-      cta: 'Unlock Warm Scripts',
-      feature: 'AI Outreach Generator',
-    },
-    resume: {
-      title: "Hey {name}, beating corporate ATS resume bots is a broken game.",
-      subtitle: "Head to the Tools tab to run your free ATS match check — and see exactly what to fix. CLiFF will optimize your resume to beat the bots and catch human eyes.",
-      badge: "ATS Crusher Mode",
-      cta: 'Fix My Resume Instantly',
-      feature: 'Resume Wow Rewrite',
-    },
-    which_jobs: {
-      title: "Hey {name}, not knowing which roles to apply for wastes weeks.",
-      subtitle: "Your background agent is scanning for openings that actually match your profile. Upgrade to see the unadvertised roles first and skip the application black hole.",
-      badge: "Job Scout Active",
-      cta: 'Unlock My Job Feed',
-      feature: 'Inside Track Signals',
-    },
-    disorganized: {
-      title: "Hey {name}, losing track of where you applied is more common than you think.",
-      subtitle: "Use this board to stay organized — and upgrade to let the agent auto-log every application, track follow-ups, and remind you when to reach back out.",
-      badge: "Auto-Tracking Ready",
-      cta: 'Unlock Auto-Tracking',
-      feature: 'Hiring CRM',
-    },
-  };
-
-  const painConfig = PAIN_POINT_CONFIG[primaryBlocker] || {
-    title: "Hey {name}, your inside track is officially live.",
-    subtitle: "Track your applications here while our agent works in the background on unadvertised roles and warm alumni connections.",
-    badge: "Premium Sprint Active",
-    cta: 'Upgrade to Premium — $4.99/wk',
-    feature: 'Premium Sprint',
-  };
-
-  const formattedTitle = painConfig.title.replace("{name}", firstName);
-
   const isNewUser = (() => { try { return !localStorage.getItem('cff_ftd_seen'); } catch { return false; } })();
   try { localStorage.setItem('cff_ftd_seen', '1'); } catch {}
 
@@ -380,14 +316,25 @@ export default function FreeTierDashboard() {
         {/* One-time work-location question for students who onboarded before this step existed */}
         {!focusMode && !isTrialExpired && <LocationPrefPrompt user={user} onUpdated={setUser} />}
 
-        {/* THE decision surface. CLIFF's single highest-leverage move, with its
-            reasoning visible, above everything else that competes for attention. */}
+        {/* 1. Next best move — CLIFF's single highest-leverage action, reasoning visible */}
         {!isTrialExpired && !focusMode && (
           <NextMoveHero user={user} firstName={firstName} />
         )}
 
-        {/* Quiet context: what CLIFF remembers, and progress worth showing.
-            Both self-hide when there's nothing real to say. */}
+        {/* 2. The free warm connection — the standout value moment */}
+        {!focusMode && (
+          <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
+        )}
+
+        {/* 3. Upgrade — free cycle done; unlock unlimited cycles.
+            Renders even during first-session focus once the Magic Moment is completed. */}
+        {(!focusMode || magicMomentCompleted) && <PlanStateBanner user={user} onUpgrade={triggerUpgrade} />}
+        {!focusMode && !isTrialExpired && <PreparedWorkProPrompt user={user} onUpgrade={triggerUpgrade} />}
+
+        {/* 4. Today's plan + activity stats (secondary) */}
+        {needsGoalsCapture
+          ? <GoalsCaptureCard user={user} onSaved={setUser} />
+          : <FirstApplicationPackageCard user={user} />}
         {!isTrialExpired && !focusMode && (
           <>
             <GoalMemoryStrip user={user} />
@@ -395,35 +342,12 @@ export default function FreeTierDashboard() {
           </>
         )}
 
-        {/* Plan state: magic moment available reminder OR post-magic-moment Pro conversion.
-            Rendered even during first-session focus mode once the Magic Moment is completed,
-            so a stale localStorage flag can never suppress the Pro conversion card. */}
-        {(!focusMode || magicMomentCompleted) && <PlanStateBanner user={user} onUpgrade={triggerUpgrade} />}
-
-        {/* Highest-intent Pro trigger: completed overnight package waiting */}
-        {!focusMode && !isTrialExpired && <PreparedWorkProPrompt user={user} onUpgrade={triggerUpgrade} />}
-
-        {/* Done-For-You activation moment — a finished application package for one real job.
-            Students with no goals at all get a goals-capture card here instead, so CLIFF
-            has something to match a real opening to. */}
-        {needsGoalsCapture
-          ? <GoalsCaptureCard user={user} onSaved={setUser} />
-          : <FirstApplicationPackageCard user={user} />}
-
-        {/* Everything below competes with the package card — hidden during first-session focus */}
-        {!focusMode && (
-          <>
-            {/* Day-one unlocked warm connection */}
-            <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
-          </>
-        )}
-
-        {/* Daily Drop Feed - Job Opportunities */}
+        {/* 5. Daily Drop Feed */}
         <div id="cff-daily-feed">
           <CliffPrioritizedFeed user={user} schoolAbbr={schoolAbbr} onUpgrade={triggerUpgrade} />
         </div>
 
-        {/* Longer-horizon context — below the day's work, never above it */}
+        {/* 6. Longer-horizon context — below the day's work */}
         {!isTrialExpired && !focusMode && (
           <>
             <CareerSeasonCard user={user} />
