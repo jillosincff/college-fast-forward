@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import QuickOnboarding from '@/components/onboarding-flow/QuickOnboarding';
 import OtpVerifyForm from '@/components/auth/OtpVerifyForm';
@@ -81,6 +81,9 @@ export default function GatorAuth() {
   // Forgot-password state — handled inline, no separate page
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
+
+  // Toggle password visibility — cuts typos that kill signups
+  const [showPw, setShowPw] = useState(false);
 
   // OTP verification step (after native signup)
   const [pendingOtpEmail, setPendingOtpEmail] = useState('');
@@ -522,7 +525,7 @@ export default function GatorAuth() {
               </h1>
             </div>
             <p style={{ fontFamily: dmSans, fontSize: 15, color: '#64748b', margin: 0 }}>
-              Your network. Your career. Let's go.
+              Your first job, with a real plan and a warm intro.
             </p>
           </div>
 
@@ -591,7 +594,12 @@ export default function GatorAuth() {
               </div>
               <div>
                 <label style={labelStyle}>Password</label>
-                <input type="password" value={signinPassword} onChange={(e) => setSigninPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
+                <div style={{ position: 'relative' }}>
+                  <input type={showPw ? 'text' : 'password'} value={signinPassword} onChange={(e) => setSigninPassword(e.target.value)} placeholder="••••••••" style={{ ...inputStyle, paddingRight: 44 }} />
+                  <button type="button" onClick={() => setShowPw(s => !s)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 8, minHeight: 'auto', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                    {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 8 }}>
                 <button
@@ -626,11 +634,21 @@ export default function GatorAuth() {
               </div>
               <div>
                 <label style={labelStyle}>Password</label>
-                <input type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
+                <div style={{ position: 'relative' }}>
+                  <input type={showPw ? 'text' : 'password'} value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} placeholder="••••••••" style={{ ...inputStyle, paddingRight: 44 }} />
+                  <button type="button" onClick={() => setShowPw(s => !s)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 8, minHeight: 'auto', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                    {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label style={labelStyle}>Confirm Password</label>
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
+                <div style={{ position: 'relative' }}>
+                  <input type={showPw ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" style={{ ...inputStyle, paddingRight: 44 }} />
+                  <button type="button" onClick={() => setShowPw(s => !s)} aria-label={showPw ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 8, minHeight: 'auto', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                    {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               <button type="submit" disabled={loading} style={primaryBtn(loading)}>
                 {loading ? 'Creating account...' : 'Create Account'}
