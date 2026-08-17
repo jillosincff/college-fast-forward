@@ -25,11 +25,10 @@ const PLAN = [
 ];
 
 const ALUMNI = [
-  { name: 'Jordan Avery', title: 'Brand Marketing Manager', note: 'From your school · Possible connection', initials: 'JA' },
-  { name: 'Priya Shah', title: 'Senior Recruiter', note: 'From your school', initials: 'PS' },
+  { name: 'Jordan Avery', title: 'Brand Marketing Manager', note: 'From your school', initials: 'JA' },
 ];
 
-const OUTREACH = "Hey Jordan — I'm a marketing student and just applied to a role at Nike. Saw you work on the brand side and would love any advice if you have a sec. Thanks either way.";
+const OUTREACH = "Hey Jordan — just applied to the Nike role. Would love any quick advice. Thanks!";
 
 export default function MagicMomentVisual() {
   const rootRef = useRef(null);
@@ -150,21 +149,11 @@ export default function MagicMomentVisual() {
         </div>
 
         {/* Tailored resume snippet */}
-        <div className="mmv-a-resume" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 12, marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              <FileText size={12} /> Tailored for this role
-            </span>
-            <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '2px 8px' }}>92% match</span>
-          </div>
-          <div style={{ background: '#f8fafc', borderRadius: 10, padding: '10px 11px' }}>
-            <p style={{ fontFamily: SF, fontSize: 12.5, fontWeight: 800, color: TEXT, margin: '0 0 2px' }}>Maya Rodriguez</p>
-            <p style={{ fontFamily: SF, fontSize: 10.5, color: TEXT3, margin: '0 0 8px' }}>State University · Marketing, Class of 2026</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <p style={{ fontFamily: SF, fontSize: 11, color: TEXT2, margin: 0, lineHeight: 1.4 }}>• Led campus brand campaign — +28% engagement</p>
-              <p style={{ fontFamily: SF, fontSize: 11, color: TEXT2, margin: 0, lineHeight: 1.4 }}>• Grew org Instagram to 12k followers</p>
-            </div>
-          </div>
+        <div className="mmv-a-resume" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '10px 12px', marginBottom: 12 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <FileText size={12} /> Resume tailored
+          </span>
+          <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '2px 8px' }}>92% match</span>
         </div>
 
         {/* Alumni cards */}
