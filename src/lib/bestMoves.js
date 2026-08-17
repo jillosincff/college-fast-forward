@@ -7,7 +7,7 @@ import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 // completing a move in one place is reflected in the other.
 
 export const movesStorageKey = (email) =>
-  `cliff_best_moves_v2_${email}_${new Date().toISOString().slice(0, 10)}`;
+  `cliff_best_moves_v3_${email}_${new Date().toISOString().slice(0, 10)}`;
 
 export function readMovesCache(email) {
   try {
