@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { Sparkles, ClipboardList } from 'lucide-react';
-import UpgradeModal from '@/components/free-tier/UpgradeModal';
+import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import FreeTierNav from '@/components/free-tier/FreeTierNav';
 import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
 // CareerAssetsCard removed — resume management moved to nav dropdown
@@ -93,7 +93,6 @@ function FirstVisitToast({ firstName, onDismiss, focusMode }) {
 export default function FreeTierDashboard() {
   const [user, setUser] = useState(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [upgradeFeature, setUpgradeFeature] = useState('');
   const [upgradeTrigger, setUpgradeTrigger] = useState('dashboard_pro_card');
   const [parentCount, setParentCount] = useState(null);
   const [showWelcomeToast, setShowWelcomeToast] = useState(false);
@@ -265,7 +264,6 @@ export default function FreeTierDashboard() {
   })();
 
   const triggerUpgrade = (featureName, trigger) => {
-    setUpgradeFeature(featureName);
     setUpgradeTrigger(trigger || 'dashboard_pro_card');
     setShowUpgrade(true);
   };
@@ -384,35 +382,10 @@ export default function FreeTierDashboard() {
       )}
 
       {showUpgrade && (
-        <UpgradeModal
-          featureName={upgradeFeature}
+        <ProUpgradeModal
+          user={user}
+          source={upgradeTrigger}
           onClose={() => setShowUpgrade(false)}
-          onUpgrade={async () => {
-            setShowUpgrade(false);
-            if (!user) {
-              base44.auth.redirectToLogin('/#FreeTierDashboard');
-              return;
-            }
-            // Conversion attribution: record which trigger led to this checkout
-            base44.functions.invoke('conversionEngine', {
-              action: 'log', event_name: 'checkout_started', once: false,
-              trigger: upgradeTrigger, device: window.innerWidth < 768 ? 'mobile' : 'desktop',
-            }).catch(() => {});
-            try {
-              const res = await base44.functions.invoke('createCheckoutSession', {
-                plan: 'pro_monthly',
-                user: { id: user.id, email: user.email },
-                successUrl: window.location.origin + '/#FreeTierDashboard?upgrade=success',
-                cancelUrl: window.location.origin + '/#FreeTierDashboard',
-              });
-              const url = res?.data?.url || res?.url;
-              if (url) window.location.href = url;
-              else alert('Unable to start checkout. Please try again.');
-            } catch (err) {
-              console.error('Checkout error:', err);
-              alert('Unable to start checkout. Please try again.');
-            }
-          }}
         />
       )}
 

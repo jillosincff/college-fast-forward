@@ -14,9 +14,11 @@ import { X, Loader2, Check, Gift, Sparkles, Lock } from 'lucide-react';
 // tracking events at each step.
 
 const UNLOCKS = [
-  'Run this exact plan for every job you want — not just one',
-  'Unlimited tailored resumes, alumni matches, and outreach drafts',
-  'CLIFF preps applications and follows up while you sleep',
+  'Unlimited job cycles with alumni matches',
+  'Ready-to-send warm outreach for every role',
+  'Unlimited resume tailoring',
+  'Mock interviews + LinkedIn review',
+  'Full tracking and follow-up reminders',
 ];
 
 export default function ProUpgradeModal({ user, onClose, source = 'magic_moment' }) {
@@ -123,11 +125,11 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '8px 12px', borderRadius: 8, marginBottom: 12, fontSize: 12.5, fontFamily: FONT }}>{error}</div>}
 
             <button onClick={startPro} disabled={busy} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '15px', cursor: busy ? 'default' : 'pointer', boxShadow: '0 6px 18px rgba(109,40,217,0.32)', opacity: busy ? 0.7 : 1 }}>
-              {busy ? <><Loader2 size={16} className="animate-spin" /> Starting checkout…</> : <>Start CLIFF Pro — {selectedPlan === 'annual' ? '$149/year' : '$19.96/mo'}</>}
+              {busy ? <><Loader2 size={16} className="animate-spin" /> Starting checkout…</> : <>Start CLIFF Pro</>}
             </button>
 
             <button onClick={openParent} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '14px', cursor: 'pointer', marginTop: 10 }}>
-              <Gift size={15} color={INDIGO} /> Send to a parent
+              <Gift size={15} color={INDIGO} /> Send this to a parent →
             </button>
 
             <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.5 }}>Cancel anytime. Students who use CLIFF Pro apply to 3× more roles.</p>
