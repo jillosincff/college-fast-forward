@@ -28,16 +28,24 @@ const ALUMNI = [
   { name: 'Priya Shah', title: 'Senior Recruiter', note: 'UF alum', initials: 'PS' },
 ];
 
-const OUTREACH = "Hi Jordan! I'm a fellow UF student studying marketing and saw your path to Brand Marketing at Nike — that's exactly where I'm trying to grow. Would you have 10 min for a quick chat about how you got there? Go Gators! – Maya";
+const OUTREACH = "Hi Jordan — fellow UF student here. Your path into brand at Nike is exactly where I'm hoping to go. If you ever have 10 minutes, I'd love to hear how you got your start. Go Gators! – Maya";
 
 export default function MagicMomentVisual() {
   return (
     <div style={{ width: '100%', maxWidth: 400, margin: '0 auto' }}>
-      <div style={{
+      <div className="mmv-card" style={{
         background: '#fff', borderRadius: 20, boxShadow: SHADOW_LG,
         border: '1px solid #f1e9ff', padding: '18px 16px', fontFamily: SF,
         position: 'relative', overflow: 'hidden',
       }}>
+        <style>{`
+          @media (max-width: 600px) {
+            .mmv-card { padding: 20px 16px !important; }
+            .mmv-outreach { padding: 14px !important; }
+            .mmv-alumni-list { gap: 10px !important; }
+            .mmv-alumni-row { padding: 11px !important; }
+          }
+        `}</style>
         <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.10) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         {/* Header: free cycle + plan progress */}
@@ -96,9 +104,9 @@ export default function MagicMomentVisual() {
         {/* Alumni cards */}
         <div style={{ marginBottom: 12 }}>
           <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 8px' }}>Alumni at Nike</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="mmv-alumni-list" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {ALUMNI.map((a) => (
-              <div key={a.name} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '9px 10px' }}>
+              <div key={a.name} className="mmv-alumni-row" style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '9px 10px' }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: GRAD_INDIGO, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontWeight: 800, fontSize: 12, flexShrink: 0 }}>{a.initials}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontFamily: SF, fontSize: 12.5, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.2 }}>{a.name}</p>
@@ -112,7 +120,7 @@ export default function MagicMomentVisual() {
         </div>
 
         {/* Outreach draft */}
-        <div style={{ background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 14, padding: 12, boxShadow: '0 6px 18px rgba(109,40,217,0.10)' }}>
+        <div className="mmv-outreach" style={{ background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 14, padding: 12, boxShadow: '0 6px 18px rgba(109,40,217,0.10)' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>
             <Check size={12} strokeWidth={4} /> Warm outreach · ready to send
           </span>
