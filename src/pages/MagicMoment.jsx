@@ -106,6 +106,7 @@ export default function MagicMoment() {
         setPhase('Tailoring your resume for this role…');
         let tailoredResult = null;
         let isStarter = false;
+        let starterText = '';
         try {
           let resumeText = '';
           const resumeUrl = user.resume_url || user.resume_file_url;
@@ -122,18 +123,26 @@ export default function MagicMoment() {
           }
           if (!resumeText || resumeText.length <= 100) {
             // No usable uploaded resume — generate a starter from profile + target role
-            resumeText = buildStarterResumeText(user, topJob);
+            starterText = buildStarterResumeText(user, topJob);
+            resumeText = starterText;
             isStarter = true;
           }
           if (resumeText.length > 100) {
-            const tailRes = await base44.functions.invoke('tailorResume', {
-              resumeText, jobTitle: topJob.job_title, companyName: topJob.name,
-              jobDescription: topJob.hiring_description || '',
-            });
-            tailoredResult = tailRes?.data || tailRes;
+            try {
+              const tailRes = await base44.functions.invoke('tailorResume', {
+                resumeText, jobTitle: topJob.job_title, companyName: topJob.name,
+                jobDescription: topJob.hiring_description || '',
+              });
+              tailoredResult = tailRes?.data || tailRes;
+            } catch (e) { /* tailor best-effort — fall back to starter text below */ }
           }
         } catch (e) { /* resume tailoring is best-effort — don't block the plan */ }
-        if (tailoredResult) setTailored({ ...tailoredResult, starter: isStarter });
+        if (tailoredResult) {
+          setTailored({ ...tailoredResult, starter: isStarter });
+        } else if (isStarter && starterText) {
+          // Tailoring failed — still show the starter resume so the block is never empty
+          setTailored({ starter: true, starter_untailored: true, tailored_content: starterText });
+        }
 
         // 3. Surface alumni at the company
         setPhase(`Surfacing alumni at ${topJob.name}…`);
@@ -163,7 +172,8 @@ export default function MagicMoment() {
             magic_moment: true,
           });
           if (outRes?.data?.upgrade_required || outRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
-          setOutreach({ ...(outRes?.data || outRes), cold: !hasAlumni });
+          const outData = outRes?.data || outRes;
+          setOutreach({ ...outData, message: normalizeOutreachMessage(outData?.message), cold: !hasAlumni });
         } catch (e) {
           // Graceful fallback — never leave the user with an empty outreach block.
           const roleLabel = topJob.job_title || role || 'this role';
@@ -313,8 +323,10 @@ export default function MagicMoment() {
         <Block icon={<FileText size={16} color={INDIGO} />} label="Tailored resume">
           {tailored ? (
             <div>
-              <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 6px' }}>Match score improved from <strong style={{ color: TEXT }}>{tailored.originalScore}%</strong> to <strong style={{ color: INDIGO }}>{tailored.tailoredScore}%</strong> for this role.</p>
-              <button onClick={downloadResume} style={ghostBtn({ marginBottom: 8 })}><Download size={14} /> Download tailored resume</button>
+              {!tailored.starter_untailored && tailored.originalScore != null && tailored.tailoredScore != null && (
+                <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 6px' }}>Match score improved from <strong style={{ color: TEXT }}>{tailored.originalScore}%</strong> to <strong style={{ color: INDIGO }}>{tailored.tailoredScore}%</strong> for this role.</p>
+              )}
+              <button onClick={downloadResume} style={ghostBtn({ marginBottom: 8 })}><Download size={14} /> Download {tailored.starter ? 'starter resume' : 'tailored resume'}</button>
               {tailored.starter && (
                 <p style={{ fontFamily: FONT, fontSize: 12, color: INDIGO_DIM, margin: '8px 0 0', lineHeight: 1.5 }}>Starter version built from your profile — <button onClick={() => navigate('/FreeTierDashboard')} style={{ background: 'none', border: 'none', padding: 0, color: INDIGO, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>upload your resume</button> for a stronger match.</p>
               )}
@@ -396,6 +408,26 @@ export default function MagicMoment() {
       {showSoftWall && <SoftWallModal user={user} onClose={() => setShowSoftWall(false)} source="soft_wall" />}
     </div>
   );
+}
+
+// Normalizes the outreach message so a raw/fenced JSON response from the LLM
+// never reaches the screen. Extracts the body field and unescapes line breaks.
+function normalizeOutreachMessage(raw) {
+  if (!raw) return '';
+  let text = String(raw);
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) text = fence[1].trim();
+  const extract = (str) => {
+    try {
+      const obj = JSON.parse(str);
+      return obj.body || obj.message || '';
+    } catch (e) { return ''; }
+  };
+  if (text.trim().startsWith('{')) {
+    const body = extract(text) || extract(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    if (body) return body.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+  }
+  return text.replace(/\\n/g, '\n').replace(/\\"/g, '"');
 }
 
 // Builds a starter resume text from the student's profile + target role when
