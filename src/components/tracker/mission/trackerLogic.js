@@ -10,7 +10,7 @@ export const HEALTH = {
 };
 
 export const FILTERS = [
-  { id: 'attention', label: 'Needs My Attention' },
+  { id: 'attention', label: 'Needs Attention' },
   { id: 'waiting', label: 'Waiting' },
   { id: 'interviewing', label: 'Interviewing' },
   { id: 'offers', label: 'Offers' },

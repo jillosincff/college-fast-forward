@@ -7,7 +7,6 @@ import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
-import MissionStats from '@/components/tracker/mission/MissionStats';
 import AttentionBanner from '@/components/tracker/mission/AttentionBanner';
 import MissionAppCard from '@/components/tracker/mission/MissionAppCard';
 import RecommendationFeedbackPrompt from '@/components/tracker/RecommendationFeedbackPrompt';
@@ -146,16 +145,6 @@ export default function ApplicationTracker() {
     else if (type === 'detail') setSelectedApp(item.app);
   };
 
-  // Contextual chat — CLIFF arrives already knowing this application
-  const handleAskCliff = (item) => {
-    navigate('cliff-chat', {
-      company: item.app.company,
-      role: item.app.jobTitle !== '—' ? item.app.jobTitle : '',
-      stage: item.insight.stage,
-      context: 'application',
-    });
-  };
-
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9ff', fontFamily: dm }}>
       {/* Hero */}
@@ -170,10 +159,7 @@ export default function ApplicationTracker() {
           <h1 style={{ fontFamily: dm, fontSize: 'clamp(24px, 5vw, 34px)', fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>
             Your Applications
           </h1>
-          <p style={{ fontSize: 14.5, color: '#4b5563', margin: '0 0 6px', lineHeight: 1.6, maxWidth: 560 }}>
-            CLIFF is actively tracking every opportunity and will tell you exactly what needs attention next.
-          </p>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#059669', margin: 0 }}>
+          <p style={{ fontSize: 14.5, fontWeight: 600, color: '#4b5563', margin: 0, lineHeight: 1.6, maxWidth: 560 }}>
             {reassurance}
           </p>
         </div>
@@ -202,9 +188,6 @@ export default function ApplicationTracker() {
         ) : (
           <>
             <RecommendationFeedbackPrompt user={user} />
-            <div style={{ marginBottom: 20 }}>
-              <MissionStats items={items} />
-            </div>
 
             <AttentionBanner item={topAttention} onAction={handleAction} />
 
@@ -247,14 +230,13 @@ export default function ApplicationTracker() {
                 </div>
               )
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: 14 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 560, margin: '0 auto' }}>
                 {visible.map(item => (
                   <MissionAppCard
                     key={item.app.id}
                     item={item}
                     highlighted={isHighlighted(item)}
                     onAction={handleAction}
-                    onAskCliff={handleAskCliff}
                     onOpen={setSelectedApp}
                   />
                 ))}
