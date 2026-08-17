@@ -39,11 +39,57 @@ export default function MagicMomentVisual() {
         position: 'relative', overflow: 'hidden',
       }}>
         <style>{`
+          @keyframes mmv-job {
+            0%, 3.75% { opacity: 0; transform: translateY(10px); }
+            10% { opacity: 1; transform: translateY(0); }
+            93.75% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(0); }
+          }
+          @keyframes mmv-resume {
+            0%, 11.25% { opacity: 0; transform: translateY(10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            93.75% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(0); }
+          }
+          @keyframes mmv-alumni1 {
+            0%, 21.25% { opacity: 0; transform: translateY(10px); }
+            30% { opacity: 1; transform: translateY(0); }
+            93.75% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(0); }
+          }
+          @keyframes mmv-alumni2 {
+            0%, 31.25% { opacity: 0; transform: translateY(10px); }
+            40% { opacity: 1; transform: translateY(0); }
+            93.75% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(0); }
+          }
+          @keyframes mmv-outreach-anim {
+            0%, 41.25% { opacity: 0; transform: translateY(10px); }
+            62.5% { opacity: 1; transform: translateY(0); }
+            93.75% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(0); }
+          }
+          @keyframes mmv-pulse {
+            0%, 62.5% { transform: scale(1); box-shadow: 0 6px 16px rgba(109,40,217,0.30); }
+            67.5% { transform: scale(1.06); box-shadow: 0 12px 26px rgba(109,40,217,0.45); }
+            72.5%, 100% { transform: scale(1); box-shadow: 0 6px 16px rgba(109,40,217,0.30); }
+          }
+          .mmv-a-job { animation: mmv-job 8s ease infinite; }
+          .mmv-a-resume { animation: mmv-resume 8s ease infinite; }
+          .mmv-a-alumni1 { animation: mmv-alumni1 8s ease infinite; }
+          .mmv-a-alumni2 { animation: mmv-alumni2 8s ease infinite; }
+          .mmv-a-outreach { animation: mmv-outreach-anim 8s ease infinite; }
+          .mmv-a-pulse { animation: mmv-pulse 8s ease infinite; }
           @media (max-width: 600px) {
             .mmv-card { padding: 20px 16px !important; }
             .mmv-outreach { padding: 14px !important; }
             .mmv-alumni-list { gap: 10px !important; }
             .mmv-alumni-row { padding: 11px !important; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .mmv-a-job, .mmv-a-resume, .mmv-a-alumni1, .mmv-a-alumni2, .mmv-a-outreach, .mmv-a-pulse {
+              animation: none !important; opacity: 1 !important; transform: none !important;
+            }
           }
         `}</style>
         <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.10) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -69,7 +115,7 @@ export default function MagicMomentVisual() {
         </div>
 
         {/* Job block */}
-        <div style={{ background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+        <div className="mmv-a-job" style={{ background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <div style={{ width: 36, height: 36, borderRadius: 9, background: GRAD_INDIGO, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontWeight: 800, fontSize: 16, flexShrink: 0 }}>N</div>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -84,7 +130,7 @@ export default function MagicMomentVisual() {
         </div>
 
         {/* Tailored resume snippet */}
-        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 12, marginBottom: 12 }}>
+        <div className="mmv-a-resume" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 12, marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               <FileText size={12} /> Tailored for this role
@@ -105,8 +151,8 @@ export default function MagicMomentVisual() {
         <div style={{ marginBottom: 12 }}>
           <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 8px' }}>Alumni at Nike</p>
           <div className="mmv-alumni-list" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {ALUMNI.map((a) => (
-              <div key={a.name} className="mmv-alumni-row" style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '9px 10px' }}>
+            {ALUMNI.map((a, i) => (
+              <div key={a.name} className={`mmv-alumni-row ${i === 0 ? 'mmv-a-alumni1' : 'mmv-a-alumni2'}`} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '9px 10px' }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: GRAD_INDIGO, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontWeight: 800, fontSize: 12, flexShrink: 0 }}>{a.initials}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontFamily: SF, fontSize: 12.5, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.2 }}>{a.name}</p>
@@ -120,14 +166,14 @@ export default function MagicMomentVisual() {
         </div>
 
         {/* Outreach draft */}
-        <div className="mmv-outreach" style={{ background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 14, padding: 12, boxShadow: '0 6px 18px rgba(109,40,217,0.10)' }}>
+        <div className="mmv-outreach mmv-a-outreach" style={{ background: '#fff', border: `1.5px solid ${INDIGO}`, borderRadius: 14, padding: 12, boxShadow: '0 6px 18px rgba(109,40,217,0.10)' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: SF, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>
             <Check size={12} strokeWidth={4} /> Warm outreach · ready to send
           </span>
           <div style={{ background: '#faf7ff', borderRadius: 10, padding: '10px 11px', marginBottom: 10, marginTop: 8 }}>
             <p style={{ fontFamily: SF, fontSize: 11.5, color: TEXT, margin: 0, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{OUTREACH}</p>
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: GRAD_INDIGO, color: '#fff', borderRadius: 999, padding: '9px 16px', fontFamily: SF, fontSize: 12.5, fontWeight: 800, boxShadow: '0 6px 16px rgba(109,40,217,0.30)' }}>
+          <div className="mmv-a-pulse" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: GRAD_INDIGO, color: '#fff', borderRadius: 999, padding: '9px 16px', fontFamily: SF, fontSize: 12.5, fontWeight: 800, boxShadow: '0 6px 16px rgba(109,40,217,0.30)' }}>
             <Copy size={13} /> Copy & send →
           </div>
         </div>
