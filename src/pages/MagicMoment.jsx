@@ -358,7 +358,8 @@ export default function MagicMoment() {
           </button>
         </div>
 
-        {/* Hard-wall teaser */}
+        {/* Hard-wall teaser — hidden once the user is already Pro */}
+        {user?.subscription_status !== 'active' && (
         <div style={{ marginTop: 20, background: 'linear-gradient(135deg, #2e1065 0%, #4c1d95 100%)', borderRadius: R, padding: '22px 20px', textAlign: 'center', boxShadow: '0 12px 30px rgba(76,29,149,0.28)' }}>
           <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>This was your free cycle.</p>
           <p style={{ fontFamily: FONT, fontSize: 13.5, color: 'rgba(255,255,255,0.8)', margin: '0 0 16px', lineHeight: 1.5 }}>Unlock unlimited so CLIFF can run this plan for every job you actually want.</p>
@@ -366,6 +367,7 @@ export default function MagicMoment() {
             <Lock size={15} /> Unlock CLIFF Pro →
           </button>
         </div>
+        )}
       </div>
       {showPro && <ProUpgradeModal user={user} onClose={() => setShowPro(false)} source="magic_moment" />}
       {showSoftWall && <SoftWallModal user={user} onClose={() => setShowSoftWall(false)} source="soft_wall" />}

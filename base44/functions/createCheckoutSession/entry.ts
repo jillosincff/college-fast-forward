@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    let { plan, successUrl, cancelUrl, user: clientUser } = await req.json();
+    let { plan, successUrl, cancelUrl, user: clientUser, returnTo, source } = await req.json();
 
     if (!clientUser?.id || !clientUser?.email) {
       return Response.json({ error: 'User context required' }, { status: 400 });
@@ -35,12 +35,20 @@ Deno.serve(async (req) => {
 
     const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
 
+    // Post-pay landing: a dedicated activation page that welcomes the new Pro
+    // user and resumes the flow they were mid-way through when they upgraded.
+    let successUrlFinal = successUrl || 'https://collegefastforward.com/#/ProActivated?upgrade=success';
+    if (!successUrl) {
+      if (returnTo) successUrlFinal += `&return_to=${encodeURIComponent(returnTo)}`;
+      if (source) successUrlFinal += `&source=${encodeURIComponent(source)}`;
+    }
+
     const body = new URLSearchParams({
       mode: 'subscription',
       'line_items[0][price]': PRICES[plan],
       'line_items[0][quantity]': '1',
-      success_url: successUrl || 'https://collegefastforward.com/#Dashboard?upgrade=success',
-      cancel_url: cancelUrl || 'https://collegefastforward.com/#Dashboard',
+      success_url: successUrlFinal,
+      cancel_url: cancelUrl || 'https://collegefastforward.com/#/FreeTierDashboard',
       client_reference_id: clientUser.id,
       'metadata[user_id]': clientUser.id,
       'metadata[user_email]': clientUser.email,

@@ -35,9 +35,12 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
     try {
       // createCheckoutSession defaults success/cancel to the production URLs,
       // which avoids the sandboxed `window.location.origin === null` bug.
+      const returnTo = (window.location.hash.replace(/^#/, '').split('?')[0]) || '/FreeTierDashboard';
       const res = await base44.functions.invoke('createCheckoutSession', {
         plan: selectedPlan === 'annual' ? 'pro_annual' : 'pro_monthly',
         user: { id: user.id, email: user.email },
+        returnTo,
+        source,
       });
       const url = res?.data?.url || res?.url;
       if (url) { window.location.href = url; return; }

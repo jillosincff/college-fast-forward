@@ -35,6 +35,7 @@ import RegistrationSuccess from '@/pages/RegistrationSuccess';
 import VerifyEmail from '@/pages/VerifyEmail';
 import OnboardingQuestions from '@/pages/OnboardingQuestions';
 import MagicMoment from '@/pages/MagicMoment';
+import ProActivated from '@/pages/ProActivated';
 
 import Profile from '@/pages/Profile';
 import ProfileEdit from '@/pages/ProfileEdit';
@@ -229,6 +230,7 @@ const AuthenticatedApp = () => {
       <Route path="/VerifyEmail" element={<VerifyEmail />} />
       <Route path="/OnboardingQuestions" element={<OnboardingQuestions />} />
       <Route path="/MagicMoment" element={<MagicMoment />} />
+      <Route path="/ProActivated" element={<ProActivated />} />
       <Route path="/SetSearchGoals" element={<SetSearchGoals />} />
 
       {/* Guarded dashboard routes */}
