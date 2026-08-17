@@ -42,6 +42,9 @@ export default function FirstWarmMatchCard({ user, onUpgrade }) {
   })();
   return (
     <div style={{ background: '#fff', border: '1px solid #c7d2fe', borderRadius: 16, padding: '14px 16px', marginBottom: 16, boxShadow: '0 4px 16px rgba(79,70,229,0.08)' }}>
+      <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#4f46e5', margin: '0 0 10px', letterSpacing: '0.01em' }}>
+        ✦ Your free warm connection
+      </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
         <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <span style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff' }}>{initial}</span>
