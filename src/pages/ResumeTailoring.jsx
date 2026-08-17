@@ -915,10 +915,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           {!isFastIQ && resumes.length >= 1 && (
             <div style={{ background: '#F5F3FF', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0 }}>
-                Free accounts can have 1 master resume. Upgrade to store unlimited versions and get advanced tailoring.
+                Free accounts include 1 master resume. Upgrade to CLIFF Pro for unlimited versions and advanced tailoring.
               </p>
               <button onClick={() => onOpenUpgrade()} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>
-                Unlock Accelerator →
+                Upgrade to Pro →
               </button>
             </div>
           )}
@@ -945,33 +945,34 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
               {analysis && !analyzing && (
                 <div style={{ background: '#0A0A0A', borderRadius: 16, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)' }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 20px' }}>Resume Analysis • Matched to Your Career Goals</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 20px' }}>Resume Analysis • {user?.career_goals?.target_roles?.length ? 'Matched to ' + user.career_goals.target_roles[0] + ' roles' : user?.career_goals?.target_industries?.length ? 'Tailored toward ' + user.career_goals.target_industries[0] + ' targets' : 'Matched to your target roles'}</p>
 
+                  {/* Lead with the next move, not the audit */}
+                  <div style={{ background: 'rgba(124,58,237,0.15)', border: '1.5px solid rgba(124,58,237,0.45)', borderRadius: 12, padding: '16px 18px', marginBottom: 24 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#7c3aed', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top fix</p>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#fff', margin: '0 0 14px', lineHeight: 1.5 }}>{analysis.top_fix}</p>
+                    <button onClick={() => handleTailor(resumes.find(r => r.is_active) || resumes[0])} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '12px 22px', fontSize: 14, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', whiteSpace: 'nowrap' }}>Improve my resume →</button>
+                  </div>
+
+                  {/* Score — supporting detail */}
                   <div style={{ display: 'flex', flexDirection: window.innerWidth < 600 ? 'column' : 'row', gap: 24, alignItems: window.innerWidth < 600 ? 'center' : 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
                     <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                      <div style={{ width: 90, height: 90, borderRadius: '50%', border: `4px solid ${analysis.overall_score >= 80 ? '#22C55E' : analysis.overall_score >= 60 ? '#F59E0B' : '#EF4444'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 28, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{analysis.overall_score}</span>
+                      <div style={{ width: 84, height: 84, borderRadius: '50%', border: `4px solid ${analysis.overall_score >= 80 ? '#22C55E' : analysis.overall_score >= 60 ? '#F59E0B' : '#EF4444'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 26, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{analysis.overall_score}</span>
                         <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>/100</span>
                       </div>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: analysis.overall_score >= 80 ? '#22C55E' : analysis.overall_score >= 60 ? '#F59E0B' : '#EF4444', margin: '8px 0 0', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{analysis.score_label}</p>
                     </div>
-
                     <div style={{ flex: 1, minWidth: 200 }}>
-                      <div style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
-                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#7c3aed', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top Priority</p>
-                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>{analysis.top_fix}</p>
-                       </div>
-                       <div style={{ marginTop: 12 }}>
-                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Analyzing Against</p>
-                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                           {user?.career_goals?.target_roles?.slice(0, 3).map((role, i) => (
-                             <span key={i} style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{role}</span>
-                           ))}
-                           {user?.career_goals?.target_industries?.slice(0, 2).map((ind, i) => (
-                             <span key={i} style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{ind}</span>
-                           ))}
-                         </div>
-                       </div>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Analyzing against</p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {user?.career_goals?.target_roles?.slice(0, 3).map((role, i) => (
+                          <span key={i} style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{role}</span>
+                        ))}
+                        {user?.career_goals?.target_industries?.slice(0, 2).map((ind, i) => (
+                          <span key={i} style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 100, padding: '3px 8px', fontSize: 10, fontWeight: 600, color: '#fff' }}>{ind}</span>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -996,19 +997,6 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                     </div>
                   </div>
 
-                  {!isFastIQ && (
-                    <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-                      <div>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>The Agent can help fix these gaps.</p>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Tell it your target job or company and it will tailor your resume in seconds.</p>
-                      </div>
-                      <button onClick={() => handleTailor(resumes.find(r => r.is_active) || resumes[0])} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Let the Agent Optimize This Resume →</button>
-                    </div>
-                  )}
-
-                  {isFastIQ && (
-                    <button onClick={() => handleTailor(resumes.find(r => r.is_active) || resumes[0])} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}>Optimize My Resume Now →</button>
-                  )}
                 </div>
               )}
             </div>
