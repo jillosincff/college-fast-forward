@@ -89,13 +89,31 @@ The body field MUST follow that 4-part structure — (1) school connection opene
 
     let subject = '';
     let message = rawText;
+    // Claude occasionally wraps JSON in ```json … ``` fences or surrounding
+    // prose. Extract the first {...} block and parse that so we never display
+    // raw JSON/markdown to the student.
     try {
-      const parsed = JSON.parse(rawText);
+      let jsonText = rawText;
+      const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      if (fenceMatch) jsonText = fenceMatch[1].trim();
+      if (!jsonText.startsWith('{')) {
+        const objStart = jsonText.indexOf('{');
+        const objEnd = jsonText.lastIndexOf('}');
+        if (objStart !== -1 && objEnd !== -1 && objEnd > objStart) {
+          jsonText = jsonText.slice(objStart, objEnd + 1);
+        }
+      }
+      const parsed = JSON.parse(jsonText);
       subject = parsed.subject || '';
       message = parsed.body || rawText;
     } catch {
-      // fallback: return raw as message body
+      // Last resort: if it still looks like fenced/raw JSON, show nothing
+      // templated — just return the raw text (frontend renders pre-wrapped).
+      message = rawText;
     }
+    // Unescape any literal \n sequences left over from JSON string encoding
+    // so the message renders with real line breaks on screen.
+    message = message.replace(/\\n/g, '\n').replace(/\\"/g, '"');
 
     // Log feature usage (fire-and-forget)
     base44.asServiceRole.entities.AnalyticsEvent.create({
