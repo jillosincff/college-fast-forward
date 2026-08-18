@@ -33,6 +33,22 @@ const OUTREACH = "Hey Jordan — just applied to the Nike role. Would love any q
 export default function MagicMomentVisual() {
   const rootRef = useRef(null);
   const [playing, setPlaying] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(OUTREACH);
+    } catch (e) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = OUTREACH; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      } catch (e2) {}
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2600);
+  };
 
   // Play the assembly sequence once when the card first scrolls into view,
   // then hold on the completed state (no continuous looping).
@@ -182,9 +198,9 @@ export default function MagicMomentVisual() {
           <div style={{ background: '#faf7ff', borderRadius: 10, padding: '10px 11px', marginBottom: 10, marginTop: 8 }}>
             <p style={{ fontFamily: SF, fontSize: 11.5, color: TEXT, margin: 0, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{OUTREACH}</p>
           </div>
-          <div className="mmv-a-pulse" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: GRAD_INDIGO, color: '#fff', borderRadius: 999, padding: '9px 16px', fontFamily: SF, fontSize: 12.5, fontWeight: 800, boxShadow: '0 6px 16px rgba(109,40,217,0.30)' }}>
-            <Copy size={13} /> Copy & send →
-          </div>
+          <button data-testid="mm-copy-send" onClick={handleCopy} className="mmv-a-pulse" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: GRAD_INDIGO, color: '#fff', border: 'none', borderRadius: 999, padding: '9px 16px', fontFamily: SF, fontSize: 12.5, fontWeight: 800, boxShadow: '0 6px 16px rgba(109,40,217,0.30)', cursor: 'pointer', minHeight: 'auto' }}>
+            {copied ? <><Check size={13} strokeWidth={3} /> <span data-testid="mm-copy-confirmation">Copied!</span></> : <><Copy size={13} /> Copy & send →</>}
+          </button>
         </div>
       </div>
     </div>
