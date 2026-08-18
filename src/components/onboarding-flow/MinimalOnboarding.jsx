@@ -3,10 +3,11 @@ import { base44 } from '@/api/base44Client';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
 import {
-  TOP_SCHOOLS, FONT, BG, CARD, TEXT, TEXT2, TEXT3,
+  FONT, BG, CARD, TEXT, TEXT2, TEXT3,
   INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
 import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Loader2 } from 'lucide-react';
+import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
 
 // Minimal pre-auth onboarding. Collects ONLY what the Magic Moment needs:
 // school, target role/industry, preferred location, optional resume.
@@ -166,14 +167,11 @@ export default function MinimalOnboarding({ onClose }) {
             <h1 style={{ fontFamily: FONT, fontSize: 24, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>Where do you go to school?</h1>
             <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 20px' }}>CLIFF uses your school to find alumni connections at the companies you want.</p>
             <label style={labelStyle}>Your school</label>
-            <input
-              list="min-schools" type="text" value={school} placeholder="Search your university…"
-              onChange={(e) => { setSchool(e.target.value); setNotEnrolled(false); }}
-              style={inputStyle}
+            <SchoolSearchInput
+              value={school}
+              onChange={(v) => { setSchool(v); setNotEnrolled(false); }}
+              light
             />
-            <datalist id="min-schools">
-              {TOP_SCHOOLS.map((s) => <option key={s} value={s} />)}
-            </datalist>
             <button
               onClick={() => { setNotEnrolled(true); setSchool(''); }}
               style={{ marginTop: 12, ...chipBtn(notEnrolled) }}

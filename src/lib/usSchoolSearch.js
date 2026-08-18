@@ -23,7 +23,7 @@ const FALLBACK_SCHOOLS = [
   'Harvard University', 'MIT', 'Yale University', 'Brown University', 'Dartmouth College',
   'Boston College', 'Boston University', 'Northeastern University', 'Tufts University',
   'University of Massachusetts Amherst', 'University of Connecticut',
-  'Columbia University', 'NYU', 'Cornell University', 'Fordham University',
+  'Columbia University', 'New York University', 'NYU', 'Cornell University', 'Fordham University',
   'Syracuse University', 'University of Rochester', 'Binghamton University', 'Stony Brook University',
   'Ohio State University', 'University of Cincinnati', 'Miami University Ohio',
   'Case Western Reserve University', 'Ohio University',
