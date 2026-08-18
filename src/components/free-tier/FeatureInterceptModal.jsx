@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import { Gift } from 'lucide-react';
+import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
+
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 
@@ -10,6 +14,7 @@ const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
  * @param {function} onUpgrade    - Fires the billing/checkout flow.
  */
 export default function FeatureInterceptModal({ featureName, onClose, onUpgrade, user }) {
+  const [askParent, setAskParent] = useState(false);
   const schoolName = user?.school_name || user?.schoolName || user?.school || 'your university';
   return (
     <div
@@ -151,10 +156,15 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade,
             Keep CLIFF Working — $4.99/wk →
           </button>
 
+          <button onClick={() => setAskParent(true)} style={{ width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#4338ca', background: '#fff', border: '1.5px solid #c7d2fe', borderRadius: 14, padding: '13px 20px', cursor: 'pointer', minHeight: 44, marginBottom: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Gift size={15} color="#4338ca" /> Ask a parent to unlock
+          </button>
+
           <p style={{ fontFamily: dm, fontSize: 10, color: '#94a3b8', fontWeight: 500, margin: 0 }}>
             Secured and processed natively by Stripe.
           </p>
         </div>
+        {askParent && <ProUpgradeModal user={user} onClose={() => setAskParent(false)} source="feature_intercept" initialView="parent" />}
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { Gift } from 'lucide-react';
+import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 
 const dm = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 const GRAD = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
@@ -24,6 +26,7 @@ export default function CliffProPaywall({ onClose, onUpgrade, trigger = 'generic
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [askParent, setAskParent] = useState(false);
   useEffect(() => { logEvent('paywall_viewed', { trigger }); }, [trigger]);
 
   const startPro = async () => {
@@ -109,12 +112,16 @@ export default function CliffProPaywall({ onClose, onUpgrade, trigger = 'generic
         <button onClick={startPro} disabled={loading} style={{ width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD, border: 'none', borderRadius: 14, padding: '15px 20px', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, minHeight: 52, boxShadow: '0 8px 24px rgba(109,40,217,0.30)', marginBottom: 8 }}>
           {loading ? 'Starting checkout…' : 'Keep CLIFF Working'}
         </button>
+        <button onClick={() => setAskParent(true)} style={{ width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6d28d9', background: '#fff', border: '1.5px solid #ddd6fe', borderRadius: 14, padding: '13px 20px', cursor: 'pointer', minHeight: 44, marginBottom: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Gift size={15} color="#6d28d9" /> Ask a parent to unlock
+        </button>
         {error && (
           <p style={{ fontFamily: dm, fontSize: 12.5, color: '#dc2626', textAlign: 'center', margin: '0 0 10px', lineHeight: 1.5 }}>{error}</p>
         )}
         <button onClick={onClose} disabled={loading} style={{ width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', padding: '10px', cursor: 'pointer', minHeight: 44 }}>
           Keep Using Free
         </button>
+        {askParent && <ProUpgradeModal user={user} onClose={() => setAskParent(false)} source="cliff_pro_paywall" initialView="parent" />}
       </div>
     </div>
   );

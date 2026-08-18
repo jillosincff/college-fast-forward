@@ -21,8 +21,8 @@ const UNLOCKS = [
   'Full tracking and follow-up reminders',
 ];
 
-export default function ProUpgradeModal({ user, onClose, source = 'magic_moment' }) {
-  const [view, setView] = useState('main'); // main | parent | sent
+export default function ProUpgradeModal({ user, onClose, source = 'magic_moment', initialView = 'main' }) {
+  const [view, setView] = useState(initialView); // main | parent | sent
   const [parentEmail, setParentEmail] = useState('');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
@@ -69,7 +69,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
     setBusy(false);
   };
 
-  const overlay = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.55)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100, padding: 0 };
+  const overlay = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.55)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 50000, padding: 0 };
   const sheet = { width: '100%', maxWidth: 440, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 22px calc(28px + env(safe-area-inset-bottom))', maxHeight: '92vh', overflowY: 'auto' };
 
   return (
