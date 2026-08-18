@@ -14,7 +14,10 @@ import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Load
 // Saves answers to localStorage, triggers Google OAuth, and lands on the
 // Magic Moment. Goal: reach the free cycle in under 90 seconds.
 
-const TARGET_CHIPS = ['Marketing', 'Finance', 'Software', 'Sales', 'Operations', "Other / I'm open"];
+const FIELD_CHIPS = ['Marketing', 'Finance', 'Software/Engineering', 'Sales', 'Operations', 'Consulting', 'Healthcare', 'Data/Analytics', 'Product/UX', 'HR/Recruiting', 'Communications/PR', 'Education/Nonprofit'];
+const OTHER_CHIP = 'Other';
+const OPEN_CHIP = "I'm open";
+const TARGET_CHIPS = [...FIELD_CHIPS, OTHER_CHIP, OPEN_CHIP];
 const LOC_CHIPS = ['Remote', 'Open to relocate'];
 
 const chipBtn = (active) => ({
@@ -57,6 +60,17 @@ export default function MinimalOnboarding({ onClose }) {
   const [error, setError] = useState('');
 
   const toggle = (arr, setArr, v) => setArr(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+
+  // Role chips: "I'm open" is mutually exclusive (no specific title required).
+  const toggleChip = (c) => {
+    if (c === OPEN_CHIP) {
+      if (chips.includes(OPEN_CHIP)) setChips([]);
+      else { setChips([OPEN_CHIP]); setRoleText(''); }
+      return;
+    }
+    const next = chips.filter((x) => x !== OPEN_CHIP);
+    setChips(next.includes(c) ? next.filter((x) => x !== c) : [...next, c]);
+  };
 
   const handleUpload = async (file) => {
     if (!file) return;
@@ -190,13 +204,17 @@ export default function MinimalOnboarding({ onClose }) {
             <label style={labelStyle}>Target field</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
               {TARGET_CHIPS.map((c) => (
-                <button key={c} onClick={() => toggle(chips, setChips, c)} style={chipBtn(chips.includes(c))}>{c}</button>
+                <button key={c} onClick={() => toggleChip(c)} style={chipBtn(chips.includes(c))}>{c}</button>
               ))}
             </div>
 
-            <label style={labelStyle}>Specific role (optional)</label>
-            <input type="text" value={roleText} placeholder="e.g. Marketing Intern, Data Analyst…"
-              onChange={(e) => setRoleText(e.target.value)} style={{ ...inputStyle, marginBottom: 20 }} />
+            {chips.includes(OTHER_CHIP) && (
+              <>
+                <label style={labelStyle}>Specific role (optional)</label>
+                <input type="text" value={roleText} placeholder="e.g. Marketing Intern, Data Analyst…"
+                  onChange={(e) => setRoleText(e.target.value)} style={{ ...inputStyle, marginBottom: 20 }} />
+              </>
+            )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
               <MapPin size={13} color={INDIGO} />

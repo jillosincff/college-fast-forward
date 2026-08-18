@@ -2,268 +2,125 @@ import { useState } from 'react';
 
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
 const INDIGO = '#6d28d9';
-const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
+const INDIGO_DIM = '#5b21b6';
 const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
-const VIOLET = '#7c3aed';
-const VIOLET_LIGHT = 'rgba(124,58,237,0.08)';
-const VIOLET_BORDER = 'rgba(124,58,237,0.20)';
-const PINK = '#ec4899';
-const PINK_LIGHT = 'rgba(236,72,153,0.08)';
-const PINK_BORDER = 'rgba(236,72,153,0.22)';
-const TEAL = '#06b6d4';
-const TEAL_LIGHT = 'rgba(6,182,212,0.08)';
-const TEAL_BORDER = 'rgba(6,182,212,0.22)';
-const TEAL_DARK = '#0891b2';
-const CORAL = '#f43f5e';
-const CORAL_LIGHT = 'rgba(244,63,94,0.07)';
-const CORAL_BORDER = 'rgba(244,63,94,0.22)';
+const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 const TEXT = '#0f172a';
 const TEXT2 = '#475569';
-const TEXT3 = '#94a3b8';
 const CARD = '#ffffff';
+const GREEN = '#06b6d4';
+const GREEN_LIGHT = 'rgba(6,182,212,0.08)';
+const GREEN_BORDER = 'rgba(6,182,212,0.22)';
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
-// Aliases for backward compat
 const BLUE = INDIGO;
-const BLUE_LIGHT = INDIGO_LIGHT;
-const BLUE_BORDER = INDIGO_BORDER;
-const GREEN = TEAL;
-const GREEN_LIGHT = TEAL_LIGHT;
-const GREEN_BORDER = TEAL_BORDER;
 
-const BUCKETS = [
-  {
-    key: 'tech',
-    emoji: '💻',
-    label: 'Tech & Engineering',
-    color: INDIGO,
-    colorLight: INDIGO_LIGHT,
-    colorBorder: INDIGO_BORDER,
-    subs: ['Software Engineering', 'Product Management', 'Data Science', 'UX/UI Design', 'Cybersecurity', 'AI/ML'],
-  },
-  {
-    key: 'business',
-    emoji: '📊',
-    label: 'Business & Finance',
-    color: VIOLET,
-    colorLight: VIOLET_LIGHT,
-    colorBorder: VIOLET_BORDER,
-    subs: ['Investment Banking', 'Consulting', 'Private Equity', 'Corporate Finance', 'Accounting', 'Strategy'],
-  },
-  {
-    key: 'marketing',
-    emoji: '📣',
-    label: 'Marketing & Media',
-    color: PINK,
-    colorLight: PINK_LIGHT,
-    colorBorder: PINK_BORDER,
-    subs: ['Social Media', 'Content Creation', 'Product Marketing', 'Brand Strategy', 'PR & Communications', 'Growth Marketing'],
-  },
-  {
-    key: 'healthcare',
-    emoji: '🏥',
-    label: 'Healthcare & Bio',
-    color: TEAL,
-    colorLight: TEAL_LIGHT,
-    colorBorder: TEAL_BORDER,
-    subs: ['Pre-Med / Clinical', 'Biotech Research', 'Health Policy', 'Pharma', 'Nursing', 'Public Health'],
-  },
-  {
-    key: 'law_gov',
-    emoji: '⚖️',
-    label: 'Law & Government',
-    color: '#B45309',
-    colorLight: '#FFFBEB',
-    colorBorder: '#FDE68A',
-    subs: ['Pre-Law', 'Public Policy', 'Government / Civil Service', 'Nonprofit', 'International Relations', 'Politics'],
-  },
-  {
-    key: 'creative',
-    emoji: '🎨',
-    label: 'Creative & Entertainment',
-    color: PINK,
-    colorLight: PINK_LIGHT,
-    colorBorder: PINK_BORDER,
-    subs: ['Film & TV', 'Music Industry', 'Fashion & Retail', 'Sports Business', 'Gaming', 'Architecture & Design'],
-  },
+const FIELD_CHIPS = [
+  'Marketing', 'Finance', 'Software/Engineering', 'Sales', 'Operations',
+  'Consulting', 'Healthcare', 'Data/Analytics', 'Product/UX', 'HR/Recruiting',
+  'Communications/PR', 'Education/Nonprofit',
 ];
+const OTHER_CHIP = 'Other';
+const OPEN_CHIP = "I'm open";
 
+/**
+ * One-screen, fast role picker — flat chips, no nested job titles.
+ * Writes the picked fields into `selectedIndustries` and an optional
+ * free-text role (shown only when "Other" is picked) into `targetRoles`,
+ * preserving the data shape job matching + Magic Moment targeting already read.
+ */
 export default function IndustryScreen({ selectedIndustries, setSelectedIndustries, targetRoles, setTargetRoles, onBack, onNext }) {
-  const [expandedBucket, setExpandedBucket] = useState(null);
+  const [otherRole, setOtherRole] = useState(targetRoles?.[0] || '');
+  const chips = selectedIndustries || [];
 
-  const MAX_TOTAL = 3;
-  const totalSelected = selectedIndustries.length + targetRoles.length;
-
-  const toggleBucket = (key) => {
-    const bucket = BUCKETS.find(b => b.key === key);
-    if (selectedIndustries.includes(key)) {
-      // Deselect bucket and its subs
-      setSelectedIndustries(prev => prev.filter(k => k !== key));
-      setTargetRoles(prev => prev.filter(r => !bucket.subs.includes(r)));
-      if (expandedBucket === key) setExpandedBucket(null);
-    } else {
-      if (totalSelected >= MAX_TOTAL) return;
-      setSelectedIndustries(prev => [...prev, key]);
-      setExpandedBucket(key);
-    }
-  };
-
-  const toggleSub = (bucketKey, sub) => {
-    const bucket = BUCKETS.find(b => b.key === bucketKey);
-    if (targetRoles.includes(sub)) {
-      setTargetRoles(prev => prev.filter(r => r !== sub));
-    } else {
-      if (totalSelected >= MAX_TOTAL) return;
-      // Auto-select parent bucket if not already
-      if (!selectedIndustries.includes(bucketKey)) {
-        setSelectedIndustries(prev => [...prev, bucketKey]);
+  const toggle = (chip) => {
+    if (chip === OPEN_CHIP) {
+      // "I'm open" is mutually exclusive — no specific title required.
+      if (chips.includes(OPEN_CHIP)) {
+        setSelectedIndustries([]);
+      } else {
+        setSelectedIndustries([OPEN_CHIP]);
+        setOtherRole('');
+        setTargetRoles([]);
       }
-      setTargetRoles(prev => [...prev, sub]);
+      return;
     }
-  };
-
-  const handleBucketClick = (key) => {
-    const isSelected = selectedIndustries.includes(key);
-    if (isSelected) {
-      // Deselect bucket and its subs
-      toggleBucket(key);
+    // Picking a real field drops "I'm open".
+    const next = chips.filter(c => c !== OPEN_CHIP);
+    if (next.includes(chip)) {
+      const removed = next.filter(c => c !== chip);
+      setSelectedIndustries(removed);
+      if (chip === OTHER_CHIP) { setOtherRole(''); setTargetRoles([]); }
     } else {
-      toggleBucket(key);
+      setSelectedIndustries([...next, chip]);
     }
   };
 
-  const canContinue = totalSelected > 0;
+  const onOtherText = (v) => {
+    setOtherRole(v);
+    setTargetRoles(v.trim() ? [v.trim()] : []);
+  };
+
+  const hasOther = chips.includes(OTHER_CHIP);
+  const hasOpen = chips.includes(OPEN_CHIP);
+  const canContinue = chips.length > 0 || otherRole.trim().length > 0;
+
+  const chipBtn = (active) => ({
+    fontFamily: FONT, fontSize: 13, fontWeight: active ? 700 : 600,
+    color: active ? '#fff' : INDIGO_DIM,
+    background: active ? GRAD_INDIGO : '#fff',
+    border: `1.5px solid ${active ? INDIGO : INDIGO_BORDER}`,
+    borderRadius: 999, padding: '10px 16px', cursor: 'pointer', minHeight: 'auto',
+    transition: 'all 0.15s',
+  });
+
+  const summary = [...chips, ...(otherRole.trim() && hasOther ? [otherRole.trim()] : [])];
 
   return (
-    <div style={{ textAlign: 'center', maxWidth: 580, width: '100%' }}>
-      {/* Badge */}
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 100, padding: '5px 14px', marginBottom: 20 }}>
+    <div style={{ textAlign: 'center', maxWidth: 560, width: '100%' }}>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 100, padding: '5px 14px', marginBottom: 18 }}>
         <span style={{ fontSize: 11 }}>🗺️</span>
         <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Mapping Your Pipeline</span>
       </div>
 
-      <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 4vw, 34px)', fontWeight: 800, color: TEXT, lineHeight: 1.15, letterSpacing: '-0.03em', margin: '0 0 12px' }}>
-        Where do you eventually want to end up?
+      <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px,4vw,32px)', fontWeight: 800, color: TEXT, lineHeight: 1.15, letterSpacing: '-0.03em', margin: '0 0 10px' }}>
+        What kind of role are you after?
       </h1>
-      <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 auto 8px', maxWidth: 460 }}>
-        Pick up to 3 spaces you're drawn to. You can change this anytime.
-      </p>
-      <p style={{ fontFamily: FONT, fontSize: 12, color: totalSelected >= MAX_TOTAL ? '#EA580C' : TEXT3, margin: '0 0 24px', fontWeight: totalSelected >= MAX_TOTAL ? 700 : 400, transition: 'color 0.2s' }}>
-        {totalSelected >= MAX_TOTAL ? '✓ Max 3 selected' : `${MAX_TOTAL - totalSelected} selection${MAX_TOTAL - totalSelected !== 1 ? 's' : ''} remaining`}
+      <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: '0 auto 22px', maxWidth: 440 }}>
+        Pick the fields you're drawn to. You can change this anytime — CLIFF uses it to find and rank your opportunities.
       </p>
 
-      {/* Bucket Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 4, textAlign: 'left' }}>
-        {BUCKETS.map(bucket => {
-          const isSelected = selectedIndustries.includes(bucket.key);
-          const isExpanded = expandedBucket === bucket.key;
-          const subsSelected = targetRoles.filter(r => bucket.subs.includes(r));
-          const isDisabled = !isSelected && totalSelected >= MAX_TOTAL;
-
-          return (
-            <div key={bucket.key} style={{ gridColumn: isExpanded ? '1 / -1' : 'auto' }}>
-              {/* Bucket Button */}
-              <button
-                onClick={() => handleBucketClick(bucket.key)}
-                disabled={isDisabled}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-                  background: isSelected ? bucket.colorLight : CARD,
-                  border: `2px solid ${isSelected ? bucket.color : isDisabled ? '#F1F5F9' : '#E2E8F0'}`,
-                  borderRadius: 12, padding: '14px 16px', cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  textAlign: 'left', minHeight: 'auto',
-                  opacity: isDisabled ? 0.4 : 1,
-                  boxShadow: isSelected ? `0 0 0 3px ${bucket.colorBorder}` : SHADOW,
-                  transition: 'all 0.18s ease',
-                }}
-              >
-                <span style={{ fontSize: 20, flexShrink: 0 }}>{bucket.emoji}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: isSelected ? bucket.color : TEXT, margin: 0 }}>{bucket.label}</p>
-                  {isSelected && subsSelected.length > 0 && (
-                    <p style={{ fontFamily: FONT, fontSize: 10, color: bucket.color, margin: '2px 0 0', opacity: 0.8 }}>{subsSelected.join(', ')}</p>
-                  )}
-                </div>
-                <div style={{
-                  width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
-                  border: `2px solid ${isSelected ? bucket.color : '#CBD5E1'}`,
-                  background: isSelected ? bucket.color : 'transparent',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 9, color: '#fff', fontWeight: 800, transition: 'all 0.18s',
-                }}>
-                  {isSelected && '✓'}
-                </div>
-              </button>
-
-              {/* Sub-pills (expand on click) */}
-              {isExpanded && isSelected && (
-                <div style={{ background: bucket.colorLight, border: `1px solid ${bucket.colorBorder}`, borderRadius: '0 0 12px 12px', borderTop: 'none', padding: '12px 14px', marginTop: -2, animation: 'fadeUp 0.2s ease' }}>
-                  <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: bucket.color, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 10px' }}>Tap to narrow it down:</p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-                    {bucket.subs.map(sub => {
-                      const isSubSelected = targetRoles.includes(sub);
-                      const subDisabled = !isSubSelected && totalSelected >= MAX_TOTAL;
-                      return (
-                        <button
-                          key={sub}
-                          onClick={() => toggleSub(bucket.key, sub)}
-                          disabled={subDisabled}
-                          style={{
-                            fontFamily: FONT, fontSize: 12, fontWeight: 600,
-                            color: isSubSelected ? '#fff' : bucket.color,
-                            background: isSubSelected ? bucket.color : '#fff',
-                            border: `1.5px solid ${bucket.colorBorder}`,
-                            borderRadius: 100, padding: '6px 14px',
-                            cursor: subDisabled ? 'not-allowed' : 'pointer',
-                            minHeight: 'auto', opacity: subDisabled ? 0.4 : 1,
-                            transition: 'all 0.15s',
-                          }}
-                        >{sub}</button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+      {/* Field chips */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginBottom: 10 }}>
+        {FIELD_CHIPS.map(c => (
+          <button key={c} onClick={() => toggle(c)} style={chipBtn(chips.includes(c))}>{c}</button>
+        ))}
       </div>
 
-      {/* Still figuring it out — that's a valid answer */}
-      {!canContinue && (
-        <button
-          onClick={() => { setSelectedIndustries([]); setTargetRoles([]); onNext(); }}
-          style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT2, background: CARD, border: '1.5px dashed #CBD5E1', borderRadius: 100, padding: '10px 22px', cursor: 'pointer', minHeight: 'auto', marginTop: 14, transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.color = INDIGO; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = TEXT2; }}
-        >
-          🔭 Still figuring it out — that's okay
-        </button>
+      {/* Other + I'm open */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginBottom: 4 }}>
+        <button onClick={() => toggle(OTHER_CHIP)} style={chipBtn(hasOther)}>{hasOther ? '✓ ' : ''}{OTHER_CHIP}</button>
+        <button onClick={() => toggle(OPEN_CHIP)} style={chipBtn(hasOpen)}>{hasOpen ? '✓ ' : ''}{OPEN_CHIP}</button>
+      </div>
+
+      {/* Other → optional specific role (only shown when Other is picked) */}
+      {hasOther && (
+        <div style={{ marginTop: 14, animation: 'fadeUp 0.2s ease' }}>
+          <input
+            type="text" value={otherRole}
+            onChange={e => onOtherText(e.target.value)}
+            placeholder="Specific role (optional) — e.g. Product Marketing Intern"
+            style={{ width: '100%', maxWidth: 420, boxSizing: 'border-box', fontFamily: FONT, fontSize: 14, color: TEXT, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '12px 14px', outline: 'none' }}
+          />
+        </div>
       )}
 
-      {/* Mirroring panel — appears after any selection */}
+      {/* Mirroring panel */}
       {canContinue && (
-        <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease' }}>
-          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 12px' }}>
-            Got it — you're targeting{' '}
-            <strong>
-              {[...selectedIndustries.map(k => BUCKETS.find(b => b.key === k)?.label), ...targetRoles].filter(Boolean).join(', ')}
-            </strong>.
-          </p>
-          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>Your agent is now prioritizing:</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-            {[
-              'Alumni & parent insiders in those spaces',
-              'Role-specific resume versions and outreach templates',
-              'Hidden opportunities most students never see',
-            ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                <span style={{ fontSize: 12, color: GREEN, flexShrink: 0, marginTop: 1 }}>•</span>
-                <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.5 }}>{item}</p>
-              </div>
-            ))}
-          </div>
-          <p style={{ fontFamily: FONT, fontSize: 13, color: '#059669', margin: '12px 0 0', fontWeight: 700 }}>
-            You just gave your agent the coordinates it needs to work effectively for you. 🎯
+        <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 18px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease' }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: 0, lineHeight: 1.55 }}>
+            {hasOpen
+              ? "Got it — you're open to exploring. CLIFF will cast a wide net and surface a mix of roles to find what fits."
+              : <>Got it — targeting <strong>{summary.join(', ')}</strong>. Your agent is prioritizing alumni insiders, role-specific prep, and hidden opportunities in these spaces.</>}
           </p>
         </div>
       )}
@@ -274,14 +131,7 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
         <button
           onClick={onNext}
           disabled={!canContinue}
-          style={{
-            fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
-            background: canContinue ? `linear-gradient(to bottom, ${BLUE}, #0052CC)` : '#CBD5E1',
-            border: 'none', borderRadius: 8, padding: '15px 36px',
-            cursor: canContinue ? 'pointer' : 'not-allowed', minHeight: 'auto',
-            boxShadow: canContinue ? '0 4px 14px rgba(0,102,255,0.25)' : 'none',
-            transition: 'all 0.2s',
-          }}
+          style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: canContinue ? `linear-gradient(to bottom, ${BLUE}, #0052CC)` : '#CBD5E1', border: 'none', borderRadius: 8, padding: '15px 36px', cursor: canContinue ? 'pointer' : 'not-allowed', minHeight: 'auto', boxShadow: canContinue ? '0 4px 14px rgba(0,102,255,0.25)' : 'none', transition: 'all 0.2s' }}
         >{canContinue ? <>Continue → <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.8 }}>Pipeline Mapped ✓</span></> : 'Select at least 1 →'}</button>
       </div>
     </div>
