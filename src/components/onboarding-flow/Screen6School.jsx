@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSchoolSearch } from '@/lib/usSchoolSearch';
 
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
 const BG = '#f8f9ff';
@@ -22,17 +23,6 @@ const BLUE_BORDER = INDIGO_BORDER;
 const GREEN = TEAL;
 const GREEN_LIGHT = TEAL_LIGHT;
 const GREEN_BORDER = TEAL_BORDER;
-
-const TOP_SCHOOLS = [
-  'University of Florida', 'Florida State University', 'University of Central Florida',
-  'University of Southern California', 'Penn State University', 'University of Michigan',
-  'Ohio State University', 'University of Georgia', 'University of Maryland',
-  'Tulane University', 'University of Delaware', 'Florida International University',
-  'New York University', 'Boston University', 'Georgetown University',
-  'University of Texas at Austin', 'UCLA', 'UC Berkeley', 'Indiana University',
-  'Purdue University', 'Arizona State University', 'University of Wisconsin',
-  'University of Illinois', 'Northeastern University', 'Temple University',
-];
 
 // Animated bar chart: cold (1x) vs alumni (10x)
 function AlumniBarChart({ pulse }) {
@@ -112,19 +102,18 @@ function AlumniBarChart({ pulse }) {
 }
 
 export default function Screen6School({ college, onCollegeChange, onBack, onNext, nextLabel = 'Continue →' }) {
-  const [suggestions, setSuggestions] = useState([]);
+  // Live US-college autocomplete (any US school). `locked` hides suggestions
+  // for one cycle after a pick so the dropdown doesn't immediately re-open.
+  const [locked, setLocked] = useState(false);
+  const { suggestions } = useSchoolSearch(locked ? '' : college);
   const [pulse, setPulse] = useState(false);
   const inputRef = useRef();
 
-  const handleInput = (val) => {
-    onCollegeChange(val);
-    if (val.length < 2) { setSuggestions([]); return; }
-    setSuggestions(TOP_SCHOOLS.filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 6));
-  };
+  const handleInput = (val) => { onCollegeChange(val); setLocked(false); };
 
   const selectSchool = (s) => {
     onCollegeChange(s);
-    setSuggestions([]);
+    setLocked(true);
     setPulse(true);
     setTimeout(() => setPulse(false), 600);
   };
