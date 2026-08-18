@@ -107,8 +107,29 @@ export default function MagicMoment() {
           setPhase(null);
           return;
         }
-        const topJob = jobs[0];
+        // 2. Pick the job that actually has a real insider. Scan the top
+        //    candidates in parallel and prefer the first with an alumni/parent
+        //    hit — cold-only is the last resort, not the default first
+        //    impression. The Magic Moment is only "holy shit" when the insider
+        //    is on the screen.
+        setPhase('Finding people on the inside…');
+        const candidates = jobs.slice(0, 6);
+        const connResults = await Promise.all(candidates.map(j =>
+          base44.functions.invoke('findWorkspaceConnections', { companyName: j.name, targetRole: j.job_title || role, magic_moment: true })
+            .then(r => ({ job: j, res: r }))
+            .catch(() => ({ job: j, res: { connections: [] } }))
+        ));
+        if (connResults.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) {
+          setShowSoftWall(true); setPhase(null); return;
+        }
+        let topJob = candidates[0];
+        let conns = [];
+        for (const r of connResults) {
+          const c = r.res?.data?.connections || r.res?.connections || [];
+          if (c.length > 0) { topJob = r.job; conns = c; break; }
+        }
         setJob(topJob);
+        setConnections(conns.slice(0, 3));
         const targetField = industries[0] || role || 'your target';
 
         // 2. Tailor the resume — uploaded if present, otherwise a starter built
@@ -155,15 +176,8 @@ export default function MagicMoment() {
           setTailored({ starter: true, starter_untailored: true, tailored_content: starterText });
         }
 
-        // 3. Surface alumni at the company
-        setPhase(`Surfacing alumni at ${topJob.name}…`);
-        let conns = [];
-        try {
-          const connRes = await base44.functions.invoke('findWorkspaceConnections', { companyName: topJob.name, targetRole: topJob.job_title || role, magic_moment: true });
-          if (connRes?.data?.upgrade_required || connRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
-          conns = connRes?.data?.connections || connRes?.connections || [];
-          setConnections(conns.slice(0, 3));
-        } catch (e) { /* alumni search best-effort */ }
+        // Alumni were already surfaced above when picking the job with a real
+        // insider — nothing to do here.
 
         // 4. Write the outreach — warm if an alum was found, cold fallback otherwise
         const top = conns[0];
