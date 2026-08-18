@@ -107,29 +107,43 @@ export default function MagicMoment() {
           setPhase(null);
           return;
         }
-        // 2. Pick the job that actually has a real insider. Scan the top
-        //    candidates in parallel and prefer the first with an alumni/parent
-        //    hit — cold-only is the last resort, not the default first
-        //    impression. The Magic Moment is only "holy shit" when the insider
-        //    is on the screen.
+        // 2. Pick the job that actually has a real insider. Priority order for
+        //    the free first cycle:
+        //      1) Strong role+location fit AND ≥1 alumni/parent at the company
+        //      2) Widen across more jobs (same field, adjacent titles/metro) if
+        //         that job has a real match
+        //      3) Cold-outreach-only job ONLY if no match exists after widening
+        //    Never prefer a "perfect" job with zero insiders over a strong-enough
+        //    job with a named person. Scan in batches and stop at the first warm
+        //    hit so high-volume targets (Finance + NYC) almost never return cold.
         setPhase('Finding people on the inside…');
-        const candidates = jobs.slice(0, 6);
-        const connResults = await Promise.all(candidates.map(j =>
-          base44.functions.invoke('findWorkspaceConnections', { companyName: j.name, targetRole: j.job_title || role, magic_moment: true })
-            .then(r => ({ job: j, res: r }))
-            .catch(() => ({ job: j, res: { connections: [] } }))
-        ));
-        if (connResults.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) {
-          setShowSoftWall(true); setPhase(null); return;
-        }
-        let topJob = candidates[0];
+        const BATCH = 6;
+        const MAX_SCAN = Math.min(jobs.length, 18);
+        let topJob = jobs[0];
         let conns = [];
-        for (const r of connResults) {
-          const c = r.res?.data?.connections || r.res?.connections || [];
-          if (c.length > 0) { topJob = r.job; conns = c; break; }
+        let jobsScanned = 0;
+        let gated = false;
+        for (let start = 0; start < MAX_SCAN; start += BATCH) {
+          const batch = jobs.slice(start, start + BATCH);
+          if (!batch.length) break;
+          const results = await Promise.all(batch.map(j =>
+            base44.functions.invoke('findWorkspaceConnections', { companyName: j.name, targetRole: j.job_title || role, magic_moment: true })
+              .then(r => ({ job: j, res: r }))
+              .catch(() => ({ job: j, res: { connections: [] } }))
+          ));
+          if (results.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) { gated = true; break; }
+          jobsScanned += batch.length;
+          for (const r of results) {
+            const c = r.res?.data?.connections || r.res?.connections || [];
+            if (c.length > 0) { topJob = r.job; conns = c; break; }
+          }
+          if (conns.length > 0) break; // warm hit — stop widening
+          if (start + BATCH < MAX_SCAN) setPhase('Widening the search for insiders…');
         }
+        if (gated) { setShowSoftWall(true); setPhase(null); return; }
         setJob(topJob);
         setConnections(conns.slice(0, 3));
+        const matchType = conns.length > 0 ? 'warm' : 'cold';
         const targetField = industries[0] || role || 'your target';
 
         // 2. Tailor the resume — uploaded if present, otherwise a starter built
@@ -217,6 +231,8 @@ export default function MagicMoment() {
           alumni_count: conns?.length || 0,
           has_tailored_resume: !!tailored,
           outreach_cold: !conns?.[0],
+          match_type: matchType,
+          jobs_scanned: jobsScanned,
         });
         markMagicMomentCompleted();
         setPhase(null);
