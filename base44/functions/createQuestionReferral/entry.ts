@@ -6,6 +6,16 @@ function encodeToken(payload) {
   return btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -106,18 +116,18 @@ Deno.serve(async (req) => {
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
   <p>Hi,</p>
   
-  <p><strong>${referrerName}</strong> thinks you might be able to help a student with a career question.</p>
+  <p><strong>${escapeHtml(referrerName)}</strong> thinks you might be able to help a student with a career question.</p>
   
   <div style="background: #f8f9fa; border-left: 4px solid #0021A5; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
     <p style="font-size: 12px; color: #666; margin: 0 0 8px 0; text-transform: uppercase;">
-      ${studentFirstName}${question.student_major ? ` • ${question.student_major}` : ''}
+      ${escapeHtml(studentFirstName)}${question.student_major ? ` • ${escapeHtml(question.student_major)}` : ''}
     </p>
     <p style="font-size: 16px; color: #1a1a1a; margin: 0; line-height: 1.5;">
-      "${(question.description || question.title || '').substring(0, 200)}${(question.description || '').length > 200 ? '...' : ''}"
+      "${escapeHtml((question.description || question.title || '').substring(0, 200))}${(question.description || '').length > 200 ? '...' : ''}"
     </p>
     ${question.help_types?.length > 0 ? `
     <p style="font-size: 13px; color: #666; margin: 12px 0 0 0;">
-      Looking for help with: ${question.help_types.map(t => t.replace(/_/g, ' ')).join(', ')}
+      Looking for help with: ${question.help_types.map(t => escapeHtml(t.replace(/_/g, ' '))).join(', ')}
     </p>
     ` : ''}
   </div>
