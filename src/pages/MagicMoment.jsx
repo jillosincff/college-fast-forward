@@ -85,12 +85,23 @@ export default function MagicMoment() {
         const industries = cg.target_industries || [];
         const location = cg.location_preference || '';
 
-        // 1. Find a high-fit job
-        const jobRes = await base44.functions.invoke('getLiveJobMatchesFn', {
-          career_goals: { role, industries, locations: location ? [location] : [], seeking: cg.seeking || 'both' },
-          force_refresh: true,
-        });
-        const jobs = jobRes?.data?.companies || jobRes?.companies || [];
+        // 1. Find a high-fit job — the live jobs provider is flaky (intermittent
+        //    timeouts / tight filtering can return an empty pool on a single pull),
+        //    so retry once before showing the "no jobs" empty state. A transient
+        //    empty must not look like "no jobs exist" when the next pull succeeds.
+        const fetchJobs = async () => {
+          const r = await base44.functions.invoke('getLiveJobMatchesFn', {
+            career_goals: { role, industries, locations: location ? [location] : [], seeking: cg.seeking || 'both' },
+            force_refresh: true,
+          });
+          return r?.data?.companies || r?.companies || [];
+        };
+        let jobs = await fetchJobs();
+        if (!jobs.length) {
+          setPhase('Widening the search…');
+          await new Promise(res => setTimeout(res, 1500));
+          jobs = await fetchJobs();
+        }
         if (!jobs.length) {
           setError("CLIFF couldn't find a job matching that target yet. Try widening your field or location in your profile.");
           setPhase(null);
