@@ -156,15 +156,13 @@ export default function MagicMoment() {
           }
           return null; // unknown chip — don't over-filter
         })();
-        // Titles that are ONLY a generic word with no field — rejected for the
-        // first cycle even if the description mentions the chip.
-        const GENERIC_ONLY_RE = /^(associate|analyst|specialist|coordinator|assistant|representative|agent|officer|trainee|graduate|intern)\s*$/i;
+        // Title-only match for the first cycle — a generic "Specialist" whose
+        // description happens to mention marketing is NOT on-chip. Description
+        // is never allowed to sneak a generic title back in.
         const isOnChip = (j) => {
           if (!chipKeywords) return true;
           const title = (j.job_title || '').toLowerCase().trim();
-          if (chipKeywords.some(k => title.includes(k))) return true;
-          if (GENERIC_ONLY_RE.test(title)) return false;
-          return chipKeywords.some(k => (j.hiring_description || '').toLowerCase().includes(k));
+          return chipKeywords.some(k => title.includes(k));
         };
 
         const legit = (arr) => arr.filter(j => !isJunk(j));
