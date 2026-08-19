@@ -86,7 +86,13 @@ Deno.serve(async (req) => {
     // Require an authenticated caller. This endpoint spends the app's Firecrawl
     // quota, so an anonymous request must never reach the API key — internal
     // service-role invocations (from other backend functions) carry auth too.
-    const user = await base44.auth.me();
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch (authErr) {
+      // No valid session token — reject before any API key is accessed.
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
