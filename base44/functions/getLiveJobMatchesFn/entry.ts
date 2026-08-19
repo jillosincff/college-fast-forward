@@ -262,7 +262,11 @@ Deno.serve(async (req) => {
       return isEntryLevel({ job_required_experience: c._exp }, c._title);
     };
 
-    const buildPool = (relaxed) => {
+    // mode: 'strict' (structured experience + senior-title gate), 'relaxed'
+    // (hard-senior title gate only), 'permissive' (no seniority gate — used only
+    // when strict AND relaxed both returned 0, so a valid query never dead-ends
+    // the Magic Moment just because every posting happened to be senior-titled).
+    const buildPool = (mode) => {
       const orgCounts = new Map();
       const pool = [];
       for (const job of jobList) {
@@ -270,7 +274,8 @@ Deno.serve(async (req) => {
         if (!c) continue;
         if (seeking === 'internship' && !c._isIntern) continue;
         if (seeking === 'fulltime' && c._isIntern) continue;
-        if (!passesEntry(c, relaxed)) continue;
+        if (mode === 'strict' && !passesEntry(c, false)) continue;
+        if (mode === 'relaxed' && !passesEntry(c, true)) continue;
         const orgKey = c.name.toLowerCase();
         const count = orgCounts.get(orgKey) || 0;
         if (count >= MAX_PER_COMPANY) continue;
@@ -281,14 +286,19 @@ Deno.serve(async (req) => {
       return pool;
     };
 
-    let allCompanies = buildPool(false);
+    let allCompanies = buildPool('strict');
     console.log(`[getLiveJobMatchesFn] Built pool of ${allCompanies.length} verified real jobs (strict)`);
 
     // Never dead-end the Magic Moment on an empty pool. If strict entry-level
-    // filtering removed everything, run one relaxed pass so roles still appear.
+    // filtering removed everything, run a relaxed pass; if that is also empty,
+    // run a permissive pass so any real, location-matched posting still surfaces.
     if (allCompanies.length === 0) {
-      allCompanies = buildPool(true);
+      allCompanies = buildPool('relaxed');
       console.log(`[getLiveJobMatchesFn] Relaxed entry pass: ${allCompanies.length} jobs`);
+    }
+    if (allCompanies.length === 0) {
+      allCompanies = buildPool('permissive');
+      console.log(`[getLiveJobMatchesFn] Permissive pass: ${allCompanies.length} jobs`);
     }
 
     // Cache the FULL pool so Load More can paginate without re-fetching.
