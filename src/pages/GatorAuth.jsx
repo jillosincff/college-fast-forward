@@ -153,7 +153,21 @@ export default function GatorAuth() {
     try {
       // Native registration — creates the account and emails a 6-digit verification code.
       const cleanEmail = signupEmail.trim().toLowerCase();
-      await base44.auth.register({ email: cleanEmail, password: signupPassword, full_name: fullName });
+      // Retry once on transient connection timeouts — the platform's database
+      // occasionally has brief connectivity hiccups that succeed on retry.
+      let regErr = null;
+      try {
+        await base44.auth.register({ email: cleanEmail, password: signupPassword, full_name: fullName });
+      } catch (err) {
+        const et = err?.response?.data?.error_type || '';
+        if (/timeout|connect/i.test(et)) {
+          await new Promise(r => setTimeout(r, 1500));
+          try {
+            await base44.auth.register({ email: cleanEmail, password: signupPassword, full_name: fullName });
+          } catch (retryErr) { regErr = retryErr; }
+        } else { regErr = err; }
+      }
+      if (regErr) throw regErr;
       // Defer email verification: try to mint a session immediately so the
       // student can start onboarding now and confirm their email later. The
       // verification email is still sent — we just don't block the funnel on
@@ -174,8 +188,11 @@ export default function GatorAuth() {
       setPendingOtpEmail(cleanEmail);
     } catch (err) {
       const detail = err?.response?.data?.detail || err?.response?.data?.message || err?.message || '';
+      const errorType = err?.response?.data?.error_type || '';
       if (/already|exist|registered/i.test(detail)) {
         setError('An account with this email already exists. Try signing in.');
+      } else if (/timeout|connect/i.test(errorType)) {
+        setError('Connection timed out. Please try again — this is usually temporary.');
       } else {
         setError(detail || 'Registration failed. Please try again.');
       }

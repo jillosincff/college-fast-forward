@@ -19,7 +19,21 @@ const AuthProviderInner = ({ children }) => {
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
+      let currentUser;
+      try {
+        currentUser = await base44.auth.me();
+      } catch (retryErr) {
+        // Transient database connection timeouts (ConnectTimeout) should not
+        // kick a logged-in user out to the login screen. Retry once after a
+        // short delay before giving up.
+        const et = retryErr?.response?.data?.error_type || '';
+        if (/timeout|connect/i.test(et)) {
+          await new Promise(r => setTimeout(r, 1500));
+          currentUser = await base44.auth.me();
+        } else {
+          throw retryErr;
+        }
+      }
       setUser(currentUser);
       setIsAuthenticated(true);
       await attributePendingReferral(currentUser);
