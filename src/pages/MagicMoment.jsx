@@ -62,6 +62,8 @@ export default function MagicMoment() {
   const [connections, setConnections] = useState([]);
   const [outreach, setOutreach] = useState(null);
   const [copied, setCopied] = useState(false);
+  // Sticks once the student copies — `copied` is only a 2.6s toast flag.
+  const [revealPaywall, setRevealPaywall] = useState(false);
   const [showPro, setShowPro] = useState(false);
   const [showSoftWall, setShowSoftWall] = useState(false);
   const [error, setError] = useState('');
@@ -252,8 +254,13 @@ export default function MagicMoment() {
         // match exists.
         if (!topJob) {
           setPhase('Checking insider connections…');
-          const curated = getCuratedFallback(role || industries[0] || '', location);
-          const curatedPool = onChip(curated.length > 0 ? curated : getCuratedFallback('', ''));
+          // Role first, then the student's industry chip — never a generic pull,
+          // which is how a Healthcare student ended up with a Deloitte "Analyst".
+          const curated = getCuratedFallback(role || '', location);
+          const byIndustry = curated.length > 0 ? curated : getCuratedFallback(industries[0] || '', location);
+          // If the chip filter empties the pool, keep the role-shaped curated
+          // jobs rather than falling through to generic inventory.
+          const curatedPool = onChip(byIndustry).length > 0 ? onChip(byIndustry) : byIndustry;
           sourcePool = curatedPool;
           const curatedWarm = curatedPool.length > 0 ? await scanForWarm(curatedPool) : null;
           if (curatedWarm) { topJob = curatedWarm.job; conns = curatedWarm.conns; resultType = 'curated_warm'; }
@@ -286,7 +293,7 @@ export default function MagicMoment() {
         // Defensive: if a future code path leaves topJob null, use the guaranteed
         // floor rather than dead-ending the first cycle.
         if (!topJob) {
-          topJob = getCuratedFallback('', '')[0];
+          topJob = getCuratedFallback(role || industries[0] || '', location)[0];
           conns = [];
           resultType = 'curated_fallback';
           sourcePool = [];
@@ -427,6 +434,7 @@ export default function MagicMoment() {
     }
     try { window.open(url, '_blank', 'noopener'); } catch (e) {}
     // 4. Confirmation — tells them the draft is on the clipboard even if the popup was blocked
+    setRevealPaywall(true);
     if (copiedOk) { setCopied(true); setTimeout(() => setCopied(false), 2600); }
   };
 
@@ -484,7 +492,13 @@ export default function MagicMoment() {
         </div>
 
         {user?.subscription_status !== 'active' && (
-          <LockedJobsRail jobs={lockedJobs} onUnlock={() => setShowPro(true)} onAskParent={() => setShowPro(true)} />
+          <LockedJobsRail
+            jobs={lockedJobs}
+            isWarm={isWarm}
+            revealed={isWarm || revealPaywall}
+            onUnlock={() => setShowPro(true)}
+            onAskParent={() => setShowPro(true)}
+          />
         )}
       </div>
       {showPro && <ProUpgradeModal user={user} onClose={() => setShowPro(false)} source="magic_moment" />}

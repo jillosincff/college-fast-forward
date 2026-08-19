@@ -449,9 +449,17 @@ export function getCuratedFallback(role: string, location: string): CuratedJob[]
 
   if (rk && mk && BY_MARKET[`${rk}|${mk}`]) return BY_MARKET[`${rk}|${mk}`];
   if (mk === 'nyc') return NYC_GENERIC;
-  // No curated market — try role-specific remote jobs first so a
-  // Communications student never gets a Sales SDR from the generic list.
-  if (rk && REMOTE_BY_ROLE[rk] && REMOTE_BY_ROLE[rk].length > 0) return REMOTE_BY_ROLE[rk];
+  // Role known but no curated metro: stay role-shaped. Role-specific remote
+  // roles first, then that role's real-company in-market bucket. A Healthcare
+  // student must NEVER receive a generic "Analyst" from the generic list.
+  if (rk) {
+    const roleShaped = [
+      ...(REMOTE_BY_ROLE[rk] || []),
+      ...(BY_MARKET[`${rk}|nyc`] || []),
+    ];
+    if (roleShaped.length > 0) return roleShaped;
+  }
+  // Only when the role is genuinely unknown.
   if (REMOTE_GENERIC.length > 0) return REMOTE_GENERIC;
   // Absolute floor — can never be empty, no matter what was edited above.
   return GUARANTEED_FLOOR;
