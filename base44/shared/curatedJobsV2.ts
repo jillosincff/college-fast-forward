@@ -281,8 +281,8 @@ const NYC_EDUCATION: CuratedJob[] = [
 
 // ── Remote / national last-resort (legitimate W-2 roles, no hustle/MLM) ─────
 const REMOTE_GENERIC: CuratedJob[] = [
-  mk('GitLab', 'Associate', 'Software', 'Remote',
-    'GitLab hires fully-remote associates across sales, support, and engineering with a documented handbook-first culture.',
+  mk('GitLab', 'Sales Development Representative', 'Sales', 'Remote',
+    'GitLab SDRs prospect and qualify outbound accounts for the fully-remote sales team — a classic entry point into enterprise SaaS.',
     'https://about.gitlab.com/jobs/'),
   mk('Automattic', 'Support & Engineering Roles', 'Software', 'Remote',
     'Automattic (WordPress.com, WooCommerce) hires fully-remote support engineers and builders across timezones.',

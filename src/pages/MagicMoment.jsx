@@ -129,7 +129,47 @@ export default function MagicMoment() {
         // Tie-breaker for cold fallback: prefer real employee-style roles.
         const looksLikeRealRole = (j) => /\b(intern|analyst|coordinator|associate|assistant|specialist|trainee|graduate)\b/i.test(j.job_title || '');
 
+        // ── Role fidelity ───────────────────────────────────────────────────
+        // The first-cycle job must clearly match the student's chip. A generic
+        // "Associate" with no marketing/brand/content in the title is a safety-
+        // net result, not a Wow. We partition the pool into on-chip and off-chip;
+        // off-chip is only touched as an absolute last resort (in-market only —
+        // cold + generic + remote is an automatic fail).
+        const ROLE_KEYWORDS = {
+          marketing: ['marketing', 'brand', 'content', 'communications', 'social media', 'social', 'public relations', 'growth', 'advertising', 'campaign', 'digital marketing', 'product marketing', 'content marketing'],
+          sales: ['sales', 'account executive', 'business development', 'sales development', 'sdr', 'bdr', 'account manager', 'inside sales'],
+          communications: ['communications', 'public relations', 'pr', 'content', 'media relations', 'corporate communications', 'internal communications'],
+          finance: ['finance', 'financial', 'investment', 'banking', 'accounting', 'audit', 'treasury', 'risk'],
+          software: ['software', 'developer', 'engineer', 'frontend', 'backend', 'full stack', 'fullstack', 'programmer'],
+          operations: ['operations', 'supply chain', 'logistics'],
+          consulting: ['consulting', 'consultant', 'strategy'],
+          healthcare: ['healthcare', 'clinical', 'patient care', 'medical assistant', 'research coordinator'],
+          data: ['data', 'analytics', 'business intelligence', 'quantitative'],
+          product: ['product', 'ux', 'user experience'],
+          hr: ['human resources', 'recruiting', 'talent acquisition', 'people operations'],
+          education: ['education', 'teaching', 'admissions', 'academic'],
+        };
+        const chipKeywords = (() => {
+          const combined = `${role || ''} ${(industries || []).join(' ')}`.toLowerCase();
+          for (const kws of Object.values(ROLE_KEYWORDS)) {
+            if (kws.some(k => combined.includes(k))) return kws;
+          }
+          return null; // unknown chip — don't over-filter
+        })();
+        // Titles that are ONLY a generic word with no field — rejected for the
+        // first cycle even if the description mentions the chip.
+        const GENERIC_ONLY_RE = /^(associate|analyst|specialist|coordinator|assistant|representative|agent|officer|trainee|graduate|intern)\s*$/i;
+        const isOnChip = (j) => {
+          if (!chipKeywords) return true;
+          const title = (j.job_title || '').toLowerCase().trim();
+          if (chipKeywords.some(k => title.includes(k))) return true;
+          if (GENERIC_ONLY_RE.test(title)) return false;
+          return chipKeywords.some(k => (j.hiring_description || '').toLowerCase().includes(k));
+        };
+
         const legit = (arr) => arr.filter(j => !isJunk(j));
+        const onChip = (arr) => arr.filter(j => isOnChip(j));
+        const offChip = (arr) => arr.filter(j => !isOnChip(j));
         const byTier = (arr) => {
           const b = { same_location: [], nearby: [], remote: [], other: [] };
           for (const j of arr) b[tierOf(j)].push(j);
@@ -162,8 +202,26 @@ export default function MagicMoment() {
         };
         const pickCold = (pool) => (pool.length ? (pool.find(looksLikeRealRole) || pool[0]) : null);
 
+        // Run the full tiered selection (warm → cold, same-location → nearby)
+        // on a bucket set. Returns { job, conns, resultType } or null.
+        const selectFromBuckets = async (b, prefix) => {
+          if (gated) return null;
+          let hit = await scanForWarm(b.same_location);
+          if (hit) return { job: hit.job, conns: hit.conns, resultType: `${prefix}warm_same_location` };
+          if (gated) return null;
+          hit = await scanForWarm(b.nearby);
+          if (hit) return { job: hit.job, conns: hit.conns, resultType: `${prefix}warm_nearby` };
+          if (gated) return null;
+          if (b.same_location.length) return { job: pickCold(b.same_location), conns: [], resultType: `${prefix}cold_same_location` };
+          if (b.nearby.length) return { job: pickCold(b.nearby), conns: [], resultType: `${prefix}cold_nearby` };
+          return null;
+        };
+
         setPhase('Finding a high-fit job…');
-        let buckets = byTier(legit(await fetchJobs(location)));
+        // On-chip pool first — titles/descriptions that clearly match the chip.
+        const rawJobs = legit(await fetchJobs(location));
+        let buckets = byTier(onChip(rawJobs));
+        let offChipBuckets = byTier(offChip(rawJobs));
 
         // In-market widen (state/metro) before ever touching remote — only when
         // the same-city pull came back thin. Never widen to "anywhere" here.
@@ -171,48 +229,58 @@ export default function MagicMoment() {
           setPhase('Widening the search…');
           await new Promise(res => setTimeout(res, 900));
           if (userState) {
-            const wb = byTier(legit(await fetchJobs(userState)));
+            const rawWiden = legit(await fetchJobs(userState));
+            const wb = byTier(onChip(rawWiden));
+            const wob = byTier(offChip(rawWiden));
             buckets.same_location.push(...wb.same_location);
             buckets.nearby.push(...wb.nearby);
+            offChipBuckets.same_location.push(...wob.same_location);
+            offChipBuckets.nearby.push(...wob.nearby);
           }
         }
 
-        // ── Tiered selection: people-first, location + legitimacy first ───────
+        // ── Tiered selection: on-chip first, people-first, location-first ────
         setPhase('Finding people on the inside…');
         let topJob = null, conns = [], resultType = 'empty';
-        let hit = !gated && await scanForWarm(buckets.same_location);
-        if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'warm_same_location'; }
-        if (!topJob && !gated) { hit = await scanForWarm(buckets.nearby); if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'warm_widened'; } }
-        // Same-location, legit job, no match → cold outreach (do NOT jump to remote)
-        if (!topJob && buckets.same_location.length) { topJob = pickCold(buckets.same_location); resultType = 'cold_same_location'; }
-        // Nearby / metro cold — still their market, ahead of any remote job
-        if (!topJob && buckets.nearby.length) { topJob = pickCold(buckets.nearby); resultType = 'cold_same_location'; }
-        // Remote / anywhere ONLY if 1–4 truly returned nothing
+        const onChipResult = await selectFromBuckets(buckets, '');
+        if (onChipResult) { topJob = onChipResult.job; conns = onChipResult.conns; resultType = onChipResult.resultType; }
+
+        // On-chip remote / anywhere ONLY if in-market on-chip returned nothing
         if (!topJob && !gated) {
           setPhase('Looking beyond your market…');
-          const ab = byTier(legit(await fetchJobs('')));
+          const rawAny = legit(await fetchJobs(''));
+          const ab = byTier(onChip(rawAny));
           const remotePool = ab.remote.length ? ab.remote : [...ab.same_location, ...ab.nearby, ...ab.remote, ...ab.other];
-          hit = await scanForWarm(remotePool);
-          if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'remote_fallback'; }
+          const hit = await scanForWarm(remotePool);
+          if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'remote_fallback_warm'; }
           else { const cj = pickCold(remotePool); if (cj) { topJob = cj; resultType = 'remote_fallback'; } }
         }
 
         if (gated) { setShowSoftWall(true); setPhase(null); return; }
+
+        // ── Curated fallback BEFORE off-chip ────────────────────────────────
+        // Curated jobs are on-chip and in-market (e.g. NYC_MARKETING) — always
+        // better than a generic "Associate" from the live pool. The first Magic
+        // Moment must NEVER dead-end on the "couldn't find a job" screen.
         if (!topJob) {
-          // The first Magic Moment must NEVER dead-end on the "couldn't find a
-          // job" screen — for ANY role + location, not just the specially
-          // inventoried chips. getCuratedFallback is guaranteed non-empty (it
-          // falls through to generic NYC → remote legitimate jobs), so this
-          // always produces a real job and the full cycle completes below.
           const curated = getCuratedFallback(role || industries[0] || '', location);
           topJob = (curated.length > 0 ? curated[0] : null) || getCuratedFallback('', '')[0];
           conns = [];
           resultType = 'curated_fallback';
           console.log('[MagicMoment] Served curated fallback job:', topJob.name, topJob.job_title);
         }
+
+        // ── Off-chip LAST RESORT — in-market only, never remote ─────────────
+        // Generic titles (Associate/Analyst with no field) are only acceptable
+        // when no on-chip or curated job exists anywhere. Cold + generic + remote
+        // is an automatic fail, so only same_location / nearby are considered.
+        if (!topJob) {
+          const offResult = await selectFromBuckets(offChipBuckets, 'offchip_');
+          if (offResult) { topJob = offResult.job; conns = offResult.conns; resultType = offResult.resultType; }
+        }
+
         // Defensive: if a future code path leaves topJob null, use the guaranteed
-        // floor rather than dead-ending the first cycle. The "couldn't find a job"
-        // screen is permanently disabled on the Magic Moment path.
+        // floor rather than dead-ending the first cycle.
         if (!topJob) {
           topJob = getCuratedFallback('', '')[0];
           conns = [];
