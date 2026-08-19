@@ -97,16 +97,27 @@ export function useSchoolSearch(query) {
   const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
-    const q = (query || '').trim();
+    const q = (query || '').trim().toLowerCase();
     if (q.length < 2) { setSuggestions([]); return; }
 
+    // Instant local matches — autocomplete must appear the moment the student
+    // types, even if the live college API hangs or is unreachable. The live API
+    // only enriches (adds smaller schools); it never gates the dropdown.
+    setSuggestions(FALLBACK_SCHOOLS.filter(s => s.toLowerCase().includes(q)).slice(0, 8));
+
     const ctrl = new AbortController();
+    // Hard timeout so a hung live request can't leave the dropdown stale.
+    const hardTimeout = setTimeout(() => ctrl.abort(), 3000);
     const t = setTimeout(async () => {
-      const r = await searchUSColleges(q, { signal: ctrl.signal });
-      setSuggestions(r);
+      try {
+        const r = await searchUSColleges(q, { signal: ctrl.signal });
+        // Only replace the local matches if the live API returned something.
+        if (r && r.length) setSuggestions(r);
+      } catch (e) { /* keep local matches */ }
+      clearTimeout(hardTimeout);
     }, 220);
 
-    return () => { clearTimeout(t); ctrl.abort(); };
+    return () => { clearTimeout(t); clearTimeout(hardTimeout); ctrl.abort(); };
   }, [query]);
 
   return { suggestions };
