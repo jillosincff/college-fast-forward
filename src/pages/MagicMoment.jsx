@@ -180,7 +180,7 @@ export default function MagicMoment() {
         // the first warm hit so high-volume targets (Finance + NYC) almost never
         // return cold. Returns { job, conns } or null.
         const scanForWarm = async (pool) => {
-          const MAX = Math.min(pool.length, 12);
+          const MAX = Math.min(pool.length, 18);
           for (let start = 0; start < MAX; start += 6) {
             const batch = pool.slice(start, start + 6);
             if (!batch.length) break;
@@ -243,7 +243,26 @@ export default function MagicMoment() {
         const onChipResult = await selectFromBuckets(buckets, '');
         if (onChipResult) { topJob = onChipResult.job; conns = onChipResult.conns; resultType = onChipResult.resultType; }
 
-        // On-chip remote / anywhere ONLY if in-market on-chip returned nothing
+        if (gated) { setShowSoftWall(true); setPhase(null); return; }
+
+        // ── Curated BEFORE remote ────────────────────────────────────────────
+        // Curated jobs are on-chip, in-market, real companies (Google, Meta,
+        // NBCUniversal…) — exactly where alumni/parents are most likely to be.
+        // Warm-scan them first: a Marketing Coordinator at Google WITH a UF alum
+        // beats a cold one. Only fall back to cold curated if no warm curated
+        // match exists.
+        if (!topJob) {
+          setPhase('Checking insider connections…');
+          const curated = getCuratedFallback(role || industries[0] || '', location);
+          const curatedPool = (curated.length > 0 ? curated : getCuratedFallback('', ''));
+          const curatedWarm = await scanForWarm(curatedPool);
+          if (curatedWarm) { topJob = curatedWarm.job; conns = curatedWarm.conns; resultType = 'curated_warm'; }
+          else if (curatedPool.length) { topJob = curatedPool[0]; conns = []; resultType = 'curated_fallback'; }
+          if (topJob) console.log('[MagicMoment] Served curated job:', topJob.name, topJob.job_title, resultType);
+        }
+
+        // ── Remote / anywhere — last resort ──────────────────────────────────
+        // Only when no on-chip in-market job (live or curated) exists at all.
         if (!topJob && !gated) {
           setPhase('Looking beyond your market…');
           const rawAny = legit(await fetchJobs(''));
@@ -252,20 +271,6 @@ export default function MagicMoment() {
           const hit = await scanForWarm(remotePool);
           if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'remote_fallback_warm'; }
           else { const cj = pickCold(remotePool); if (cj) { topJob = cj; resultType = 'remote_fallback'; } }
-        }
-
-        if (gated) { setShowSoftWall(true); setPhase(null); return; }
-
-        // ── Curated fallback BEFORE off-chip ────────────────────────────────
-        // Curated jobs are on-chip and in-market (e.g. NYC_MARKETING) — always
-        // better than a generic "Associate" from the live pool. The first Magic
-        // Moment must NEVER dead-end on the "couldn't find a job" screen.
-        if (!topJob) {
-          const curated = getCuratedFallback(role || industries[0] || '', location);
-          topJob = (curated.length > 0 ? curated[0] : null) || getCuratedFallback('', '')[0];
-          conns = [];
-          resultType = 'curated_fallback';
-          console.log('[MagicMoment] Served curated fallback job:', topJob.name, topJob.job_title);
         }
 
         // ── Off-chip LAST RESORT — in-market only, never remote ─────────────
