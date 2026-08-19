@@ -279,17 +279,107 @@ const NYC_EDUCATION: CuratedJob[] = [
     'https://www.nyu.edu/about/careers-at-nyu.html'),
 ];
 
-// ── Remote / national last-resort (legitimate W-2 roles, no hustle/MLM) ─────
+// ── Remote / national last-resort — ROLE-SPECIFIC so a Communications
+//    student never gets a Sales SDR. Each list has on-chip W-2 remote roles
+//    for that field. REMOTE_GENERIC is only for truly unknown roles. ────────
+const REMOTE_BY_ROLE: Record<string, CuratedJob[]> = {
+  communications: [
+    mk('Edelman', 'Communications Assistant (Remote)', 'Communications', 'Remote',
+      'Edelman Communications Assistants support media relations, press lists, and client deliverables across PR campaigns for major brands.',
+      'https://www.edelman.com/careers'),
+    mk('Weber Shandwick', 'Account Coordinator, PR (Remote)', 'Communications', 'Remote',
+      'Weber Shandwick Account Coordinators support media outreach, content drafting, and campaign coordination across consumer and corporate clients.',
+      'https://www.webershandwick.com/careers'),
+    mk('Ogilvy', 'Junior Associate, Communications (Remote)', 'Communications', 'Remote',
+      'Ogilvy Junior Associates support PR, social, and content programs across the agency brand and corporate communications teams.',
+      'https://www.ogilvy.com/careers'),
+  ],
+  marketing: [
+    mk('HubSpot', 'Marketing Coordinator (Remote)', 'Marketing', 'Remote',
+      'HubSpot Marketing Coordinators help execute lifecycle, content, and acquisition campaigns remotely with a proven training program.',
+      'https://www.hubspot.com/careers'),
+    mk('GitLab', 'Marketing Campaign Manager', 'Marketing', 'Remote',
+      'GitLab Marketing Campaign Managers plan and execute demand-generation campaigns for the fully-remote team.',
+      'https://about.gitlab.com/jobs/'),
+    mk('Automattic', 'Marketing Specialist', 'Marketing', 'Remote',
+      'Automattic (WordPress.com, WooCommerce) hires fully-remote marketing specialists across growth, content, and brand.',
+      'https://automattic.com/work-with-us/'),
+  ],
+  sales: [
+    mk('GitLab', 'Sales Development Representative', 'Sales', 'Remote',
+      'GitLab SDRs prospect and qualify outbound accounts for the fully-remote sales team — a classic entry point into enterprise SaaS.',
+      'https://about.gitlab.com/jobs/'),
+    mk('Stripe', 'Account Executive', 'Sales', 'Remote',
+      'Stripe AEs help online businesses scale payments — consultative SaaS sales with strong enablement.',
+      'https://stripe.com/jobs'),
+    mk('HubSpot', 'Sales Development Representative (Remote)', 'Sales', 'Remote',
+      'HubSpot hires remote SDRs to prospect and qualify inbound/outbound leads with a proven training program.',
+      'https://www.hubspot.com/careers'),
+  ],
+  software: [
+    mk('Automattic', 'Software Engineer', 'Software', 'Remote',
+      'Automattic (WordPress.com, WooCommerce) hires fully-remote engineers across timezones.',
+      'https://automattic.com/work-with-us/'),
+    mk('GitLab', 'Software Engineer', 'Software', 'Remote',
+      'GitLab Engineers build the DevOps platform used by millions of developers — fully remote, handbook-first culture.',
+      'https://about.gitlab.com/jobs/'),
+    mk('Stripe', 'Software Engineer', 'Software', 'Remote',
+      'Stripe Engineers build payment infrastructure for online businesses — strong engineering bar, fully remote-friendly.',
+      'https://stripe.com/jobs'),
+  ],
+  finance: [
+    mk('Stripe', 'Financial Analyst', 'Finance', 'Remote',
+      'Stripe Financial Analysts support forecasting, reporting, and strategic finance for the payments platform.',
+      'https://stripe.com/jobs'),
+    mk('Plaid', 'Financial Analyst', 'Finance', 'Remote',
+      'Plaid Financial Analysts support fintech financial operations and planning.',
+      'https://plaid.com/careers/'),
+  ],
+  data: [
+    mk('GitLab', 'Data Analyst', 'Data', 'Remote',
+      'GitLab Data Analysts turn product and usage data into insight for the fully-remote team.',
+      'https://about.gitlab.com/jobs/'),
+    mk('Stripe', 'Data Scientist', 'Data', 'Remote',
+      'Stripe Data Scientists build models and experiments that power payment decisions.',
+      'https://stripe.com/jobs'),
+  ],
+  consulting: [
+    mk('Deloitte', 'Analyst (Remote-Eligible)', 'Consulting', 'Remote',
+      'Deloitte Analysts join consulting and advisory teams — many roles offer remote-eligible arrangements.',
+      'https://jobs.deloitte.com/'),
+  ],
+  operations: [
+    mk('GitLab', 'Operations Analyst', 'Operations', 'Remote',
+      'GitLab Operations Analysts support business operations for the fully-remote company.',
+      'https://about.gitlab.com/jobs/'),
+  ],
+  hr: [
+    mk('GitLab', 'People Operations Analyst', 'HR', 'Remote',
+      'GitLab People Operations Analysts support HR programs and workforce analytics — fully remote.',
+      'https://about.gitlab.com/jobs/'),
+  ],
+  product: [
+    mk('GitLab', 'Product Analyst', 'Product', 'Remote',
+      'GitLab Product Analysts measure and improve product surfaces with experimentation — fully remote.',
+      'https://about.gitlab.com/jobs/'),
+  ],
+  healthcare: [
+    mk('UnitedHealth Group', 'Healthcare Data Analyst (Remote)', 'Healthcare', 'Remote',
+      'UnitedHealth Group Healthcare Data Analysts turn clinical data into operational insight — remote-eligible.',
+      'https://careers.unitedhealthgroup.com/'),
+  ],
+  education: [
+    mk('Khan Academy', 'Content Intern', 'Education', 'Remote',
+      'Khan Academy Content Interns help build free educational content used by millions — fully remote.',
+      'https://www.khanacademy.org/careers'),
+  ],
+};
+
+// Generic remote fallback — only used when the role is truly unknown.
 const REMOTE_GENERIC: CuratedJob[] = [
-  mk('GitLab', 'Sales Development Representative', 'Sales', 'Remote',
-    'GitLab SDRs prospect and qualify outbound accounts for the fully-remote sales team — a classic entry point into enterprise SaaS.',
-    'https://about.gitlab.com/jobs/'),
-  mk('Automattic', 'Support & Engineering Roles', 'Software', 'Remote',
-    'Automattic (WordPress.com, WooCommerce) hires fully-remote support engineers and builders across timezones.',
-    'https://automattic.com/work-with-us/'),
-  mk('Stripe', 'Account Executive', 'Sales', 'Remote',
-    'Stripe AEs help online businesses scale payments — consultative SaaS sales with strong enablement.',
-    'https://stripe.com/jobs'),
+  mk('Deloitte', 'Analyst (Remote-Eligible)', 'Business', 'Remote',
+    'Deloitte Analysts join consulting and risk/advisory teams — many roles offer remote arrangements.',
+    'https://jobs.deloitte.com/'),
   mk('HubSpot', 'Sales Development Representative (Remote)', 'Sales', 'Remote',
     'HubSpot hires remote SDRs to prospect and qualify inbound/outbound leads with a proven training program.',
     'https://www.hubspot.com/careers'),
@@ -359,8 +449,9 @@ export function getCuratedFallback(role: string, location: string): CuratedJob[]
 
   if (rk && mk && BY_MARKET[`${rk}|${mk}`]) return BY_MARKET[`${rk}|${mk}`];
   if (mk === 'nyc') return NYC_GENERIC;
-  // No curated market for this metro — return remote legitimate roles so the
-  // first cycle still completes instead of dead-ending.
+  // No curated market — try role-specific remote jobs first so a
+  // Communications student never gets a Sales SDR from the generic list.
+  if (rk && REMOTE_BY_ROLE[rk] && REMOTE_BY_ROLE[rk].length > 0) return REMOTE_BY_ROLE[rk];
   if (REMOTE_GENERIC.length > 0) return REMOTE_GENERIC;
   // Absolute floor — can never be empty, no matter what was edited above.
   return GUARANTEED_FLOOR;

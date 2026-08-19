@@ -254,8 +254,8 @@ export default function MagicMoment() {
         if (!topJob) {
           setPhase('Checking insider connections…');
           const curated = getCuratedFallback(role || industries[0] || '', location);
-          const curatedPool = (curated.length > 0 ? curated : getCuratedFallback('', ''));
-          const curatedWarm = await scanForWarm(curatedPool);
+          const curatedPool = onChip(curated.length > 0 ? curated : getCuratedFallback('', ''));
+          const curatedWarm = curatedPool.length > 0 ? await scanForWarm(curatedPool) : null;
           if (curatedWarm) { topJob = curatedWarm.job; conns = curatedWarm.conns; resultType = 'curated_warm'; }
           else if (curatedPool.length) { topJob = curatedPool[0]; conns = []; resultType = 'curated_fallback'; }
           if (topJob) console.log('[MagicMoment] Served curated job:', topJob.name, topJob.job_title, resultType);
@@ -294,16 +294,14 @@ export default function MagicMoment() {
         const matchType = conns.length > 0 ? 'warm' : 'cold';
         const targetField = industries[0] || role || 'your target';
 
-        // 2. Tailor the resume — uploaded if present, otherwise a starter built
-        //    from the student's profile so the cycle always shows a resume
-        //    artifact (never an empty slot).
-        setPhase('Tailoring your resume for this role…');
+        // 2. Resume — only tailor if the student uploaded one. No uploaded
+        //    resume = honest empty card ("Upload your resume and CLIFF will
+        //    tailor it to this job"), not a fake starter. The cycle still
+        //    completes with job + alumni + outreach.
         let tailoredResult = null;
-        let isStarter = false;
-        let starterText = '';
         try {
-          let resumeText = '';
           const resumeUrl = user.resume_url || user.resume_file_url;
+          let resumeText = '';
           if (resumeUrl) {
             let resumes = [];
             try { resumes = await base44.entities.Resume.filter({ student_email: user.email }, '-created_date', 5); } catch (e) {}
@@ -315,28 +313,19 @@ export default function MagicMoment() {
               if (resumeText.length > 100) await saveParsedResume(base44, user.email, parsed, resumeUrl, '').catch(() => {});
             }
           }
-          if (!resumeText || resumeText.length <= 100) {
-            // No usable uploaded resume — generate a starter from profile + target role
-            starterText = buildStarterResumeText(user, topJob);
-            resumeText = starterText;
-            isStarter = true;
-          }
           if (resumeText.length > 100) {
+            setPhase('Tailoring your resume for this role…');
             try {
               const tailRes = await base44.functions.invoke('tailorResume', {
                 resumeText, jobTitle: topJob.job_title, companyName: topJob.name,
                 jobDescription: topJob.hiring_description || '',
               });
               tailoredResult = tailRes?.data || tailRes;
-            } catch (e) { /* tailor best-effort — fall back to starter text below */ }
+            } catch (e) { /* tailor best-effort */ }
+            if (tailoredResult) setTailored(tailoredResult);
           }
+          // No uploaded resume → tailored stays null → UI shows honest upload card
         } catch (e) { /* resume tailoring is best-effort — don't block the plan */ }
-        if (tailoredResult) {
-          setTailored({ ...tailoredResult, starter: isStarter });
-        } else if (isStarter && starterText) {
-          // Tailoring failed — still show the starter resume so the block is never empty
-          setTailored({ starter: true, starter_untailored: true, tailored_content: starterText });
-        }
 
         // Alumni were already surfaced above when picking the job with a real
         // insider — nothing to do here.
