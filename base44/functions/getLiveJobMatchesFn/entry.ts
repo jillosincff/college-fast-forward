@@ -6,6 +6,9 @@ import { getCuratedFallback } from '../../shared/curatedJobs.ts';
  * Source of truth: OpenWeb Ninja JSearch API —
  * real, live job postings aggregated from Google for Jobs. No LLM-generated listings.
  * Cached 24h per user, busted when goals change.
+ *
+ * Roles covered by the curated fallback ladder: Sales, Finance, Marketing, Software,
+ * Communications, Operations, Consulting, Healthcare, Data, Product/UX, HR, Education.
  */
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -137,6 +140,17 @@ Deno.serve(async (req) => {
       communications: '"Communications" OR "Public Relations" OR PR OR Media OR Content OR "Social Media" OR "Communications Coordinator" OR "Communications Specialist"',
       'public relations': '"Public Relations" OR PR OR Communications OR Media OR "Media Relations"',
       pr: '"Public Relations" OR PR OR Communications OR Media OR "Media Relations"',
+      healthcare: '"Healthcare" OR "Clinical Research Coordinator" OR "Research Technician" OR "Healthcare Analyst" OR "Clinical Operations" OR "Patient Care" OR "Medical Assistant"',
+      consulting: '"Consulting" OR "Analyst" OR "Strategy" OR "Associate Consultant" OR "Business Analyst" OR "Management Consultant"',
+      operations: '"Operations" OR "Operations Coordinator" OR "Operations Analyst" OR "Supply Chain" OR "Logistics Coordinator" OR "Operations Associate"',
+      data: '"Data Analyst" OR "Data Scientist" OR "Analytics" OR "Quantitative Analyst" OR "Business Intelligence" OR "Data Associate"',
+      product: '"Product Manager" OR "Product Analyst" OR "Product Design" OR "UX" OR "User Experience" OR "Associate Product Manager" OR "Product Coordinator"',
+      hr: '"Human Resources" OR "HR Coordinator" OR "Recruiting Coordinator" OR "People Operations" OR "Talent Acquisition" OR "HR Analyst"',
+      education: '"Education" OR "Teaching" OR "Admissions" OR "Program Coordinator" OR "Academic Coordinator" OR "Education Associate"',
+      marketing: '"Marketing" OR "Marketing Coordinator" OR "Digital Marketing" OR "Content Marketing" OR "Brand Marketing" OR "Social Media Marketing"',
+      finance: '"Finance" OR "Financial Analyst" OR "Investment Banking" OR "Asset Management" OR "Risk Analyst" OR "Finance Associate"',
+      sales: '"Sales" OR "Sales Development Representative" OR "Account Executive" OR "Business Development" OR "Sales Associate"',
+      software: '"Software Engineer" OR "Software Developer" OR "Frontend Developer" OR "Backend Developer" OR "Full Stack Developer" OR "Associate Engineer"',
     };
     const searchTerm = rawTerm
       .replace(/\b(paid|unpaid|part[\s-]?time|full[\s-]?time|entry[\s-]?level|junior|jr)\b/gi, '')
