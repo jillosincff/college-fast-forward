@@ -83,8 +83,12 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Internal utility — called only by other backend functions (e.g. scrapeUFCareerEvents)
-    // No user auth needed; FIRECRAWL_API_KEY is the real secret gate
+    // Require an authenticated caller. This endpoint spends the app's Firecrawl
+    // quota, so an anonymous request must never reach the API key — internal
+    // service-role invocations (from other backend functions) carry auth too.
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
 
     const { action, url, school_code, formats } = await req.json();
