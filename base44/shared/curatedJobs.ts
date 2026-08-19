@@ -438,6 +438,25 @@ const GUARANTEED_FLOOR: CuratedJob[] = [
 ];
 
 /**
+ * STRICTLY chip-shaped curated jobs. Returns [] when the chip can't be
+ * identified — callers must never fall through to generic inventory and stamp
+ * "matches your Healthcare" on a Deloitte Analyst. In-market (metro) jobs come
+ * first; role-specific remote jobs are appended as the last resort only.
+ */
+export function getChipCuratedJobs(chipText: string, location: string): CuratedJob[] {
+  const rk = detectRole(chipText);
+  if (!rk) return [];
+  const metro = detectMetro(location);
+  const inMarket = (metro && BY_MARKET[`${rk}|${metro}`]) || BY_MARKET[`${rk}|nyc`] || [];
+  return [...inMarket, ...(REMOTE_BY_ROLE[rk] || [])];
+}
+
+/** Exposed so callers can tell "unknown chip" from "known chip, no inventory". */
+export function detectChipKey(chipText: string): string | null {
+  return detectRole(chipText);
+}
+
+/**
  * Returns curated real jobs for a target role + location. Tries the specific
  * role+metro pair first, then a generic metro list, then a remote national list.
  * Always returns at least an empty array only when no market matches at all —

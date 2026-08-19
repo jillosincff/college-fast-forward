@@ -11,7 +11,7 @@ import { Users, Mail, Sparkles } from 'lucide-react';
 import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied, markMagicMomentCompleted } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import SoftWallModal from '@/components/conversion/SoftWallModal';
-import { getCuratedFallback } from '../../base44/shared/curatedJobs';
+import { getCuratedFallback, getChipCuratedJobs, detectChipKey } from '../../base44/shared/curatedJobs';
 import MagicMomentLoader from '@/components/magic-moment/MagicMomentLoader';
 import HeroJobHeader from '@/components/magic-moment/HeroJobHeader';
 import HeroPeople from '@/components/magic-moment/HeroPeople';
@@ -68,6 +68,8 @@ export default function MagicMoment() {
   const [showSoftWall, setShowSoftWall] = useState(false);
   const [error, setError] = useState('');
   const [lockedJobs, setLockedJobs] = useState([]);
+  // Only claim "matches your {chip}" when the hero actually passed the chip gate.
+  const [heroMeta, setHeroMeta] = useState({ onChip: false, chipLabel: '' });
 
   useEffect(() => {
     if (!user || ranRef.current) return;
@@ -141,31 +143,41 @@ export default function MagicMoment() {
           software: ['software', 'developer', 'engineer', 'frontend', 'backend', 'full stack', 'fullstack', 'programmer'],
           operations: ['operations', 'supply chain', 'logistics'],
           consulting: ['consulting', 'consultant', 'strategy'],
-          healthcare: ['healthcare', 'clinical', 'patient care', 'medical assistant', 'research coordinator'],
+          healthcare: ['healthcare', 'health', 'clinical', 'hospital', 'patient', 'medical', 'nurse', 'nursing', 'allied health', 'pharma', 'biotech', 'research coordinator'],
           data: ['data', 'analytics', 'business intelligence', 'quantitative'],
           product: ['product', 'ux', 'user experience'],
           hr: ['human resources', 'recruiting', 'talent acquisition', 'people operations'],
           education: ['education', 'teaching', 'admissions', 'academic'],
         };
+        // The chip is everything the student told us: role + industry.
+        const chipText = `${role || ''} ${(industries || []).join(' ')}`.trim();
+        const chipLabel = industries[0] || role || '';
         const chipKeywords = (() => {
-          const combined = `${role || ''} ${(industries || []).join(' ')}`.toLowerCase();
+          const combined = chipText.toLowerCase();
           for (const kws of Object.values(ROLE_KEYWORDS)) {
             if (kws.some(k => combined.includes(k))) return kws;
           }
           return null; // unknown chip — don't over-filter
         })();
+        // Titles that name no field at all. These can NEVER be the first-cycle
+        // hero for a real chip — "Analyst" is not a Sales or Healthcare job.
+        const GENERIC_TITLE = /^(sr\.?|senior|junior|jr\.?|entry[- ]level|associate|assistant|staff)?\s*(analyst|associate|specialist|coordinator|consultant|generalist|professional|representative)\b/i;
+        const rejected = [];
+        const logReject = (j, why) => rejected.push({
+          job_id: j.job_id || j.id || null, title: j.job_title || '', company: j.name || '', why_rejected: why,
+        });
         // Title-only match for the first cycle — a generic "Specialist" whose
-        // description happens to mention marketing is NOT on-chip. Description
-        // is never allowed to sneak a generic title back in.
+        // DESCRIPTION happens to mention the chip is NOT on-chip.
         const isOnChip = (j) => {
           if (!chipKeywords) return true;
           const title = (j.job_title || '').toLowerCase().trim();
-          return chipKeywords.some(k => title.includes(k));
+          const hit = chipKeywords.some(k => title.includes(k));
+          if (!hit) { logReject(j, GENERIC_TITLE.test(title) ? 'junk' : 'off_chip'); return false; }
+          return true;
         };
 
         const legit = (arr) => arr.filter(j => !isJunk(j));
         const onChip = (arr) => arr.filter(j => isOnChip(j));
-        const offChip = (arr) => arr.filter(j => !isOnChip(j));
         const byTier = (arr) => {
           const b = { same_location: [], nearby: [], remote: [], other: [] };
           for (const j of arr) b[tierOf(j)].push(j);
@@ -220,7 +232,6 @@ export default function MagicMoment() {
         // On-chip pool first — titles/descriptions that clearly match the chip.
         const rawJobs = legit(await fetchJobs(location));
         let buckets = byTier(onChip(rawJobs));
-        let offChipBuckets = byTier(offChip(rawJobs));
 
         // In-market widen (state/metro) before ever touching remote — only when
         // the same-city pull came back thin. Never widen to "anywhere" here.
@@ -230,11 +241,8 @@ export default function MagicMoment() {
           if (userState) {
             const rawWiden = legit(await fetchJobs(userState));
             const wb = byTier(onChip(rawWiden));
-            const wob = byTier(offChip(rawWiden));
             buckets.same_location.push(...wb.same_location);
             buckets.nearby.push(...wb.nearby);
-            offChipBuckets.same_location.push(...wob.same_location);
-            offChipBuckets.nearby.push(...wob.nearby);
           }
         }
 
@@ -256,11 +264,20 @@ export default function MagicMoment() {
           setPhase('Checking insider connections…');
           // Role first, then the student's industry chip — never a generic pull,
           // which is how a Healthcare student ended up with a Deloitte "Analyst".
-          const curated = getCuratedFallback(role || '', location);
-          const byIndustry = curated.length > 0 ? curated : getCuratedFallback(industries[0] || '', location);
-          // If the chip filter empties the pool, keep the role-shaped curated
-          // jobs rather than falling through to generic inventory.
-          const curatedPool = onChip(byIndustry).length > 0 ? onChip(byIndustry) : byIndustry;
+          // Chip-specific curated inventory ONLY (role AND industry are both
+          // considered). Generic inventory is allowed exclusively when the chip
+          // itself is unknown — otherwise a Healthcare student would get the
+          // shared "Deloitte Analyst" that Sales students also get.
+          const chipCurated = getChipCuratedJobs(chipText, location);
+          const knownChip = !!detectChipKey(chipText) || !!chipKeywords;
+          const basePool = chipCurated.length > 0
+            ? chipCurated
+            : (knownChip ? [] : getCuratedFallback(role || industries[0] || '', location));
+          // In-market before remote, and every candidate must pass the chip gate.
+          const gate = onChip(basePool);
+          const pool = gate.length > 0 ? gate : (knownChip ? [] : basePool);
+          const inMarket = pool.filter(j => tierOf(j) !== 'remote');
+          const curatedPool = inMarket.length > 0 ? inMarket : pool;
           sourcePool = curatedPool;
           const curatedWarm = curatedPool.length > 0 ? await scanForWarm(curatedPool) : null;
           if (curatedWarm) { topJob = curatedWarm.job; conns = curatedWarm.conns; resultType = 'curated_warm'; }
@@ -281,23 +298,21 @@ export default function MagicMoment() {
           else { const cj = pickCold(remotePool); if (cj) { topJob = cj; resultType = 'remote_fallback'; } }
         }
 
-        // ── Off-chip LAST RESORT — in-market only, never remote ─────────────
-        // Generic titles (Associate/Analyst with no field) are only acceptable
-        // when no on-chip or curated job exists anywhere. Cold + generic + remote
-        // is an automatic fail, so only same_location / nearby are considered.
+        // NO off-chip fallback. A hero that doesn't pass the chip gate is worse
+        // than no hero — it makes the whole product look fake. Last resort is
+        // chip-shaped curated inventory; if even that is empty we say so.
         if (!topJob) {
-          const offResult = await selectFromBuckets(offChipBuckets, 'offchip_');
-          if (offResult) { topJob = offResult.job; conns = offResult.conns; resultType = offResult.resultType; sourcePool = [...offChipBuckets.same_location, ...offChipBuckets.nearby]; }
+          const lastResort = onChip(getChipCuratedJobs(chipText, location));
+          if (lastResort.length) { topJob = lastResort[0]; conns = []; resultType = 'curated_fallback'; sourcePool = lastResort; }
         }
-
-        // Defensive: if a future code path leaves topJob null, use the guaranteed
-        // floor rather than dead-ending the first cycle.
+        if (rejected.length) console.log('[MagicMoment] rejected candidates:', rejected);
         if (!topJob) {
-          topJob = getCuratedFallback(role || industries[0] || '', location)[0];
-          conns = [];
-          resultType = 'curated_fallback';
-          sourcePool = [];
+          console.log('[MagicMoment] no on-chip job found for chip:', chipText, location);
+          setError(`CLIFF couldn't find a ${chipLabel || 'matching'} role that meets its bar yet. Try again shortly — it won't show you a job that isn't a real match.`);
+          setPhase(null);
+          return;
         }
+        setHeroMeta({ onChip: !chipKeywords ? false : isOnChip(topJob), chipLabel });
         setJob(topJob);
         setConnections(conns.slice(0, 3));
         const heroKey = `${topJob?.name || ''}|${topJob?.job_title || ''}`;
@@ -400,7 +415,7 @@ export default function MagicMoment() {
   }, [user]);
 
   const fitReason = job
-    ? `Hiring now for ${job.job_title}${job.location ? ` in ${job.location}` : ''} — matches your ${((user?.career_goals?.target_industries) || [])[0] || (user?.career_goals?.target_roles || [])[0] || 'target'}.`
+    ? `Hiring now for ${job.job_title}${job.location ? ` in ${job.location}` : ''}${heroMeta.onChip && heroMeta.chipLabel ? ` — matches your ${heroMeta.chipLabel}.` : '.'}`
     : '';
 
   const handlePrimaryAction = async () => {
@@ -474,9 +489,13 @@ export default function MagicMoment() {
             <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your free cycle</span>
           </div>
           <h1 style={{ fontFamily: FONT, fontSize: 28, fontWeight: 800, color: TEXT, margin: '0 0 8px', lineHeight: 1.2 }}>
-            {isWarm ? 'CLIFF found someone on the inside.' : 'CLIFF found your way in.'}
+            {isWarm ? 'CLIFF found someone on the inside.' : "Here's a role to start with."}
           </h1>
-          <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>One complete path — ready to send. The rest is unlocked with Pro.</p>
+          <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>
+            {isWarm
+              ? 'One complete path — ready to send. The rest is unlocked with Pro.'
+              : "We didn't find an alum at this company yet — here's your outreach draft anyway."}
+          </p>
         </div>
 
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '22px 20px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
