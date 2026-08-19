@@ -85,10 +85,12 @@ export default function MagicMoment() {
         const industries = cg.target_industries || [];
         const location = cg.location_preference || '';
 
-        // 1. Find a high-fit job — the live jobs provider is flaky (intermittent
-        //    timeouts / tight filtering can return an empty pool on a single pull),
-        //    so retry once before showing the "no jobs" empty state. A transient
-        //    empty must not look like "no jobs exist" when the next pull succeeds.
+        // 1. Find a high-fit job — LOCATION + LEGITIMACY first, people second,
+        //    remote only as a last resort. The free first cycle must NEVER
+        //    bait-and-switch a New York student into a remote "build your own
+        //    biz" posting just because the title keyword matched.
+        //    Priority: same-location+warm → nearby/metro+warm → same-location
+        //    cold → nearby cold → remote (anywhere) ONLY if all of those fail.
         const fetchJobs = async (locOverride) => {
           const loc = locOverride !== undefined ? locOverride : location;
           const r = await base44.functions.invoke('getLiveJobMatchesFn', {
@@ -97,54 +99,109 @@ export default function MagicMoment() {
           });
           return r?.data?.companies || r?.companies || [];
         };
-        let jobs = await fetchJobs();
-        if (!jobs.length) {
+
+        // Parse the student's location intent into city/state tokens for tiering.
+        const locParts = (location || '').split(',').map(p => p.trim()).filter(Boolean);
+        const userCity = locParts[0] || '';
+        const userState = locParts[1] || '';
+
+        // Partition a pool by location fit. "Widen" means metro/hybrid/adjacent
+        // in the SAME market — never a different work mode. Pure Remote is its
+        // own last-resort tier; "Remote in NY" stays in-market as nearby.
+        const tierOf = (j) => {
+          const loc = (j.location || '').toLowerCase();
+          if (!loc) return 'other';
+          const isRemote = /\bremote\b|work\s*from\s*home/.test(loc);
+          const cityHit = userCity && loc.includes(userCity.toLowerCase());
+          const stateHit = userState && loc.includes(userState.toLowerCase());
+          if (isRemote) return (stateHit || cityHit) ? 'nearby' : 'remote';
+          if (cityHit) return 'same_location';
+          if (stateHit) return 'nearby';
+          return 'other';
+        };
+
+        // Junk / hustle postings destroy trust in the first cycle — exclude them
+        // entirely (independent / 1099 / own biz / partner program / MLM / etc.).
+        const isJunk = (j) => /\b(independent|1099|own business|own biz|build your own|be your own|partner program|independent partner|work[- ]from[- ]home opportunity|unlimited earning|franchise|mlm|multi[- ]level)\b/i
+          .test(`${j.job_title || ''} ${j.hiring_description || ''}`);
+
+        // Tie-breaker for cold fallback: prefer real employee-style roles.
+        const looksLikeRealRole = (j) => /\b(intern|analyst|coordinator|associate|assistant|specialist|trainee|graduate)\b/i.test(j.job_title || '');
+
+        const legit = (arr) => arr.filter(j => !isJunk(j));
+        const byTier = (arr) => {
+          const b = { same_location: [], nearby: [], remote: [], other: [] };
+          for (const j of arr) b[tierOf(j)].push(j);
+          return b;
+        };
+
+        let gated = false;
+        let jobsScanned = 0;
+        // Scan a pool in batches for the first job with a real insider. Stops at
+        // the first warm hit so high-volume targets (Finance + NYC) almost never
+        // return cold. Returns { job, conns } or null.
+        const scanForWarm = async (pool) => {
+          const MAX = Math.min(pool.length, 12);
+          for (let start = 0; start < MAX; start += 6) {
+            const batch = pool.slice(start, start + 6);
+            if (!batch.length) break;
+            const results = await Promise.all(batch.map(j =>
+              base44.functions.invoke('findWorkspaceConnections', { companyName: j.name, targetRole: j.job_title || role, magic_moment: true })
+                .then(r => ({ job: j, res: r }))
+                .catch(() => ({ job: j, res: { connections: [] } }))
+            ));
+            if (results.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) { gated = true; return null; }
+            jobsScanned += batch.length;
+            for (const r of results) {
+              const c = r.res?.data?.connections || r.res?.connections || [];
+              if (c.length > 0) return { job: r.job, conns: c };
+            }
+          }
+          return null;
+        };
+        const pickCold = (pool) => (pool.length ? (pool.find(looksLikeRealRole) || pool[0]) : null);
+
+        setPhase('Finding a high-fit job…');
+        let buckets = byTier(legit(await fetchJobs(location)));
+
+        // In-market widen (state/metro) before ever touching remote — only when
+        // the same-city pull came back thin. Never widen to "anywhere" here.
+        if (!buckets.same_location.length && !buckets.nearby.length) {
           setPhase('Widening the search…');
-          await new Promise(res => setTimeout(res, 1200));
-          // Widen metro → statewide → anywhere rather than dead-ending on a thin market
-          const statePart = location.split(',').map(p => p.trim())[1] || '';
-          jobs = statePart ? await fetchJobs(statePart) : [];
-          if (!jobs.length) jobs = await fetchJobs('');
+          await new Promise(res => setTimeout(res, 900));
+          if (userState) {
+            const wb = byTier(legit(await fetchJobs(userState)));
+            buckets.same_location.push(...wb.same_location);
+            buckets.nearby.push(...wb.nearby);
+          }
         }
-        if (!jobs.length) {
+
+        // ── Tiered selection: people-first, location + legitimacy first ───────
+        setPhase('Finding people on the inside…');
+        let topJob = null, conns = [], resultType = 'empty';
+        let hit = !gated && await scanForWarm(buckets.same_location);
+        if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'warm_same_location'; }
+        if (!topJob && !gated) { hit = await scanForWarm(buckets.nearby); if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'warm_widened'; } }
+        // Same-location, legit job, no match → cold outreach (do NOT jump to remote)
+        if (!topJob && buckets.same_location.length) { topJob = pickCold(buckets.same_location); resultType = 'cold_same_location'; }
+        // Nearby / metro cold — still their market, ahead of any remote job
+        if (!topJob && buckets.nearby.length) { topJob = pickCold(buckets.nearby); resultType = 'cold_same_location'; }
+        // Remote / anywhere ONLY if 1–4 truly returned nothing
+        if (!topJob && !gated) {
+          setPhase('Looking beyond your market…');
+          const ab = byTier(legit(await fetchJobs('')));
+          const remotePool = ab.remote.length ? ab.remote : [...ab.same_location, ...ab.nearby, ...ab.remote, ...ab.other];
+          hit = await scanForWarm(remotePool);
+          if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'remote_fallback'; }
+          else { const cj = pickCold(remotePool); if (cj) { topJob = cj; resultType = 'remote_fallback'; } }
+        }
+
+        if (gated) { setShowSoftWall(true); setPhase(null); return; }
+        if (!topJob) {
           setError("CLIFF couldn't find a job matching that target yet. Try widening your field or location in your profile.");
           setPhase(null);
           return;
         }
-        // 2. Pick the job that actually has a real insider. Priority order for
-        //    the free first cycle:
-        //      1) Strong role+location fit AND ≥1 alumni/parent at the company
-        //      2) Widen across more jobs (same field, adjacent titles/metro) if
-        //         that job has a real match
-        //      3) Cold-outreach-only job ONLY if no match exists after widening
-        //    Never prefer a "perfect" job with zero insiders over a strong-enough
-        //    job with a named person. Scan in batches and stop at the first warm
-        //    hit so high-volume targets (Finance + NYC) almost never return cold.
-        setPhase('Finding people on the inside…');
-        const BATCH = 6;
-        const MAX_SCAN = Math.min(jobs.length, 18);
-        let topJob = jobs[0];
-        let conns = [];
-        let jobsScanned = 0;
-        let gated = false;
-        for (let start = 0; start < MAX_SCAN; start += BATCH) {
-          const batch = jobs.slice(start, start + BATCH);
-          if (!batch.length) break;
-          const results = await Promise.all(batch.map(j =>
-            base44.functions.invoke('findWorkspaceConnections', { companyName: j.name, targetRole: j.job_title || role, magic_moment: true })
-              .then(r => ({ job: j, res: r }))
-              .catch(() => ({ job: j, res: { connections: [] } }))
-          ));
-          if (results.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) { gated = true; break; }
-          jobsScanned += batch.length;
-          for (const r of results) {
-            const c = r.res?.data?.connections || r.res?.connections || [];
-            if (c.length > 0) { topJob = r.job; conns = c; break; }
-          }
-          if (conns.length > 0) break; // warm hit — stop widening
-          if (start + BATCH < MAX_SCAN) setPhase('Widening the search for insiders…');
-        }
-        if (gated) { setShowSoftWall(true); setPhase(null); return; }
         setJob(topJob);
         setConnections(conns.slice(0, 3));
         const matchType = conns.length > 0 ? 'warm' : 'cold';
@@ -236,6 +293,7 @@ export default function MagicMoment() {
           has_tailored_resume: !!tailored,
           outreach_cold: !conns?.[0],
           match_type: matchType,
+          result_type: resultType,
           jobs_scanned: jobsScanned,
         });
         markMagicMomentCompleted();
