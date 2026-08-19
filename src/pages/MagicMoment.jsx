@@ -89,9 +89,10 @@ export default function MagicMoment() {
         //    timeouts / tight filtering can return an empty pool on a single pull),
         //    so retry once before showing the "no jobs" empty state. A transient
         //    empty must not look like "no jobs exist" when the next pull succeeds.
-        const fetchJobs = async () => {
+        const fetchJobs = async (locOverride) => {
+          const loc = locOverride !== undefined ? locOverride : location;
           const r = await base44.functions.invoke('getLiveJobMatchesFn', {
-            career_goals: { role, industries, locations: location ? [location] : [], seeking: cg.seeking || 'both' },
+            career_goals: { role, industries, locations: loc ? [loc] : [], seeking: cg.seeking || 'both' },
             force_refresh: true,
           });
           return r?.data?.companies || r?.companies || [];
@@ -99,8 +100,11 @@ export default function MagicMoment() {
         let jobs = await fetchJobs();
         if (!jobs.length) {
           setPhase('Widening the search…');
-          await new Promise(res => setTimeout(res, 1500));
-          jobs = await fetchJobs();
+          await new Promise(res => setTimeout(res, 1200));
+          // Widen metro → statewide → anywhere rather than dead-ending on a thin market
+          const statePart = location.split(',').map(p => p.trim())[1] || '';
+          jobs = statePart ? await fetchJobs(statePart) : [];
+          if (!jobs.length) jobs = await fetchJobs('');
         }
         if (!jobs.length) {
           setError("CLIFF couldn't find a job matching that target yet. Try widening your field or location in your profile.");

@@ -122,11 +122,19 @@ Deno.serve(async (req) => {
     }
 
     // Clean the search term: strip qualifiers like "paid", "internship", "entry level"
-    // that hurt Indeed keyword matching. The seniority gate below handles level filtering.
+    // that hurt keyword matching. The seniority gate below handles level filtering.
     const rawTerm = role || industries[0] || '';
+    // Expand common abbreviations to full terms — JSearch (Google for Jobs) indexes
+    // full-word titles. "HR in Miami" mostly returns senior "HR Manager/Director"
+    // postings that the entry-level gate then strips; "Human Resources" surfaces the
+    // assistant/coordinator roles that actually fit a student.
+    const ABBR = { hr: 'Human Resources', pr: 'Public Relations', cs: 'Customer Service', ops: 'Operations', qa: 'Quality Assurance' };
     const searchTerm = rawTerm
       .replace(/\b(paid|unpaid|part[\s-]?time|full[\s-]?time|entry[\s-]?level|junior|jr)\b/gi, '')
       .replace(/\binternships?\b/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+      .replace(/\b(hr|pr|cs|ops|qa)\b/gi, (m) => ABBR[m.toLowerCase()] || m)
       .replace(/\s{2,}/g, ' ')
       .trim() || rawTerm;
     const isRemote = /remote/i.test(location);
