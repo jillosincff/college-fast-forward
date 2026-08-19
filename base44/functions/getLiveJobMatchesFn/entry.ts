@@ -211,54 +211,29 @@ Deno.serve(async (req) => {
       [jobList[i], jobList[j]] = [jobList[j], jobList[i]];
     }
 
-    // Filter + normalize into a pool (allow a few roles per company)
-    const orgCounts = new Map();
-    const allCompanies = [];
-
-    for (const job of jobList) {
+    // Normalize a raw JSearch posting into our company-shape, applying the junk
+    // filters (domain employer names, aggregator titles) and the location match
+    // that are common to both the strict and relaxed passes. Returns null if the
+    // posting fails these shared gates.
+    const normalizeJob = (job) => {
       const org = job.employer_name?.trim();
       const title = job.job_title?.trim();
       const url = job.job_apply_link || job.apply_options?.[0]?.apply_link;
-      if (!org || !title || !url) continue;
-      // Skip junk employer names that are actually domains/URLs (e.g. "foo.up.railway.app")
-      if (/\.(com|net|org|io|app|co|dev|xyz)\b/i.test(org) || /https?:\/\//i.test(org)) continue;
-      // Skip content-farm aggregators: single lowercase mashed-together names
-      // like "careersprint", "wfhforgeon" that repost other companies' jobs.
-      if (/^[a-z]+$/.test(org) && org.length > 7) continue;
-      // Skip spammy aggregated titles like "Marketing Jobs Southwest Airlines" / "... | Apply Today"
-      if (/\bjobs\b/i.test(title) || /\|/.test(title) || /apply (today|now)/i.test(title)) continue;
-
+      if (!org || !title || !url) return null;
+      if (/\.(com|net|org|io|app|co|dev|xyz)\b/i.test(org) || /https?:\/\//i.test(org)) return null;
+      if (/^[a-z]+$/.test(org) && org.length > 7) return null;
+      if (/\bjobs\b/i.test(title) || /\|/.test(title) || /apply (today|now)/i.test(title)) return null;
       const locText = [job.job_city, job.job_state].filter(Boolean).join(', ')
         || (job.job_is_remote ? 'Remote' : (job.job_country || ''));
+      if (!jobMatchesLocation(locText, prefCity, prefState)) return null;
       const postedDate = job.job_posted_at_datetime_utc || null;
-
-      const isInternTitle = INTERN_TITLE_RE.test(title);
-
-      if (seeking === 'internship' && !isInternTitle) continue;
-      if (seeking === 'fulltime' && isInternTitle) continue;
-
-      // Entry-level gate: prefer JSearch's structured experience data, fall back
-      // to title keywords. Interns are always entry-appropriate.
-      if (!isInternTitle && !isEntryLevel(job, title)) continue;
-
-      if (!jobMatchesLocation(locText, prefCity, prefState)) continue;
-
-      // Allow up to MAX_PER_COMPANY roles per employer so the feed has volume
-      // without one company dominating.
-      const orgKey = org.toLowerCase();
-      const count = orgCounts.get(orgKey) || 0;
-      if (count >= MAX_PER_COMPANY) continue;
-      orgCounts.set(orgKey, count + 1);
-
-      const description = job.job_description?.trim() || `${org} is hiring for ${title}.`;
       const salary = (job.job_min_salary || job.job_max_salary)
         ? `$${job.job_min_salary || '?'} - $${job.job_max_salary || '?'} ${job.job_salary_period || ''}`.trim()
         : null;
-
-      allCompanies.push({
+      return {
         name: org,
         job_title: title,
-        hiring_description: description,
+        hiring_description: job.job_description?.trim() || `${org} is hiring for ${title}.`,
         hiring_signal: hiringSignalFromDate(postedDate),
         job_url: url,
         industry: industries[0] || '',
@@ -268,10 +243,53 @@ Deno.serve(async (req) => {
         logo_url: job.employer_logo || null,
         has_web_result: true,
         verified_posting: true,
-      });
-    }
+        _isIntern: INTERN_TITLE_RE.test(title),
+        _title: title,
+        _exp: job.job_required_experience,
+      };
+    };
 
-    console.log(`[getLiveJobMatchesFn] Built pool of ${allCompanies.length} verified real jobs`);
+    // Entry-level gate. Strict mode prefers JSearch's structured experience data
+    // and falls back to title keywords — the default for the feed. Relaxed mode
+    // (used only when the strict pool is empty) blocks just unmistakably senior
+    // titles (director/vp/chief/head/principal/architect) and drops the structured
+    // experience requirement so coordinator/assistant/analyst/specialist roles
+    // that lack experience data still surface. The Magic Moment must show a role.
+    const HARD_SENIOR_RE = /\b(director|vp|vice president|chief|head|principal|architect|executive|expert)\b|\b(iii|iv|v)\b/i;
+    const passesEntry = (c, relaxed) => {
+      if (c._isIntern) return true;
+      if (relaxed) return !(HARD_SENIOR_RE.test(c._title) && !ENTRY_TITLE_RE.test(c._title));
+      return isEntryLevel({ job_required_experience: c._exp }, c._title);
+    };
+
+    const buildPool = (relaxed) => {
+      const orgCounts = new Map();
+      const pool = [];
+      for (const job of jobList) {
+        const c = normalizeJob(job);
+        if (!c) continue;
+        if (seeking === 'internship' && !c._isIntern) continue;
+        if (seeking === 'fulltime' && c._isIntern) continue;
+        if (!passesEntry(c, relaxed)) continue;
+        const orgKey = c.name.toLowerCase();
+        const count = orgCounts.get(orgKey) || 0;
+        if (count >= MAX_PER_COMPANY) continue;
+        orgCounts.set(orgKey, count + 1);
+        const { _isIntern, _title, _exp, ...company } = c;
+        pool.push(company);
+      }
+      return pool;
+    };
+
+    let allCompanies = buildPool(false);
+    console.log(`[getLiveJobMatchesFn] Built pool of ${allCompanies.length} verified real jobs (strict)`);
+
+    // Never dead-end the Magic Moment on an empty pool. If strict entry-level
+    // filtering removed everything, run one relaxed pass so roles still appear.
+    if (allCompanies.length === 0) {
+      allCompanies = buildPool(true);
+      console.log(`[getLiveJobMatchesFn] Relaxed entry pass: ${allCompanies.length} jobs`);
+    }
 
     // Cache the FULL pool so Load More can paginate without re-fetching.
     // Best-effort only — a cache-write failure (e.g. auth/permission hiccup) must
