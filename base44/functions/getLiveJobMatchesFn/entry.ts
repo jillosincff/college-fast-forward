@@ -130,6 +130,14 @@ Deno.serve(async (req) => {
     // postings that the entry-level gate then strips; "Human Resources" surfaces the
     // assistant/coordinator roles that actually fit a student.
     const ABBR = { hr: 'Human Resources', pr: 'Public Relations', cs: 'Customer Service', ops: 'Operations', qa: 'Quality Assurance' };
+    // Role synonyms — broadens narrow chips into the title variants JSearch actually
+    // indexes, so "Communications" doesn't return 0 live postings. Applied AFTER
+    // abbreviation expansion so the cleaned term is matched against these aliases.
+    const ROLE_SYNONYMS: Record<string, string> = {
+      communications: '"Communications" OR "Public Relations" OR PR OR Media OR Content OR "Social Media" OR "Communications Coordinator" OR "Communications Specialist"',
+      'public relations': '"Public Relations" OR PR OR Communications OR Media OR "Media Relations"',
+      pr: '"Public Relations" OR PR OR Communications OR Media OR "Media Relations"',
+    };
     const searchTerm = rawTerm
       .replace(/\b(paid|unpaid|part[\s-]?time|full[\s-]?time|entry[\s-]?level|junior|jr)\b/gi, '')
       .replace(/\binternships?\b/gi, '')
@@ -138,6 +146,10 @@ Deno.serve(async (req) => {
       .replace(/\b(hr|pr|cs|ops|qa)\b/gi, (m) => ABBR[m.toLowerCase()] || m)
       .replace(/\s{2,}/g, ' ')
       .trim() || rawTerm;
+    // If the cleaned term has a synonym expansion, use the broadened query so the
+    // live provider returns real postings instead of zero hits on a niche chip.
+    const synonymKey = searchTerm.toLowerCase();
+    const queryRole = ROLE_SYNONYMS[synonymKey] || searchTerm;
     const isRemote = /remote/i.test(location);
     const locParts = (location && !isRemote) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
     const prefCity = locParts[0] || null;
@@ -146,7 +158,7 @@ Deno.serve(async (req) => {
     console.log(`[getLiveJobMatchesFn] Fetching REAL jobs for: ${searchTerm} in ${location || 'anywhere'}`);
 
     // JSearch: free-text query combining role + location, recent postings only
-    const queryStr = `${searchTerm}${isRemote ? ' remote' : (prefCity ? ` in ${prefCity}` : '')}`.trim();
+    const queryStr = `${queryRole}${isRemote ? ' remote' : (prefCity ? ` in ${prefCity}` : '')}`.trim();
     const params = new URLSearchParams({
       query: queryStr,
       country: 'us',

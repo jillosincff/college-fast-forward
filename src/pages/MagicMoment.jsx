@@ -199,24 +199,24 @@ export default function MagicMoment() {
 
         if (gated) { setShowSoftWall(true); setPhase(null); return; }
         if (!topJob) {
-          // ABSOLUTE LAST RESORT — the first Magic Moment must NEVER dead-end on
-          // the "couldn't find a job" screen. If every live tier (incl. the
-          // backend curated fallback) returned nothing, serve a curated real job
-          // for the target market here and still complete the full cycle
-          // (resume + outreach). The empty state below is now effectively
-          // unreachable for the first cycle and kept only as a hard safety net.
+          // The first Magic Moment must NEVER dead-end on the "couldn't find a
+          // job" screen — for ANY role + location, not just the specially
+          // inventoried chips. getCuratedFallback is guaranteed non-empty (it
+          // falls through to generic NYC → remote legitimate jobs), so this
+          // always produces a real job and the full cycle completes below.
           const curated = getCuratedFallback(role || industries[0] || '', location);
-          if (curated.length > 0) {
-            topJob = curated[0];
-            conns = [];
-            resultType = 'curated_fallback';
-            console.log('[MagicMoment] Served curated fallback job:', topJob.name, topJob.job_title);
-          }
+          topJob = (curated.length > 0 ? curated[0] : null) || getCuratedFallback('', '')[0];
+          conns = [];
+          resultType = 'curated_fallback';
+          console.log('[MagicMoment] Served curated fallback job:', topJob.name, topJob.job_title);
         }
+        // Defensive: if a future code path leaves topJob null, use the guaranteed
+        // floor rather than dead-ending the first cycle. The "couldn't find a job"
+        // screen is permanently disabled on the Magic Moment path.
         if (!topJob) {
-          setError("CLIFF couldn't find a job matching that target yet. Try widening your field or location in your profile.");
-          setPhase(null);
-          return;
+          topJob = getCuratedFallback('', '')[0];
+          conns = [];
+          resultType = 'curated_fallback';
         }
         setJob(topJob);
         setConnections(conns.slice(0, 3));

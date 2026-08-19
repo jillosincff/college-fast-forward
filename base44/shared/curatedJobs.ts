@@ -123,6 +123,28 @@ const NYC_SOFTWARE: CuratedJob[] = [
     'https://www.mongodb.com/careers/positions'),
 ];
 
+// ── Communications / PR — NYC ────────────────────────────────────────────────
+const NYC_COMMUNICATIONS: CuratedJob[] = [
+  mk('Edelman', 'Communications Assistant', 'Communications', NYC,
+    'Edelman Communications Assistants support media relations, press lists, and client deliverables across PR campaigns for major brands.',
+    'https://www.edelman.com/careers'),
+  mk('Weber Shandwick', 'Account Coordinator, PR', 'Communications', NYC,
+    'Weber Shandwick Account Coordinators support media outreach, content drafting, and campaign coordination across consumer and corporate clients.',
+    'https://www.webershandwick.com/careers'),
+  mk('NBCUniversal', 'Communications Coordinator', 'Communications', NYC,
+    'NBCUniversal Communications Coordinators support publicity, talent relations, and internal comms across TV, streaming, and news.',
+    'https://www.nbcunicareers.com/search-jobs'),
+  mk('Ogilvy', 'Junior Associate, Communications', 'Communications', NYC,
+    'Ogilvy Junior Associates support PR, social, and content programs across the agency brand and corporate communications teams.',
+    'https://www.ogilvy.com/careers'),
+  mk('Warner Bros. Discovery', 'Public Relations Coordinator', 'Communications', NYC,
+    'WBD PR Coordinators support title launches, press events, and talent publicity across networks and streaming.',
+    'https://careers.wbd.com/'),
+  mk('Meta', 'Communications Coordinator', 'Communications', NYC,
+    'Meta Communications Coordinators support corporate comms, internal storytelling, and executive visibility programs.',
+    'https://www.metacareers.com/jobs'),
+];
+
 // ── Generic NYC (used when the role doesn't match a specific category) ──────
 const NYC_GENERIC: CuratedJob[] = [
   mk('Deloitte', 'Analyst', 'Business', NYC,
@@ -168,6 +190,7 @@ function detectRole(role: string): string | null {
   if (/\bsale|business development|\bSDR\b|\bBDR\b|account executive/.test(r)) return 'sales';
   if (/financ|account|bank|invest|asset|wealth/.test(r)) return 'finance';
   if (/market|media|content|brand|social|advertis/.test(r)) return 'marketing';
+  if (/communicat|public relations|\bpr\b|media relations|press|corporate communicat/.test(r)) return 'communications';
   if (/software|engineer|develop|frontend|backend|fullstack|\bSWE\b|tech|data|coding|programmer/.test(r)) return 'software';
   return null;
 }
@@ -185,8 +208,18 @@ const BY_MARKET: Record<string, CuratedJob[]> = {
   'finance|nyc': NYC_FINANCE,
   'marketing|nyc': NYC_MARKETING,
   'software|nyc': NYC_SOFTWARE,
+  'communications|nyc': NYC_COMMUNICATIONS,
   'generic|nyc': NYC_GENERIC,
 };
+
+// Hard floor — a single legitimate W-2 job. getCuratedFallback can NEVER return
+// an empty array, so the first Magic Moment cycle can never dead-end on the
+// "couldn't find a job" screen for ANY role + location combination.
+const GUARANTEED_FLOOR: CuratedJob[] = [
+  mk('Deloitte', 'Analyst', 'Business', NYC,
+    'Deloitte Analysts join consulting and risk/advisory teams supporting client engagements across industries with structured training.',
+    'https://jobs.deloitte.com/'),
+];
 
 /**
  * Returns curated real jobs for a target role + location. Tries the specific
@@ -202,5 +235,7 @@ export function getCuratedFallback(role: string, location: string): CuratedJob[]
   if (mk === 'nyc') return NYC_GENERIC;
   // No curated market for this metro — return remote legitimate roles so the
   // first cycle still completes instead of dead-ending.
-  return REMOTE_GENERIC;
+  if (REMOTE_GENERIC.length > 0) return REMOTE_GENERIC;
+  // Absolute floor — can never be empty, no matter what was edited above.
+  return GUARANTEED_FLOOR;
 }
