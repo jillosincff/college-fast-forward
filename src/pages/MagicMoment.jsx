@@ -12,6 +12,7 @@ import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import SoftWallModal from '@/components/conversion/SoftWallModal';
 import { getCuratedFallback, getChipCuratedJobs, detectChipKey } from '../../base44/shared/curatedJobs';
+import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
 import MagicMomentLoader from '@/components/magic-moment/MagicMomentLoader';
 import HeroJobHeader from '@/components/magic-moment/HeroJobHeader';
 import HeroPeople from '@/components/magic-moment/HeroPeople';
@@ -135,33 +136,10 @@ export default function MagicMoment() {
         // net result, not a Wow. We partition the pool into on-chip and off-chip;
         // off-chip is only touched as an absolute last resort (in-market only —
         // cold + generic + remote is an automatic fail).
-        const ROLE_KEYWORDS = {
-          marketing: ['marketing', 'brand', 'content', 'communications', 'social media', 'social', 'public relations', 'growth', 'advertising', 'campaign', 'digital marketing', 'product marketing', 'content marketing'],
-          sales: ['sales', 'account executive', 'business development', 'sales development', 'sdr', 'bdr', 'account manager', 'inside sales'],
-          communications: ['communications', 'public relations', 'pr', 'content', 'media relations', 'corporate communications', 'internal communications'],
-          finance: ['finance', 'financial', 'investment', 'banking', 'accounting', 'audit', 'treasury', 'risk'],
-          software: ['software', 'developer', 'engineer', 'frontend', 'backend', 'full stack', 'fullstack', 'programmer'],
-          operations: ['operations', 'supply chain', 'logistics'],
-          consulting: ['consulting', 'consultant', 'strategy'],
-          healthcare: ['healthcare', 'health', 'clinical', 'hospital', 'patient', 'medical', 'nurse', 'nursing', 'allied health', 'pharma', 'biotech', 'research coordinator'],
-          data: ['data', 'analytics', 'business intelligence', 'quantitative'],
-          product: ['product', 'ux', 'user experience'],
-          hr: ['human resources', 'recruiting', 'talent acquisition', 'people operations'],
-          education: ['education', 'teaching', 'admissions', 'academic'],
-        };
         // The chip is everything the student told us: role + industry.
         const chipText = `${role || ''} ${(industries || []).join(' ')}`.trim();
         const chipLabel = industries[0] || role || '';
-        const chipKeywords = (() => {
-          const combined = chipText.toLowerCase();
-          for (const kws of Object.values(ROLE_KEYWORDS)) {
-            if (kws.some(k => combined.includes(k))) return kws;
-          }
-          return null; // unknown chip — don't over-filter
-        })();
-        // Titles that name no field at all. These can NEVER be the first-cycle
-        // hero for a real chip — "Analyst" is not a Sales or Healthcare job.
-        const GENERIC_TITLE = /^(sr\.?|senior|junior|jr\.?|entry[- ]level|associate|assistant|staff)?\s*(analyst|associate|specialist|coordinator|consultant|generalist|professional|representative)\b/i;
+        const chipKeywords = chipKeywordsFor(chipText);
         const rejected = [];
         const logReject = (j, why) => rejected.push({
           job_id: j.job_id || j.id || null, title: j.job_title || '', company: j.name || '', why_rejected: why,
@@ -169,10 +147,8 @@ export default function MagicMoment() {
         // Title-only match for the first cycle — a generic "Specialist" whose
         // DESCRIPTION happens to mention the chip is NOT on-chip.
         const isOnChip = (j) => {
-          if (!chipKeywords) return true;
-          const title = (j.job_title || '').toLowerCase().trim();
-          const hit = chipKeywords.some(k => title.includes(k));
-          if (!hit) { logReject(j, GENERIC_TITLE.test(title) ? 'junk' : 'off_chip'); return false; }
+          const { ok, why } = checkOnChip(j.job_title, chipKeywords);
+          if (!ok) { logReject(j, why); return false; }
           return true;
         };
 
