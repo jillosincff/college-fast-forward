@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { getCuratedFallback } from '../../shared/curatedJobs.ts';
 
 /**
  * Returns personalized job leads for a student.
@@ -179,6 +180,9 @@ Deno.serve(async (req) => {
           // Backup source: scrape BuiltIn directly
           const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking);
           if (backup) return backup;
+          console.log(`[getLiveJobMatchesFn][EMPTY] role=${searchTerm} location=${location} query="${queryStr}" api_status=timeout raw_postings=0`);
+          const curatedTO = getCuratedFallback(searchTerm, location);
+          if (curatedTO.length) return Response.json({ companies: curatedTO, from_cache: false, curated: true });
           return Response.json({ error: 'The job provider is taking too long to respond. Please try again in a moment.', upstream_timeout: true }, { status: 503 });
         }
         throw e;
@@ -197,7 +201,10 @@ Deno.serve(async (req) => {
         console.log(`[getLiveJobMatchesFn] Upstream ${apiRes.status} — serving ${cached.length} stale cached leads`);
         return Response.json({ companies: cached, from_cache: true, stale: true });
       }
-      // No cache to fall back on — surface as 503, not a generic 500.
+      // No cache to fall back on — serve curated jobs so the cycle still completes.
+      console.log(`[getLiveJobMatchesFn][EMPTY] role=${searchTerm} location=${location} query="${queryStr}" api_status=${apiRes.status} raw_postings=0`);
+      const curatedErr = getCuratedFallback(searchTerm, location);
+      if (curatedErr.length) return Response.json({ companies: curatedErr, from_cache: false, curated: true });
       return Response.json({ error: 'The job provider is temporarily unavailable. Please try again shortly.', upstream_status: apiRes.status }, { status: 503 });
     }
     const payload = await apiRes.json();
@@ -299,6 +306,19 @@ Deno.serve(async (req) => {
     if (allCompanies.length === 0) {
       allCompanies = buildPool('permissive');
       console.log(`[getLiveJobMatchesFn] Permissive pass: ${allCompanies.length} jobs`);
+    }
+
+    // GUARANTEED FALLBACK — the first Magic Moment must never ship an empty
+    // "couldn't find a job" screen. If every live pass returned nothing, log the
+    // empty search for diagnosis and serve curated real jobs for the target role
+    // + market so the cycle always completes.
+    if (allCompanies.length === 0) {
+      console.log(`[getLiveJobMatchesFn][EMPTY] role=${rawTerm} location=${location} query="${queryStr}" api_status=200 raw_postings=${jobs.length} strict_pool=0 relaxed_pool=0 permissive_pool=0`);
+      const curated = getCuratedFallback(rawTerm, location);
+      if (curated.length > 0) {
+        allCompanies = curated;
+        console.log(`[getLiveJobMatchesFn] Curated fallback served: ${curated.length} jobs for ${rawTerm} in ${location}`);
+      }
     }
 
     // Cache the FULL pool so Load More can paginate without re-fetching.

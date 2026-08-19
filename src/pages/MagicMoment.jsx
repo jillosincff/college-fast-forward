@@ -13,6 +13,7 @@ import {
 import { trackMagicMomentStarted, trackMagicMomentCompleted, trackOutreachCopied, markMagicMomentCompleted } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import SoftWallModal from '@/components/conversion/SoftWallModal';
+import { getCuratedFallback } from '../../base44/shared/curatedJobs';
 
 // The free Magic Moment — one complete plan cycle shown on a single screen:
 // a high-fit job, a tailored resume, real alumni at the company, and a
@@ -197,6 +198,21 @@ export default function MagicMoment() {
         }
 
         if (gated) { setShowSoftWall(true); setPhase(null); return; }
+        if (!topJob) {
+          // ABSOLUTE LAST RESORT — the first Magic Moment must NEVER dead-end on
+          // the "couldn't find a job" screen. If every live tier (incl. the
+          // backend curated fallback) returned nothing, serve a curated real job
+          // for the target market here and still complete the full cycle
+          // (resume + outreach). The empty state below is now effectively
+          // unreachable for the first cycle and kept only as a hard safety net.
+          const curated = getCuratedFallback(role || industries[0] || '', location);
+          if (curated.length > 0) {
+            topJob = curated[0];
+            conns = [];
+            resultType = 'curated_fallback';
+            console.log('[MagicMoment] Served curated fallback job:', topJob.name, topJob.job_title);
+          }
+        }
         if (!topJob) {
           setError("CLIFF couldn't find a job matching that target yet. Try widening your field or location in your profile.");
           setPhase(null);
