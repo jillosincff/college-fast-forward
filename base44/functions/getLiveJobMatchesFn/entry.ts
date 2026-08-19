@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { getCuratedFallback } from '../../shared/curatedJobs.ts';
+import { getCuratedFallback } from '../../shared/curatedJobsV2.ts';
 
 /**
  * Returns personalized job leads for a student.
