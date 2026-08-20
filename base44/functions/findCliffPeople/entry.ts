@@ -130,26 +130,8 @@ export default async function (req: Request) {
     // Never fabricates. Runs once per company per 24h (cached above).
     if (connections.length === 0 && school) {
       try {
-        const prompt = [
-          `You are CLIFF, helping a college student find a REAL human connection at a company they want to work at.`,
-          ``,
-          `Student's school: ${school}`,
-          `Target company: ${companyName}`,
-          `Target role/function: ${targetRole || chipText || 'a relevant role'}`,
-          `Location: ${location || 'not specified'}`,
-          ``,
-          `Task: Find REAL, VERIFIABLE people who are alumni of ${school} and currently work (or recently worked) at ${companyName}, ideally in or near ${location || 'the company'} in a ${targetRole || chipText || 'relevant'} function.`,
-          ``,
-          `STRICT RULES:`,
-          `- Only return a person if you found them in a REAL public web source (company bio, news article, university feature, press release, speaker page, conference bio).`,
-          `- Every person MUST include the exact source_url where you found them. If you cannot provide a real source URL, do not include the person.`,
-          `- Do NOT fabricate names, titles, graduation years, or emails. If unsure, omit the field or omit the person entirely.`,
-          `- Do NOT include LinkedIn profile URLs unless you actually found them in the source.`,
-          `- Prefer people whose role is adjacent to "${targetRole || chipText || 'the target role'}" (hiring managers, team members in that function).`,
-          `- Maximum 3 people. If you cannot find any verifiable real person, return an empty people array.`,
-          ``,
-          `Return JSON. Each person: name, title (current title at the company), company, school, graduation_year (if known from the source, else empty string), source_url (REQUIRED real URL), summary (one sentence: why they match the student).`,
-        ].join('\n');
+        const roleHint = targetRole || chipText || 'a relevant role';
+        const prompt = `Find 3 real people who are alumni of ${school} and currently work at ${companyName}, ideally in ${roleHint} or an adjacent function. For each person give: name, title (their job title at ${companyName}), source_url (the LinkedIn profile URL or other public page where you found them), and summary (one sentence on why they're a good connection for the student). Only include real people you found via web search — do not fabricate. Return as JSON.`;
 
         const llmRes = await sr.integrations.Core.InvokeLLM({
           prompt,
@@ -165,9 +147,6 @@ export default async function (req: Request) {
                   properties: {
                     name: { type: 'string' },
                     title: { type: 'string' },
-                    company: { type: 'string' },
-                    school: { type: 'string' },
-                    graduation_year: { type: 'string' },
                     source_url: { type: 'string' },
                     summary: { type: 'string' },
                   },
@@ -182,15 +161,16 @@ export default async function (req: Request) {
           // Hard gate: no source URL = not verifiable = dropped. No name = dropped.
           if (!p.name || !p.source_url) continue;
           if (!/^https?:\/\//i.test(p.source_url)) continue;
+          const isLinkedIn = /linkedin\.com/i.test(p.source_url);
           connections.push({
             tier: 4,
             source: 'public_web',
             name: p.name,
             role_title: p.title || null,
             company: companyName,
-            school: p.school || school,
-            graduation_year: p.graduation_year || null,
-            linkedin_url: null,
+            school: school,
+            graduation_year: null,
+            linkedin_url: isLinkedIn ? p.source_url : null,
             persona: 'alumni',
             school_code: schoolCode,
             why: p.summary || `${school} alum found via public source`,
