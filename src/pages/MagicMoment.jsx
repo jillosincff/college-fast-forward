@@ -71,6 +71,8 @@ export default function MagicMoment() {
   const [lockedJobs, setLockedJobs] = useState([]);
   // Only claim "matches your {chip}" when the hero actually passed the chip gate.
   const [heroMeta, setHeroMeta] = useState({ onChip: false, chipLabel: '' });
+  // CRM tracking status shown on the hero after the student copies/sends.
+  const [trackedStatus, setTrackedStatus] = useState('');
 
   useEffect(() => {
     if (!user || ranRef.current) return;
@@ -481,6 +483,35 @@ export default function MagicMoment() {
     // 4. Confirmation — tells them the draft is on the clipboard even if the popup was blocked
     setRevealPaywall(true);
     if (copiedOk) { setCopied(true); setTimeout(() => setCopied(false), 2600); }
+    // 5. Track in the student's CRM — create a NetworkingPipeline record so
+    //    the outreach shows in Application History. This is part of the free
+    //    cycle: applying + reaching the insider + tracking it is never gated.
+    try {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const alum = connections[0];
+      await base44.entities.NetworkingPipeline.create({
+        user_email: user.email,
+        company: job?.name || '',
+        job_title: job?.job_title || '',
+        job_url: job?.job_url || job?.apply_url || '',
+        job_description: job?.hiring_description || '',
+        location: job?.location || '',
+        alumni_name: alum?.name || '',
+        alumni_role: alum?.role_title || '',
+        alumni_linkedin: alum?.linkedin_url || '',
+        alumni_source: alum?.source || 'manual',
+        application_path: alum ? 'alumni_outreach' : 'cold_apply',
+        status: 'reached_out',
+        reached_out_date: now.toISOString(),
+        status_date: now.toISOString(),
+        identified_date: now.toISOString(),
+      });
+      const firstName = alum?.name?.split(' ')[0] || '';
+      setTrackedStatus(firstName
+        ? `Messaged ${firstName} at ${job?.name} on ${dateStr}`
+        : `Reached out to ${job?.name} on ${dateStr}`);
+    } catch (e) { /* tracking is best-effort */ }
   };
 
   const downloadResume = () => {
@@ -529,13 +560,13 @@ export default function MagicMoment() {
         </div>
 
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '22px 20px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-          <HeroJobHeader job={job} fitReason={fitReason} />
+          <HeroJobHeader job={job} fitReason={fitReason} trackedStatus={trackedStatus} />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label="People on the inside" />
           <HeroPeople connections={connections} companyName={job?.name} school={user?.school} />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <SectionLabel icon={<Mail size={14} color={INDIGO_DIM} />} label="Your outreach draft" />
-          <HeroOutreach outreach={outreach} copied={copied} onCopy={handlePrimaryAction} onAskParent={() => setShowPro(true)} />
+          <HeroOutreach outreach={outreach} copied={copied} onCopy={handlePrimaryAction} />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <HeroResume tailored={tailored} onDownload={downloadResume} />
         </div>
