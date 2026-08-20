@@ -3,7 +3,8 @@
 // anyone reintroduces a shared generic fallback ("Deloitte Analyst for all").
 import { test, expect } from '@playwright/test';
 import { chipKeywordsFor, checkOnChip, GENERIC_TITLE } from '../../src/lib/chipGate.js';
-import { getChipCuratedJobs, detectChipKey } from '../../base44/shared/curatedJobs.ts';
+import { getChipCuratedJobs, detectChipKey, getCuratedFallback as getFallbackV1 } from '../../base44/shared/curatedJobs.ts';
+import { getCuratedFallback as getFallbackV2 } from '../../base44/shared/curatedJobsV2.ts';
 
 const NYC = 'New York, NY';
 
@@ -87,5 +88,43 @@ test.describe('Magic Moment chip fidelity', () => {
   test('unknown chip text returns no chip-curated inventory', () => {
     expect(getChipCuratedJobs('', NYC)).toEqual([]);
     expect(getChipCuratedJobs('asdfghjkl', NYC)).toEqual([]);
+  });
+
+  // ── P0 regression guard: the Deloitte "Analyst (Remote-Eligible)" seed and
+  //    any generic-title job must be gone from EVERY fallback list (V1 frontend
+  //    + V2 backend). Both copies feed the hero picker; a stale divergence here
+  //    is exactly how the bug came back. ───────────────────────────────────
+  test('no fallback list (V1 or V2) contains a Deloitte Analyst or generic title', () => {
+    const isDeloitteAnalyst = (j) => /deloitte/i.test(j.name || '') && /analyst/i.test(j.job_title || '');
+    const allLists = [
+      ['V1 Marketing+NYC', getFallbackV1('Marketing', NYC)],
+      ['V1 Sales+NYC', getFallbackV1('Sales', NYC)],
+      ['V1 Healthcare+NYC', getFallbackV1('Healthcare', NYC)],
+      ['V1 unknown+NYC', getFallbackV1('', NYC)],
+      ['V1 unknown+empty', getFallbackV1('', '')],
+      ['V2 Marketing+NYC', getFallbackV2('Marketing', NYC)],
+      ['V2 Sales+NYC', getFallbackV2('Sales', NYC)],
+      ['V2 Healthcare+NYC', getFallbackV2('Healthcare', NYC)],
+      ['V2 unknown+NYC', getFallbackV2('', NYC)],
+      ['V2 unknown+empty', getFallbackV2('', '')],
+    ];
+    for (const [label, list] of allLists) {
+      for (const j of list) {
+        expect(isDeloitteAnalyst(j), `${label}: Deloitte Analyst survived in fallback`).toBe(false);
+      }
+    }
+  });
+
+  test('known-chip fallback (V1 + V2) never returns a generic-title hero', () => {
+    for (const { chipText } of CHIPS) {
+      const kws = chipKeywordsFor(chipText);
+      for (const [label, getter] of [['V1', getFallbackV1], ['V2', getFallbackV2]]) {
+        const list = getter(chipText, NYC);
+        // Every returned job for a KNOWN chip must pass that chip's gate.
+        for (const j of list) {
+          expect(checkOnChip(j.job_title, kws).ok, `${label} ${chipText}: "${j.job_title}" is off-chip`).toBe(true);
+        }
+      }
+    }
   });
 });

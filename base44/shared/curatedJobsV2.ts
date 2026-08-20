@@ -147,9 +147,6 @@ const NYC_COMMUNICATIONS: CuratedJob[] = [
 
 // ── Generic NYC (used when the role doesn't match a specific category) ──────
 const NYC_GENERIC: CuratedJob[] = [
-  mk('Deloitte', 'Analyst', 'Business', NYC,
-    'Deloitte Analysts join consulting and risk/advisory teams supporting client engagements across industries with structured training.',
-    'https://jobs.deloitte.com/'),
   mk('EY', 'Analyst', 'Business', NYC,
     'EY Analysts support assurance, consulting, tax, and strategy engagements with a clear professional development path.',
     'https://careers.ey.com/'),
@@ -344,9 +341,9 @@ const REMOTE_BY_ROLE: Record<string, CuratedJob[]> = {
       'https://stripe.com/jobs'),
   ],
   consulting: [
-    mk('Deloitte', 'Analyst (Remote-Eligible)', 'Consulting', 'Remote',
-      'Deloitte Analysts join consulting and advisory teams — many roles offer remote-eligible arrangements.',
-      'https://jobs.deloitte.com/'),
+    mk('Accenture', 'Consulting Analyst (Remote)', 'Consulting', 'Remote',
+      'Accenture Consulting Analysts join client engagement teams supporting transformation and tech-advisory work — many roles offer remote arrangements.',
+      'https://www.accenture.com/us-en/careers'),
   ],
   operations: [
     mk('GitLab', 'Operations Analyst', 'Operations', 'Remote',
@@ -376,10 +373,10 @@ const REMOTE_BY_ROLE: Record<string, CuratedJob[]> = {
 };
 
 // Generic remote fallback — only used when the role is truly unknown.
+// NOTE: a generic "Analyst (Remote-Eligible)" was removed — it stamped every
+// chip with "matches your Marketing/Sales/Healthcare" because the title names
+// no field. A role-shaped W-2 job is the only safe generic remote hero.
 const REMOTE_GENERIC: CuratedJob[] = [
-  mk('Deloitte', 'Analyst (Remote-Eligible)', 'Business', 'Remote',
-    'Deloitte Analysts join consulting and risk/advisory teams — many roles offer remote arrangements.',
-    'https://jobs.deloitte.com/'),
   mk('HubSpot', 'Sales Development Representative (Remote)', 'Sales', 'Remote',
     'HubSpot hires remote SDRs to prospect and qualify inbound/outbound leads with a proven training program.',
     'https://www.hubspot.com/careers'),
@@ -432,9 +429,9 @@ const BY_MARKET: Record<string, CuratedJob[]> = {
 // an empty array, so the first Magic Moment cycle can never dead-end on the
 // "couldn't find a job" screen for ANY role + location combination.
 const GUARANTEED_FLOOR: CuratedJob[] = [
-  mk('Deloitte', 'Analyst', 'Business', NYC,
-    'Deloitte Analysts join consulting and risk/advisory teams supporting client engagements across industries with structured training.',
-    'https://jobs.deloitte.com/'),
+  mk('Squarespace', 'Account Coordinator', 'Business', NYC,
+    'Squarespace Account Coordinators support customer onboarding and growth across the SMB segment — a real W-2 entry role.',
+    'https://www.squarespace.com/about/careers'),
 ];
 
 /**

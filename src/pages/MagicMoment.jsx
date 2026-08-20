@@ -281,6 +281,31 @@ export default function MagicMoment() {
           const lastResort = onChip(getChipCuratedJobs(chipText, location));
           if (lastResort.length) { topJob = lastResort[0]; conns = []; resultType = 'curated_fallback'; sourcePool = lastResort; }
         }
+
+        // ── Hard final gate ───────────────────────────────────────────────
+        // Regardless of which path produced topJob (live / curated / cached /
+        // stale bundle), re-run the chip gate on the chosen hero and log it.
+        // If the chip is known and the hero FAILS the title-only gate, it is
+        // NEVER rendered — fall to the honest empty state. This is the single
+        // guarantee that a generic "Analyst (Remote-Eligible)" can never reach
+        // the screen stamped "matches your Marketing/Sales/Healthcare".
+        if (topJob) {
+          const finalOnChip = !chipKeywords ? null : isOnChip(topJob);
+          console.log('[MagicMoment] HERO PICK', {
+            job_id: topJob.job_id || topJob.id || null,
+            title: topJob.job_title,
+            company: topJob.name,
+            chip: chipText,
+            isOnChip: finalOnChip,
+            source: resultType,
+          });
+          if (chipKeywords && !finalOnChip) {
+            console.log('[MagicMoment] Rejected off-chip hero — refusing to render:', topJob.name, topJob.job_title);
+            topJob = null;
+            resultType = 'rejected_off_chip';
+          }
+        }
+
         if (rejected.length) console.log('[MagicMoment] rejected candidates:', rejected);
         if (!topJob) {
           console.log('[MagicMoment] no on-chip job found for chip:', chipText, location);
