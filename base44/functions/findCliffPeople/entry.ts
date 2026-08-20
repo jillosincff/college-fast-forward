@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
-import { normCompany, makeCompanyMatcher, rankAndDedupe } from '../../shared/peopleSearch.ts';
+import { normCompany, makeCompanyMatcher, rankAndDedupe, shuffle } from '../../shared/peopleSearch.ts';
 
 // CLIFF People Finder — the two-layer people search that powers the free Magic
 // Moment "Wow". Layer 1 is the opt-in CLIFF graph (parents/alumni who joined
@@ -69,18 +69,27 @@ export default async function (req: Request) {
     }
 
     // Tier 2: previously-discovered public alumni from the student's school at
-    // this company (cached from past Layer 2 runs). These are real people found
-    // via public web — surfaced as public_web source, not opt-in.
+    // this company (cached from past Layer 2 runs). Shuffled + sorted by
+    // last_shown_at ascending so the least-recently-sown person surfaces first
+    // (rotation / soft-cap — prevents the same person going to every student).
     if (schoolCode) {
       const alumni = await sr.entities.DiscoveredAlumni.filter(
         { school_code: schoolCode }, '-created_date', 500
       ).catch(() => []);
       const now = Date.now();
-      for (const a of alumni || []) {
-        if (!companyMatch(a.company)) continue;
-        // Respect the 24h cache TTL — stale entries are ignored (not deleted,
-        // a fresh Layer 2 run will refresh them).
-        if (a.expires_at && new Date(a.expires_at).getTime() < now) continue;
+      const fresh = (alumni || []).filter((a) => {
+        if (!companyMatch(a.company)) return false;
+        if (a.expires_at && new Date(a.expires_at).getTime() < now) return false;
+        return true;
+      });
+      // Sort: never-shown first, then least-recently-shown — then shuffle within
+      // equal buckets so ties don't always return the same person.
+      const sorted = shuffle(fresh).sort((a, b) => {
+        const at = a.last_shown_at ? new Date(a.last_shown_at).getTime() : 0;
+        const bt = b.last_shown_at ? new Date(b.last_shown_at).getTime() : 0;
+        return at - bt;
+      });
+      for (const a of sorted) {
         connections.push({
           tier: 2,
           source: 'public_web',
@@ -95,6 +104,7 @@ export default async function (req: Request) {
           why: `${schoolCode} alum found via public source${a.source_url ? ' — see link' : ''}`,
           label: 'Found publicly',
           source_url: a.source_url || null,
+          _alumni_id: a.id,
         });
       }
     }
@@ -156,7 +166,8 @@ export default async function (req: Request) {
           },
         });
 
-        const people = (llmRes?.people) || [];
+        // Shuffle so different calls return different people (rotation).
+        const people = shuffle((llmRes?.people) || []);
         for (const p of people) {
           // Hard gate: no source URL = not verifiable = dropped. No name = dropped.
           if (!p.name || !p.source_url) continue;
@@ -179,15 +190,18 @@ export default async function (req: Request) {
           });
         }
 
-        // Cache the fresh public finds so the next cycle is instant.
+        // Cache the fresh public finds so the next cycle is instant. Mark
+        // last_shown_at = now so the soft-cap deprioritizes them for the next
+        // student (prevents the same person going to everyone within 24h).
         const toCache = connections
           .filter((c) => c.source === 'public_web')
           .slice(0, 3);
         if (toCache.length && schoolCode) {
           const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+          const nowIso = new Date().toISOString();
           for (const c of toCache) {
             try {
-              await sr.entities.DiscoveredAlumni.create({
+              const created = await sr.entities.DiscoveredAlumni.create({
                 name: c.name,
                 role_title: c.role_title || '',
                 company: companyName,
@@ -199,7 +213,9 @@ export default async function (req: Request) {
                 description: c.why || '',
                 verified: false,
                 expires_at: expires,
+                last_shown_at: nowIso,
               });
+              if (created?.id) c._alumni_id = created.id;
             } catch (e) { /* cache best-effort */ }
           }
         }
@@ -210,6 +226,17 @@ export default async function (req: Request) {
 
     // Rank + dedupe via the shared helper (same logic as findWorkspaceConnections).
     const deduped = rankAndDedupe(connections, targetRole, 5);
+
+    // Soft-cap: stamp last_shown_at = now on served public-web alumni so the
+    // next student gets a different person (least-recently-shown surfaces first).
+    const nowIso = new Date().toISOString();
+    for (const c of deduped) {
+      if (c.source !== 'public_web' || !c._alumni_id) continue;
+      try {
+        await sr.entities.DiscoveredAlumni.update(c._alumni_id, { last_shown_at: nowIso });
+      } catch (e) { /* best-effort */ }
+      delete c._alumni_id;
+    }
 
     return Response.json({
       connections: deduped,

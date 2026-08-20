@@ -60,6 +60,11 @@
       "type": "string",
       "format": "date-time",
       "description": "Cache expiration (24h TTL)"
+    },
+    "last_shown_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this alumni was last served to a student (for rotation/soft-cap \u2014 least-recently-shown surfaces first)"
     }
   },
   "required": [

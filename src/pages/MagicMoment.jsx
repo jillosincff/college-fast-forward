@@ -116,7 +116,7 @@ export default function MagicMoment() {
           const isRemote = /\bremote\b|work\s*from\s*home/.test(loc);
           const cityHit = userCity && loc.includes(userCity.toLowerCase());
           const stateHit = userState && loc.includes(userState.toLowerCase());
-          if (isRemote) return (stateHit || cityHit) ? 'nearby' : 'remote';
+          if (isRemote) return 'remote';
           if (cityHit) return 'same_location';
           if (stateHit) return 'nearby';
           return 'other';
@@ -172,8 +172,13 @@ export default function MagicMoment() {
         // so a thin opt-in graph no longer means "no alum found". Stops at the
         // first warm hit so high-volume targets (Finance + NYC) almost never
         // return cold. Returns { job, conns } or null.
+        // Scans the pool in batches, collecting ALL warm hits (not just the
+        // first). After scanning up to 18 jobs (or 3+ warm hits), picks one at
+        // random so different students get different hero companies — prevents
+        // every Sales+NYC user from getting the same HubSpot job.
         const scanForWarm = async (pool) => {
           const MAX = Math.min(pool.length, 18);
+          const warmHits = [];
           for (let start = 0; start < MAX; start += 6) {
             const batch = pool.slice(start, start + 6);
             if (!batch.length) break;
@@ -190,11 +195,13 @@ export default function MagicMoment() {
               alumniMap[r.job.name] = c.length;
               if (c.length > 0) {
                 if (src !== 'none') bestPeopleSource = src;
-                return { job: r.job, conns: c };
+                warmHits.push({ job: r.job, conns: c });
               }
             }
+            if (warmHits.length >= 3) break;
           }
-          return null;
+          if (!warmHits.length) return null;
+          return warmHits[Math.floor(Math.random() * warmHits.length)];
         };
         const pickCold = (pool) => (pool.length ? (pool.find(looksLikeRealRole) || pool[0]) : null);
 
@@ -326,10 +333,21 @@ export default function MagicMoment() {
         setJob(topJob);
         setConnections(conns.slice(0, 3));
         const heroKey = `${topJob?.name || ''}|${topJob?.job_title || ''}`;
-        setLockedJobs(sourcePool
+        let railJobs = sourcePool
           .filter(j => `${j.name || ''}|${j.job_title || ''}` !== heroKey)
           .slice(0, 5)
-          .map(j => ({ name: j.name, job_title: j.job_title, location: j.location, logo_url: j.logo_url, hasAlumni: (alumniMap[j.name] || 0) > 0 })));
+          .map(j => ({ name: j.name, job_title: j.job_title, location: j.location, logo_url: j.logo_url, hasAlumni: (alumniMap[j.name] || 0) > 0 }));
+        // Pad with on-chip curated jobs if the rail is thin (< 3) — the rail
+        // must always show 3-5 real locked opportunities.
+        if (railJobs.length < 3) {
+          const curated = onChip(getChipCuratedJobs(chipText, location))
+            .filter(j => `${j.name || ''}|${j.job_title || ''}` !== heroKey)
+            .filter(j => !railJobs.some(r => r.name === j.name))
+            .slice(0, 5 - railJobs.length)
+            .map(j => ({ name: j.name, job_title: j.job_title, location: j.location, logo_url: j.logo_url, hasAlumni: false }));
+          railJobs = [...railJobs, ...curated];
+        }
+        setLockedJobs(railJobs.slice(0, 5));
         const matchType = conns.length > 0 ? 'warm' : 'cold';
         const locationMatch = resultType.includes('remote') ? 'remote'
           : (resultType.includes('same_location') || resultType.includes('nearby') || resultType.includes('curated')) ? 'same_market'

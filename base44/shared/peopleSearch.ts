@@ -28,15 +28,28 @@ export function roleRelevance(roleTitle: string, targetRole: string): number {
   return hits;
 }
 
-/** Dedupes connections by normalized name and ranks tier-first, then role-relevance. */
+/** Fisher-Yates shuffle (returns a new array). */
+export function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Dedupes connections by normalized name and ranks tier-first, then role-relevance.
+ *  Input is shuffled first so ties (same tier + same relevance) are broken
+ *  randomly — different calls return different people within the same tier. */
 export function rankAndDedupe(
   connections: any[],
   targetRole: string,
   limit = 8,
 ): any[] {
-  connections.sort((a, b) => (a.tier - b.tier) || (roleRelevance(b.role_title, targetRole) - roleRelevance(a.role_title, targetRole)));
+  const shuffled = shuffle(connections);
+  shuffled.sort((a, b) => (a.tier - b.tier) || (roleRelevance(b.role_title, targetRole) - roleRelevance(a.role_title, targetRole)));
   const seen = new Set<string>();
-  const deduped = connections.filter((c) => {
+  const deduped = shuffled.filter((c) => {
     const k = normCompany(c.name);
     if (!k || seen.has(k)) return false;
     seen.add(k);
