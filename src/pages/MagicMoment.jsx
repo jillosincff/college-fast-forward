@@ -13,6 +13,7 @@ import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import SoftWallModal from '@/components/conversion/SoftWallModal';
 import { getCuratedFallback, getChipCuratedJobs, detectChipKey } from '../../base44/shared/curatedJobs';
 import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
+import { buildInsiderRail, jobKey } from '@/lib/insiderRail';
 import MagicMomentLoader from '@/components/magic-moment/MagicMomentLoader';
 import HeroJobHeader from '@/components/magic-moment/HeroJobHeader';
 import HeroPeople from '@/components/magic-moment/HeroPeople';
@@ -166,6 +167,10 @@ export default function MagicMoment() {
         let jobsScanned = 0;
         const alumniMap = {};
         let sourcePool = [];
+        // Every confirmed insider-backed hit found while hunting the hero. The
+        // hero uses one; the rest become the locked "more insider paths" stack,
+        // so curated volume costs no extra lookups.
+        const warmPool = [];
         // Tracks the source of the hero's person (opt_in | public_web | none) for
         // the magic_moment_completed funnel event.
         let bestPeopleSource = 'none';
@@ -198,9 +203,11 @@ export default function MagicMoment() {
               if (c.length > 0) {
                 if (src !== 'none') bestPeopleSource = src;
                 warmHits.push({ job: r.job, conns: c });
+                if (!warmPool.some(w => jobKey(w.job) === jobKey(r.job))) warmPool.push({ job: r.job, conns: c });
               }
             }
-            if (warmHits.length >= 3) break;
+            // Keep scanning past the hero — the extras are the locked stack.
+            if (warmHits.length >= 6) break;
           }
           if (!warmHits.length) return null;
           return warmHits[Math.floor(Math.random() * warmHits.length)];
@@ -334,22 +341,20 @@ export default function MagicMoment() {
         setHeroMeta({ onChip: !chipKeywords ? false : isOnChip(topJob), chipLabel });
         setJob(topJob);
         setConnections(conns.slice(0, 3));
-        const heroKey = `${topJob?.name || ''}|${topJob?.job_title || ''}`;
-        let railJobs = sourcePool
-          .filter(j => `${j.name || ''}|${j.job_title || ''}` !== heroKey)
-          .slice(0, 5)
-          .map(j => ({ name: j.name, job_title: j.job_title, location: j.location, logo_url: j.logo_url, hasAlumni: (alumniMap[j.name] || 0) > 0 }));
-        // Pad with on-chip curated jobs if the rail is thin (< 3) — the rail
-        // must always show 3-5 real locked opportunities.
-        if (railJobs.length < 3) {
-          const curated = onChip(getChipCuratedJobs(chipText, location))
-            .filter(j => `${j.name || ''}|${j.job_title || ''}` !== heroKey)
-            .filter(j => !railJobs.some(r => r.name === j.name))
-            .slice(0, 5 - railJobs.length)
-            .map(j => ({ name: j.name, job_title: j.job_title, location: j.location, logo_url: j.logo_url, hasAlumni: false }));
-          railJobs = [...railJobs, ...curated];
-        }
-        setLockedJobs(railJobs.slice(0, 5));
+        // ── Locked stack: MORE insider-backed roles ─────────────────────────
+        // One hero is a Wow but not a search — a student needs several shots at
+        // the same method. Candidates are on-chip roles (live pool first, then
+        // chip-curated inventory); only companies with a confirmed insider ship.
+        const heroKey = jobKey(topJob);
+        const candidates = [
+          ...onChip(sourcePool),
+          ...onChip(getChipCuratedJobs(chipText, location)),
+        ].filter(j => jobKey(j) !== heroKey);
+        const railJobs = await buildInsiderRail({
+          base44, user, role, chipText, location,
+          known: warmPool, candidates, excludeKeys: [heroKey], want: 5,
+        });
+        setLockedJobs(railJobs);
         const matchType = conns.length > 0 ? 'warm' : 'cold';
         const locationMatch = resultType.includes('remote') ? 'remote'
           : (resultType.includes('same_location') || resultType.includes('nearby') || resultType.includes('curated')) ? 'same_market'
@@ -574,8 +579,6 @@ export default function MagicMoment() {
         {user?.subscription_status !== 'active' && (
           <LockedJobsRail
             jobs={lockedJobs}
-            isWarm={isWarm}
-            revealed={isWarm || revealPaywall}
             onUnlock={() => setShowPro(true)}
             onAskParent={() => setShowPro(true)}
           />
