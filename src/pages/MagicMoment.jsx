@@ -157,6 +157,19 @@ export default function MagicMoment() {
 
         const legit = (arr) => arr.filter(j => !isJunk(j));
         const onChip = (arr) => arr.filter(j => isOnChip(j));
+        // ── Market gate ─────────────────────────────────────────────────────
+        // Curated inventory is metro-scoped (currently NYC only). An Austin
+        // student must NEVER be handed a New York role, so curated candidates
+        // have to actually land in the student's city or state. Note 'other'
+        // (= a different metro) is NOT in-market — treating it as such is what
+        // served "Squarespace · New York, NY" to an Austin search.
+        const hasMarket = !!(userCity || userState);
+        const inMarketOnly = (arr) => (!hasMarket ? arr : arr.filter(j => {
+          const t = tierOf(j);
+          if (t === 'same_location' || t === 'nearby') return true;
+          logReject(j, 'out_of_market');
+          return false;
+        }));
         const byTier = (arr) => {
           const b = { same_location: [], nearby: [], remote: [], other: [] };
           for (const j of arr) b[tierOf(j)].push(j);
@@ -274,11 +287,11 @@ export default function MagicMoment() {
           const basePool = chipCurated.length > 0
             ? chipCurated
             : (knownChip ? [] : getCuratedFallback(role || industries[0] || '', location));
-          // In-market before remote, and every candidate must pass the chip gate.
+          // Two hard gates: the chip AND the student's market. Curated inventory
+          // that belongs to another metro is dropped entirely rather than served.
           const gate = onChip(basePool);
           const pool = gate.length > 0 ? gate : (knownChip ? [] : basePool);
-          const inMarket = pool.filter(j => tierOf(j) !== 'remote');
-          const curatedPool = inMarket.length > 0 ? inMarket : pool;
+          const curatedPool = inMarketOnly(pool);
           sourcePool = curatedPool;
           const curatedWarm = curatedPool.length > 0 ? await scanForWarm(curatedPool) : null;
           if (curatedWarm) { topJob = curatedWarm.job; conns = curatedWarm.conns; resultType = 'curated_warm'; }
@@ -303,7 +316,7 @@ export default function MagicMoment() {
         // than no hero — it makes the whole product look fake. Last resort is
         // chip-shaped curated inventory; if even that is empty we say so.
         if (!topJob) {
-          const lastResort = onChip(getChipCuratedJobs(chipText, location));
+          const lastResort = inMarketOnly(onChip(getChipCuratedJobs(chipText, location)));
           if (lastResort.length) { topJob = lastResort[0]; conns = []; resultType = 'curated_fallback'; sourcePool = lastResort; }
         }
 
@@ -345,10 +358,14 @@ export default function MagicMoment() {
         // One hero is a Wow but not a search — a student needs several shots at
         // the same method. Candidates are on-chip roles (live pool first, then
         // chip-curated inventory); only companies with a confirmed insider ship.
+        // In-market roles lead; the rest of the on-chip pool backs them up, and
+        // curated inventory only joins if it's in the student's market.
         const heroKey = jobKey(topJob);
+        const poolOnChip = onChip(sourcePool);
         const candidates = [
-          ...onChip(sourcePool),
-          ...onChip(getChipCuratedJobs(chipText, location)),
+          ...inMarketOnly(poolOnChip),
+          ...poolOnChip,
+          ...inMarketOnly(onChip(getChipCuratedJobs(chipText, location))),
         ].filter(j => jobKey(j) !== heroKey);
         const railJobs = await buildInsiderRail({
           base44, user, role, chipText, location,
