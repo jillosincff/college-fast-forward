@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
+import { normCompany, makeCompanyMatcher, rankAndDedupe } from '../../shared/peopleSearch.ts';
 
 // Ordered, permission-respecting connection search for the CLIFF Job Workspace.
 // Search order: (1) own-school parents/helpers, (2) cached school alumni found via
@@ -18,16 +19,12 @@ Deno.serve(async (req) => {
     if (!(await canRunGated(base44, user, magic_moment))) {
       return Response.json({ connections: [], recommended: null, upgrade_required: true, message: SOFT_WALL_MESSAGE });
     }
-    const norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    const target = norm(companyName);
+    const target = normCompany(companyName);
     if (!target) return Response.json({ connections: [], recommended: null });
 
     const schoolCode = (user.school_code || '').toUpperCase();
     const sr = base44.asServiceRole;
-    const companyMatch = (name) => {
-      const c = norm(name);
-      return c && (c.includes(target) || target.includes(c));
-    };
+    const companyMatch = makeCompanyMatcher(companyName);
 
     const connections = [];
 
@@ -101,23 +98,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Rank: tier first (same school before cross-school), then role similarity to the target role
-    const roleTokens = (s) => (s || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-    const targetTokens = new Set(roleTokens(targetRole));
-    const roleRelevance = (c) => {
-      if (!targetTokens.size || !c.role_title) return 0;
-      let hits = 0;
-      for (const t of roleTokens(c.role_title)) if (targetTokens.has(t)) hits++;
-      return hits;
-    };
-    connections.sort((a, b) => (a.tier - b.tier) || (roleRelevance(b) - roleRelevance(a)));
-    const seen = new Set();
-    const deduped = connections.filter((c) => {
-      const k = norm(c.name);
-      if (!k || seen.has(k)) return false;
-      seen.add(k);
-      return true;
-    }).slice(0, 8);
+    const deduped = rankAndDedupe(connections, targetRole, 8);
 
     return Response.json({ connections: deduped, recommended: deduped[0] || null });
   } catch (error) {

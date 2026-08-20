@@ -164,8 +164,13 @@ export default function MagicMoment() {
         let jobsScanned = 0;
         const alumniMap = {};
         let sourcePool = [];
-        // Scan a pool in batches for the first job with a real insider. Stops at
-        // the first warm hit so high-volume targets (Finance + NYC) almost never
+        // Tracks the source of the hero's person (opt_in | public_web | none) for
+        // the magic_moment_completed funnel event.
+        let bestPeopleSource = 'none';
+        // Scan a pool in batches for the first job with a real insider. Uses the
+        // CLIFF People Finder (Layer 1 opt-in graph → Layer 2 public web research)
+        // so a thin opt-in graph no longer means "no alum found". Stops at the
+        // first warm hit so high-volume targets (Finance + NYC) almost never
         // return cold. Returns { job, conns } or null.
         const scanForWarm = async (pool) => {
           const MAX = Math.min(pool.length, 18);
@@ -173,7 +178,7 @@ export default function MagicMoment() {
             const batch = pool.slice(start, start + 6);
             if (!batch.length) break;
             const results = await Promise.all(batch.map(j =>
-              base44.functions.invoke('findWorkspaceConnections', { companyName: j.name, targetRole: j.job_title || role, magic_moment: true })
+              base44.functions.invoke('findCliffPeople', { companyName: j.name, targetRole: j.job_title || role, magic_moment: true, schoolName: user.school, schoolCode: user.school_code, chipText, location })
                 .then(r => ({ job: j, res: r }))
                 .catch(() => ({ job: j, res: { connections: [] } }))
             ));
@@ -181,8 +186,12 @@ export default function MagicMoment() {
             jobsScanned += batch.length;
             for (const r of results) {
               const c = r.res?.data?.connections || r.res?.connections || [];
+              const src = r.res?.data?.people_source || r.res?.people_source || 'none';
               alumniMap[r.job.name] = c.length;
-              if (c.length > 0) return { job: r.job, conns: c };
+              if (c.length > 0) {
+                if (src !== 'none') bestPeopleSource = src;
+                return { job: r.job, conns: c };
+              }
             }
           }
           return null;
@@ -405,6 +414,8 @@ export default function MagicMoment() {
           result_type: resultType,
           location_match: locationMatch,
           jobs_scanned: jobsScanned,
+          people_source: bestPeopleSource,
+          person_found: (conns?.length || 0) > 0,
         });
         markMagicMomentCompleted();
         setPhase(null);
@@ -503,7 +514,7 @@ export default function MagicMoment() {
           <HeroJobHeader job={job} fitReason={fitReason} />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label="People on the inside" />
-          <HeroPeople connections={connections} companyName={job?.name} />
+          <HeroPeople connections={connections} companyName={job?.name} school={user?.school} />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <SectionLabel icon={<Mail size={14} color={INDIGO_DIM} />} label="Your outreach draft" />
           <HeroOutreach outreach={outreach} copied={copied} onCopy={handlePrimaryAction} onAskParent={() => setShowPro(true)} />
