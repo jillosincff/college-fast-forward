@@ -376,11 +376,11 @@ const REMOTE_BY_ROLE: Record<string, CuratedJob[]> = {
 // NOTE: a generic "Analyst (Remote-Eligible)" was removed — it stamped every
 // chip with "matches your Marketing/Sales/Healthcare" because the title names
 // no field. A role-shaped W-2 job is the only safe generic remote hero.
-const REMOTE_GENERIC: CuratedJob[] = [
-  mk('HubSpot', 'Sales Development Representative (Remote)', 'Sales', 'Remote',
-    'HubSpot hires remote SDRs to prospect and qualify inbound/outbound leads with a proven training program.',
-    'https://www.hubspot.com/careers'),
-];
+// A *Sales* SDR was here — it got stamped onto every unknown chip, which is how
+// an HR student in NYC was served "Sales Development Representative (Remote),
+// HubSpot · Remote". A generic bucket must contain NO field-specific role, so it
+// is intentionally empty: callers fall through to GUARANTEED_FLOOR instead.
+const REMOTE_GENERIC: CuratedJob[] = [];
 
 // ── Matching helpers ───────────────────────────────────────────────────────
 function detectRole(role: string): string | null {
@@ -445,7 +445,9 @@ export function getCuratedFallback(role: string, location: string): CuratedJob[]
   const mk = detectMetro(location);
 
   if (rk && mk && BY_MARKET[`${rk}|${mk}`]) return BY_MARKET[`${rk}|${mk}`];
-  if (mk === 'nyc') return NYC_GENERIC;
+  // Cross-industry NYC generic is ONLY safe when the role is unknown — returning
+  // it for a known role is what handed an HR student a Sales/Analyst posting.
+  if (!rk && mk === 'nyc') return NYC_GENERIC;
   // Role known but no curated metro: stay role-shaped. Role-specific remote
   // roles first, then that role's real-company in-market bucket. A Healthcare
   // student must NEVER receive a generic "Analyst" from the generic list.
