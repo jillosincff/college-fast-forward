@@ -5,7 +5,7 @@ export const ROLE_KEYWORDS = {
   marketing: ['marketing', 'brand', 'content', 'communications', 'social media', 'social', 'public relations', 'growth', 'advertising', 'campaign', 'digital marketing', 'product marketing', 'content marketing'],
   sales: ['sales', 'account executive', 'business development', 'sales development', 'sdr', 'bdr', 'account manager', 'inside sales'],
   communications: ['communications', 'public relations', 'pr', 'content', 'media relations', 'corporate communications', 'internal communications'],
-  finance: ['finance', 'financial', 'investment', 'banking', 'accounting', 'audit', 'treasury', 'risk'],
+  finance: ['finance', 'financial', 'investment', 'banking', 'accounting', 'audit', 'treasury', 'risk', 'credit', 'wealth', 'markets', 'fp&a', 'fp and a', 'portfolio', 'asset management', 'valuation', 'underwriting', 'underwriter', 'actuarial', 'equity research', 'fixed income', 'lending', 'mortgage', 'private equity', 'asset management'],
   software: ['software', 'developer', 'engineer', 'frontend', 'backend', 'full stack', 'fullstack', 'programmer'],
   operations: ['operations', 'supply chain', 'logistics'],
   consulting: ['consulting', 'consultant', 'strategy'],

@@ -39,6 +39,15 @@ const ROLE_KEYWORDS = {
   marketing: ['marketing', 'brand', 'content', 'communications', 'social media', 'social', 'public relations', 'growth', 'advertising', 'campaign', 'digital marketing', 'product marketing', 'content marketing'],
   sales: ['sales', 'account executive', 'business development', 'sales development', 'sdr', 'bdr', 'account manager', 'inside sales'],
   communications: ['communications', 'public relations', 'pr', 'content', 'media relations', 'corporate communications', 'internal communications'],
+  finance: ['finance', 'financial', 'investment', 'banking', 'accounting', 'audit', 'treasury', 'risk', 'credit', 'wealth', 'markets', 'fp&a', 'fp and a', 'portfolio', 'asset management', 'valuation', 'underwriting', 'underwriter', 'actuarial', 'equity research', 'fixed income', 'lending', 'mortgage', 'private equity'],
+  software: ['software', 'developer', 'engineer', 'frontend', 'backend', 'full stack', 'fullstack', 'programmer'],
+  operations: ['operations', 'supply chain', 'logistics'],
+  consulting: ['consulting', 'consultant', 'strategy'],
+  healthcare: ['healthcare', 'health', 'clinical', 'hospital', 'patient', 'medical', 'nurse', 'nursing', 'allied health', 'pharma', 'biotech', 'research coordinator'],
+  data: ['data', 'analytics', 'business intelligence', 'quantitative'],
+  product: ['product', 'ux', 'user experience'],
+  hr: ['hr', 'human resources', 'human resource', 'recruiting', 'recruiter', 'recruitment', 'talent acquisition', 'talent', 'people operations', 'people ops', 'employee relations', 'benefits', 'compensation', 'personnel'],
+  education: ['education', 'teaching', 'teacher', 'admissions', 'academic'],
 };
 const GENERIC_TITLE = /^(sr\.?|senior|junior|jr\.?|entry[- ]level|associate|assistant|staff)?\s*(analyst|associate|specialist|coordinator|consultant|generalist|professional|representative)\b/i;
 
