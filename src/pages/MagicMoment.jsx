@@ -15,6 +15,7 @@ import { getCuratedFallback, getChipCuratedJobs, detectChipKey } from '../../bas
 import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
 import { buildInsiderRail, jobKey } from '@/lib/insiderRail';
 import { checkJobLive, hasApplyUrl, isDateFresh, applyUrlOf } from '@/lib/jobFreshness';
+import { gatePersonReal, buildHeroLog, logHeroPick } from '@/lib/magicMomentGates';
 import MagicMomentLoader from '@/components/magic-moment/MagicMomentLoader';
 import HeroJobHeader from '@/components/magic-moment/HeroJobHeader';
 import HeroStepPlan from '@/components/magic-moment/HeroStepPlan';
@@ -405,9 +406,13 @@ export default function MagicMoment() {
           setPhase(null);
           return;
         }
-        setHeroMeta({ onChip: !chipKeywords ? false : isOnChip(topJob), chipLabel, live: heroLive });
+        const heroChipOk = !chipKeywords ? false : isOnChip(topJob);
+        // Gate 3 — only real people (name + role/company + source URL) ship as
+        // insiders. An invented/partial record never titles the page as a connection.
+        const realConns = conns.filter(c => gatePersonReal(c).ok);
+        setHeroMeta({ onChip: heroChipOk, chipLabel, live: heroLive });
         setJob(topJob);
-        setConnections(conns.slice(0, 3));
+        setConnections(realConns.slice(0, 3));
         // ── Locked stack: MORE insider-backed roles ─────────────────────────
         // One hero is a Wow but not a search — a student needs several shots at
         // the same method. Candidates are on-chip roles (live pool first, then
@@ -447,7 +452,7 @@ export default function MagicMoment() {
         // so it costs no extra lookups and never fabricates a person. Capped
         // at 6; only renders when at least 2 distinct people exist.
         const heroCompanyKey = (topJob.name || '').toLowerCase();
-        const heroConnNames = new Set(conns.slice(0, 3).map(c => (c.name || '').toLowerCase()));
+        const heroConnNames = new Set(realConns.slice(0, 3).map(c => (c.name || '').toLowerCase()));
         const supportSeen = new Set();
         const support = [];
         for (const w of warmPool) {
@@ -463,7 +468,19 @@ export default function MagicMoment() {
           if (support.length >= 6) break;
         }
         setSupportPeople(support);
-        const matchType = conns.length > 0 ? 'warm' : 'cold';
+        // Log every hero — the release-bar contract: job_id, url_ok, chip_ok,
+        // person_found, people_source, rail_count. Analytics event too.
+        logHeroPick(base44, buildHeroLog({
+          job: topJob,
+          chipOk: heroChipOk,
+          urlOk: heroLive,
+          personFound: realConns.length > 0,
+          peopleSource: bestPeopleSource,
+          railCount: railJobs.length,
+          resultType,
+          chipText,
+        }));
+        const matchType = realConns.length > 0 ? 'warm' : 'cold';
         const locationMatch = resultType.includes('remote') ? 'remote'
           : (resultType.includes('same_location') || resultType.includes('nearby') || resultType.includes('curated')) ? 'same_market'
           : 'fallback';
@@ -510,15 +527,15 @@ export default function MagicMoment() {
         trackMagicMomentCompleted({
           hero_job_title: topJob?.job_title || '',
           hero_company: topJob?.name || '',
-          alumni_count: conns?.length || 0,
+          alumni_count: realConns.length,
           has_tailored_resume: !!tailored,
-          outreach_cold: !conns?.[0],
+          outreach_cold: !realConns[0],
           match_type: matchType,
           result_type: resultType,
           location_match: locationMatch,
           jobs_scanned: jobsScanned,
           people_source: bestPeopleSource,
-          person_found: (conns?.length || 0) > 0,
+          person_found: realConns.length > 0,
         });
         markMagicMomentCompleted();
         setPhase(null);
