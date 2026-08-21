@@ -24,6 +24,7 @@ import HeroOutreach from '@/components/magic-moment/HeroOutreach';
 import HeroResume from '@/components/magic-moment/HeroResume';
 import LockedJobsRail from '@/components/magic-moment/LockedJobsRail';
 import RoleAlumniStrip from '@/components/magic-moment/RoleAlumniStrip';
+import PeopleLedHero from '@/components/magic-moment/PeopleLedHero';
 
 // The free Magic Moment — one complete plan cycle shown on a single screen:
 // a high-fit job, a tailored resume, real alumni at the company, and a
@@ -415,17 +416,30 @@ export default function MagicMoment() {
         // curated inventory only joins if it's in the student's market.
         // Rail rows also need a real apply URL and a fresh (≤14 days) posting
         // date — no dead or undated inventory presented as open roles.
-        const railFresh = (j) => hasApplyUrl(j) && isDateFresh(j);
+        // Rail = on-chip in-market LIVE roles (real apply URL) — the plan's
+        // volume. Insider count is a bonus from the warm scan, NOT a gate:
+        // one dead posting + two people is a networking card, not a plan.
+        // Live-pool jobs are fresh by source (just fetched); curated joins
+        // only with a real URL AND a fresh date so no dead inventory ships.
         const heroKey = jobKey(topJob);
-        const poolOnChip = onChip(sourcePool);
-        const candidates = [
-          ...inMarketOnly(poolOnChip),
-          ...poolOnChip,
-          ...inMarketOnly(onChip(getChipCuratedJobs(chipText, location))),
-        ].filter(j => jobKey(j) !== heroKey && railFresh(j));
+        const railHasUrl = (j) => hasApplyUrl(j);
+        const liveOnChip = onChip(rawJobs || []);
+        const railCandidates = [
+          ...inMarketOnly(liveOnChip),
+          ...liveOnChip,
+          ...inMarketOnly(onChip(getChipCuratedJobs(chipText, location))).filter(j => hasApplyUrl(j) && isDateFresh(j)),
+        ].filter(j => jobKey(j) !== heroKey && railHasUrl(j));
+        const railSeen = new Set();
+        const railDedup = [];
+        for (const j of railCandidates) {
+          const k = jobKey(j);
+          if (railSeen.has(k)) continue;
+          railSeen.add(k); railDedup.push(j);
+        }
         const railJobs = await buildInsiderRail({
           base44, user, role, chipText, location,
-          known: warmPool.filter(w => railFresh(w.job)), candidates, excludeKeys: [heroKey], want: 5,
+          known: warmPool.filter(w => jobKey(w.job) !== heroKey && railHasUrl(w.job)),
+          candidates: railDedup.slice(0, 12), excludeKeys: [heroKey], want: 5,
         });
         setLockedJobs(railJobs);
         // ── Support strip: alumni in the same chip, excluding the hero's ──
@@ -633,6 +647,7 @@ export default function MagicMoment() {
 
   // ── Results screen ─────────────────────────────────────────────
   const isWarm = connections.length > 0;
+  const deadPosting = !!job && !heroMeta.live;
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #faf5ff 0%, #fff 30%)', paddingBottom: 48 }}>
       <div style={{ maxWidth: 620, margin: '0 auto', padding: '28px 16px' }}>
@@ -642,17 +657,23 @@ export default function MagicMoment() {
             <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your free cycle</span>
           </div>
           <h1 style={{ fontFamily: FONT, fontSize: 28, fontWeight: 800, color: TEXT, margin: '0 0 8px', lineHeight: 1.2 }}>
-            {isWarm ? 'CLIFF found someone on the inside.' : "Here's a role to start with."}
+            {deadPosting
+              ? `People from your school at ${job?.name || 'this company'}`
+              : isWarm ? 'CLIFF found someone on the inside.' : "Here's a role to start with."}
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>
-            {isWarm
-              ? 'One complete path — ready to send. The rest is unlocked with Pro.'
-              : "We didn't find an alum at this company yet — here's your outreach draft anyway."}
+            {deadPosting
+              ? `No ${job?.job_title || ''} posting we can confirm right now — start with the insider, then check the live roles below.`
+              : isWarm
+                ? 'One complete path — ready to send. The rest is unlocked with Pro.'
+                : "We didn't find an alum at this company yet — here's your outreach draft anyway."}
           </p>
         </div>
 
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '22px 20px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-          <HeroJobHeader job={job} fitReason={fitReason} />
+          {deadPosting
+            ? <PeopleLedHero companyName={job?.name} jobTitle={job?.job_title} location={job?.location} insiderFirst={(connections[0]?.name || '').split(' ')[0]} />
+            : <HeroJobHeader job={job} fitReason={fitReason} />}
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <HeroStepPlan
             live={heroMeta.live}
