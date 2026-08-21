@@ -14,12 +14,25 @@ const FRESH_MS = 14 * 24 * 60 * 60 * 1000;
 const JSEARCH = 'https://api.openwebninja.com/jsearch';
 
 const DEFAULT_PERSONAS = [
+  // Every chip is regression-tested weekly across diverse markets. When a chip's
+  // keyword list is too narrow for its synonym vocabulary, on_chip_pool drops to
+  // 0 here — the weekly bar flags it before any student hits the empty state.
   { name: 'Sales+NYC', role: 'Sales', industries: ['Sales'], location: 'New York, NY' },
   { name: 'Marketing+NYC', role: 'Marketing', industries: ['Marketing'], location: 'New York, NY' },
   { name: 'Comms+NYC', role: 'Communications', industries: ['Communications'], location: 'New York, NY' },
   // Regression guard: an Austin Sales search must NEVER serve a New York role.
   // This is the exact leak that shipped Squarespace/NYC to an Austin student.
   { name: 'Sales+Austin', role: 'Sales', industries: ['Sales'], location: 'Austin, TX' },
+  { name: 'Finance+Nyc', role: 'Finance', industries: ['Finance'], location: 'New York, NY' },
+  { name: 'Healthcare+Miami', role: 'Healthcare', industries: ['Healthcare'], location: 'Miami, FL' },
+  { name: 'PR+Columbus', role: 'Public Relations', industries: ['Public Relations'], location: 'Columbus, OH' },
+  { name: 'Software+Seattle', role: 'Software', industries: ['Software'], location: 'Seattle, WA' },
+  { name: 'Data+Austin', role: 'Data', industries: ['Data'], location: 'Austin, TX' },
+  { name: 'Operations+Chicago', role: 'Operations', industries: ['Operations'], location: 'Chicago, IL' },
+  { name: 'Consulting+Boston', role: 'Consulting', industries: ['Consulting'], location: 'Boston, MA' },
+  { name: 'HR+Atlanta', role: 'HR', industries: ['HR'], location: 'Atlanta, GA' },
+  { name: 'Product+SF', role: 'Product', industries: ['Product'], location: 'San Francisco, CA' },
+  { name: 'Education+Nashville', role: 'Education', industries: ['Education'], location: 'Nashville, TN' },
 ];
 
 // Mirror of magicMomentGates.gateLocation (kept in sync manually — verification
