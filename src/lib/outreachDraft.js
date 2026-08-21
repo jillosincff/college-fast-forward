@@ -2,13 +2,16 @@
 // collected: school, this job's title + company, the insider's name, and the
 // student's own name. Never guesses a major or embellishes. The apply line
 // swaps based on whether the student has applied yet.
-export function buildOutreachDraft({ school, jobTitle, company, insiderName, studentName, applied }) {
+export function buildOutreachDraft({ school, jobTitle, company, insiderName, studentName, applied, live = true }) {
   const insiderFirst = (insiderName || '').trim().split(/\s+/)[0] || '';
   const opener = insiderFirst ? `Hi ${insiderFirst} — ` : 'Hi — ';
   const schoolBit = school ? ` at ${school}` : '';
-  const applyLine = applied
-    ? `I just applied for the ${jobTitle} role at ${company}.`
-    : `I'm applying for the ${jobTitle} role at ${company}.`;
+  // No confirmed live posting → never claim we're applying to an open role.
+  const applyLine = !live
+    ? `I'm really interested in ${company} and roles like ${jobTitle}.`
+    : applied
+      ? `I just applied for the ${jobTitle} role at ${company}.`
+      : `I'm applying for the ${jobTitle} role at ${company}.`;
   const ask = insiderFirst
     ? `If you have a minute, I'd really appreciate any quick advice on standing out. Thanks either way!`
     : `If anyone on the team has a minute, I'd really appreciate any quick advice on standing out. Thanks either way!`;

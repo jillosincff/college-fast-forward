@@ -14,6 +14,7 @@ import SoftWallModal from '@/components/conversion/SoftWallModal';
 import { getCuratedFallback, getChipCuratedJobs, detectChipKey } from '../../base44/shared/curatedJobs';
 import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
 import { buildInsiderRail, jobKey } from '@/lib/insiderRail';
+import { checkJobLive, hasApplyUrl, isDateFresh, applyUrlOf } from '@/lib/jobFreshness';
 import MagicMomentLoader from '@/components/magic-moment/MagicMomentLoader';
 import HeroJobHeader from '@/components/magic-moment/HeroJobHeader';
 import HeroStepPlan from '@/components/magic-moment/HeroStepPlan';
@@ -74,7 +75,7 @@ export default function MagicMoment() {
   const [error, setError] = useState('');
   const [lockedJobs, setLockedJobs] = useState([]);
   // Only claim "matches your {chip}" when the hero actually passed the chip gate.
-  const [heroMeta, setHeroMeta] = useState({ onChip: false, chipLabel: '' });
+  const [heroMeta, setHeroMeta] = useState({ onChip: false, chipLabel: '', live: false });
   // CRM tracking status shown on the hero after the student copies/sends.
   const [trackedStatus, setTrackedStatus] = useState('');
 
@@ -347,6 +348,50 @@ export default function MagicMoment() {
           }
         }
 
+        // ── Live-posting gate ────────────────────────────────────────────
+        // Insider + dead job is worse than a less pretty live job. "Apply" /
+        // "Hiring now" only ship when the posting is confirmed live: dated
+        // within 14 days, or its URL re-validated server-side at pick time
+        // (exists, not expired/closed, and actually mentions this role).
+        const logDeadPosting = (j, why) => console.log('[MagicMoment] REJECT dead posting', {
+          job_id: j.job_id || j.id || null, company: j.name || '', title: j.job_title || '',
+          url: applyUrlOf(j), why,
+        });
+        let heroLive = false;
+        if (topJob) {
+          setPhase('Confirming the posting is live…');
+          let chk = await checkJobLive(base44, topJob);
+          if (chk.ok) {
+            heroLive = true;
+          } else {
+            logDeadPosting(topJob, chk.why);
+            // Next on-chip in-market candidate with a person AND a live link:
+            // warm hits first, then the cold on-chip in-market pool.
+            const tried = new Set([jobKey(topJob)]);
+            const replacements = [
+              ...warmPool.map(w => ({ job: w.job, conns: w.conns })),
+              ...inMarketOnly(onChip(sourcePool)).map(j => ({ job: j, conns: [] })),
+            ];
+            for (const cand of replacements) {
+              const k = jobKey(cand.job);
+              if (tried.has(k)) continue;
+              tried.add(k);
+              if (chipKeywords && !isOnChip(cand.job)) continue;
+              chk = await checkJobLive(base44, cand.job);
+              if (chk.ok) {
+                topJob = cand.job; conns = cand.conns;
+                resultType = `${resultType}_live_replacement`; heroLive = true;
+                break;
+              }
+              logDeadPosting(cand.job, chk.why);
+            }
+            // No live posting anywhere: an insider-backed hero survives as a
+            // people-only card (no Apply, no "Hiring now"). No people either
+            // → honest empty state, never a fake open role.
+            if (!heroLive && !conns.length) { topJob = null; resultType = 'no_live_posting'; }
+          }
+        }
+
         if (rejected.length) console.log('[MagicMoment] rejected candidates:', rejected);
         if (!topJob) {
           console.log('[MagicMoment] no on-chip job found for chip:', chipText, location);
@@ -354,7 +399,7 @@ export default function MagicMoment() {
           setPhase(null);
           return;
         }
-        setHeroMeta({ onChip: !chipKeywords ? false : isOnChip(topJob), chipLabel });
+        setHeroMeta({ onChip: !chipKeywords ? false : isOnChip(topJob), chipLabel, live: heroLive });
         setJob(topJob);
         setConnections(conns.slice(0, 3));
         // ── Locked stack: MORE insider-backed roles ─────────────────────────
@@ -363,16 +408,19 @@ export default function MagicMoment() {
         // chip-curated inventory); only companies with a confirmed insider ship.
         // In-market roles lead; the rest of the on-chip pool backs them up, and
         // curated inventory only joins if it's in the student's market.
+        // Rail rows also need a real apply URL and a fresh (≤14 days) posting
+        // date — no dead or undated inventory presented as open roles.
+        const railFresh = (j) => hasApplyUrl(j) && isDateFresh(j);
         const heroKey = jobKey(topJob);
         const poolOnChip = onChip(sourcePool);
         const candidates = [
           ...inMarketOnly(poolOnChip),
           ...poolOnChip,
           ...inMarketOnly(onChip(getChipCuratedJobs(chipText, location))),
-        ].filter(j => jobKey(j) !== heroKey);
+        ].filter(j => jobKey(j) !== heroKey && railFresh(j));
         const railJobs = await buildInsiderRail({
           base44, user, role, chipText, location,
-          known: warmPool, candidates, excludeKeys: [heroKey], want: 5,
+          known: warmPool.filter(w => railFresh(w.job)), candidates, excludeKeys: [heroKey], want: 5,
         });
         setLockedJobs(railJobs);
         const matchType = conns.length > 0 ? 'warm' : 'cold';
@@ -441,8 +489,12 @@ export default function MagicMoment() {
     })();
   }, [user]);
 
+  // "Hiring now" only when the posting passed the live check. Otherwise this
+  // is a people-at-the-company card, never presented as an open role.
   const fitReason = job
-    ? `Hiring now for ${job.job_title}${job.location ? ` in ${job.location}` : ''}${heroMeta.onChip && heroMeta.chipLabel ? ` — matches your ${heroMeta.chipLabel}.` : '.'}`
+    ? (heroMeta.live
+        ? `Hiring now for ${job.job_title}${job.location ? ` in ${job.location}` : ''}${heroMeta.onChip && heroMeta.chipLabel ? ` — matches your ${heroMeta.chipLabel}.` : '.'}`
+        : `CLIFF found people for you at ${job.name}. This posting isn't confirmed open right now — start with the insider.`)
     : '';
 
   // Draft built from collected facts only; the apply line swaps when `applied`
@@ -454,9 +506,11 @@ export default function MagicMoment() {
     insiderName: connections[0]?.name || '',
     studentName: user?.full_name || '',
     applied,
+    live: heroMeta.live,
   }) : null;
 
-  const applyUrl = job?.job_url || job?.apply_url || job?.url || '';
+  // Apply only exists when the posting is confirmed live.
+  const applyUrl = heroMeta.live ? (job?.job_url || job?.apply_url || job?.url || '') : '';
   const handleApply = () => {
     if (applyUrl) { try { window.open(applyUrl, '_blank', 'noopener'); } catch (e) {} }
     setApplied(true);
@@ -575,6 +629,7 @@ export default function MagicMoment() {
           <HeroJobHeader job={job} fitReason={fitReason} />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <HeroStepPlan
+            live={heroMeta.live}
             applied={applied}
             onApply={handleApply}
             onAlreadyApplied={() => setApplied(true)}

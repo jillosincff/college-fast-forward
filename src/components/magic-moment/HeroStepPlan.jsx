@@ -17,9 +17,10 @@ function Dot({ state, n }) {
 
 // The free cycle's guided plan: apply → message the insider → tracked.
 // Parent / upgrade CTAs never appear here — they live on the locked wall only.
-export default function HeroStepPlan({ applied, onApply, onAlreadyApplied, applyUrl, messaged, trackedStatus, insiderFirst }) {
-  const step1 = applied ? 'done' : 'active';
-  const step2 = messaged ? 'done' : (applied ? 'active' : 'pending');
+export default function HeroStepPlan({ live = true, applied, onApply, onAlreadyApplied, applyUrl, messaged, trackedStatus, insiderFirst }) {
+  // No confirmed live posting → never present "Apply"; outreach leads instead.
+  const step1 = applied ? 'done' : (live ? 'active' : 'pending');
+  const step2 = messaged ? 'done' : ((applied || !live) ? 'active' : 'pending');
   const step3 = messaged ? 'done' : 'pending';
   const row = { display: 'flex', gap: 12, alignItems: 'flex-start' };
   const title = (state) => ({ fontFamily: FONT, fontSize: 14, fontWeight: 800, color: state === 'pending' ? TEXT3 : TEXT, margin: 0, lineHeight: '26px' });
@@ -27,6 +28,15 @@ export default function HeroStepPlan({ applied, onApply, onAlreadyApplied, apply
 
   return (
     <div data-testid="mm-step-plan" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {!live ? (
+        <div style={row}>
+          <Dot state="pending" n={1} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={title('pending')}>No live posting right now</p>
+            <p style={sub}>This role isn't confirmed open — skip the application and start with the insider.</p>
+          </div>
+        </div>
+      ) : (
       <div style={row}>
         <Dot state={step1} n={1} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -49,6 +59,7 @@ export default function HeroStepPlan({ applied, onApply, onAlreadyApplied, apply
           )}
         </div>
       </div>
+      )}
 
       <div style={row}>
         <Dot state={step2} n={2} />
