@@ -110,7 +110,12 @@ export default function MagicMoment() {
         const fetchJobs = async (locOverride) => {
           const loc = locOverride !== undefined ? locOverride : location;
           const r = await base44.functions.invoke('getLiveJobMatchesFn', {
-            career_goals: { role, industries, locations: loc ? [loc] : [], seeking: cg.seeking || 'both' },
+            // Always pass the loc in the array — even when loc is '' (the
+            // "search anywhere" remote fallback). The backend uses ?? (not ||)
+            // so an explicit '' is respected as "no location" instead of
+            // falling back to the user's saved preference (which would
+            // re-search the same market that already returned nothing).
+            career_goals: { role, industries, locations: [loc], seeking: cg.seeking || 'both' },
             force_refresh: true,
           });
           return r?.data?.companies || r?.companies || [];
@@ -305,7 +310,15 @@ export default function MagicMoment() {
           // Curated inventory is metro-scoped (NYC today). A student with no
           // parseable market must NEVER receive curated jobs — that's the path
           // that served a New York role to an Austin search. Live-only instead.
-          const curatedPool = hasMarket ? inMarketOnly(pool) : [];
+          // Curated hero fallback: in-market jobs first, but REMOTE curated jobs
+          // are the designed last resort — don't strip them. 'other' (a
+          // different metro, e.g. NYC for an Orlando student) is still rejected.
+          // Without this, inMarketOnly killed every curated job for any non-NYC
+          // market, producing the "couldn't find a matching role" empty state.
+          const curatedPool = hasMarket ? pool.filter(j => {
+            const t = tierOf(j);
+            return t === 'same_location' || t === 'nearby' || t === 'remote';
+          }) : pool;
           sourcePool = curatedPool;
           const curatedWarm = curatedPool.length > 0 ? await scanForWarm(curatedPool) : null;
           if (curatedWarm) { topJob = curatedWarm.job; conns = curatedWarm.conns; resultType = 'curated_warm'; }
@@ -333,7 +346,11 @@ export default function MagicMoment() {
         // than no hero — it makes the whole product look fake. Last resort is
         // chip-shaped curated inventory; if even that is empty we say so.
         if (!topJob) {
-          const lastResort = inMarketOnly(onChip(getChipCuratedJobs(chipText, location)));
+          // Same logic as the curated hero pool: in-market OR remote, never 'other'.
+          const lastResort = onChip(getChipCuratedJobs(chipText, location)).filter(j => {
+            const t = tierOf(j);
+            return !hasMarket || t === 'same_location' || t === 'nearby' || t === 'remote';
+          });
           if (lastResort.length) { topJob = lastResort[0]; conns = []; resultType = 'curated_fallback'; sourcePool = lastResort; }
         }
 

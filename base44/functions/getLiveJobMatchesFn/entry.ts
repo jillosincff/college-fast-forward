@@ -105,7 +105,10 @@ Deno.serve(async (req) => {
 
     const role = career_goals.role || user.career_goals?.target_roles?.[0] || '';
     const industries = career_goals.industries || user.career_goals?.target_industries || [];
-    const location = career_goals.locations?.[0] || user.career_goals?.location_preference || '';
+    // ?? (not ||) so an explicit '' from the caller means "search anywhere" —
+    // || treated '' as falsy and fell back to the user's saved location_preference,
+    // re-searching the same market that already returned nothing.
+    const location = career_goals.locations?.[0] ?? user.career_goals?.location_preference ?? '';
     const seeking = career_goals.seeking || user.career_goals?.seeking || 'both';
 
     if (!role && industries.length === 0) {
