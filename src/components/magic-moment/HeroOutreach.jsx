@@ -11,9 +11,9 @@ const pill = (extra) => ({
 // Under the outreach draft we keep ONLY job actions. The parent-unlock / Pro
 // wall lives in the locked-jobs section below — it must never compete with the
 // student's next step on THIS job.
-export default function HeroOutreach({ outreach, copied, onCopy }) {
+export default function HeroOutreach({ outreach, copied, onCopy, highlight }) {
   return (
-    <div>
+    <div style={highlight ? { borderRadius: 14, boxShadow: '0 0 0 3px rgba(109,40,217,0.25)', padding: 10, margin: -10 } : undefined}>
       {outreach?.cold && (
         <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>Cold outreach · no alumni found</p>
       )}

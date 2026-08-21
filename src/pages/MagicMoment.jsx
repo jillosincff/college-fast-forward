@@ -16,6 +16,8 @@ import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
 import { buildInsiderRail, jobKey } from '@/lib/insiderRail';
 import MagicMomentLoader from '@/components/magic-moment/MagicMomentLoader';
 import HeroJobHeader from '@/components/magic-moment/HeroJobHeader';
+import HeroStepPlan from '@/components/magic-moment/HeroStepPlan';
+import { buildOutreachDraft } from '@/lib/outreachDraft';
 import HeroPeople from '@/components/magic-moment/HeroPeople';
 import HeroOutreach from '@/components/magic-moment/HeroOutreach';
 import HeroResume from '@/components/magic-moment/HeroResume';
@@ -62,7 +64,8 @@ export default function MagicMoment() {
   const [job, setJob] = useState(null);
   const [tailored, setTailored] = useState(null);
   const [connections, setConnections] = useState([]);
-  const [outreach, setOutreach] = useState(null);
+  // Apply-first flow: true once the student taps Apply or "I already applied".
+  const [applied, setApplied] = useState(false);
   const [copied, setCopied] = useState(false);
   // Sticks once the student copies — `copied` is only a 2.6s toast flag.
   const [revealPaywall, setRevealPaywall] = useState(false);
@@ -411,39 +414,9 @@ export default function MagicMoment() {
           // No uploaded resume → tailored stays null → UI shows honest upload card
         } catch (e) { /* resume tailoring is best-effort — don't block the plan */ }
 
-        // Alumni were already surfaced above when picking the job with a real
-        // insider — nothing to do here.
-
-        // 4. Write the outreach — warm if an alum was found, cold fallback otherwise
-        const top = conns[0];
-        const hasAlumni = !!top;
-        setPhase(hasAlumni ? 'Writing your warm outreach…' : 'Writing your outreach…');
-        try {
-          const outRes = await base44.functions.invoke('generateOutreachDraft', {
-            studentName: user.full_name || '',
-            major: cg.target_industries?.[0] || '',
-            targetRole: topJob.job_title || role,
-            graduationYear: user.graduation_year || '',
-            school: user.school || '',
-            alumniName: hasAlumni ? top.name : '',
-            alumniTitle: hasAlumni ? (top.role_title || '') : (topJob.job_title || role),
-            alumniCompany: topJob.name,
-            cold: !hasAlumni,
-            magic_moment: true,
-          });
-          if (outRes?.data?.upgrade_required || outRes?.upgrade_required) { setShowSoftWall(true); setPhase(null); return; }
-          const outData = outRes?.data || outRes;
-          setOutreach({ ...outData, message: normalizeOutreachMessage(outData?.message), cold: !hasAlumni });
-        } catch (e) {
-          // Graceful fallback — never leave the user with an empty outreach block.
-          const roleLabel = topJob.job_title || role || 'this role';
-          const schoolLabel = user.school ? ` at ${user.school}` : '';
-          const first = hasAlumni ? (top.name.split(' ')[0] || 'there') : '';
-          const msg = hasAlumni
-            ? `Hey ${first} — I'm a student${schoolLabel} and just applied to the ${roleLabel} role at ${topJob.name}. I saw you're on the team and would love any quick advice on standing out. Thanks either way.`
-            : `Hi — I'm a student${schoolLabel} interested in the ${roleLabel} role at ${topJob.name}. I'd value any quick advice on how to stand out. Thanks either way.`;
-          setOutreach({ message: msg, cold: !hasAlumni });
-        }
+        // The outreach draft is built deterministically at render from ONLY
+        // collected facts (school + this job + insider name + applied state) —
+        // no LLM call, so it can never invent a major or embellish.
 
         base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
         trackMagicMomentCompleted({
@@ -471,6 +444,23 @@ export default function MagicMoment() {
   const fitReason = job
     ? `Hiring now for ${job.job_title}${job.location ? ` in ${job.location}` : ''}${heroMeta.onChip && heroMeta.chipLabel ? ` — matches your ${heroMeta.chipLabel}.` : '.'}`
     : '';
+
+  // Draft built from collected facts only; the apply line swaps when `applied`
+  // flips ("I'm applying…" → "I just applied…").
+  const outreach = job ? buildOutreachDraft({
+    school: user?.school || '',
+    jobTitle: job.job_title || '',
+    company: job.name || '',
+    insiderName: connections[0]?.name || '',
+    studentName: user?.full_name || '',
+    applied,
+  }) : null;
+
+  const applyUrl = job?.job_url || job?.apply_url || job?.url || '';
+  const handleApply = () => {
+    if (applyUrl) { try { window.open(applyUrl, '_blank', 'noopener'); } catch (e) {} }
+    setApplied(true);
+  };
 
   const handlePrimaryAction = async () => {
     const text = outreach?.message || '';
@@ -582,13 +572,23 @@ export default function MagicMoment() {
         </div>
 
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '22px 20px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-          <HeroJobHeader job={job} fitReason={fitReason} trackedStatus={trackedStatus} />
+          <HeroJobHeader job={job} fitReason={fitReason} />
+          <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
+          <HeroStepPlan
+            applied={applied}
+            onApply={handleApply}
+            onAlreadyApplied={() => setApplied(true)}
+            applyUrl={applyUrl}
+            messaged={!!trackedStatus}
+            trackedStatus={trackedStatus}
+            insiderFirst={(connections[0]?.name || '').split(' ')[0]}
+          />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label="People on the inside" />
           <HeroPeople connections={connections} companyName={job?.name} school={user?.school} />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <SectionLabel icon={<Mail size={14} color={INDIGO_DIM} />} label="Your outreach draft" />
-          <HeroOutreach outreach={outreach} copied={copied} onCopy={handlePrimaryAction} />
+          <HeroOutreach outreach={outreach} copied={copied} onCopy={handlePrimaryAction} highlight={applied && !trackedStatus} />
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <HeroResume tailored={tailored} onDownload={downloadResume} />
         </div>
@@ -607,25 +607,6 @@ export default function MagicMoment() {
   );
 }
 
-// Normalizes the outreach message so a raw/fenced JSON response from the LLM
-// never reaches the screen. Extracts the body field and unescapes line breaks.
-function normalizeOutreachMessage(raw) {
-  if (!raw) return '';
-  let text = String(raw);
-  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  if (fence) text = fence[1].trim();
-  const extract = (str) => {
-    try {
-      const obj = JSON.parse(str);
-      return obj.body || obj.message || '';
-    } catch (e) { return ''; }
-  };
-  if (text.trim().startsWith('{')) {
-    const body = extract(text) || extract(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
-    if (body) return body.replace(/\\n/g, '\n').replace(/\\"/g, '"');
-  }
-  return text.replace(/\\n/g, '\n').replace(/\\"/g, '"');
-}
 
 function SectionLabel({ icon, label }) {
   return (
