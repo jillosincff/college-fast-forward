@@ -109,6 +109,22 @@ function isFresh(job) {
 }
 function urlOf(j) { return (j && (j.job_url || j.apply_url || j.url)) || ''; }
 
+// Mirror of getLiveJobMatchesFn's HARD_SENIOR_RE + ENTRY_TITLE_RE — the
+// scenario runner must apply the SAME seniority gate so its results reflect
+// what a real student would actually see. A thin market widens by geography,
+// never by seniority: "Sr Manager, Software Development" must never be the
+// hero even if it's the only posting in Austin.
+const HARD_SENIOR_RE = /\b(senior|sr\.?|lead|manager|mgr|supervisor|staff|director|vp|vice president|chief|head|principal|architect|executive|expert|experienced)\b|\b(ii|iii|iv|v)\b/i;
+const ENTRY_TITLE_RE = /\b(junior|jr\.?|entry|graduate|trainee|new grad)\b/i;
+const INTERN_RE = /\b(intern|internship|co-?op)\b/i;
+function isEntryLevelTitle(title) {
+  const t = (title || '').trim();
+  if (!t) return false;
+  if (INTERN_RE.test(t)) return true;
+  if (ENTRY_TITLE_RE.test(t)) return true;
+  return !HARD_SENIOR_RE.test(t);
+}
+
 async function fetchJobs(persona) {
   const token = Deno.env.get('OPENWEB_NINJA_API_KEY');
   if (!token) throw new Error('OPENWEB_NINJA_API_KEY not set');
@@ -132,7 +148,7 @@ async function fetchJobs(persona) {
       location: [j.job_city, j.job_state].filter(Boolean).join(', ') || (j.job_is_remote ? 'Remote' : (j.job_country || '')),
       posted_date: j.job_posted_at_datetime_utc || null,
       hiring_description: (j.job_description || '').trim(),
-    })).filter((j) => j.name && j.job_title && j.job_url);
+    })).filter((j) => j.name && j.job_title && j.job_url && isEntryLevelTitle(j.job_title));
   } finally { clearTimeout(timer); }
 }
 

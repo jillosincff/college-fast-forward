@@ -298,7 +298,12 @@ Deno.serve(async (req) => {
     // titles (director/vp/chief/head/principal/architect) and drops the structured
     // experience requirement so coordinator/assistant/analyst/specialist roles
     // that lack experience data still surface. The Magic Moment must show a role.
-    const HARD_SENIOR_RE = /\b(director|vp|vice president|chief|head|principal|architect|executive|expert)\b|\b(iii|iv|v)\b/i;
+    // Hard seniority block — applied in EVERY mode (strict, relaxed, permissive).
+    // A thin market widens by geography, never by seniority. "Sr Manager, Software
+    // Development" is the wrong hero for a student even if it's the only posting.
+    // Kept in sync with the full seniority list: senior, sr., lead, manager, mgr,
+    // supervisor, staff, director, vp, chief, head, principal, architect, etc.
+    const HARD_SENIOR_RE = /\b(senior|sr\.?|lead|manager|mgr|supervisor|staff|director|vp|vice president|chief|head|principal|architect|executive|expert|experienced)\b|\b(ii|iii|iv|v)\b/i;
     const passesEntry = (c, relaxed) => {
       if (c._isIntern) return true;
       if (relaxed) return !(HARD_SENIOR_RE.test(c._title) && !ENTRY_TITLE_RE.test(c._title));
@@ -306,9 +311,12 @@ Deno.serve(async (req) => {
     };
 
     // mode: 'strict' (structured experience + senior-title gate), 'relaxed'
-    // (hard-senior title gate only), 'permissive' (no seniority gate — used only
-    // when strict AND relaxed both returned 0, so a valid query never dead-ends
-    // the Magic Moment just because every posting happened to be senior-titled).
+    // (hard-senior title gate only, drops structured-experience requirement),
+    // 'permissive' (same hard-senior gate as relaxed — NEVER promotes a senior
+    // title to fill a thin pool). A thin market widens by geography
+    // (metro → state → remote), never by seniority. "Sr Manager, Software
+    // Development" is the wrong hero for a college kid even if it's the only
+    // posting in Austin.
     const buildPool = (mode) => {
       const orgCounts = new Map();
       const pool = [];
@@ -318,7 +326,9 @@ Deno.serve(async (req) => {
         if (seeking === 'internship' && !c._isIntern) continue;
         if (seeking === 'fulltime' && c._isIntern) continue;
         if (mode === 'strict' && !passesEntry(c, false)) continue;
-        if (mode === 'relaxed' && !passesEntry(c, true)) continue;
+        // Relaxed AND permissive both apply the hard-senior gate — no mode
+        // ever lets a senior/director/manager/VP/principal/lead title through.
+        if ((mode === 'relaxed' || mode === 'permissive') && !passesEntry(c, true)) continue;
         const orgKey = c.name.toLowerCase();
         const count = orgCounts.get(orgKey) || 0;
         if (count >= MAX_PER_COMPANY) continue;
