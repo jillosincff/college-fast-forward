@@ -316,7 +316,10 @@ export default function MagicMoment() {
           setPhase('Looking beyond your market…');
           const rawAny = legit(await fetchJobs(''));
           const ab = byTier(onChip(rawAny));
-          const remotePool = ab.remote.length ? ab.remote : [...ab.same_location, ...ab.nearby, ...ab.remote, ...ab.other];
+          // In-market or remote ONLY — never 'other'. An Austin search that
+          // returns only New York jobs must fall to the honest empty state,
+          // not bait-and-switch with an out-of-market role.
+          const remotePool = [...ab.same_location, ...ab.nearby, ...ab.remote];
           sourcePool = remotePool;
           const hit = await scanForWarm(remotePool);
           if (hit) { topJob = hit.job; conns = hit.conns; resultType = 'remote_fallback_warm'; }
@@ -352,6 +355,17 @@ export default function MagicMoment() {
             console.log('[MagicMoment] Rejected off-chip hero — refusing to render:', topJob.name, topJob.job_title);
             topJob = null;
             resultType = 'rejected_off_chip';
+          }
+        }
+
+        // Hard location gate — an out-of-market hero is a bait-and-switch (a
+        // New York role served to an Austin search). Same final-gate pattern
+        // as the chip gate; a hero landing in the 'other' tier never renders.
+        if (topJob && hasMarket) {
+          if (tierOf(topJob) === 'other') {
+            console.log('[MagicMoment] Rejected out-of-market hero — refusing to render:', topJob.name, topJob.location);
+            topJob = null;
+            resultType = 'rejected_out_of_market';
           }
         }
 
@@ -431,7 +445,7 @@ export default function MagicMoment() {
         const liveOnChip = onChip(rawJobs || []);
         const railCandidates = [
           ...inMarketOnly(liveOnChip),
-          ...liveOnChip,
+          ...liveOnChip.filter(j => tierOf(j) === 'remote'),
           ...inMarketOnly(onChip(getChipCuratedJobs(chipText, location))).filter(j => hasApplyUrl(j) && isDateFresh(j)),
         ].filter(j => jobKey(j) !== heroKey && railHasUrl(j));
         const railSeen = new Set();
