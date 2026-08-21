@@ -80,11 +80,19 @@ function chipKeywordsFor(chipText) {
   }
   return best;
 }
+// Inverted gate — mirrors chipGate.checkOnChip. Trusts the synonym query's
+// contextual filtering; rejects only generic titles or titles that name a
+// DIFFERENT chip. Stops false-rejection of role variants like "Summer Analyst".
 function checkOnChip(jobTitle, kw) {
   const title = (jobTitle || '').toLowerCase().trim();
-  if (!kw) return GENERIC_TITLE.test(title) ? { ok: false } : { ok: true };
-  if (kw.some((k) => hasWord(title, k))) return { ok: true };
-  return { ok: false };
+  if (GENERIC_TITLE.test(title)) return { ok: false };
+  if (kw && kw.some((k) => hasWord(title, k))) return { ok: true };
+  if (!kw) return { ok: true };
+  for (const kws of Object.values(ROLE_KEYWORDS)) {
+    if (kws === kw) continue;
+    if (kws.some((k) => hasWord(title, k))) return { ok: false };
+  }
+  return { ok: true };
 }
 
 const ROLE_SYNONYMS = {

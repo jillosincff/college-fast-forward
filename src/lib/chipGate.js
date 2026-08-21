@@ -53,16 +53,30 @@ export function chipKeywordsFor(chipText) {
 }
 
 /**
- * Title-only chip match. A generic "Specialist" whose DESCRIPTION mentions the
- * chip is NOT on-chip. Returns { ok, why } so callers can log rejections.
+ * Title-only chip match. Returns { ok, why } so callers can log rejections.
+ *
+ * Logic (inverted from the original strict-keyword gate):
+ * 1. A field-less generic title ("Analyst", "Specialist", "Associate") is NEVER
+ *    a legitimate hero — it could belong to any chip.
+ * 2. A direct chip-keyword hit in the title is always on-chip.
+ * 3. If the chip is unknown, any non-generic title passes (the synonym query
+ *    already filtered contextually).
+ * 4. If the chip IS known but the title has no direct keyword hit, the job was
+ *    returned by a chip-specific synonym query — so it IS contextually on-chip.
+ *    Accept it UNLESS the title clearly belongs to a DIFFERENT chip (e.g. a
+ *    "Software Engineer" served to a Marketing student). This is what stops a
+ *    "Summer Analyst" at PIMCO from being rejected just because "summer" isn't
+ *    in the finance keyword list — the search found it BECAUSE it's finance.
  */
 export function checkOnChip(jobTitle, chipKeywords) {
   const title = (jobTitle || '').toLowerCase().trim();
-  // Even when the chip is unrecognized, a field-less generic title is never a
-  // legitimate hero — it's what lets "Analyst (Remote)" masquerade as a match.
-  if (!chipKeywords) {
-    return GENERIC_TITLE.test(title) ? { ok: false, why: 'junk' } : { ok: true, why: null };
+  if (GENERIC_TITLE.test(title)) return { ok: false, why: 'junk' };
+  if (chipKeywords && chipKeywords.some(k => hasWord(title, k))) return { ok: true, why: null };
+  if (!chipKeywords) return { ok: true, why: null };
+  // Known chip, no direct keyword. Reject only if the title names a DIFFERENT chip.
+  for (const kws of Object.values(ROLE_KEYWORDS)) {
+    if (kws === chipKeywords) continue;
+    if (kws.some(k => hasWord(title, k))) return { ok: false, why: 'other_chip' };
   }
-  if (chipKeywords.some(k => hasWord(title, k))) return { ok: true, why: null };
-  return { ok: false, why: GENERIC_TITLE.test(title) ? 'junk' : 'off_chip' };
+  return { ok: true, why: null };
 }
