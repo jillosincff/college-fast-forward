@@ -15,7 +15,7 @@ import { getCuratedFallback, getChipCuratedJobs, detectChipKey } from '../../bas
 import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
 import { buildInsiderRail, jobKey } from '@/lib/insiderRail';
 import { checkJobLive, hasApplyUrl, isDateFresh, applyUrlOf } from '@/lib/jobFreshness';
-import { gatePersonReal, buildHeroLog, logHeroPick } from '@/lib/magicMomentGates';
+import { gatePersonReal, gateLocation, widenTierOf, buildHeroLog, logHeroPick } from '@/lib/magicMomentGates';
 import MagicMomentLoader from '@/components/magic-moment/MagicMomentLoader';
 import HeroJobHeader from '@/components/magic-moment/HeroJobHeader';
 import HeroStepPlan from '@/components/magic-moment/HeroStepPlan';
@@ -82,7 +82,7 @@ export default function MagicMoment() {
   // promoted as an open role.
   const [supportPeople, setSupportPeople] = useState([]);
   // Only claim "matches your {chip}" when the hero actually passed the chip gate.
-  const [heroMeta, setHeroMeta] = useState({ onChip: false, chipLabel: '', live: false });
+  const [heroMeta, setHeroMeta] = useState({ onChip: false, chipLabel: '', live: false, widenTier: '' });
   // CRM tracking status shown on the hero after the student copies/sends.
   const [trackedStatus, setTrackedStatus] = useState('');
 
@@ -302,7 +302,10 @@ export default function MagicMoment() {
           // that belongs to another metro is dropped entirely rather than served.
           const gate = onChip(basePool);
           const pool = gate.length > 0 ? gate : (knownChip ? [] : basePool);
-          const curatedPool = inMarketOnly(pool);
+          // Curated inventory is metro-scoped (NYC today). A student with no
+          // parseable market must NEVER receive curated jobs — that's the path
+          // that served a New York role to an Austin search. Live-only instead.
+          const curatedPool = hasMarket ? inMarketOnly(pool) : [];
           sourcePool = curatedPool;
           const curatedWarm = curatedPool.length > 0 ? await scanForWarm(curatedPool) : null;
           if (curatedWarm) { topJob = curatedWarm.job; conns = curatedWarm.conns; resultType = 'curated_warm'; }
@@ -358,12 +361,15 @@ export default function MagicMoment() {
           }
         }
 
-        // Hard location gate — an out-of-market hero is a bait-and-switch (a
-        // New York role served to an Austin search). Same final-gate pattern
-        // as the chip gate; a hero landing in the 'other' tier never renders.
-        if (topJob && hasMarket) {
-          if (tierOf(topJob) === 'other') {
-            console.log('[MagicMoment] Rejected out-of-market hero — refusing to render:', topJob.name, topJob.location);
+        // Hard location gate — UNCONDITIONAL. An out-of-market hero is a
+        // bait-and-switch (a New York role served to an Austin search). Same
+        // final-gate pattern as the chip gate. When the student has no parseable
+        // market, only remote jobs pass (location-agnostic). This is the gate
+        // the live-replacement loop also re-runs on every candidate below.
+        if (topJob) {
+          const locGate = gateLocation(topJob, { userCity, userState });
+          if (!locGate.ok) {
+            console.log('[MagicMoment] Rejected out-of-market hero — refusing to render:', topJob.name, topJob.location, locGate.why);
             topJob = null;
             resultType = 'rejected_out_of_market';
           }
@@ -398,6 +404,11 @@ export default function MagicMoment() {
               if (tried.has(k)) continue;
               tried.add(k);
               if (chipKeywords && !isOnChip(cand.job)) continue;
+              // Re-run the location gate on every replacement — a dead hero
+              // must never be swapped for an out-of-market one (the hole that
+              // let a NYC Squarespace posting survive as a people card).
+              const candLoc = gateLocation(cand.job, { userCity, userState });
+              if (!candLoc.ok) { logReject(cand.job, `replacement_${candLoc.why}`); continue; }
               chk = await checkJobLive(base44, cand.job);
               if (chk.ok) {
                 topJob = cand.job; conns = cand.conns;
@@ -421,10 +432,11 @@ export default function MagicMoment() {
           return;
         }
         const heroChipOk = !chipKeywords ? false : isOnChip(topJob);
+        const heroWidenTier = widenTierOf(resultType);
         // Gate 3 — only real people (name + role/company + source URL) ship as
         // insiders. An invented/partial record never titles the page as a connection.
         const realConns = conns.filter(c => gatePersonReal(c).ok);
-        setHeroMeta({ onChip: heroChipOk, chipLabel, live: heroLive });
+        setHeroMeta({ onChip: heroChipOk, chipLabel, live: heroLive, widenTier: heroWidenTier });
         setJob(topJob);
         setConnections(realConns.slice(0, 3));
         // ── Locked stack: MORE insider-backed roles ─────────────────────────
@@ -493,6 +505,7 @@ export default function MagicMoment() {
           railCount: railJobs.length,
           resultType,
           chipText,
+          widenTier: heroWidenTier,
         }));
         const matchType = realConns.length > 0 ? 'warm' : 'cold';
         const locationMatch = resultType.includes('remote') ? 'remote'
@@ -699,6 +712,16 @@ export default function MagicMoment() {
                 ? 'One complete path — ready to send. The rest is unlocked with Pro.'
                 : "We didn't find an alum at this company yet — here's your outreach draft anyway."}
           </p>
+          {!deadPosting && (heroMeta.widenTier === 'state' || heroMeta.widenTier === 'remote') && (() => {
+            const locPref = user?.career_goals?.location_preference || '';
+            const city = locPref.split(',')[0]?.trim() || 'your area';
+            const tierLabel = heroMeta.widenTier === 'state' ? locPref.split(',')[1]?.trim() : 'remote';
+            return (
+              <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, margin: '6px 0 0' }}>
+                No {city} posting this week — here's a {tierLabel || 'wider'} role with someone on the inside.
+              </p>
+            );
+          })()}
         </div>
 
         <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '22px 20px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>

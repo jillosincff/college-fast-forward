@@ -17,7 +17,22 @@ const DEFAULT_PERSONAS = [
   { name: 'Sales+NYC', role: 'Sales', industries: ['Sales'], location: 'New York, NY' },
   { name: 'Marketing+NYC', role: 'Marketing', industries: ['Marketing'], location: 'New York, NY' },
   { name: 'Comms+NYC', role: 'Communications', industries: ['Communications'], location: 'New York, NY' },
+  // Regression guard: an Austin Sales search must NEVER serve a New York role.
+  // This is the exact leak that shipped Squarespace/NYC to an Austin student.
+  { name: 'Sales+Austin', role: 'Sales', industries: ['Sales'], location: 'Austin, TX' },
 ];
+
+// Mirror of magicMomentGates.gateLocation (kept in sync manually — verification
+// harness). Returns { ok, why }; 'other'-tier jobs never pass.
+function gateLocation(job, city, state) {
+  if (!job) return { ok: false, why: 'no_job' };
+  const loc = (job.location || '').toLowerCase();
+  if (!loc) return { ok: false, why: 'no_location' };
+  if (/\bremote\b|work\s*from\s*home/.test(loc)) return { ok: true, why: 'remote' };
+  if (city && loc.includes(city.toLowerCase())) return { ok: true, why: 'metro' };
+  if (state && loc.includes(state.toLowerCase())) return { ok: true, why: 'state' };
+  return { ok: false, why: 'out_of_market' };
+}
 
 // Mirror of chipGate (kept in sync manually — this is a verification harness).
 const ROLE_KEYWORDS = {
@@ -178,12 +193,16 @@ Deno.serve(async (req) => {
         const parts = (p.location || '').split(',').map((s) => s.trim());
         const city = parts[0];
         const state = parts[1];
-        const inMarket = onChip.filter((j) => {
-          const l = (j.location || '').toLowerCase();
-          if (/remote/.test(l)) return false;
-          return (city && l.includes(city.toLowerCase())) || (state && new RegExp(`\\b${state.toLowerCase()}\\b`).test(l));
-        });
-        const pool = inMarket.length ? inMarket : onChip;
+
+        // Widen cascade — mirrors MagicMoment.jsx exactly. NEVER steals another
+        // metro's jobs: metro → state → remote → empty. 'other'-tier jobs are
+        // excluded at every tier. This is the regression guard for the
+        // Squarespace/NYC → Austin leak.
+        const metro = onChip.filter((j) => gateLocation(j, city, state).why === 'metro');
+        const statePool = onChip.filter((j) => gateLocation(j, city, state).why === 'state');
+        const remotePool = onChip.filter((j) => gateLocation(j, city, state).why === 'remote');
+        const pool = metro.length ? metro : (statePool.length ? statePool : remotePool);
+        const widenTier = metro.length ? 'metro' : (statePool.length ? 'state' : (remotePool.length ? 'remote' : 'empty'));
 
         let hero = null;
         let urlOk = false;
@@ -208,6 +227,11 @@ Deno.serve(async (req) => {
 
         const railCount = pool.filter((j) => urlOf(j) && (!hero || j.name !== hero.name || j.job_title !== hero.job_title)).length;
 
+        // Integrity assertion: if the hero landed in the 'other' tier, the run
+        // is flagged as a leak — another metro's job served to this student.
+        const heroTier = hero ? gateLocation(hero, city, state).why : 'none';
+        const leak = hero && heroTier === 'out_of_market';
+
         return {
           persona: p.name,
           job_id: hero ? (hero.job_id || null) : null,
@@ -221,7 +245,10 @@ Deno.serve(async (req) => {
           person_name: personName,
           rail_count: railCount,
           on_chip_pool: onChip.length,
-          in_market_pool: inMarket.length,
+          in_market_pool: metro.length + statePool.length,
+          widen_tier: widenTier,
+          hero_tier: heroTier,
+          leak: !!leak,
         };
       } catch (e) {
         return { persona: p.name, error: e.message };
@@ -236,6 +263,7 @@ Deno.serve(async (req) => {
     const person = scenarios.filter((s) => s.person_found).length;
     const volume = scenarios.filter((s) => (s.rail_count || 0) >= 4).length;
     const costume = scenarios.filter((s) => s.chip_ok === false).length;
+    const leaks = scenarios.filter((s) => s.leak).length;
     const names = scenarios.map((s) => s.person_name).filter(Boolean);
     const same3 = names.length >= 3 && new Set(names).size === 1;
 
@@ -246,6 +274,7 @@ Deno.serve(async (req) => {
         person_found_rate: person / n,
         volume_rate: volume / n,
         costume_job_count: costume,
+        out_of_market_leaks: leaks,
         same_person_3x: same3,
         sample_size: scenarios.length,
       },

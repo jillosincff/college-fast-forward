@@ -29,6 +29,32 @@ export function gateJobMatches(job, chipText) {
   return checkOnChip(job.job_title, kw);
 }
 
+// Gate 2b — Job is in the student's market (or remote). A New York role served
+// to an Austin search is a bait-and-switch. UNCONDITIONAL: when the student has
+// no parseable market, only remote jobs pass (location-agnostic by definition).
+// This is the gate that closes the Squarespace/NYC → Austin leak — it runs on
+// the initial pick AND on every live-replacement candidate.
+export function gateLocation(job, { userCity, userState } = {}) {
+  if (!job) return { ok: false, why: 'no_job' };
+  const loc = (job.location || '').toLowerCase();
+  if (!loc) return { ok: false, why: 'no_location' };
+  if (/\bremote\b|work\s*from\s*home/.test(loc)) return { ok: true, why: 'remote' };
+  if (userCity && loc.includes(userCity.toLowerCase())) return { ok: true, why: 'metro' };
+  if (userState && loc.includes(userState.toLowerCase())) return { ok: true, why: 'state' };
+  return { ok: false, why: 'out_of_market' };
+}
+
+// Derive the widen tier label from a resultType string for logging + the UI
+// widen line. metro = same city, state = same state, remote = anywhere, curated =
+// metro-scoped inventory.
+export function widenTierOf(resultType = '') {
+  if (resultType.includes('same_location')) return 'metro';
+  if (resultType.includes('nearby')) return 'state';
+  if (resultType.includes('remote')) return 'remote';
+  if (resultType.includes('curated')) return 'curated';
+  return '';
+}
+
 // Gate 3 — Person is real: name + (title or company) + a public source URL.
 // No invented bios; an empty/partial record never ships as an insider.
 export function gatePersonReal(person) {
@@ -55,7 +81,7 @@ export function gateVolume(railJobs, min = 4) {
 }
 
 // Build the structured hero log row — the "log every hero" contract.
-export function buildHeroLog({ job, chipOk, urlOk, personFound, peopleSource, railCount, resultType, chipText }) {
+export function buildHeroLog({ job, chipOk, urlOk, personFound, peopleSource, railCount, resultType, chipText, widenTier }) {
   return {
     job_id: job?.job_id || job?.id || null,
     company: job?.name || '',
@@ -67,6 +93,7 @@ export function buildHeroLog({ job, chipOk, urlOk, personFound, peopleSource, ra
     people_source: peopleSource || 'none',
     rail_count: railCount || 0,
     result_type: resultType || '',
+    widen_tier: widenTier || widenTierOf(resultType),
     chip: chipText || '',
     at: new Date().toISOString(),
   };
