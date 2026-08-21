@@ -117,10 +117,20 @@ async function validateUrl(url, title) {
   if (!res.ok) return { live: false, reason: 'http_fail', status: res.status };
   const text = (await res.text()).slice(0, 500000).toLowerCase();
   if (/(no longer (accepting|available|open)|position (has been )?filled|job (has )?expired|job (has been )?closed|posting (has )?expired|page not found|job not found)/i.test(text)) return { live: false, reason: 'closed' };
+  // Token-level title match (mirror of validateJobPosting). Exact-phrase matching
+  // killed real postings on Greenhouse/Lever/Workday, where the title is rendered
+  // by JS and never appears in raw HTML. Require 2+ distinctive title tokens.
+  const STOP = new Set(['analyst','associate','intern','internship','junior','jr','sr','senior','lead','coordinator','specialist','assistant','team','role','position','the','and','for','of','to','in','at','with','a','an']);
   const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-  const phrase = norm(title);
-  if (phrase && !norm(text).includes(phrase)) return { live: false, reason: 'closed', detail: 'title_not_on_page' };
-  return { live: true };
+  const tokens = norm(title).split(' ').filter(t => t.length > 2 && !STOP.has(t));
+  const pageText = norm(text);
+  if (tokens.filter(t => pageText.includes(t)).length >= 2) return { live: true };
+  const ATS = ['greenhouse.io','lever.co','workday','ashby.at','smartrecruiters','taleo','icims','jobvite','myworkdayjobs','applytojob','recruitee','bamboohr'];
+  const isATS = ATS.some(h => url.toLowerCase().includes(h));
+  const isShell = text.length < 2000 || /id="root"|id="__next"|data-react-root|window\.__INITIAL/i.test(text);
+  if (isATS || isShell) return { live: true, reason: 'ats_shell' };
+  if (tokens.length < 2) return { live: true, reason: 'generic_title' };
+  return { live: false, reason: 'closed', detail: 'title_not_on_page' };
 }
 
 const PEOPLE_SCHEMA = {
