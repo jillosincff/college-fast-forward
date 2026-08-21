@@ -148,7 +148,11 @@ Deno.serve(async (req) => {
       hr: '"Human Resources" OR "HR Coordinator" OR "Recruiting Coordinator" OR "People Operations" OR "Talent Acquisition" OR "HR Analyst"',
       education: '"Education" OR "Teaching" OR "Admissions" OR "Program Coordinator" OR "Academic Coordinator" OR "Education Associate"',
       marketing: '"Marketing" OR "Marketing Coordinator" OR "Digital Marketing" OR "Content Marketing" OR "Brand Marketing" OR "Social Media Marketing"',
-      finance: '"Finance" OR "Financial Analyst" OR "Investment Banking" OR "Asset Management" OR "Risk Analyst" OR "Finance Associate"',
+      // Role-keyword-driven, not sector. A bare "Finance" query returns any job
+      // at a financial firm (Digital Marketing at Blackstone) and the chip gate
+      // then empties the pool. Lead with the actual role titles a student qualifies
+      // for so the on-chip pool is dense and fresh.
+      finance: '"Investment Banking" OR "Financial Analyst" OR "Summer Analyst" OR "Investment Banking Analyst" OR "FP&A" OR "FP and A" OR "Credit Analyst" OR "Markets Analyst" OR "Wealth Management" OR "Risk Analyst" OR "Audit Associate" OR "Finance Associate"',
       sales: '"Sales" OR "Sales Development Representative" OR "Account Executive" OR "Business Development" OR "Sales Associate"',
       software: '"Software Engineer" OR "Software Developer" OR "Frontend Developer" OR "Backend Developer" OR "Full Stack Developer" OR "Associate Engineer"',
     };

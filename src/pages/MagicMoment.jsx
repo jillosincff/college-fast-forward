@@ -417,10 +417,14 @@ export default function MagicMoment() {
               }
               logDeadPosting(cand.job, chk.why);
             }
-            // No live posting anywhere: an insider-backed hero survives as a
-            // people-only card (no Apply, no "Hiring now"). No people either
-            // → honest empty state, never a fake open role.
-            if (!heroLive && !conns.length) { topJob = null; resultType = 'no_live_posting'; }
+            // No live posting anywhere AND no insider. Cold-card safety net:
+            // keep the best on-chip in-market job (already vetted by the chip +
+            // location gates above) as a cold card — heroLive stays false, so the
+            // UI suppresses Apply / "Hiring now" and ships a cold draft + LinkedIn
+            // helper and the locked rail of other on-chip roles. Empty only
+            // happens earlier, when the pool was truly off-chip or another metro —
+            // never here just because URL validation was inconclusive.
+            if (!heroLive && !conns.length) { resultType = 'cold_card'; }
           }
         }
 
@@ -578,7 +582,9 @@ export default function MagicMoment() {
   const fitReason = job
     ? (heroMeta.live
         ? `Hiring now for ${job.job_title}${job.location ? ` in ${job.location}` : ''}${heroMeta.onChip && heroMeta.chipLabel ? ` — matches your ${heroMeta.chipLabel}.` : '.'}`
-        : `CLIFF found people for you at ${job.name}. This posting isn't confirmed open right now — start with the insider.`)
+        : connections.length > 0
+          ? `CLIFF found people for you at ${job.name}. This posting isn't confirmed open right now — start with the insider.`
+          : `CLIFF found a ${heroMeta.chipLabel || 'matching'} role at ${job.name} that fits your target. The posting isn't confirmed open right now — use the cold draft and LinkedIn to reach a hiring manager.`)
     : '';
 
   // Draft built from collected facts only; the apply line swaps when `applied`

@@ -38,17 +38,27 @@ export default async function(req) {
     const CLOSED = /(no longer (accepting|available|active|open)|position (has been )?filled|job (has )?expired|job (has been )?closed|posting (has )?expired|posting (has been )?closed|this (job|position|posting|role) (is|has been) (closed|expired|filled|removed)|has been removed|page not found|job not found)/i;
     if (CLOSED.test(text)) return Response.json({ live: false, reason: 'closed' });
 
-    // The page must actually be about THIS role — a generic careers homepage
-    // that never mentions the exact title is not a live posting for it.
-    // Exact phrase match (normalized whitespace/punctuation), not loose tokens:
-    // "account" + "coordinator" scattered across a careers page must NOT pass.
+    // Token-level title match instead of exact phrase. Real postings on
+    // Greenhouse/Lever/Workday render the title via JavaScript, so the exact
+    // title phrase never appears in the raw HTML — those real jobs were being
+    // executed as "closed". Require 2+ distinctive title tokens on the page.
+    const STOP = new Set(['analyst','associate','intern','internship','junior','jr','sr','senior','lead','coordinator','specialist','assistant','team','role','position','the','and','for','of','to','in','at','with','a','an']);
     const normalize = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-    const phrase = normalize(title);
-    if (phrase && !normalize(text).includes(phrase)) {
-      return Response.json({ live: false, reason: 'closed', detail: 'title_not_on_page' });
+    const tokens = normalize(title).split(' ').filter(t => t.length > 2 && !STOP.has(t));
+    const pageText = normalize(text);
+    if (tokens.filter(t => pageText.includes(t)).length >= 2) {
+      return Response.json({ live: true });
     }
-
-    return Response.json({ live: true });
+    // JS-rendered ATS shell: HTTP 200 + no closed language = live. The page is
+    // reachable and not a 404/expired page; the title just isn't in raw HTML.
+    const ATS = ['greenhouse.io','lever.co','workday','ashby.at','smartrecruiters','taleo','icims','jobvite','myworkdayjobs','applytojob','recruitee','bamboohr'];
+    const isATS = ATS.some(h => url.toLowerCase().includes(h));
+    const isShell = text.length < 2000 || /id="root"|id="__next"|data-react-root|window\.__INITIAL/i.test(text);
+    if (isATS || isShell) return Response.json({ live: true, reason: 'ats_shell' });
+    // Generic single-token title (e.g. "Analyst") — can't token-match. A
+    // reachable, non-closed page is live; the chip gate already vetted the role.
+    if (tokens.length < 2) return Response.json({ live: true, reason: 'generic_title' });
+    return Response.json({ live: false, reason: 'closed', detail: 'title_not_on_page' });
   } catch (error) {
     return Response.json({ live: false, reason: 'http_fail', error: error.message });
   }
