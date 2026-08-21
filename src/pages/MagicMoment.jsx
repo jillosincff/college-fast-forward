@@ -23,6 +23,7 @@ import HeroPeople from '@/components/magic-moment/HeroPeople';
 import HeroOutreach from '@/components/magic-moment/HeroOutreach';
 import HeroResume from '@/components/magic-moment/HeroResume';
 import LockedJobsRail from '@/components/magic-moment/LockedJobsRail';
+import RoleAlumniStrip from '@/components/magic-moment/RoleAlumniStrip';
 
 // The free Magic Moment — one complete plan cycle shown on a single screen:
 // a high-fit job, a tailored resume, real alumni at the company, and a
@@ -74,6 +75,10 @@ export default function MagicMoment() {
   const [showSoftWall, setShowSoftWall] = useState(false);
   const [error, setError] = useState('');
   const [lockedJobs, setLockedJobs] = useState([]);
+  // Support/social-proof strip: school alumni in the same chip, pulled from
+  // the warm scan (not the hero company, not the locked rail). Free, never
+  // promoted as an open role.
+  const [supportPeople, setSupportPeople] = useState([]);
   // Only claim "matches your {chip}" when the hero actually passed the chip gate.
   const [heroMeta, setHeroMeta] = useState({ onChip: false, chipLabel: '', live: false });
   // CRM tracking status shown on the hero after the student copies/sends.
@@ -423,6 +428,27 @@ export default function MagicMoment() {
           known: warmPool.filter(w => railFresh(w.job)), candidates, excludeKeys: [heroKey], want: 5,
         });
         setLockedJobs(railJobs);
+        // ── Support strip: alumni in the same chip, excluding the hero's ──
+        // company and the hero's already-shown people. Reuses the warm scan,
+        // so it costs no extra lookups and never fabricates a person. Capped
+        // at 6; only renders when at least 2 distinct people exist.
+        const heroCompanyKey = (topJob.name || '').toLowerCase();
+        const heroConnNames = new Set(conns.slice(0, 3).map(c => (c.name || '').toLowerCase()));
+        const supportSeen = new Set();
+        const support = [];
+        for (const w of warmPool) {
+          for (const c of (w.conns || [])) {
+            const key = (c.name || '').toLowerCase();
+            if (!key || supportSeen.has(key)) continue;
+            if ((c.company || '').toLowerCase() === heroCompanyKey) continue;
+            if (heroConnNames.has(key)) continue;
+            supportSeen.add(key);
+            support.push(c);
+            if (support.length >= 6) break;
+          }
+          if (support.length >= 6) break;
+        }
+        setSupportPeople(support);
         const matchType = conns.length > 0 ? 'warm' : 'cold';
         const locationMatch = resultType.includes('remote') ? 'remote'
           : (resultType.includes('same_location') || resultType.includes('nearby') || resultType.includes('curated')) ? 'same_market'
@@ -647,6 +673,10 @@ export default function MagicMoment() {
           <div style={{ height: 1, background: '#f1e9ff', margin: '16px 0' }} />
           <HeroResume tailored={tailored} onDownload={downloadResume} />
         </div>
+
+        {supportPeople.length >= 2 && (
+          <RoleAlumniStrip people={supportPeople} school={user?.school} chipLabel={heroMeta.chipLabel} />
+        )}
 
         {user?.subscription_status !== 'active' && (
           <LockedJobsRail
