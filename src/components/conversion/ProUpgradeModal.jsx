@@ -13,12 +13,13 @@ import { X, Loader2, Check, Gift, Sparkles, Lock } from 'lucide-react';
 // pay (Monthly / Annual shown) or send to a parent. Fires the conversion
 // tracking events at each step.
 
+// Only what the product actually delivers — no "direct contacts", no
+// unsourced interview stats, no overnight-autonomy promise.
 const UNLOCKS = [
-  'Unlimited job cycles with alumni matches',
-  'Ready-to-send warm outreach for every role',
-  'Unlimited resume tailoring',
-  'Mock interviews + LinkedIn review',
-  'Full tracking and follow-up reminders',
+  'More roles with people from your school',
+  'Outreach drafts ready to send',
+  'Application tracking and follow-ups',
+  'Resume tailored to specific roles',
 ];
 
 export default function ProUpgradeModal({ user, onClose, source = 'magic_moment', initialView = 'main' }) {
@@ -27,7 +28,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [selectedPlan, setSelectedPlan] = useState('annual'); // 'annual' | 'monthly'
+  const [selectedPlan, setSelectedPlan] = useState('monthly'); // 'annual' | 'monthly'
 
   useEffect(() => { trackUpgradeModalViewed({ source }); }, []);
 
@@ -84,10 +85,10 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '5px 12px', marginBottom: 12 }}>
                 <Lock size={12} color={INDIGO} />
-                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your free cycle is done</span>
+                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>You used your free cycle</span>
               </div>
-              <h1 style={{ fontFamily: FONT, fontSize: 22, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.2 }}>Unlock CLIFF Pro</h1>
-              <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.5 }}>Run this exact plan for every job you want — not just one.</p>
+              <h1 style={{ fontFamily: FONT, fontSize: 22, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.2 }}>Unlock more paths like the one you just saw</h1>
+              <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.5 }}>More roles in your field and more people from your school — with drafts and tracking.</p>
             </div>
 
             <div style={{ background: '#faf7ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
@@ -125,14 +126,14 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '8px 12px', borderRadius: 8, marginBottom: 12, fontSize: 12.5, fontFamily: FONT }}>{error}</div>}
 
             <button data-testid="cta-upgrade" onClick={startPro} disabled={busy} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '15px', cursor: busy ? 'default' : 'pointer', boxShadow: '0 6px 18px rgba(109,40,217,0.32)', opacity: busy ? 0.7 : 1 }}>
-              {busy ? <><Loader2 size={16} className="animate-spin" /> Starting checkout…</> : <>Start CLIFF Pro</>}
+              {busy ? <><Loader2 size={16} className="animate-spin" /> Starting checkout…</> : <>Unlock CLIFF Pro · {selectedPlan === 'annual' ? '$149/yr' : '$19.96/mo'}</>}
             </button>
 
             <button data-testid="cta-parent" onClick={openParent} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '14px', cursor: 'pointer', marginTop: 10 }}>
               <Gift size={15} color={INDIGO} /> Ask a parent to unlock
             </button>
 
-            <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.5 }}>Cancel anytime. Students who use CLIFF Pro apply to 3× more roles.</p>
+            <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.5 }}>Cancel anytime.</p>
           </>
         )}
 
