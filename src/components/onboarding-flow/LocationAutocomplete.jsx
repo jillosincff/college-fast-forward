@@ -24,12 +24,12 @@ const US_METROS = [
   'Madison, WI', 'Lubbock, TX', 'Chandler, AZ', 'Scottsdale, AZ', 'Reno, NV',
   'Glendale, AZ', 'Norfolk, VA', 'Winston-Salem, NC', 'North Las Vegas, NV', 'Gilbert, AZ',
   'Chesapeake, VA', 'Garland, TX', 'Irving, TX', 'Chattanooga, TN', 'Fremont, CA',
-  'Baton Rouge, LA', 'Durham, NC', 'Richmond, VA', 'Boise, ID', 'San Antonio, TX',
+  'Baton Rouge, LA', 'Richmond, VA', 'Boise, ID',
   'Tallahassee, FL', 'Gainesville, FL', 'Daytona Beach, FL', 'Birmingham, AL',
   'Salt Lake City, UT', 'Hartford, CT', 'Providence, RI', 'Des Moines, IA',
   'Grand Rapids, MI', 'Scranton, PA', 'Albany, NY', 'Syracuse, NY', 'Rochester, NY',
   'Trenton, NJ', 'Charleston, SC', 'Columbia, SC', 'Knoxville, TN', 'Little Rock, AR',
-  'Jackson, MS', 'Shreveport, LA', 'Mobile, AL', 'Huntsville, AL', 'Knoxville, TN',
+  'Jackson, MS', 'Shreveport, LA', 'Mobile, AL', 'Huntsville, AL',
 ];
 
 const inputStyle = {

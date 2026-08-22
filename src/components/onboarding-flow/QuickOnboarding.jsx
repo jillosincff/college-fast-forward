@@ -5,17 +5,11 @@ import { deriveSchoolCode } from '@/lib/schoolNames';
 import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
 import {
   TOP_SCHOOLS, FONT, BG, CARD, TEXT, TEXT2, TEXT3,
-  INDIGO, INDIGO_DIM, INDIGO_BORDER, VIOLET, GRAD_INDIGO, SHADOW, SHADOW_MD, R,
+  INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO, SHADOW, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
 import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Loader2 } from 'lucide-react';
 import LocationAutocomplete from './LocationAutocomplete';
 import { trackOnboardingCompleted } from '@/lib/tracking';
-
-// Lean first-session onboarding for the Free → Paid conversion rebuild.
-// Collects ONLY what the Magic Moment needs: school, internship vs full-time,
-// target role/industry, preferred location (with autocomplete), and an optional resume.
-// No emotional/reflective questions — those move to AFTER the Magic Moment.
-// Goal: reach the Magic Moment in <90s.
 
 const TARGET_CHIPS = ['Marketing', 'Finance', 'Software', 'Sales', 'Operations', "Other / I'm open"];
 const LOC_CHIPS = ['Remote', 'Open to relocate'];
@@ -118,7 +112,6 @@ export default function QuickOnboarding({ onDone }) {
 
   const canStep2 = chips.length > 0 || roleText.trim().length > 0;
 
-  console.log('🔵 [QuickOnboarding v2] Rendering with location autocomplete + seeking options');
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #faf5ff 0%, #fff 40%)', padding: '24px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: 480 }}>
