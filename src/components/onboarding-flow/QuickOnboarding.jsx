@@ -12,9 +12,10 @@ import LocationAutocomplete from './LocationAutocomplete';
 import { trackOnboardingCompleted } from '@/lib/tracking';
 
 // Lean first-session onboarding for the Free → Paid conversion rebuild.
-// Collects ONLY what the Magic Moment needs: school, target role/industry,
-// preferred location, and an optional resume. No emotional/reflective questions
-// — those move to AFTER the Magic Moment. Goal: reach the Magic Moment in <90s.
+// Collects ONLY what the Magic Moment needs: school, internship vs full-time,
+// target role/industry, preferred location (with autocomplete), and an optional resume.
+// No emotional/reflective questions — those move to AFTER the Magic Moment.
+// Goal: reach the Magic Moment in <90s.
 
 const TARGET_CHIPS = ['Marketing', 'Finance', 'Software', 'Sales', 'Operations', "Other / I'm open"];
 const LOC_CHIPS = ['Remote', 'Open to relocate'];
