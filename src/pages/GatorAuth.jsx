@@ -389,7 +389,12 @@ export default function GatorAuth() {
             localStorage.removeItem('cff_funnel_completed');
             try { sessionStorage.removeItem('cff_funnel_completed'); sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); } catch (e) {}
             try { await refreshUser(); } catch (e) {}
+            // Full reload so AuthContext re-fetches the now-persisted user
+            // (with career_goals) before MagicMoment mounts. Without this,
+            // MagicMoment reads a stale user (pre-updateMe) and its ranRef
+            // guard prevents the effect from re-running when the user updates.
             window.location.hash = '#/MagicMoment';
+            window.location.reload();
             return;
           } catch (e) { /* fall through to normal routing */ }
         } else {
