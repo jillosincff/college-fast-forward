@@ -175,7 +175,7 @@ export default function QuickOnboarding({ onDone }) {
               <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Step 2 of 3</span>
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 24, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>What kind of role are you after?</h1>
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px' }}>Pick a field — add a specific role if you have one in mind.</p>
+            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px' }}>Pick your stage, a field, and a location — add a specific role if you have one in mind.</p>
 
             <label style={labelStyle}>I'm looking for</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
