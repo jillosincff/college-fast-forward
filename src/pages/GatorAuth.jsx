@@ -261,6 +261,66 @@ export default function GatorAuth() {
     // returns persona/onboarding_completed from the auth layer — we must ignore those
     // stale flags and treat them as a brand-new user.
     const checkAndRoute = async () => {
+      // ── FIRST: verify the User entity record actually exists in the database. ──
+      // If a user was deleted (e.g. admin testing) but keeps their auth account,
+      // auth.me() still returns stale persona/onboarding_completed flags — AND
+      // localStorage may still have cff_funnel_completed from a prior test run.
+      // We must clear ALL stale funnel state and route to QuickOnboarding fresh.
+      let entityExists = true;
+      try {
+        const records = await base44.entities.User.filter({ email: user.email }, undefined, 1);
+        entityExists = Array.isArray(records) && records.length > 0;
+      } catch (e) {
+        entityExists = true; // assume exists to avoid breaking normal returning users
+      }
+
+      if (!entityExists) {
+        // Wipe stale auth-level flags + ALL funnel localStorage so the user
+        // starts QuickOnboarding completely fresh (no stale career_goals, etc.)
+        try { await base44.auth.updateMe({ persona: '', onboarding_completed: false }); } catch (e) {}
+        try {
+          localStorage.removeItem('cff_funnel_completed');
+          sessionStorage.removeItem('cff_funnel_completed');
+          localStorage.removeItem('cff_onboarding_screen');
+          localStorage.removeItem('cff_onboarding_type');
+          sessionStorage.removeItem('cff_onboarding_type');
+          localStorage.removeItem('cff_college');
+          localStorage.removeItem('cff_blockers');
+          localStorage.removeItem('cff_industries');
+          localStorage.removeItem('cff_target_roles');
+          localStorage.removeItem('cff_location');
+          localStorage.removeItem('cff_location_pref');
+          localStorage.removeItem('cff_location_city');
+          localStorage.removeItem('cff_work_location');
+          localStorage.removeItem('cff_seeking');
+          localStorage.removeItem('cff_resume_url');
+          localStorage.removeItem('cff_resume_status');
+          localStorage.removeItem('cff_resume_parsed');
+          localStorage.removeItem('cff_resume_filename');
+          localStorage.removeItem('cff_linkedin_url');
+          localStorage.removeItem('cff_goal_text');
+          localStorage.removeItem('pending_invite_role');
+        } catch (e) {}
+        try {
+          const fn = user.full_name?.split(' ')[0] || '';
+          if (fn) sessionStorage.setItem('cff_auth_first_name', fn);
+        } catch (e) {}
+        setResumeScreen(null);
+        setStep('onboarding');
+        return;
+      }
+
+      // Clear stale cff_funnel_completed for users with no persona.
+      // The old OnboardingFlow (Flow A) that set this flag is deprecated —
+      // QuickOnboarding replaced it. Any lingering flag is from a prior session
+      // (e.g. admin deleted + re-signed up) and must NOT bypass QuickOnboarding.
+      if (!user.persona?.trim()) {
+        try {
+          localStorage.removeItem('cff_funnel_completed');
+          sessionStorage.removeItem('cff_funnel_completed');
+        } catch (e) {}
+      }
+
       // Flow A completed BEFORE sign-in: the funnel saved every answer locally
       // and set cff_funnel_completed right before the OAuth round-trip.
       // Finalize the profile from those answers here — NEVER make the student
@@ -340,32 +400,6 @@ export default function GatorAuth() {
           // Already onboarded — just clear the stale flag
           try { localStorage.removeItem('cff_funnel_completed'); sessionStorage.removeItem('cff_funnel_completed'); } catch (e) {}
         }
-      }
-
-      // Check if this user's entity record actually exists.
-      // If they deleted their profile but kept the auth account, auth.me() still
-      // returns stale persona/onboarding_completed — we must ignore those.
-      let entityExists = true; // assume exists unless we confirm otherwise
-      try {
-        const records = await base44.entities.User.filter({ email: user.email }, undefined, 1);
-        entityExists = Array.isArray(records) && records.length > 0;
-      } catch (e) {
-        // Can't confirm — assume exists to avoid breaking normal returning users
-        entityExists = true;
-      }
-
-      if (!entityExists) {
-        // Wipe stale auth-level flags so next routing logic starts clean
-        try { await base44.auth.updateMe({ persona: '', onboarding_completed: false }); } catch (e) {}
-        localStorage.removeItem('cff_onboarding_screen');
-        // Store first name so the onboarding funnel can greet the user by name even if they skip the resume step
-        try {
-          const fn = user.full_name?.split(' ')[0] || '';
-          if (fn) sessionStorage.setItem('cff_auth_first_name', fn);
-        } catch (e) {}
-        setResumeScreen(null);
-        setStep('onboarding');
-        return;
       }
 
       const hasPersona = !!user.persona?.trim();
