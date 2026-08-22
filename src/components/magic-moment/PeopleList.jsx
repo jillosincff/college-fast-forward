@@ -5,32 +5,44 @@ import { base44 } from '@/api/base44Client';
 import { buildOutreachDraft } from '@/lib/outreachDraft';
 import { trackOutreachCopied } from '@/lib/tracking';
 
-export default function PeopleList({ people, user, liveJobCompanies }) {
+// People-list drafts are ADVICE notes — the student is exploring the field,
+// not claiming to apply for the alum's own job title. The draft uses the
+// student's target field (chipText) as the role, with live=false so the
+// message says "interested in roles like [field]" rather than "applying for
+// [alum's title]".
+export default function PeopleList({ people, user, liveJobCompanies, chipText, excludeName }) {
   if (!people?.length) return null;
   const liveCompanies = Array.isArray(liveJobCompanies) ? liveJobCompanies : [];
+  const excludeKey = (excludeName || '').toLowerCase().trim();
+  const filtered = excludeKey
+    ? people.filter(p => (p.name || '').toLowerCase().trim() !== excludeKey)
+    : people;
+  if (!filtered.length) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {people.map((person, i) => {
+      {filtered.map((person, i) => {
         const pCompany = (person.company || '').toLowerCase();
         const hasLiveJob = liveCompanies.some(c => c === pCompany || c.includes(pCompany) || pCompany.includes(c));
         return (
-          <PersonRow key={i} person={person} user={user} hasLiveJob={hasLiveJob} />
+          <PersonRow key={i} person={person} user={user} hasLiveJob={hasLiveJob} chipText={chipText} />
         );
       })}
     </div>
   );
 }
 
-function PersonRow({ person, user, hasLiveJob }) {
+function PersonRow({ person, user, hasLiveJob, chipText }) {
   const [copied, setCopied] = useState(false);
+  // Advice draft: uses the student's target field, never the alum's title.
+  // live=false → "interested in [company] and roles like [field]" (not "applying for [alum title]").
   const draft = buildOutreachDraft({
     school: user?.school || '',
-    jobTitle: person.role_title || '',
+    jobTitle: chipText || person.company || '',
     company: person.company || '',
     insiderName: person.name,
     studentName: user?.full_name || '',
     applied: false,
-    live: hasLiveJob,
+    live: false,
   });
 
   const handleCopyAndLinkedIn = async () => {
@@ -65,7 +77,7 @@ function PersonRow({ person, user, hasLiveJob }) {
       await base44.entities.NetworkingPipeline.create({
         user_email: user.email,
         company: person.company || '',
-        job_title: person.role_title || '',
+        job_title: chipText || '',
         alumni_name: person.name || '',
         alumni_role: person.role_title || '',
         alumni_linkedin: person.linkedin_url || '',

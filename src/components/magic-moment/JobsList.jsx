@@ -10,11 +10,16 @@ const TIER_LABELS = {
   other: '',
 };
 
-export default function JobsList({ jobs }) {
+export default function JobsList({ jobs, excludeJobKey }) {
   if (!jobs?.length) return null;
+  const exclude = (excludeJobKey || '').toLowerCase().trim();
+  const filtered = exclude
+    ? jobs.filter(j => `${(j.name || '')}|${(j.job_title || '')}`.toLowerCase().trim() !== exclude)
+    : jobs;
+  if (!filtered.length) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {jobs.map((job, i) => (
+      {filtered.map((job, i) => (
         <JobRow key={job.job_id || job.id || i} job={job} />
       ))}
     </div>

@@ -436,7 +436,7 @@ export default function MagicMoment() {
             {bestPath ? 'CLIFF found your best path.' : 'Here are your matches.'}
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>
-            {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'} and people from your school on the same path.
+            {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'}{bestPath ? ' and people from your school on the same lane.' : ' and connections from your school.'}
           </p>
         </div>
 
@@ -458,28 +458,44 @@ export default function MagicMoment() {
           </div>
         )}
 
-        {/* Best path card (optional) */}
+        {/* 1. Best path card (only when a real live job + a real school person at that company both exist) */}
         {bestPath && (
           <BestPathCard job={bestPath.job} person={bestPath.person} user={user} />
         )}
 
-        {/* A. Jobs for you */}
-        {jobsList.length > 0 && (
-          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Jobs for you" />
-            <JobsList jobs={jobsList} />
-          </div>
-        )}
+        {/* 2. Jobs for you — excludes the Best Path job so it's not duplicated */}
+        {(() => {
+          const excludeKey = bestPath
+            ? `${(bestPath.job.name || '')}|${(bestPath.job.job_title || '')}`.toLowerCase()
+            : '';
+          const remaining = excludeKey
+            ? jobsList.filter(j => `${(j.name || '')}|${(j.job_title || '')}`.toLowerCase() !== excludeKey)
+            : jobsList;
+          if (!remaining.length) return null;
+          return (
+            <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
+              <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Jobs for you" />
+              <JobsList jobs={remaining} />
+            </div>
+          );
+        })()}
 
-        {/* B. People from your school in this lane */}
-        {peopleList.length > 0 && (
-          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-            <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label="People from your school in this lane" />
-            <PeopleList people={peopleList} user={user} liveJobCompanies={liveJobCompanies} />
-          </div>
-        )}
+        {/* 3. People from your school in this lane — excludes the Best Path person */}
+        {(() => {
+          const excludeName = bestPath?.person?.name || '';
+          const remaining = excludeName
+            ? peopleList.filter(p => (p.name || '').toLowerCase().trim() !== excludeName.toLowerCase().trim())
+            : peopleList;
+          if (!remaining.length) return null;
+          return (
+            <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
+              <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label={`People from your school in ${heroMeta.chipLabel || 'this lane'}`} />
+              <PeopleList people={remaining} user={user} liveJobCompanies={liveJobCompanies} chipText={heroMeta.chipText} />
+            </div>
+          );
+        })()}
 
-        {/* Resume card — only show when there are jobs or people to contextually attach it to */}
+        {/* 4. Resume upload */}
         {!bothEmpty && <HeroResume tailored={tailored} onDownload={downloadResume} />}
       </div>
       {showPro && <ProUpgradeModal user={user} onClose={() => setShowPro(false)} source="magic_moment" />}

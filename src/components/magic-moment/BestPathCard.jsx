@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Zap, Copy, Check, Sparkles } from 'lucide-react';
-import { FONT, TEXT, TEXT2, INDIGO, INDIGO_BORDER, GRAD_INDIGO, R } from '@/components/onboarding-flow/onboardingShared';
+import { Zap, Copy, Check, Sparkles, MapPin, GraduationCap, ExternalLink, Building2 } from 'lucide-react';
+import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO, R } from '@/components/onboarding-flow/onboardingShared';
 import { base44 } from '@/api/base44Client';
 import { buildOutreachDraft } from '@/lib/outreachDraft';
 import { trackOutreachCopied } from '@/lib/tracking';
@@ -10,6 +10,8 @@ export default function BestPathCard({ job, person, user }) {
   const [applied, setApplied] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Best Path draft uses the OPEN ROLE's title + company — never the alum's title.
+  // The student is reaching out about the job, not about the insider's position.
   const draft = buildOutreachDraft({
     school: user?.school || '',
     jobTitle: job.job_title || '',
@@ -21,6 +23,7 @@ export default function BestPathCard({ job, person, user }) {
   });
 
   const applyUrl = applyUrlOf(job);
+  const sourceLabel = person.source === 'opt_in' ? 'In your network' : 'Found publicly';
 
   const handleApply = () => {
     if (applyUrl) { try { window.open(applyUrl, '_blank', 'noopener'); } catch (e) {} }
@@ -82,7 +85,8 @@ export default function BestPathCard({ job, person, user }) {
       border: `2px solid ${INDIGO}`, borderRadius: R, padding: '20px 18px',
       marginBottom: 16, boxShadow: '0 4px 14px rgba(109,40,217,0.15)',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+      {/* Label */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
         <Sparkles size={14} color={INDIGO} />
         <span style={{
           fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO,
@@ -91,36 +95,76 @@ export default function BestPathCard({ job, person, user }) {
           Best path
         </span>
       </div>
+
+      {/* Job block */}
       <h2 style={{ fontFamily: FONT, fontSize: 17, fontWeight: 800, color: TEXT, margin: '0 0 4px', lineHeight: 1.3 }}>
         {job.job_title} at {job.name}
       </h2>
-      <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO, margin: '0 0 14px' }}>
-        {person.name} works there
-      </p>
-      <button onClick={handleApply} style={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: GRAD_INDIGO,
-        border: 'none', borderRadius: 999, padding: '12px 18px', cursor: 'pointer',
-        minHeight: 'auto', width: '100%', marginBottom: 10,
+      {job.location && (
+        <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <MapPin size={12} /> {job.location}
+        </p>
+      )}
+
+      {/* Apply button — only when the posting is live */}
+      {job.live && applyUrl && (
+        <button onClick={handleApply} style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: GRAD_INDIGO,
+          border: 'none', borderRadius: 999, padding: '12px 18px', cursor: 'pointer',
+          minHeight: 'auto', width: '100%', marginBottom: 14,
+        }}>
+          <Zap size={14} /> {applied ? 'Applied — reach out below' : 'Apply for this role'}
+        </button>
+      )}
+
+      {/* Divider */}
+      <div style={{ height: 1, background: INDIGO_BORDER, margin: '0 0 14px', opacity: 0.6 }} />
+
+      {/* Person block — fully visible inside the card */}
+      <div style={{
+        background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 10,
+        padding: '14px 16px', marginBottom: 12,
       }}>
-        <Zap size={14} /> {applied ? 'Applied — copy your message' : 'Apply for this role'}
-      </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+          <Building2 size={13} color={INDIGO} />
+          <span style={{
+            fontFamily: FONT, fontSize: 10, fontWeight: 800, color: INDIGO_DIM,
+            textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>
+            Insider at {job.name}
+          </span>
+        </div>
+        <h3 style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: TEXT, margin: '0 0 2px', lineHeight: 1.3 }}>
+          {person.name}
+        </h3>
+        <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT2, margin: '0 0 4px', lineHeight: 1.3 }}>
+          {person.role_title || '—'}
+        </p>
+        <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: 0, lineHeight: 1.4, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <GraduationCap size={11} /> {person.school || user?.school || 'Your school'} · {sourceLabel}
+        </p>
+      </div>
+
+      {/* Outreach draft — addressed to the person, referencing the open role */}
       <div style={{
         background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 8,
-        padding: '12px 14px', marginBottom: 10, fontFamily: FONT, fontSize: 12,
+        padding: '12px 14px', marginBottom: 12, fontFamily: FONT, fontSize: 12,
         color: TEXT2, lineHeight: 1.5, whiteSpace: 'pre-wrap',
       }}>
         {draft?.message}
       </div>
+
+      {/* CTA: Copy message & open LinkedIn */}
       <button onClick={handleCopyAndLinkedIn} style={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        fontFamily: FONT, fontSize: 13, fontWeight: 800, color: INDIGO, background: '#fff',
-        border: `1.5px solid ${INDIGO}`, borderRadius: 999, padding: '12px 18px',
+        fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: GRAD_INDIGO,
+        border: 'none', borderRadius: 999, padding: '12px 18px',
         cursor: 'pointer', minHeight: 'auto', width: '100%',
       }}>
         {copied
           ? <><Check size={14} /> Copied — opening LinkedIn</>
-          : <><Copy size={14} /> Copy message for {person.name?.split(' ')[0] || 'them'}</>}
+          : <><Copy size={14} /> Copy message & open LinkedIn <ExternalLink size={12} /></>}
       </button>
     </div>
   );
