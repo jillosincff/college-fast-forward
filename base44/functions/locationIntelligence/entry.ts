@@ -26,6 +26,26 @@ const STATE_NAMES: Record<string, string> = {
 const NAME_TO_ABBR: Record<string, string> = {};
 for (const [abbr, name] of Object.entries(STATE_NAMES)) NAME_TO_ABBR[name] = abbr.toLowerCase();
 
+// Foreign base / language-requirement signals. When a posting's description
+// mentions one of these, the (often mislabeled) location field can't be trusted
+// and the role is a chip-fit failure for a US-scoped student.
+const FOREIGN_LOCATION_SIGNALS = [
+  'bangkok', 'thailand', 'singapore', 'tokyo', 'japan', 'seoul', 'south korea', 'kuala lumpur', 'malaysia',
+  'jakarta', 'indonesia', 'manila', 'philippines', 'hong kong', 'taipei', 'taiwan', 'shanghai', 'beijing', 'china',
+  'mumbai', 'delhi', 'bangalore', 'india', 'tel aviv', 'israel', 'dubai', 'uae', 'riyadh', 'saudi arabia',
+  'london', 'united kingdom', 'berlin', 'germany', 'paris', 'france', 'amsterdam', 'netherlands',
+  'dublin', 'ireland', 'madrid', 'spain', 'milan', 'italy', 'stockholm', 'sweden', 'zurich', 'switzerland',
+  'sydney', 'melbourne', 'australia', 'auckland', 'new zealand', 'toronto', 'vancouver', 'canada',
+  'mexico city', 'mexico', 'são paulo', 'brazil', 'buenos aires', 'argentina',
+];
+const LANGUAGE_REQUIREMENT_SIGNALS = [
+  'fluent in thai', 'thai speaker', 'thai language', 'native thai',
+  'fluent in mandarin', 'mandarin speaker', 'fluent in korean', 'korean speaker',
+  'fluent in japanese', 'japanese speaker', 'fluent in hindi', 'hindi speaker',
+  'fluent in arabic', 'arabic speaker', 'fluent in hebrew', 'hebrew speaker',
+  'fluent in portuguese', 'fluent in german', 'fluent in french',
+];
+
 // Short tokens (state abbreviations) must match as whole words — "fl" must not
 // match "buffalo". Longer tokens use substring matching.
 function tokenHit(loc: string, token: string): boolean {
@@ -114,6 +134,39 @@ function evaluateJob(job: any, prefs: any) {
     display_explanation: '',
   };
   const labels = prefs.labels.join(' / ');
+
+  // ── Description integrity: the location field is sometimes mislabeled (e.g.
+  //    "Miami" for a role whose posting is actually in Bangkok and requires
+  //    Thai). If the description reveals a foreign base or a non-English
+  //    language requirement the student hasn't asked for, that's a hard chip-fit
+  //    failure — overrides whatever the (unreliable) location field claims.
+  //    Runs BEFORE the location-field logic so a fake "strong" match can't sneak through.
+  if (!isRemote) {
+    const desc = (job.description || '').toLowerCase();
+    if (desc) {
+      // Does the student actually want this country? If it's not in their tokens,
+      // treat it as a mismatch.
+      const wantsForeign = (tok: string) => prefs.tokens.some((t: string) => t && (t.includes(tok) || tok.includes(t)));
+      const foreign = FOREIGN_LOCATION_SIGNALS.find((f: string) => desc.includes(f) && !wantsForeign(f));
+      if (foreign) {
+        out.location_match = 'mismatch';
+        out.hard_constraint_violation = true;
+        out.ranking_adjustment = -6;
+        out.location_reason = `Posting describes a role in ${foreign} / requiring local presence — not a fit for your locations.`;
+        out.display_explanation = `I'd skip this — the posting is actually based in/around ${foreign}, not ${job.location || 'where it says'}.`;
+        return out;
+      }
+      const langReq = LANGUAGE_REQUIREMENT_SIGNALS.find((l: string) => desc.includes(l) && !wantsForeign(l.replace(/[^a-z]/g, '')));
+      if (langReq) {
+        out.location_match = 'mismatch';
+        out.hard_constraint_violation = true;
+        out.ranking_adjustment = -6;
+        out.location_reason = `Posting requires ${langReq} fluency — not a fit.`;
+        out.display_explanation = `I'd skip this — it requires ${langReq} fluency.`;
+        return out;
+      }
+    }
+  }
 
   // Explicit "avoid" always wins (unless the role is remote — location moot)
   const ex = loc ? prefs.excluded.find((t: string) => tokenHit(loc, t)) : null;

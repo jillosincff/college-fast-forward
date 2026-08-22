@@ -908,7 +908,7 @@ Deno.serve(async (req) => {
     // ── SHARED LOCATION INTELLIGENCE: strict constraints filter here, preferences
     // re-rank here. One service, same rules as every other CLIFF surface. ──
     try {
-      const jobsForLoc = relevant.map((s, i) => ({ key: String(i), location: s.job.location || '', title: s.job.job_title || '' }));
+      const jobsForLoc = relevant.map((s, i) => ({ key: String(i), location: s.job.location || '', title: s.job.job_title || '', description: (s.job.hiring_description || s.job.description || '').slice(0, 1500) }));
       if (jobsForLoc.length) {
         const locRes = await base44.functions.invoke('locationIntelligence', { jobs: jobsForLoc, log_context: 'daily_drop' });
         const byKey = {};

@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       let oppEvals: any[] = [];
       try {
         const locRes = await base44.functions.invoke('locationIntelligence', {
-          jobs: opps.map((x: any, i: number) => ({ key: String(i), location: x.location || '', title: x.role || '' })),
+          jobs: opps.map((x: any, i: number) => ({ key: String(i), location: x.location || '', title: x.role || '', description: (x.description || x.job_description || '').slice(0, 1500) })),
           log_context: 'decision_engine',
         });
         oppEvals = (locRes as any)?.data?.evaluations || (locRes as any)?.evaluations || [];
