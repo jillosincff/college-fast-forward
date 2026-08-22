@@ -6,18 +6,30 @@ import OutcomeTimeline from '@/components/workspace/OutcomeTimeline';
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 const card = { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', marginBottom: 16 };
 
-
+// Keep the fit read short — one or two sentences, never an essay.
+const shortSummary = (t = '') => {
+  const parts = String(t).match(/[^.!?]+[.!?]?/g) || [];
+  return parts.slice(0, 2).join('').trim();
+};
 
 // Strip any backend reason that contradicts the verdict (e.g. "networking won't
-// move the needle") so the Why-this? copy can never argue with the badge.
+// move the needle") so the Why-this? copy can never argue with the badge or the
+// Apply CTA. For non-skip roles we also drop "research before deciding" language
+// that would soften the user into not applying.
 const CONTRADICTS = /networking won't|move the needle|don't.*network|not worth networking/i;
-const cleanReasons = (rs = []) => rs.filter(r => !CONTRADICTS.test(String(r)));
+const SOFTENS_APPLY = /before deciding|hold off|consider passing|maybe don't|reconsider|not worth|research.*before.*apply|wait.*before.*apply|reconsider.*whether/i;
+const cleanReasons = (rs = [], isSkip) =>
+  rs.filter(r => {
+    const s = String(r);
+    if (CONTRADICTS.test(s)) return false;
+    if (!isSkip && SOFTENS_APPLY.test(s)) return false;
+    return true;
+  });
 
-// CLIFF Trust Engine panel: "Why this?" reasoning, "Why not the others?",
-// confidence label (never a number), what changed, and the outcome timeline.
-export default function TrustPanel({ job, fit, fitLoading }) {
+// Single combined "Fit & why" block: intro, what you bring, gaps (one place),
+// and a softened "Why CLIFF surfaced this." Keeps "Why not the others?" collapsed.
+export default function TrustPanel({ job, fit, fitLoading, error }) {
   const [ctx, setCtx] = useState(null);
-  const [open, setOpen] = useState(false);
   const [showWhyNot, setShowWhyNot] = useState(false);
 
   const company = job.company || '';
@@ -31,47 +43,64 @@ export default function TrustPanel({ job, fit, fitLoading }) {
     return () => { cancelled = true; };
   }, [company]);
 
-  if (!ctx || ctx.error) return null;
   const verdict = computeVerdict(fit);
   const isSkip = verdict.key === 'skip';
-  const reasons = cleanReasons(ctx.reasons);
+  const reasons = cleanReasons(ctx?.reasons || [], isSkip);
   const gaps = fit?.gaps || [];
 
   return (
     <>
       <div style={card}>
-        <button onClick={() => setOpen(v => !v)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', minWidth: 'auto' }}>
-          💡 Why this? {open ? '▾' : '▸'}
-        </button>
+        <h3 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 12px' }}>Job Fit</h3>
 
-        {open && (
-          <div style={{ marginTop: 12 }}>
-            <p style={{ fontFamily: dm, fontSize: 12.5, fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
-              {isSkip ? 'Why you may want to pass:' : 'Why CLIFF surfaced this:'}
-            </p>
-            {(isSkip && reasons.length === 0 ? ['The fit gaps outweigh the upside for your profile right now.'] : reasons).map((r, i) => (
-              <p key={i} style={{ fontFamily: dm, fontSize: 12.5, color: '#374151', margin: '0 0 6px', lineHeight: 1.55 }}>• {r}</p>
-            ))}
+        {fitLoading ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#7c3aed', fontFamily: dm, fontSize: 13, fontWeight: 600 }}>
+            <span style={{ width: 14, height: 14, border: '2px solid #ddd6fe', borderTop: '2px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+            CLIFF is analyzing how this job fits you…
+            <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+          </div>
+        ) : error || !fit ? (
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0 }}>
+            CLIFF couldn't analyze this job right now — you can still prepare your application below.
+          </p>
+        ) : (
+          <>
+            <p style={{ fontFamily: dm, fontSize: 14, color: '#1f2937', lineHeight: 1.65, margin: '0 0 14px' }}>{shortSummary(fit.why_match)}</p>
 
-            {!isSkip && gaps.length > 0 && (
-              <div style={{ marginTop: 8 }}>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#b45309', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gaps to watch</p>
+            {fit.matching_qualifications?.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#15803d', margin: '0 0 6px' }}>✓ WHAT YOU ALREADY BRING</p>
+                {fit.matching_qualifications.slice(0, 3).map((q, i) => (
+                  <p key={i} style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: '0 0 4px', lineHeight: 1.5 }}>• {q}</p>
+                ))}
+              </div>
+            )}
+
+            {gaps.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#b45309', margin: '0 0 6px' }}>⚠ GAPS TO WATCH</p>
                 {gaps.slice(0, 3).map((g, i) => (
-                  <p key={i} style={{ fontFamily: dm, fontSize: 12.5, color: '#4b5563', margin: '0 0 4px', lineHeight: 1.5 }}>• {g}</p>
+                  <p key={i} style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: '0 0 4px', lineHeight: 1.5 }}>• {g}</p>
                 ))}
               </div>
             )}
 
-            {(ctx.changes || []).length > 0 && (
-              <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 10, padding: '10px 14px', marginTop: 10 }}>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6d28d9', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>What changed?</p>
-                {ctx.changes.map((c, i) => (
-                  <p key={i} style={{ fontFamily: dm, fontSize: 12, color: '#4c1d95', margin: '0 0 4px', lineHeight: 1.5 }}>↻ {c.text}</p>
+            {reasons.length > 0 && (
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #f1f5f9' }}>
+                <p style={{ fontFamily: dm, fontSize: 12.5, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
+                  {isSkip ? 'Why you may want to pass:' : 'Why CLIFF surfaced this:'}
+                </p>
+                {reasons.map((r, i) => (
+                  <p key={i} style={{ fontFamily: dm, fontSize: 12.5, color: '#374151', margin: '0 0 4px', lineHeight: 1.55 }}>• {r}</p>
                 ))}
               </div>
             )}
 
-            {(ctx.why_not || []).length > 0 && (
+            {fit.deadline && (
+              <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#dc2626', margin: '12px 0 0' }}>⏰ Application deadline: {fit.deadline}</p>
+            )}
+
+            {(ctx?.why_not || []).length > 0 && (
               <div style={{ marginTop: 10 }}>
                 <button onClick={() => setShowWhyNot(v => !v)} style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', minWidth: 'auto' }}>
                   Why not the others? {showWhyNot ? '▾' : '▸'}
@@ -88,11 +117,11 @@ export default function TrustPanel({ job, fit, fitLoading }) {
                 )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
 
-      <OutcomeTimeline timeline={ctx.timeline || []} />
+      <OutcomeTimeline timeline={ctx?.timeline || []} />
     </>
   );
 }

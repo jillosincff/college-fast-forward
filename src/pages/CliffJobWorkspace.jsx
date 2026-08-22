@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 import { analyzeJobFit } from '@/functions/analyzeJobFit';
 import { syncJobPursuit } from '@/functions/syncJobPursuit';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
-import JobFitCard from '@/components/workspace/JobFitCard';
 import { computeVerdict } from '@/components/workspace/workspaceNextStep';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
@@ -168,10 +167,8 @@ export default function CliffJobWorkspace() {
         {/* People at this company — networking is always part of the plan */}
         {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
 
-        <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
-
-        {/* Why this? + progress checklist (collapsed, no duplicate verdict label) */}
-        {user && <TrustPanel job={job} fit={fit} fitLoading={fitLoading} />}
+        {/* Single Job Fit + Why-this block — gaps appear once, no duplicate verdict */}
+        {user && <TrustPanel job={job} fit={fit} fitLoading={fitLoading} error={fitError} />}
 
         {user && <WorkspacePrepActions job={job} user={user} />}
 
