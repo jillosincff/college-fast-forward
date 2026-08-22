@@ -8,6 +8,7 @@ import {
   INDIGO, INDIGO_DIM, INDIGO_BORDER, VIOLET, GRAD_INDIGO, SHADOW, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
 import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Loader2 } from 'lucide-react';
+import LocationAutocomplete from './LocationAutocomplete';
 import { trackOnboardingCompleted } from '@/lib/tracking';
 
 // Lean first-session onboarding for the Free → Paid conversion rebuild.
@@ -184,8 +185,7 @@ export default function QuickOnboarding({ onDone }) {
               <MapPin size={13} color={INDIGO} />
               <label style={{ ...labelStyle, marginBottom: 0 }}>Preferred location</label>
             </div>
-            <input type="text" value={city} placeholder="City, State (e.g. Austin, TX)"
-              onChange={(e) => setCity(e.target.value)} style={{ ...inputStyle, marginBottom: 10 }} />
+            <LocationAutocomplete value={city} onChange={setCity} />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {LOC_CHIPS.map((c) => (
                 <button key={c} onClick={() => toggle(locChips, setLocChips, c)} style={chipBtn(locChips.includes(c))}>{c}</button>
