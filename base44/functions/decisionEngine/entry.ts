@@ -79,10 +79,14 @@ Deno.serve(async (req) => {
     } else if (noResume && (unprepared || opps.length)) {
       const target = unprepared?.company || opps[0]?.company || '';
       move = { title: 'Add your resume', reason: `You're ready to apply${target ? ` to ${target}` : ''} — I just need your resume to prepare a strong, tailored application.`, time: '~1 minute', outcome: 'Unlocks tailored applications and sharper matches — even a rough draft works.', cta: 'Add resume', action: route('#/ResumeTailoring') };
-    } else if (readyResume) {
-      move = { title: `Apply to ${readyResume.company_name}`, reason: "I already tailored your resume — it just needs your approval before it goes out.", time: '~5 minutes', outcome: `A submitted application at ${readyResume.company_name}.`, cta: 'Continue', action: route('#/ResumeTailoring') };
-    } else if (unprepared) {
-      move = { title: `Apply to ${unprepared.company}`, reason: "It's already in your pipeline — I'll prep the whole application with you.", time: '~20 minutes', outcome: `A submit-ready application at ${unprepared.company}.`, cta: 'Continue', action: ws({ company: unprepared.company, role: unprepared.job_title, jobDescription: unprepared.job_description || '', jobUrl: unprepared.job_url || '', location: unprepared.location || '' }) };
+    } else if (readyResume && (readyResume.company_name || '').trim()) {
+      // Apply task → job workspace, NOT Resume Studio. The resume is already
+      // tailored; the workspace is where the student reviews it and submits.
+      const company = readyResume.company_name.trim();
+      move = { title: `Apply to ${company}`, reason: "I already tailored your resume — review it and submit your application.", time: '~5 minutes', outcome: `A submitted application at ${company}.`, cta: 'Continue', action: ws({ company, role: readyResume.role_title || '', jobDescription: readyResume.job_description || '', jobUrl: readyResume.job_url || '', location: readyResume.location || '' }) };
+    } else if (unprepared && (unprepared.company || '').trim()) {
+      const company = unprepared.company.trim();
+      move = { title: `Apply to ${company}`, reason: "It's already in your pipeline — I'll prep the whole application with you.", time: '~20 minutes', outcome: `A submit-ready application at ${company}.`, cta: 'Continue', action: ws({ company, role: unprepared.job_title || '', jobDescription: unprepared.job_description || '', jobUrl: unprepared.job_url || '', location: unprepared.location || '' }) };
     } else if (opps[0]) {
       // Shared Location Intelligence: never pick a plan opportunity that violates
       // an explicit location constraint; explain location fit in the reason.
@@ -99,9 +103,14 @@ Deno.serve(async (req) => {
       if (pickIdx < 0) pickIdx = 0;
       const o = opps[pickIdx];
       const oLoc = evalOf(pickIdx);
-      let reason = o.beat_others || `It's my top pick for "${plan.goal_summary}".`;
-      if (oLoc?.display_explanation && ['strong', 'tradeoff'].includes(oLoc.location_match)) reason += ` ${oLoc.display_explanation}`;
-      move = { title: `Apply to ${o.company}`, reason, time: o.effort || '~20 minutes', outcome: 'Your strongest current shot at your goal.', cta: 'Continue', action: ws({ company: o.company, role: o.role, jobUrl: o.url || '', location: o.location || '' }) };
+      // Never build an "Apply to" move without a resolvable company+role target.
+      if (!(o.company || '').trim() || !(o.role || '').trim()) {
+        move = { title: 'Tell me your goal', reason: "I don't have an active plan for you yet — give me a goal and I'll line everything up.", time: '~30 seconds', outcome: 'A full plan with your 3 best opportunities.', cta: 'Start', action: { type: 'goal' } };
+      } else {
+        let reason = o.beat_others || `It's my top pick for "${plan.goal_summary}".`;
+        if (oLoc?.display_explanation && ['strong', 'tradeoff'].includes(oLoc.location_match)) reason += ` ${oLoc.display_explanation}`;
+        move = { title: `Apply to ${o.company.trim()}`, reason, time: o.effort || '~20 minutes', outcome: 'Your strongest current shot at your goal.', cta: 'Continue', action: ws({ company: o.company.trim(), role: o.role, jobUrl: o.url || '', location: o.location || '' }) };
+      }
       const held = opps.filter((_x: any, i: number) => i !== pickIdx);
       if (held.length) {
         suppressed.push(`I'm holding ${held.map((x: any) => x.company).join(' and ')} until ${o.company} is submitted — one great application beats three rushed ones.`);
