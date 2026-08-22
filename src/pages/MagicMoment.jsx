@@ -164,16 +164,18 @@ export default function MagicMoment() {
         // timeouts that silently return empty — the root cause of "no matches found".
         const fetchJobs = async (locOverride) => {
           const loc = locOverride !== undefined ? locOverride : location;
-          const r = await base44.functions.invoke('getLiveJobMatchesFn', {
-            career_goals: { role, industries, locations: [loc], seeking: cg.seeking || 'both' },
-            force_refresh: true,
-          });
-          const companies = r?.data?.companies || r?.companies || [];
-          if (companies.length === 0) {
-            const errMsg = r?.data?.error || r?.error || '';
-            if (errMsg) console.warn('[MagicMoment] getLiveJobMatchesFn returned error:', errMsg);
+          try {
+            const r = await base44.functions.invoke('getLiveJobMatchesFn', {
+              career_goals: { role, industries, locations: [loc], seeking: cg.seeking || 'both' },
+              force_refresh: true,
+            });
+            return r?.data?.companies || r?.companies || [];
+          } catch (e) {
+            // Live API failed (timeout, network, etc.) — return empty so the
+            // curated fallback fires and the user still sees results.
+            console.warn('[MagicMoment] fetchJobs error:', e?.message || e);
+            return [];
           }
-          return companies;
         };
 
         setPhase('Finding matching jobs…');
@@ -206,6 +208,19 @@ export default function MagicMoment() {
           }
           seenJobs.add(k);
           dedupedJobs.push(j);
+        }
+
+        // Safety net: if the location gate rejected EVERYTHING, fall back to
+        // all on-chip jobs (sorted by tier) rather than showing "no matches found".
+        // This catches edge cases where the user's location doesn't match any
+        // job location strings (e.g. onboarding persistence gaps).
+        if (dedupedJobs.length === 0 && onChipJobs.length > 0) {
+          for (const j of onChipJobs) {
+            const k = (j.name + '|' + j.job_title).toLowerCase();
+            if (seenJobs.has(k)) continue;
+            seenJobs.add(k);
+            dedupedJobs.push(j);
+          }
         }
         const tierOrder = { same_location: 0, nearby: 1, remote: 2, other: 3 };
         dedupedJobs.sort((a, b) => (tierOrder[tierOf(a)] || 3) - (tierOrder[tierOf(b)] || 3));
