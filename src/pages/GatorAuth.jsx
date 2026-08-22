@@ -398,8 +398,13 @@ export default function GatorAuth() {
             return;
           } catch (e) { /* fall through to normal routing */ }
         } else {
-          // Already onboarded — just clear the stale flag
+          // Already onboarded but the user just re-ran MinimalOnboarding (the
+          // flag was set THIS session). Route to Magic Moment so they see
+          // their updated matches, not the dashboard.
           try { localStorage.removeItem('cff_funnel_completed'); sessionStorage.removeItem('cff_funnel_completed'); } catch (e) {}
+          window.location.hash = '#/MagicMoment';
+          window.location.reload();
+          return;
         }
       }
 
