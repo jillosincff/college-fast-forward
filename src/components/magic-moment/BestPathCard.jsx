@@ -5,8 +5,9 @@ import { base44 } from '@/api/base44Client';
 import { buildOutreachDraft } from '@/lib/outreachDraft';
 import { trackOutreachCopied } from '@/lib/tracking';
 import { applyUrlOf } from '@/lib/jobFreshness';
+import { logJobApplied } from '@/lib/magicMomentLog';
 
-export default function BestPathCard({ job, person, user }) {
+export default function BestPathCard({ job, person, user, onAction }) {
   const [applied, setApplied] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -28,6 +29,8 @@ export default function BestPathCard({ job, person, user }) {
   const handleApply = () => {
     if (applyUrl) { try { window.open(applyUrl, '_blank', 'noopener'); } catch (e) {} }
     setApplied(true);
+    logJobApplied({ user, job, alumniName: person.name || '' });
+    onAction?.('apply');
   };
 
   const handleCopyAndLinkedIn = async () => {
@@ -77,6 +80,7 @@ export default function BestPathCard({ job, person, user }) {
         identified_date: now.toISOString(),
       });
     } catch (e) {}
+    onAction?.('copy');
   };
 
   return (

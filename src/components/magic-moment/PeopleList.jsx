@@ -10,7 +10,7 @@ import { trackOutreachCopied } from '@/lib/tracking';
 // student's target field (chipText) as the role, with live=false so the
 // message says "interested in roles like [field]" rather than "applying for
 // [alum's title]".
-export default function PeopleList({ people, user, liveJobCompanies, chipText, excludeName }) {
+export default function PeopleList({ people, user, liveJobCompanies, chipText, excludeName, onAction }) {
   if (!people?.length) return null;
   const liveCompanies = Array.isArray(liveJobCompanies) ? liveJobCompanies : [];
   const excludeKey = (excludeName || '').toLowerCase().trim();
@@ -24,14 +24,14 @@ export default function PeopleList({ people, user, liveJobCompanies, chipText, e
         const pCompany = (person.company || '').toLowerCase();
         const hasLiveJob = liveCompanies.some(c => c === pCompany || c.includes(pCompany) || pCompany.includes(c));
         return (
-          <PersonRow key={i} person={person} user={user} hasLiveJob={hasLiveJob} chipText={chipText} />
+          <PersonRow key={i} person={person} user={user} hasLiveJob={hasLiveJob} chipText={chipText} onAction={onAction} />
         );
       })}
     </div>
   );
 }
 
-function PersonRow({ person, user, hasLiveJob, chipText }) {
+function PersonRow({ person, user, hasLiveJob, chipText, onAction }) {
   const [copied, setCopied] = useState(false);
   // Advice draft: uses the student's target field, never the alum's title.
   // live=false → "interested in [company] and roles like [field]" (not "applying for [alum title]").
@@ -89,6 +89,7 @@ function PersonRow({ person, user, hasLiveJob, chipText }) {
         identified_date: now.toISOString(),
       });
     } catch (e) {}
+    onAction?.('copy');
   };
 
   const sourceLabel = person.source === 'opt_in' ? 'In your network' : 'Found publicly';

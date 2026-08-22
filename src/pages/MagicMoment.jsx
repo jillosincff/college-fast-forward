@@ -20,6 +20,8 @@ import HeroResume from '@/components/magic-moment/HeroResume';
 import JobsList from '@/components/magic-moment/JobsList';
 import PeopleList from '@/components/magic-moment/PeopleList';
 import BestPathCard from '@/components/magic-moment/BestPathCard';
+import NextStepFooter from '@/components/magic-moment/NextStepFooter';
+import { logJobApplied } from '@/lib/magicMomentLog';
 
 // The free Magic Moment — rebuilt as two independent lists (jobs + people)
 // with an optional best-path highlight when they overlap. Neither list depends
@@ -63,6 +65,7 @@ export default function MagicMoment() {
   const [showSoftWall, setShowSoftWall] = useState(false);
   const [error, setError] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
+  const [didAction, setDidAction] = useState(false);
 
   // Search bar state — lets the user (or tester) override role/location directly
   const cg0 = initialUser?.career_goals || {};
@@ -423,6 +426,12 @@ export default function MagicMoment() {
 
   const liveJobCompanies = jobsList.filter(j => j.live).map(j => (j.name || '').toLowerCase());
 
+  // First meaningful action (apply or copy) — never blocks, just marks progress.
+  const handleAction = () => setDidAction(true);
+  const handleRowApply = (job) => { logJobApplied({ user, job }); setDidAction(true); };
+  // Resume tailoring only ever targets a specific job: the Best Path role.
+  const resumeTargetJob = bestPath?.job || null;
+
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #faf5ff 0%, #fff 30%)', paddingBottom: 48 }}>
       <div style={{ maxWidth: 620, margin: '0 auto', padding: '28px 16px' }}>
@@ -460,7 +469,7 @@ export default function MagicMoment() {
 
         {/* 1. Best path card (only when a real live job + a real school person at that company both exist) */}
         {bestPath && (
-          <BestPathCard job={bestPath.job} person={bestPath.person} user={user} />
+          <BestPathCard job={bestPath.job} person={bestPath.person} user={user} onAction={handleAction} />
         )}
 
         {/* 2. Jobs for you — excludes the Best Path job so it's not duplicated */}
@@ -475,7 +484,7 @@ export default function MagicMoment() {
           return (
             <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
               <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Jobs for you" />
-              <JobsList jobs={remaining} />
+              <JobsList jobs={remaining} onApply={handleRowApply} />
             </div>
           );
         })()}
@@ -490,13 +499,24 @@ export default function MagicMoment() {
           return (
             <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
               <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label={heroMeta.chipLabel ? `People from your school in ${heroMeta.chipLabel.toLowerCase()}` : 'People from your school'} />
-              <PeopleList people={remaining} user={user} liveJobCompanies={liveJobCompanies} chipText={heroMeta.chipText} />
+              <PeopleList people={remaining} user={user} liveJobCompanies={liveJobCompanies} chipText={heroMeta.chipText} onAction={handleAction} />
             </div>
           );
         })()}
 
-        {/* 4. Resume upload */}
-        {!bothEmpty && <HeroResume tailored={tailored} onDownload={downloadResume} />}
+        {/* 4. Resume — only with a tailored result or a specific target job */}
+        {!bothEmpty && (
+          <HeroResume tailored={tailored} onDownload={downloadResume} targetJob={resumeTargetJob} />
+        )}
+
+        {/* 5. Where they go next — always present, never a dead end */}
+        {!bothEmpty && (
+          <NextStepFooter
+            didAction={didAction}
+            bestPathCompany={bestPath?.job?.name || ''}
+            onUpgrade={() => setShowPro(true)}
+          />
+        )}
       </div>
       {showPro && <ProUpgradeModal user={user} onClose={() => setShowPro(false)} source="magic_moment" />}
       {showSoftWall && <SoftWallModal user={user} onClose={() => setShowSoftWall(false)} source="soft_wall" />}

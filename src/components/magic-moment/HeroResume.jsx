@@ -8,8 +8,17 @@ const ghostBtn = (extra) => ({
   display: 'inline-flex', alignItems: 'center', gap: 8, ...extra,
 });
 
-export default function HeroResume({ tailored, onDownload }) {
+// `targetJob` is required for the upload CTA — the copy must name a specific
+// role and company. With no target job we never show a vague "this role" CTA.
+export default function HeroResume({ tailored, onDownload, targetJob, onUpload }) {
   const navigate = useNavigate();
+  if (!tailored && !targetJob) return null;
+
+  const handleUpload = () => {
+    onUpload?.(targetJob);
+    navigate('/FreeTierDashboard');
+  };
+
   return (
     <div style={{ padding: '12px 14px', background: '#f8f6ff', borderRadius: 12, border: `1px solid ${INDIGO_BORDER}` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -28,9 +37,9 @@ export default function HeroResume({ tailored, onDownload }) {
       ) : (
         <div>
           <p style={{ fontFamily: FONT, fontSize: 12.5, color: TEXT2, margin: '0 0 8px', lineHeight: 1.5 }}>
-            Upload your resume and CLIFF will tailor it to this exact role.
+            Upload your resume — CLIFF will tailor it to <strong style={{ color: TEXT }}>{targetJob.job_title}</strong> at <strong style={{ color: TEXT }}>{targetJob.name}</strong>.
           </p>
-          <button onClick={() => navigate('/FreeTierDashboard')} style={ghostBtn({})}><Upload size={14} /> Upload resume</button>
+          <button onClick={handleUpload} style={ghostBtn({})}><Upload size={14} /> Upload resume</button>
         </div>
       )}
     </div>

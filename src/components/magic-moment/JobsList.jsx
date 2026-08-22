@@ -10,7 +10,7 @@ const TIER_LABELS = {
   other: '',
 };
 
-export default function JobsList({ jobs, excludeJobKey }) {
+export default function JobsList({ jobs, excludeJobKey, onApply }) {
   if (!jobs?.length) return null;
   const exclude = (excludeJobKey || '').toLowerCase().trim();
   const filtered = exclude
@@ -20,13 +20,13 @@ export default function JobsList({ jobs, excludeJobKey }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {filtered.map((job, i) => (
-        <JobRow key={job.job_id || job.id || i} job={job} />
+        <JobRow key={job.job_id || job.id || i} job={job} onApply={onApply} />
       ))}
     </div>
   );
 }
 
-function JobRow({ job }) {
+function JobRow({ job, onApply }) {
   const tierLabel = TIER_LABELS[job._tier] || '';
   const applyUrl = job.live ? applyUrlOf(job) : '';
   return (
@@ -64,6 +64,7 @@ function JobRow({ job }) {
           href={applyUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => onApply?.(job)}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
             fontSize: 12, fontWeight: 800, color: '#fff', background: INDIGO,
