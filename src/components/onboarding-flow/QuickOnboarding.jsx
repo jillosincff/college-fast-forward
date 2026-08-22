@@ -118,6 +118,7 @@ export default function QuickOnboarding({ onDone }) {
 
   const canStep2 = chips.length > 0 || roleText.trim().length > 0;
 
+  console.log('🔵 [QuickOnboarding v2] Rendering with location autocomplete + seeking options');
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #faf5ff 0%, #fff 40%)', padding: '24px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: 480 }}>
