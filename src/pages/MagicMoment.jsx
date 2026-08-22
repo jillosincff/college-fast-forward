@@ -107,6 +107,7 @@ export default function MagicMoment() {
         //    biz" posting just because the title keyword matched.
         //    Priority: same-location+warm → nearby/metro+warm → same-location
         //    cold → nearby cold → remote (anywhere) ONLY if all of those fail.
+        let _diagCaptured = false;
         const fetchJobs = async (locOverride) => {
           const loc = locOverride !== undefined ? locOverride : location;
           const r = await base44.functions.invoke('getLiveJobMatchesFn', {
@@ -118,6 +119,15 @@ export default function MagicMoment() {
             career_goals: { role, industries, locations: [loc], seeking: cg.seeking || 'both' },
             force_refresh: true,
           });
+          // Capture backend diagnostics (raw JSearch count, post-seniority count)
+          // from the FIRST fetch only — subsequent widen/remote fetches would
+          // overwrite the student's market-specific numbers.
+          if (!_diagCaptured) {
+            const diag = r?.data?.diagnostics || r?.diagnostics || {};
+            if (diag.raw_jsearch_count !== undefined) emptyReason.jsearch_count = diag.raw_jsearch_count;
+            if (diag.post_filter_count !== undefined) emptyReason.after_seniority = diag.post_filter_count;
+            _diagCaptured = true;
+          }
           return r?.data?.companies || r?.companies || [];
         };
 
@@ -125,6 +135,23 @@ export default function MagicMoment() {
         const locParts = (location || '').split(',').map(p => p.trim()).filter(Boolean);
         const userCity = locParts[0] || '';
         const userState = locParts[1] || '';
+
+        // Structured empty_reason — logged on EVERY run (hero or empty) so a
+        // dead-end can be diagnosed without guessing. Tracks the funnel from
+        // raw JSearch count through chip/location/seniority/live/person gates.
+        const emptyReason = {
+          chip: `${role || ''} ${(industries || []).join(' ')}`.trim(),
+          location_raw: location || '',
+          metro: userCity && userState ? `${userCity}, ${userState}` : (userCity || userState || ''),
+          jsearch_count: 0,
+          after_seniority: 0,
+          after_chip: 0,
+          after_location: 0,
+          after_live: 0,
+          person_found: false,
+          hero: null,
+          reject_samples: [],
+        };
 
         // Partition a pool by location fit. "Widen" means metro/hybrid/adjacent
         // in the SAME market — never a different work mode. Pure Remote is its
@@ -261,7 +288,11 @@ export default function MagicMoment() {
         setPhase('Finding a high-fit job…');
         // On-chip pool first — titles/descriptions that clearly match the chip.
         const rawJobs = legit(await fetchJobs(location));
-        let buckets = byTier(onChip(rawJobs));
+        const onChipJobs = onChip(rawJobs);
+        let buckets = byTier(onChipJobs);
+        // Track funnel metrics for empty_reason logging
+        emptyReason.after_chip = onChipJobs.length;
+        emptyReason.after_location = buckets.same_location.length + buckets.nearby.length;
 
         // In-market widen (state/metro) before ever touching remote — only when
         // the same-city pull came back thin. Never widen to "anywhere" here.
@@ -402,11 +433,12 @@ export default function MagicMoment() {
           url: applyUrlOf(j), why,
         });
         let heroLive = false;
+        let livePassed = 0; // tracks after_live for empty_reason logging
         if (topJob) {
           setPhase('Confirming the posting is live…');
           let chk = await checkJobLive(base44, topJob);
           if (chk.ok) {
-            heroLive = true;
+            heroLive = true; livePassed++;
           } else {
             logDeadPosting(topJob, chk.why);
             // Next on-chip in-market candidate with a person AND a live link:
@@ -427,7 +459,7 @@ export default function MagicMoment() {
               const candLoc = gateLocation(cand.job, { userCity, userState });
               if (!candLoc.ok) { logReject(cand.job, `replacement_${candLoc.why}`); continue; }
               chk = await checkJobLive(base44, cand.job);
-              if (chk.ok) {
+              if (chk.ok) { livePassed++;
                 topJob = cand.job; conns = cand.conns;
                 resultType = `${resultType}_live_replacement`; heroLive = true;
                 break;
@@ -445,9 +477,15 @@ export default function MagicMoment() {
           }
         }
 
+        emptyReason.after_live = livePassed;
         if (rejected.length) console.log('[MagicMoment] rejected candidates:', rejected);
         if (!topJob) {
-          console.log('[MagicMoment] no on-chip job found for chip:', chipText, location);
+          // Log the structured empty_reason — the release-bar contract for
+          // diagnosing why a first cycle dead-ended. Paste this log before
+          // claiming any market is "too thin" to serve.
+          emptyReason.person_found = bestPeopleSource !== 'none';
+          emptyReason.reject_samples = rejected.slice(0, 10).map(r => ({ title: r.title, company: r.company, why: r.why_rejected }));
+          console.log('[MagicMoment] EMPTY_REASON', JSON.stringify(emptyReason, null, 2));
           setError(`CLIFF couldn't find a ${chipLabel || 'matching'} role that meets its bar yet. Try again shortly — it won't show you a job that isn't a real match.`);
           setPhase(null);
           return;
@@ -528,6 +566,13 @@ export default function MagicMoment() {
           chipText,
           widenTier: heroWidenTier,
         }));
+        // Log the structured empty_reason on SUCCESS too — the same funnel
+        // metrics, with the hero filled in, so a successful run can be
+        // compared against a dead-end for the same chip + market.
+        emptyReason.hero = { company: topJob.name, title: topJob.job_title, live: heroLive, result_type: resultType };
+        emptyReason.person_found = realConns.length > 0;
+        emptyReason.reject_samples = rejected.slice(0, 10).map(r => ({ title: r.title, company: r.company, why: r.why_rejected }));
+        console.log('[MagicMoment] HERO_REASON', JSON.stringify(emptyReason, null, 2));
         const matchType = realConns.length > 0 ? 'warm' : 'cold';
         const locationMatch = resultType.includes('remote') ? 'remote'
           : (resultType.includes('same_location') || resultType.includes('nearby') || resultType.includes('curated')) ? 'same_market'

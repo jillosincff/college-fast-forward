@@ -9,7 +9,7 @@ export const ROLE_KEYWORDS = {
   software: ['software', 'developer', 'engineer', 'frontend', 'backend', 'full stack', 'fullstack', 'programmer'],
   operations: ['operations', 'supply chain', 'logistics'],
   consulting: ['consulting', 'consultant', 'strategy'],
-  healthcare: ['healthcare', 'health', 'clinical', 'hospital', 'patient', 'medical', 'nurse', 'nursing', 'allied health', 'pharma', 'biotech', 'research coordinator', 'surgical', 'surgery', 'radiology', 'pharmacy', 'pharmacist', 'therapist', 'therapy', 'sonographer', 'technologist', 'lab technician', 'laboratory', 'dental', 'behavioral health', 'mental health', 'care coordinator', 'care tech'],
+  healthcare: ['healthcare', 'health', 'clinical', 'hospital', 'patient', 'medical', 'nurse', 'nursing', 'allied health', 'allied', 'pharma', 'biotech', 'research coordinator', 'surgical', 'surgery', 'radiology', 'pharmacy', 'pharmacist', 'therapist', 'therapy', 'sonographer', 'technologist', 'lab technician', 'laboratory', 'dental', 'behavioral health', 'mental health', 'care coordinator', 'care tech', 'registrar', 'health coordinator', 'medical assistant', 'patient access', 'patient registration', 'patient services'],
   data: ['data', 'analytics', 'business intelligence', 'quantitative'],
   product: ['product', 'ux', 'user experience'],
   // Short forms MUST be listed — a student who picks the "HR" chip types
