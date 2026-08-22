@@ -310,17 +310,12 @@ export default function GatorAuth() {
         return;
       }
 
-      // Clear stale cff_funnel_completed for users with no persona.
-      // MinimalOnboarding (pre-auth funnel) sets this flag right before the
-      // Google OAuth round-trip — that's legitimate. But a flag from a prior
-      // session (e.g. admin deleted + re-signed up) is stale and must not
-      // bypass onboarding.
-      if (!user.persona?.trim()) {
-        try {
-          localStorage.removeItem('cff_funnel_completed');
-          sessionStorage.removeItem('cff_funnel_completed');
-        } catch (e) {}
-      }
+      // NOTE: Do NOT clear cff_funnel_completed here. MinimalOnboarding (the
+      // pre-auth funnel) sets this flag right before the Google OAuth
+      // round-trip. A brand-new Google user has no persona yet — clearing the
+      // flag here would wipe the legitimate signal and send them back to
+      // onboarding step 1 instead of advancing to Magic Moment. The
+      // entityExists check above already handles the stale deleted-user case.
 
       // Flow A completed BEFORE sign-in: the funnel saved every answer locally
       // and set cff_funnel_completed right before the OAuth round-trip.
