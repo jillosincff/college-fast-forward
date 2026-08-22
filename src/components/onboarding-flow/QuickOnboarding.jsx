@@ -18,6 +18,11 @@ import { trackOnboardingCompleted } from '@/lib/tracking';
 
 const TARGET_CHIPS = ['Marketing', 'Finance', 'Software', 'Sales', 'Operations', "Other / I'm open"];
 const LOC_CHIPS = ['Remote', 'Open to relocate'];
+const SEEKING_OPTIONS = [
+  { value: 'internship', label: 'Internship' },
+  { value: 'fulltime', label: 'Full-time job' },
+  { value: 'both', label: "Open to both" },
+];
 
 const chipBtn = (active) => ({
   fontFamily: FONT, fontSize: 13, fontWeight: active ? 700 : 600,
@@ -52,6 +57,7 @@ export default function QuickOnboarding({ onDone }) {
   const [roleText, setRoleText] = useState('');
   const [city, setCity] = useState('');
   const [locChips, setLocChips] = useState([]);
+  const [seeking, setSeeking] = useState('both');
   const [resumeUrl, setResumeUrl] = useState('');
   const [resumeName, setResumeName] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -80,7 +86,7 @@ export default function QuickOnboarding({ onDone }) {
       const locationPref = locChips.includes('Remote') ? 'Remote'
         : (city.trim() || (locChips.includes('Open to relocate') ? '' : ''));
       const career_goals = buildCareerGoalsFromOnboarding({
-        seeking: 'both',
+        seeking,
         industries: chips,
         targetRoles,
         location: locationPref === 'Remote' ? 'remote' : locationPref,
@@ -169,6 +175,13 @@ export default function QuickOnboarding({ onDone }) {
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 24, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>What kind of role are you after?</h1>
             <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px' }}>Pick a field — add a specific role if you have one in mind.</p>
+
+            <label style={labelStyle}>I'm looking for</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+              {SEEKING_OPTIONS.map((o) => (
+                <button key={o.value} onClick={() => setSeeking(o.value)} style={chipBtn(seeking === o.value)}>{o.label}</button>
+              ))}
+            </div>
 
             <label style={labelStyle}>Target field</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
