@@ -489,7 +489,7 @@ export default function MagicMoment() {
           if (!remaining.length) return null;
           return (
             <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-              <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label={`People from your school in ${heroMeta.chipLabel || 'this lane'}`} />
+              <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label={heroMeta.chipLabel ? `People from your school in ${heroMeta.chipLabel.toLowerCase()}` : 'People from your school'} />
               <PeopleList people={remaining} user={user} liveJobCompanies={liveJobCompanies} chipText={heroMeta.chipText} />
             </div>
           );
