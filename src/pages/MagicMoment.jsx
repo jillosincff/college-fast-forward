@@ -159,25 +159,33 @@ export default function MagicMoment() {
         const onChip = (arr) => arr.filter(j => isOnChip(j));
 
         // ── 1. Fetch jobs (cascade: metro → state → remote → curated) ─────
+        // Each live API call takes 10-15s, so thresholds are kept low to avoid
+        // stacking multiple calls (22+s total) which can trigger platform-level
+        // timeouts that silently return empty — the root cause of "no matches found".
         const fetchJobs = async (locOverride) => {
           const loc = locOverride !== undefined ? locOverride : location;
           const r = await base44.functions.invoke('getLiveJobMatchesFn', {
             career_goals: { role, industries, locations: [loc], seeking: cg.seeking || 'both' },
             force_refresh: true,
           });
-          return r?.data?.companies || r?.companies || [];
+          const companies = r?.data?.companies || r?.companies || [];
+          if (companies.length === 0) {
+            const errMsg = r?.data?.error || r?.error || '';
+            if (errMsg) console.warn('[MagicMoment] getLiveJobMatchesFn returned error:', errMsg);
+          }
+          return companies;
         };
 
         setPhase('Finding matching jobs…');
         let onChipJobs = onChip(legit(await fetchJobs(location)));
 
         // Widen to state if thin
-        if (onChipJobs.length < 5 && userState) {
+        if (onChipJobs.length < 3 && userState) {
           setPhase('Widening the search…');
           onChipJobs = [...onChipJobs, ...onChip(legit(await fetchJobs(userState)))];
         }
         // Add remote if still thin
-        if (onChipJobs.length < 5) {
+        if (onChipJobs.length < 3) {
           setPhase('Looking beyond your market…');
           onChipJobs = [...onChipJobs, ...onChip(legit(await fetchJobs(''))).filter(j => tierOf(j) === 'remote')];
         }
