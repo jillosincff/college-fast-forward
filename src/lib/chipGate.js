@@ -9,7 +9,7 @@ export const ROLE_KEYWORDS = {
   software: ['software', 'developer', 'engineer', 'frontend', 'backend', 'full stack', 'fullstack', 'programmer'],
   operations: ['operations', 'supply chain', 'logistics'],
   consulting: ['consulting', 'consultant', 'strategy'],
-  healthcare: ['healthcare', 'health', 'clinical', 'hospital', 'patient', 'medical', 'nurse', 'nursing', 'allied health', 'pharma', 'biotech', 'research coordinator'],
+  healthcare: ['healthcare', 'health', 'clinical', 'hospital', 'patient', 'medical', 'nurse', 'nursing', 'allied health', 'pharma', 'biotech', 'research coordinator', 'surgical', 'surgery', 'radiology', 'pharmacy', 'pharmacist', 'therapist', 'therapy', 'sonographer', 'technologist', 'lab technician', 'laboratory', 'dental', 'behavioral health', 'mental health', 'care coordinator', 'care tech'],
   data: ['data', 'analytics', 'business intelligence', 'quantitative'],
   product: ['product', 'ux', 'user experience'],
   // Short forms MUST be listed — a student who picks the "HR" chip types
@@ -70,8 +70,13 @@ export function chipKeywordsFor(chipText) {
  */
 export function checkOnChip(jobTitle, chipKeywords) {
   const title = (jobTitle || '').toLowerCase().trim();
-  if (GENERIC_TITLE.test(title)) return { ok: false, why: 'junk' };
+  // A direct chip-keyword hit ANYWHERE in the title is always on-chip — even
+  // when the title starts with a generic word. "Coordinator, Clinical Research"
+  // is a healthcare role despite starting with "Coordinator"; without this
+  // ordering, the GENERIC_TITLE regex rejected it as 'junk' and emptied the
+  // on-chip pool for thin markets (Healthcare + Miami, etc.).
   if (chipKeywords && chipKeywords.some(k => hasWord(title, k))) return { ok: true, why: null };
+  if (GENERIC_TITLE.test(title)) return { ok: false, why: 'junk' };
   if (!chipKeywords) return { ok: true, why: null };
   // Known chip, no direct keyword. Reject only if the title names a DIFFERENT chip.
   for (const kws of Object.values(ROLE_KEYWORDS)) {

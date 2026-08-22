@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       communications: '"Communications" OR "Public Relations" OR PR OR Media OR Content OR "Social Media" OR "Communications Coordinator" OR "Communications Specialist"',
       'public relations': '"Public Relations" OR PR OR Communications OR Media OR "Media Relations"',
       pr: '"Public Relations" OR PR OR Communications OR Media OR "Media Relations"',
-      healthcare: '"Healthcare" OR "Clinical Research Coordinator" OR "Research Technician" OR "Healthcare Analyst" OR "Clinical Operations" OR "Patient Care" OR "Medical Assistant"',
+      healthcare: '"Healthcare" OR "Clinical Research Coordinator" OR "Research Technician" OR "Healthcare Analyst" OR "Clinical Operations" OR "Patient Care" OR "Medical Assistant" OR "Surgical Tech" OR "Pharmacy Technician" OR "Patient Care Tech" OR "Care Coordinator" OR "Lab Technician" OR "Medical Records" OR "Behavioral Health" OR "Radiology Tech" OR "Healthcare Coordinator"',
       consulting: '"Consulting" OR "Analyst" OR "Strategy" OR "Associate Consultant" OR "Business Analyst" OR "Management Consultant"',
       operations: '"Operations" OR "Operations Coordinator" OR "Operations Analyst" OR "Supply Chain" OR "Logistics Coordinator" OR "Operations Associate"',
       data: '"Data Analyst" OR "Data Scientist" OR "Analytics" OR "Quantitative Analyst" OR "Business Intelligence" OR "Data Associate"',
