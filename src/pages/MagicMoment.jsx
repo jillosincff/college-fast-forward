@@ -66,7 +66,11 @@ export default function MagicMoment() {
 
   // Search bar state — lets the user (or tester) override role/location directly
   const cg0 = initialUser?.career_goals || {};
-  const [searchRole, setSearchRole] = useState((cg0.target_roles || [])[0] || '');
+  // The 3-screen onboarding makes the specific role text optional — a student
+  // who picks the "Marketing" chip but skips typing a role has empty
+  // target_roles. Fall back to the field chip so the search still has a term.
+  const fallbackRole = (cg0.target_industries || [])[0] || '';
+  const [searchRole, setSearchRole] = useState((cg0.target_roles || [])[0] || fallbackRole || '');
   const [searchLoc, setSearchLoc] = useState(cg0.location_preference || initialUser?.location || '');
   const [user, setUser] = useState(initialUser);
 
@@ -111,7 +115,10 @@ export default function MagicMoment() {
     (async () => {
       try {
         const cg = user.career_goals || {};
-        const role = (cg.target_roles || [])[0] || '';
+        // Fall back to the field chip when no specific role was typed — the
+        // 3-screen onboarding doesn't require it, so "Marketing" chip alone
+        // must still produce a searchable role.
+        const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
         const industries = cg.target_industries || [];
         const location = cg.location_preference || '';
         const chipText = `${role || ''} ${(industries || []).join(' ')}`.trim();
