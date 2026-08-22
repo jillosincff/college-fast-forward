@@ -310,14 +310,17 @@ export default function GatorAuth() {
         return;
       }
 
-      // Always clear deprecated cff_funnel_completed — the old OnboardingFlow
-      // (Flow A) that set this flag is no longer rendered; QuickOnboarding
-      // replaced it. Any lingering flag is stale (e.g. admin deleted + re-signed
-      // up) and bypasses QuickOnboarding, so remove it unconditionally.
-      try {
-        localStorage.removeItem('cff_funnel_completed');
-        sessionStorage.removeItem('cff_funnel_completed');
-      } catch (e) {}
+      // Clear stale cff_funnel_completed for users with no persona.
+      // MinimalOnboarding (pre-auth funnel) sets this flag right before the
+      // Google OAuth round-trip — that's legitimate. But a flag from a prior
+      // session (e.g. admin deleted + re-signed up) is stale and must not
+      // bypass onboarding.
+      if (!user.persona?.trim()) {
+        try {
+          localStorage.removeItem('cff_funnel_completed');
+          sessionStorage.removeItem('cff_funnel_completed');
+        } catch (e) {}
+      }
 
       // Flow A completed BEFORE sign-in: the funnel saved every answer locally
       // and set cff_funnel_completed right before the OAuth round-trip.

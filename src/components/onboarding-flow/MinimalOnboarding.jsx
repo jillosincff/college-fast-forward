@@ -8,6 +8,7 @@ import {
 } from '@/components/onboarding-flow/onboardingShared';
 import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Loader2 } from 'lucide-react';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
+import LocationAutocomplete from '@/components/onboarding-flow/LocationAutocomplete';
 
 // Minimal pre-auth onboarding. Collects ONLY what the Magic Moment needs:
 // school, target role/industry, preferred location, optional resume.
@@ -20,6 +21,11 @@ const OTHER_CHIP = 'Other';
 const OPEN_CHIP = "I'm open";
 const TARGET_CHIPS = [...FIELD_CHIPS, OTHER_CHIP, OPEN_CHIP];
 const LOC_CHIPS = ['Remote', 'Open to relocate'];
+const SEEKING_OPTIONS = [
+  { value: 'internship', label: 'Internship' },
+  { value: 'fulltime', label: 'Full-time job' },
+  { value: 'both', label: 'Open to both' },
+];
 
 const chipBtn = (active) => ({
   fontFamily: FONT, fontSize: 13, fontWeight: active ? 700 : 600,
@@ -53,6 +59,7 @@ export default function MinimalOnboarding({ onClose }) {
   const [roleText, setRoleText] = useState('');
   const [city, setCity] = useState('');
   const [locChips, setLocChips] = useState([]);
+  const [seeking, setSeeking] = useState('both');
   const [resumeUrl, setResumeUrl] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [resumeName, setResumeName] = useState('');
@@ -97,7 +104,7 @@ export default function MinimalOnboarding({ onClose }) {
       localStorage.setItem('pending_invite_role', 'student');
       sessionStorage.setItem('cff_onboarding_type', 'student');
       localStorage.setItem('cff_college', schoolValue);
-      localStorage.setItem('cff_seeking', 'both');
+      localStorage.setItem('cff_seeking', seeking);
       localStorage.setItem('cff_industries', JSON.stringify(chips));
       localStorage.setItem('cff_target_roles', JSON.stringify(targetRoles));
       if (locationForGoals) localStorage.setItem('cff_location', locationForGoals);
@@ -122,7 +129,7 @@ export default function MinimalOnboarding({ onClose }) {
           persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true,
           school: schoolValue,
           ...(notEnrolled ? {} : { school_code: (deriveSchoolCode(school) || '').toUpperCase() }),
-          career_goals: buildCareerGoalsFromOnboarding({ seeking: 'both', industries: chips, targetRoles, location: locationForGoals }),
+          career_goals: buildCareerGoalsFromOnboarding({ seeking, industries: chips, targetRoles, location: locationForGoals }),
           ...(locationForGoals ? { location: isRemote ? 'Remote' : locationForGoals } : {}),
           ...(resumeUrl ? { resume_url: resumeUrl, resume_file_url: resumeUrl, resume_uploaded_at: new Date().toISOString(), resume_status: 'provided' } : { resume_status: 'not_provided' }),
           ...(linkedinUrl.trim() ? { linkedin_url: linkedinUrl.trim() } : {}),
@@ -197,7 +204,14 @@ export default function MinimalOnboarding({ onClose }) {
               <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Step 2 of 3</span>
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 24, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>What kind of role are you after?</h1>
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px' }}>Pick a field — add a specific role if you have one in mind.</p>
+            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px' }}>Pick your stage, a field, and a location — add a specific role if you have one in mind.</p>
+
+            <label style={labelStyle}>I'm looking for</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+              {SEEKING_OPTIONS.map((o) => (
+                <button key={o.value} onClick={() => setSeeking(o.value)} style={chipBtn(seeking === o.value)}>{o.label}</button>
+              ))}
+            </div>
 
             <label style={labelStyle}>Target field</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
@@ -218,8 +232,7 @@ export default function MinimalOnboarding({ onClose }) {
               <MapPin size={13} color={INDIGO} />
               <label style={{ ...labelStyle, marginBottom: 0 }}>Preferred location</label>
             </div>
-            <input type="text" value={city} placeholder="City, State (e.g. Austin, TX)"
-              onChange={(e) => setCity(e.target.value)} style={{ ...inputStyle, marginBottom: 10 }} />
+            <LocationAutocomplete value={city} onChange={setCity} />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {LOC_CHIPS.map((c) => (
                 <button key={c} onClick={() => toggle(locChips, setLocChips, c)} style={chipBtn(locChips.includes(c))}>{c}</button>
