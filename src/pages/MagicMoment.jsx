@@ -158,10 +158,11 @@ export default function MagicMoment() {
         const legit = (arr) => arr.filter(j => !isJunk(j));
         const onChip = (arr) => arr.filter(j => isOnChip(j));
 
-        // ── 1. Fetch jobs (cascade: metro → state → remote → curated) ─────
-        // Each live API call takes 10-15s, so thresholds are kept low to avoid
-        // stacking multiple calls (22+s total) which can trigger platform-level
-        // timeouts that silently return empty — the root cause of "no matches found".
+        // ── 1. Fetch jobs (single live call + immediate curated fallback) ─
+        // Each live API call takes 10-15s. The old cascade made up to 3 sequential
+        // calls (39s+), which triggered platform-level timeouts that silently
+        // killed the effect before the curated fallback could fire — the root
+        // cause of "no matches found" even when the backend had results.
         const fetchJobs = async (locOverride) => {
           const loc = locOverride !== undefined ? locOverride : location;
           try {
@@ -171,30 +172,25 @@ export default function MagicMoment() {
             });
             return r?.data?.companies || r?.companies || [];
           } catch (e) {
-            // Live API failed (timeout, network, etc.) — return empty so the
-            // curated fallback fires and the user still sees results.
             console.warn('[MagicMoment] fetchJobs error:', e?.message || e);
             return [];
           }
         };
 
         setPhase('Finding matching jobs…');
-        let onChipJobs = onChip(legit(await fetchJobs(location)));
+        let liveJobs = onChip(legit(await fetchJobs(location)));
 
-        // Widen to state if thin
-        if (onChipJobs.length < 3 && userState) {
+        // ONE widening call to state if the metro was thin — don't stack a
+        // third "anywhere" call (that's what pushed total time past 30s).
+        if (liveJobs.length < 3 && userState) {
           setPhase('Widening the search…');
-          onChipJobs = [...onChipJobs, ...onChip(legit(await fetchJobs(userState)))];
+          liveJobs = [...liveJobs, ...onChip(legit(await fetchJobs(userState)))];
         }
-        // Add remote if still thin
-        if (onChipJobs.length < 3) {
-          setPhase('Looking beyond your market…');
-          onChipJobs = [...onChipJobs, ...onChip(legit(await fetchJobs(''))).filter(j => tierOf(j) === 'remote')];
-        }
-        // Add curated if still thin
-        if (onChipJobs.length < 3) {
-          onChipJobs = [...onChipJobs, ...onChip(getChipCuratedJobs(chipText, location))];
-        }
+
+        // Curated fallback — always available for known chips. Merge with live
+        // results so the user sees real volume even when the API was slow or thin.
+        const curatedJobs = onChip(getChipCuratedJobs(chipText, location));
+        let onChipJobs = [...liveJobs, ...curatedJobs];
 
         // Dedupe + location gate + sort by tier
         const seenJobs = new Set();
