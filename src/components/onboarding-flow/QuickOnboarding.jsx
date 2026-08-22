@@ -1,3 +1,4 @@
+// QuickOnboarding v3 — internship/full-time chips + LocationAutocomplete
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';

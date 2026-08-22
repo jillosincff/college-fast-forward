@@ -310,16 +310,14 @@ export default function GatorAuth() {
         return;
       }
 
-      // Clear stale cff_funnel_completed for users with no persona.
-      // The old OnboardingFlow (Flow A) that set this flag is deprecated —
-      // QuickOnboarding replaced it. Any lingering flag is from a prior session
-      // (e.g. admin deleted + re-signed up) and must NOT bypass QuickOnboarding.
-      if (!user.persona?.trim()) {
-        try {
-          localStorage.removeItem('cff_funnel_completed');
-          sessionStorage.removeItem('cff_funnel_completed');
-        } catch (e) {}
-      }
+      // Always clear deprecated cff_funnel_completed — the old OnboardingFlow
+      // (Flow A) that set this flag is no longer rendered; QuickOnboarding
+      // replaced it. Any lingering flag is stale (e.g. admin deleted + re-signed
+      // up) and bypasses QuickOnboarding, so remove it unconditionally.
+      try {
+        localStorage.removeItem('cff_funnel_completed');
+        sessionStorage.removeItem('cff_funnel_completed');
+      } catch (e) {}
 
       // Flow A completed BEFORE sign-in: the funnel saved every answer locally
       // and set cff_funnel_completed right before the OAuth round-trip.
