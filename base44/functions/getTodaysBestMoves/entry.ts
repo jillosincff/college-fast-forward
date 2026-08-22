@@ -26,38 +26,43 @@ Deno.serve(async (req) => {
 
     const candidates = [];
 
-    // Resume already prepared → apply is nearly free
-    const readyResume = (resumes || []).find(r => r.status === 'completed' && !r.downloaded_at);
+    // Resume already prepared → apply is nearly free.
+    // Never surface a move with a missing company — "Apply to " with no target
+    // is a broken hero. Skip resumes whose company we can't resolve.
+    const readyResume = (resumes || []).find(r => r.status === 'completed' && !r.downloaded_at && (r.company_name || '').trim());
     if (readyResume) {
-      const conn = (pipeline || []).find(r => (r.company || '').toLowerCase() === (readyResume.company_name || '').toLowerCase() && r.alumni_name);
+      const company = readyResume.company_name.trim();
+      const conn = (pipeline || []).find(r => (r.company || '').toLowerCase() === company.toLowerCase() && r.alumni_name);
       const reasons = ['Your tailored resume is already prepared — you\'re one step from done'];
       if ((readyResume.ats_score || 0) >= 75) reasons.unshift('Excellent fit — your resume scores strongly for this role');
       if (conn) reasons.push(`One possible connection available: ${conn.alumni_name}`);
       candidates.push({
         score: 92, kind: 'apply',
-        title: `Apply to ${readyResume.company_name}`,
+        title: `Apply to ${company}`,
         reasons, time: '6 min', action_label: 'Continue',
-        action: { type: 'workspace', company: readyResume.company_name, role: readyResume.role_title || '' },
-        company: readyResume.company_name,
+        action: { type: 'workspace', company, role: readyResume.role_title || '' },
+        company,
       });
     }
 
-    // Follow-up window open, draft ready
+    // Follow-up window open, draft ready. Skip if company is missing.
     const followUp = (pipeline || []).find(r =>
       ((['reached_out', 'messaged'].includes(r.status) && daysSince(r) >= 5) || (r.status === 'applied' && daysSince(r) >= 7)) &&
-      (r.follow_up_count || 0) < 2
+      (r.follow_up_count || 0) < 2 &&
+      (r.company || '').trim()
     );
     if (followUp) {
+      const company = followUp.company.trim();
       candidates.push({
         score: 88, kind: 'followup',
-        title: `Follow up with ${followUp.company}`,
+        title: `Follow up with ${company}`,
         reasons: [
           `You ${followUp.status === 'applied' ? 'applied' : 'reached out'} ${daysSince(followUp)} days ago — this is usually the right follow-up window`,
           'Your draft is already prepared',
         ],
         time: '30 sec', action_label: 'Send',
-        action: { type: 'followup', company: followUp.company, role: followUp.job_title || '', contactName: followUp.alumni_name || '', pipelineId: followUp.id, followUpCount: followUp.follow_up_count || 0 },
-        company: followUp.company,
+        action: { type: 'followup', company, role: followUp.job_title || '', contactName: followUp.alumni_name || '', pipelineId: followUp.id, followUpCount: followUp.follow_up_count || 0 },
+        company,
       });
     }
 
@@ -117,7 +122,7 @@ Deno.serve(async (req) => {
       ranked.sort((a, b) =>
         ((b._loc?.ranking_adjustment || 0) + (prefHit(b) ? 1 : 0)) - ((a._loc?.ranking_adjustment || 0) + (prefHit(a) ? 1 : 0)));
       const best = ranked[0];
-      if (best) {
+      if (best && (best.company || '').trim()) {
         const pref = prefHit(best);
         const reasons = ['Strong match for your goals, and it recently opened — early applicants stand out'];
         if (best._loc?.display_explanation && ['strong', 'tradeoff'].includes(best._loc.location_match)) reasons.push(best._loc.display_explanation);
@@ -135,19 +140,22 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Half-started application — finishing beats starting something new
+    // Half-started application — finishing beats starting something new.
+    // Skip if the company is missing so we never render a dangling title.
     const unprepared = (pipeline || []).find(r =>
       ['identified', 'matched'].includes(r.status) &&
+      (r.company || '').trim() &&
       !(resumes || []).some(t => (t.company_name || '').toLowerCase() === (r.company || '').toLowerCase())
     );
     if (unprepared) {
+      const company = unprepared.company.trim();
       candidates.push({
         score: 55, kind: 'complete',
-        title: `Finish your ${unprepared.company} application`,
+        title: `Finish your ${company} application`,
         reasons: ['You already started this one — finishing it beats starting something new'],
         time: '6 min', action_label: 'Complete',
-        action: { type: 'workspace', company: unprepared.company, role: unprepared.job_title || '' },
-        company: unprepared.company,
+        action: { type: 'workspace', company, role: unprepared.job_title || '' },
+        company,
       });
     }
 

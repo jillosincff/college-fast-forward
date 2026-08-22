@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, Clock, Check } from 'lucide-react';
 import { loadBestMoves, writeMovesCache, runMoveAction } from '@/lib/bestMoves';
+import { base44 } from '@/api/base44Client';
 import MissionDraftModal from './MissionDraftModal';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -37,6 +38,14 @@ export default function NextMoveHero({ user, firstName }) {
   const move = idx >= 0 ? moves[idx] : null;
   const remaining = doneFlags.filter((d, i) => !d && i !== idx).length;
 
+  // Defensive: a move title must always name its target. If the backend ever
+  // returns a dangling title ("Apply to " / "Follow up with " with no company)
+  // or an empty title, never render the broken hero — fall back to a neutral
+  // "pick your next role" card that points at the opportunities below.
+  const BROKEN_TAIL = /^(apply to|follow up with|start your|finish your)\s*$/i;
+  const titleBroken = !move || !move.title || !move.title.trim() || BROKEN_TAIL.test(move.title.trim());
+  const showFallback = !!move && titleBroken;
+
   const markDone = (i) => {
     const next = { ...state, done: doneFlags.map((d, j) => (j === i ? true : d)) };
     setState(next);
@@ -59,17 +68,35 @@ export default function NextMoveHero({ user, firstName }) {
     );
   }
 
-  if (!move) {
+  if (!move || showFallback) {
     return (
-      <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 20, padding: '26px 22px', textAlign: 'center', marginBottom: 16 }}>
-        <p style={{ fontSize: 26, margin: '0 0 6px' }}>🎉</p>
-        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#047857', margin: '0 0 6px' }}>
-          {greeting()}{firstName ? `, ${firstName}` : ''}.
+      <div style={{
+        background: 'linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%)',
+        borderRadius: 20, padding: 'clamp(20px, 4vw, 28px)', marginBottom: 16,
+        boxShadow: '0 8px 28px rgba(76,29,149,0.28)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
+          <Sparkles size={14} color="#c4b5fd" />
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 900, color: '#c4b5fd', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            {greeting()}{firstName ? `, ${firstName}` : ''} · Your next move
+          </span>
+        </div>
+        <h2 style={{ fontFamily: dm, fontSize: 'clamp(21px, 5vw, 28px)', fontWeight: 900, color: '#fff', margin: '0 0 10px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+          Pick your next role
+        </h2>
+        <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.82)', margin: '0 0 16px', lineHeight: 1.55 }}>
+          CLIFF has opportunities ready below — I'll line up the strongest fit and your next move as soon as you pick one.
         </p>
-        <p style={{ fontFamily: dm, fontSize: 17, fontWeight: 900, color: '#065f46', margin: '0 0 4px' }}>You're done for today.</p>
-        <p style={{ fontFamily: dm, fontSize: 13, color: '#047857', margin: 0, lineHeight: 1.55 }}>
-          That was the highest-leverage work available — no busywork needed. I'll have your next move ready tomorrow.
-        </p>
+        <button
+          onClick={() => {
+            try { base44.analytics.track({ eventName: 'next_move_fallback_clicked' }); } catch {}
+            const el = document.getElementById('cliff-best-opportunities');
+            if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            else { window.dispatchEvent(new CustomEvent('cff:focus-opportunities')); }
+          }}
+          style={{ fontFamily: dm, fontSize: 15, fontWeight: 900, color: '#4c1d95', background: '#fff', border: 'none', borderRadius: 999, padding: '13px 26px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+          See today's opportunities <ArrowRight size={16} />
+        </button>
       </div>
     );
   }
