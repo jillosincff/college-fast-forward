@@ -1,12 +1,4 @@
-import { computeVerdict } from './workspaceNextStep';
-
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
-
-const VERDICT_STYLES = {
-  pursue: { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' },
-  stretch: { bg: '#fffbeb', color: '#b45309', border: '#fde68a' },
-  skip: { bg: '#fef2f2', color: '#b91c1c', border: '#fecaca' },
-};
 
 // Keep the fit read short — one or two sentences, never an essay.
 const shortSummary = (t = '') => {
@@ -40,17 +32,9 @@ export default function JobFitCard({ fit, loading, error }) {
     );
   }
 
-  const verdict = computeVerdict(fit);
-  const style = VERDICT_STYLES[verdict.tone] || VERDICT_STYLES.stretch;
-
   return (
     <div style={card}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-        <h3 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Job Fit</h3>
-        <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, background: style.bg, color: style.color, border: `1px solid ${style.border}`, borderRadius: 999, padding: '5px 14px' }}>
-          {verdict.icon} {verdict.word}
-        </span>
-      </div>
+      <h3 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 12px' }}>Job Fit</h3>
 
       <p style={{ fontFamily: dm, fontSize: 14, color: '#1f2937', lineHeight: 1.65, margin: '0 0 14px' }}>{shortSummary(fit.why_match)}</p>
 

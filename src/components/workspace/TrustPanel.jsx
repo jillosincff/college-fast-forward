@@ -6,11 +6,7 @@ import OutcomeTimeline from '@/components/workspace/OutcomeTimeline';
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 const card = { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', marginBottom: 16 };
 
-const VERDICT_STYLE = {
-  pursue: { bg: '#ecfdf5', border: '#a7f3d0', color: '#047857' },
-  stretch: { bg: '#fffbeb', border: '#fde68a', color: '#b45309' },
-  skip: { bg: '#fef2f2', border: '#fecaca', color: '#b91c1c' },
-};
+
 
 // Strip any backend reason that contradicts the verdict (e.g. "networking won't
 // move the needle") so the Why-this? copy can never argue with the badge.
@@ -37,7 +33,6 @@ export default function TrustPanel({ job, fit, fitLoading }) {
 
   if (!ctx || ctx.error) return null;
   const verdict = computeVerdict(fit);
-  const vs = VERDICT_STYLE[verdict.tone] || VERDICT_STYLE.stretch;
   const isSkip = verdict.key === 'skip';
   const reasons = cleanReasons(ctx.reasons);
   const gaps = fit?.gaps || [];
@@ -45,14 +40,9 @@ export default function TrustPanel({ job, fit, fitLoading }) {
   return (
     <>
       <div style={card}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-          <button onClick={() => setOpen(v => !v)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', minWidth: 'auto' }}>
-            💡 Why this? {open ? '▾' : '▸'}
-          </button>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', background: vs.bg, border: `1px solid ${vs.border}`, color: vs.color, borderRadius: 999, padding: '4px 12px' }}>
-            {verdict.icon} {verdict.word}
-          </span>
-        </div>
+        <button onClick={() => setOpen(v => !v)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', minWidth: 'auto' }}>
+          💡 Why this? {open ? '▾' : '▸'}
+        </button>
 
         {open && (
           <div style={{ marginTop: 12 }}>

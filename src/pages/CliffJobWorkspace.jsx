@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { analyzeJobFit } from '@/functions/analyzeJobFit';
 import { syncJobPursuit } from '@/functions/syncJobPursuit';
-import WorkspaceNextStep from '@/components/workspace/WorkspaceNextStep';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import JobFitCard from '@/components/workspace/JobFitCard';
 import { computeVerdict } from '@/components/workspace/workspaceNextStep';
@@ -10,7 +9,6 @@ import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import TrustPanel from '@/components/workspace/TrustPanel';
-import TrajectoryFitCard from '@/components/workspace/TrajectoryFitCard';
 import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
 import { ArrowRight } from 'lucide-react';
 import decodeEntities from '@/utils/decodeEntities';
@@ -100,14 +98,19 @@ export default function CliffJobWorkspace() {
   const company = decodeEntities(job.company || '');
   const role = decodeEntities(job.role || job.job_title || '');
 
-  // The header CTA leads with the plan's next step — not the final step.
-  // Mirrors the WorkspaceNextStep card so the top action and the plan never disagree.
+  // ONE verdict drives the whole page. The hero shows it once; no other block repeats it.
   const verdict = computeVerdict(fit);
-  const hasApplyUrl = !!(job.jobUrl || job.job_url);
+  const isSkip = verdict.key === 'skip';
   const goTailor = () => {
     const params = new URLSearchParams({ company, role, job_url: job.jobUrl || job.job_url || '', from: 'workspace' });
     window.location.hash = `#/ResumeTailoring?${params.toString()}`;
   };
+
+  const nextLine = isSkip
+    ? 'Probably not this one — I’d focus elsewhere.'
+    : verdict.key === 'stretch'
+      ? 'Stretch role — tailor your resume if you want, then apply.'
+      : 'Strong fit — apply today.';
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
@@ -116,71 +119,66 @@ export default function CliffJobWorkspace() {
           ← Back to dashboard
         </button>
 
-        {/* Job header */}
+        {/* SINGLE JOB HERO — title, company, one verdict badge, one primary action. */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', marginBottom: 16 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(109,40,217,0.08)', border: '1px solid rgba(109,40,217,0.2)', borderRadius: 100, padding: '4px 12px', marginBottom: 10 }}>
-            <span style={{ fontSize: 11 }}>✨</span>
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#6d28d9', letterSpacing: '0.06em', textTransform: 'uppercase' }}>CLIFF Job Workspace</span>
-          </div>
           <h1 style={{ fontFamily: dm, fontSize: 'clamp(18px, 4.5vw, 24px)', fontWeight: 900, color: '#111827', margin: '0 0 4px', lineHeight: 1.25, wordBreak: 'break-word' }}>{role}</h1>
           <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#6b7280', margin: 0 }}>{company}</p>
-          {/* Single canonical verdict badge — same score every block uses. */}
-          {!fitLoading && fit && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: dm, fontSize: 12, fontWeight: 800, marginTop: 10, padding: '5px 14px', borderRadius: 999,
+
+          {/* The only verdict badge on the page. */}
+          {fitLoading ? (
+            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#7c3aed', margin: '12px 0 0' }}>Analyzing fit…</p>
+          ) : fit && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: dm, fontSize: 12, fontWeight: 800, marginTop: 12, padding: '5px 14px', borderRadius: 999,
               background: verdict.key === 'skip' ? '#fef2f2' : verdict.key === 'stretch' ? '#fffbeb' : '#ecfdf5',
               border: `1px solid ${verdict.key === 'skip' ? '#fecaca' : verdict.key === 'stretch' ? '#fde68a' : '#a7f3d0'}`,
               color: verdict.key === 'skip' ? '#b91c1c' : verdict.key === 'stretch' ? '#b45309' : '#047857' }}>
               {verdict.icon} {verdict.word}
             </span>
           )}
-          <div style={{ display: 'flex', gap: 14, marginTop: 8, flexWrap: 'wrap' }}>
+
+          <div style={{ display: 'flex', gap: 14, marginTop: 10, flexWrap: 'wrap' }}>
             {job.location && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>📍 {decodeEntities(job.location)}</span>}
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}
           </div>
 
-          {/* One primary action: apply. Resume is the single secondary text link. */}
+          {/* One primary action. Skip → leave, otherwise Apply. Resume is the single secondary link. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 16, flexWrap: 'wrap' }}>
-            {hasApplyUrl ? (
-              <button
-                onClick={() => setShowApply(true)}
-                style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}
-              >
-                Apply to job <ArrowRight size={15} />
+            {isSkip ? (
+              <button onClick={goBack} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: '#6b7280', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6 }}>
+                Back to dashboard
               </button>
             ) : (
-              <button
-                onClick={() => setShowApply(true)}
-                style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}
-              >
-                View posting <ArrowRight size={15} />
+              <button onClick={() => setShowApply(true)} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
+                Apply to job <ArrowRight size={15} />
               </button>
             )}
-            <button
-              onClick={goTailor}
-              style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6d28d9', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44, textDecoration: 'underline' }}
-            >
-              Prepare resume for this role
-            </button>
+            {!isSkip && (
+              <button onClick={goTailor} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6d28d9', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44, textDecoration: 'underline' }}>
+                Prepare resume for this role
+              </button>
+            )}
           </div>
-        </div>
 
-        {/* One Next Step: CLIFF's single strongest recommendation leads the workspace */}
-        {user && <WorkspaceNextStep job={job} pursuit={pursuit} fit={fit} fitLoading={fitLoading} user={user} />}
+          {/* One next-step sentence — replaces the whole Verdict / Next-Step card. */}
+          {!fitLoading && (
+            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#4b5563', margin: '14px 0 0', lineHeight: 1.5 }}>{nextLine}</p>
+          )}
+        </div>
 
         {/* People at this company — networking is always part of the plan */}
         {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
 
-        {/* Career Trajectory: why this job matters for the student's long-term path */}
-        {user && <TrajectoryFitCard job={job} user={user} />}
-
-        {/* CLIFF Trust Engine: why this, why not others, confidence, what changed, outcome timeline */}
+        {/* Why this? + progress checklist (collapsed, no duplicate verdict label) */}
         {user && <TrustPanel job={job} fit={fit} fitLoading={fitLoading} />}
 
         {user && <WorkspacePrepActions job={job} user={user} />}
 
-        <CompanyPrepCard job={job} onPrepared={() => syncPursuit({ companyResearched: true })} />
+        {/* Company prep demoted under a "More" disclosure */}
+        <MoreDisclosure>
+          <CompanyPrepCard job={job} onPrepared={() => syncPursuit({ companyResearched: true })} />
+        </MoreDisclosure>
 
         {showApply && user && (
           <WarmApplyFlow
@@ -191,6 +189,18 @@ export default function CliffJobWorkspace() {
           />
         )}
       </div>
+    </div>
+  );
+}
+
+function MoreDisclosure({ children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <button onClick={() => setOpen(v => !v)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44 }}>
+        {open ? '▾ Hide more' : '▸ More'}
+      </button>
+      {open && <div style={{ marginTop: 8 }}>{children}</div>}
     </div>
   );
 }
