@@ -48,29 +48,12 @@ export default function BestAdvantageCard({ job, pursuit }) {
   const value = assessment?.value || 'NONE';
   const resumeReady = ['ready_for_review', 'approved', 'complete'].includes(pursuit?.resume_status || '');
 
-  // LOW: stays collapsed — CLIFF does not recommend it
-  if (!loading && value === 'LOW') {
-    return (
-      <div style={card}>
-        <button onClick={() => setExpanded(v => !v)} style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', minWidth: 'auto' }}>
-          Networking Advantage {expanded ? '▾' : '▸'}
-        </button>
-        {expanded && (
-          <div style={{ marginTop: 12 }}>
-            <p style={{ fontFamily: dm, fontSize: 12.5, color: '#6b7280', margin: '0 0 10px', lineHeight: 1.55 }}>
-              {assessment.reason} Your application is the better use of your time here.
-            </p>
-            {assessment.best_contact && <ContactRow c={assessment.best_contact} />}
-          </div>
-        )}
-      </div>
-    );
-  }
+  const linkedinAlumni = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(company)}`;
 
   return (
     <div style={card}>
       <h3 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 12px' }}>
-        {value === 'MEDIUM' ? 'Possible Advantage' : 'Your Best Advantage'}
+        People at {company}
       </h3>
 
       {loading ? (
@@ -106,24 +89,27 @@ export default function BestAdvantageCard({ job, pursuit }) {
             ✉️ Use the Prepared Outreach
           </button>
         </>
-      ) : value === 'MEDIUM' ? (
+      ) : (value === 'MEDIUM' || value === 'LOW') && assessment?.best_contact ? (
         <>
           <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: '0 0 10px', lineHeight: 1.55 }}>
-            I found someone who may be worth contacting. It could help — but your application matters more. Your call.
+            Here's someone worth reaching out to at {company}. A short, specific message is always worth sending.
           </p>
           <ContactRow c={assessment.best_contact} />
           <button onClick={useDraft} style={{ marginTop: 10, fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 999, padding: '9px 18px', cursor: 'pointer', minHeight: 44 }}>
-            Draft outreach (optional)
+            ✉️ Copy message
           </button>
         </>
       ) : (
         <>
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
-            {resumeReady ? '📄 Your resume already matches well.' : '📄 A strong application is your edge here.'}
+            No one from your school found yet.
           </p>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0, lineHeight: 1.55 }}>
-            No meaningful networking advantage here. I don't think networking adds much value for this opportunity — I'd spend your time strengthening the application. If a real connection appears later, I'll flag it.
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: '0 0 10px', lineHeight: 1.55 }}>
+            You can cold apply now — I'll keep looking, and flag it the moment a connection shows up.
           </p>
+          <a href={linkedinAlumni} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', textDecoration: 'none' }}>
+            Search LinkedIn for {company} alumni ↗
+          </a>
         </>
       )}
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>

@@ -37,19 +37,13 @@ export function computeNextStep(pursuit, fit) {
       time: '0 min', ctaLabel: 'View in tracker', cta: 'tracker',
     };
   }
-  if (!resumeDone(pursuit?.resume_status)) {
-    return {
-      key: 'resume',
-      title: 'Get your tailored resume ready.',
-      detail: 'This is the step that most improves your odds — everything else waits until your resume speaks their language.',
-      time: '~5 min', ctaLabel: 'Prepare my resume', cta: 'tailor',
-    };
-  }
   return {
     key: 'apply',
-    title: 'Submit your application.',
-    detail: 'Your resume is ready — this application is prepared and worth sending today.',
-    time: '~10 min', ctaLabel: 'Review resume & apply', cta: 'apply',
+    title: 'Apply to this job.',
+    detail: resumeDone(pursuit?.resume_status)
+      ? 'Your tailored resume is ready — send this one today.'
+      : 'This one is worth sending. Tailor your resume first if you want, then apply.',
+    time: '~10 min', ctaLabel: 'Apply to this job', cta: 'apply',
   };
 }
 

@@ -10,11 +10,9 @@ import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import TrustPanel from '@/components/workspace/TrustPanel';
 import TrajectoryFitCard from '@/components/workspace/TrajectoryFitCard';
-import CliffReadyCard from '@/components/conversion/CliffReadyCard';
 import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
 import { ArrowRight } from 'lucide-react';
 import decodeEntities from '@/utils/decodeEntities';
-import { computeNextStep } from '@/components/workspace/workspaceNextStep';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -103,7 +101,7 @@ export default function CliffJobWorkspace() {
 
   // The header CTA leads with the plan's next step — not the final step.
   // Mirrors the WorkspaceNextStep card so the top action and the plan never disagree.
-  const nextStep = computeNextStep(pursuit, fit);
+  const hasApplyUrl = !!(job.jobUrl || job.job_url);
   const goTailor = () => {
     const params = new URLSearchParams({ company, role, job_url: job.jobUrl || job.job_url || '', from: 'workspace' });
     window.location.hash = `#/ResumeTailoring?${params.toString()}`;
@@ -130,46 +128,37 @@ export default function CliffJobWorkspace() {
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}
           </div>
 
-          {/* Header CTA leads with the plan's next step — not the final step. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
-            {nextStep.cta === 'tailor' && (
-              <button
-                onClick={goTailor}
-                style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}
-              >
-                Prepare my resume <ArrowRight size={15} />
-              </button>
-            )}
-            {nextStep.cta === 'apply' && (
+          {/* One primary action: apply. Resume is the single secondary text link. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 16, flexWrap: 'wrap' }}>
+            {hasApplyUrl ? (
               <button
                 onClick={() => setShowApply(true)}
                 style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}
               >
-                Apply <ArrowRight size={15} />
+                Apply to job <ArrowRight size={15} />
               </button>
-            )}
-            {(job.jobUrl || job.job_url) && (
-              <a href={job.jobUrl || job.job_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6d28d9', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                View posting ↗
-              </a>
-            )}
-            {/* Apply stays reachable while the resume is being prepared — just demoted, never competing */}
-            {nextStep.cta === 'tailor' && (
+            ) : (
               <button
                 onClick={() => setShowApply(true)}
-                style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44, textDecoration: 'underline' }}
+                style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}
               >
-                or apply now
+                View posting <ArrowRight size={15} />
               </button>
             )}
+            <button
+              onClick={goTailor}
+              style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6d28d9', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44, textDecoration: 'underline' }}
+            >
+              Prepare resume for this role
+            </button>
           </div>
         </div>
 
         {/* One Next Step: CLIFF's single strongest recommendation leads the workspace */}
         {user && <WorkspaceNextStep job={job} pursuit={pursuit} fit={fit} fitLoading={fitLoading} user={user} />}
 
-        {/* "CLIFF Is Ready" preview — Free students post-Magic-Moment only (backend-gated) */}
-        {user && <CliffReadyCard job={job} />}
+        {/* People at this company — networking is always part of the plan */}
+        {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
 
         <JobFitCard fit={fit} loading={fitLoading} error={fitError} />
 
@@ -182,8 +171,6 @@ export default function CliffJobWorkspace() {
         {user && <WorkspacePrepActions job={job} user={user} />}
 
         <CompanyPrepCard job={job} onPrepared={() => syncPursuit({ companyResearched: true })} />
-
-        {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
 
         {showApply && user && (
           <WarmApplyFlow
