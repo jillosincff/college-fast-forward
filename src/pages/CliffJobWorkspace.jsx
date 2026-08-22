@@ -5,6 +5,7 @@ import { syncJobPursuit } from '@/functions/syncJobPursuit';
 import WorkspaceNextStep from '@/components/workspace/WorkspaceNextStep';
 import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import JobFitCard from '@/components/workspace/JobFitCard';
+import { computeVerdict } from '@/components/workspace/workspaceNextStep';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
@@ -101,6 +102,7 @@ export default function CliffJobWorkspace() {
 
   // The header CTA leads with the plan's next step — not the final step.
   // Mirrors the WorkspaceNextStep card so the top action and the plan never disagree.
+  const verdict = computeVerdict(fit);
   const hasApplyUrl = !!(job.jobUrl || job.job_url);
   const goTailor = () => {
     const params = new URLSearchParams({ company, role, job_url: job.jobUrl || job.job_url || '', from: 'workspace' });
@@ -122,7 +124,15 @@ export default function CliffJobWorkspace() {
           </div>
           <h1 style={{ fontFamily: dm, fontSize: 'clamp(18px, 4.5vw, 24px)', fontWeight: 900, color: '#111827', margin: '0 0 4px', lineHeight: 1.25, wordBreak: 'break-word' }}>{role}</h1>
           <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#6b7280', margin: 0 }}>{company}</p>
-          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', margin: '6px 0 0' }}>I'm on it — everything for this application lives right here.</p>
+          {/* Single canonical verdict badge — same score every block uses. */}
+          {!fitLoading && fit && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: dm, fontSize: 12, fontWeight: 800, marginTop: 10, padding: '5px 14px', borderRadius: 999,
+              background: verdict.key === 'skip' ? '#fef2f2' : verdict.key === 'stretch' ? '#fffbeb' : '#ecfdf5',
+              border: `1px solid ${verdict.key === 'skip' ? '#fecaca' : verdict.key === 'stretch' ? '#fde68a' : '#a7f3d0'}`,
+              color: verdict.key === 'skip' ? '#b91c1c' : verdict.key === 'stretch' ? '#b45309' : '#047857' }}>
+              {verdict.icon} {verdict.word}
+            </span>
+          )}
           <div style={{ display: 'flex', gap: 14, marginTop: 8, flexWrap: 'wrap' }}>
             {job.location && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>📍 {decodeEntities(job.location)}</span>}
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}
@@ -166,7 +176,7 @@ export default function CliffJobWorkspace() {
         {user && <TrajectoryFitCard job={job} user={user} />}
 
         {/* CLIFF Trust Engine: why this, why not others, confidence, what changed, outcome timeline */}
-        {user && <TrustPanel job={job} />}
+        {user && <TrustPanel job={job} fit={fit} fitLoading={fitLoading} />}
 
         {user && <WorkspacePrepActions job={job} user={user} />}
 

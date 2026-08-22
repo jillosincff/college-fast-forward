@@ -3,15 +3,32 @@
 
 const resumeDone = s => ['ready_for_review', 'approved', 'complete'].includes(s || '');
 
+// ONE canonical verdict, derived from the job-fit label. Used by the header,
+// Job Fit badge, Why this?, and the Next Step so every block agrees.
 export function computeVerdict(fit) {
-  const label = fit?.fit_label || '';
-  if (label === 'Strong Match') return { icon: '🔥', word: 'Pursue', tone: 'pursue' };
-  return { icon: '⭐', word: 'Worth pursuing', tone: 'consider' };
+  const label = (fit?.fit_label || '').toLowerCase();
+  if (label.includes('low') || label.includes('not recommended') || label.includes('skip')) {
+    return { key: 'skip', icon: '⊘', word: 'Skip', tone: 'skip' };
+  }
+  if (label.includes('stretch')) {
+    return { key: 'stretch', icon: '⭐', word: 'Stretch', tone: 'stretch' };
+  }
+  return { key: 'worth_pursuing', icon: '🔥', word: 'Worth pursuing', tone: 'pursue' };
 }
 
 // Returns { key, title, detail, time, ctaLabel, cta } — cta is 'tailor' | 'apply' | 'interview' | 'tracker' | 'back'
 export function computeNextStep(pursuit, fit) {
   const appStatus = pursuit?.application_status || '';
+
+  // A Skip verdict never leads with Apply — get the student out of here.
+  if (computeVerdict(fit).key === 'skip' && !appStatus) {
+    return {
+      key: 'pass',
+      title: 'Probably not this one.',
+      detail: "The fit gaps are real — I'd spend your time on a stronger match. I'll keep an eye out for better options at this company.",
+      time: '0 min', ctaLabel: 'Back to dashboard', cta: 'back',
+    };
+  }
 
   if (appStatus === 'interviewing' || pursuit?.interview_status === 'scheduled') {
     return {

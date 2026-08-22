@@ -6,9 +6,9 @@ import { computeVerdict, computeNextStep, computePlan } from './workspaceNextSte
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 const VERDICT_STYLES = {
-  pursue: { bg: '#fff7ed', border: '#fdba74', text: '#c2410c' },
-  consider: { bg: '#eef2ff', border: '#c7d2fe', text: '#4338ca' },
-  skip: { bg: '#f9fafb', border: '#e5e7eb', text: '#6b7280' },
+  pursue: { bg: '#ecfdf5', border: '#a7f3d0', text: '#047857' },
+  stretch: { bg: '#fffbeb', border: '#fde68a', text: '#b45309' },
+  skip: { bg: '#fef2f2', border: '#fecaca', text: '#b91c1c' },
 };
 
 // The one answer this workspace exists to give: "What is my best next move?"
@@ -70,14 +70,20 @@ export default function WorkspaceNextStep({ job, pursuit, fit, fitLoading, user 
         <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#9ca3af', display: 'flex', alignItems: 'center', gap: 5 }}>
           <Clock size={12} /> {step.time}
         </span>
-        <button onClick={act}
-          style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: step.cta === 'back' ? '#6b7280' : 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 24px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: step.cta === 'back' ? 'none' : '0 6px 20px rgba(124,58,237,0.3)' }}>
-          {step.ctaLabel} <ArrowRight size={15} />
-        </button>
+        {/* The header already owns the primary Apply — the verdict only repeats it
+            as a button when the next step is NOT apply (interview / follow-up / pass). */}
+        {step.cta === 'apply' ? (
+          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>↑ Apply above</span>
+        ) : (
+          <button onClick={act}
+            style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: step.cta === 'back' ? '#6b7280' : 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 24px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: step.cta === 'back' ? 'none' : '0 6px 20px rgba(124,58,237,0.3)' }}>
+            {step.ctaLabel} <ArrowRight size={15} />
+          </button>
+        )}
       </div>
 
       {/* This job's plan — only the steps it actually needs */}
-      {verdict.tone !== 'skip' && (
+      {verdict.key !== 'skip' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 16, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
           <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: 2 }}>This job's plan:</span>
           {plan.map((s, i) => (
