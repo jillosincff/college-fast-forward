@@ -7,7 +7,7 @@ import {
   FONT, CARD, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
   VIOLET, GRAD_INDIGO, SHADOW, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { Briefcase, Users, Sparkles } from 'lucide-react';
+import { Briefcase, Users, Sparkles, Search, MapPin } from 'lucide-react';
 import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import SoftWallModal from '@/components/conversion/SoftWallModal';
@@ -50,7 +50,7 @@ const pill = (extra) => ({
 });
 
 export default function MagicMoment() {
-  const { user } = useAuth();
+  const { user: initialUser } = useAuth();
   const navigate = useNavigate();
   const ranRef = useRef(false);
 
@@ -63,6 +63,42 @@ export default function MagicMoment() {
   const [showSoftWall, setShowSoftWall] = useState(false);
   const [error, setError] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
+
+  // Search bar state — lets the user (or tester) override role/location directly
+  const cg0 = initialUser?.career_goals || {};
+  const [searchRole, setSearchRole] = useState((cg0.target_roles || [])[0] || '');
+  const [searchLoc, setSearchLoc] = useState(cg0.location_preference || initialUser?.location || '');
+  const [user, setUser] = useState(initialUser);
+
+  // Re-run the Magic Moment with an explicit role/location override.
+  // Used by the search bar so the user can try "HR in Miami, FL" without
+  // having to edit career_goals via a separate modal.
+  const handleSearch = async (e) => {
+    e?.preventDefault();
+    if (!searchRole.trim() && !searchLoc.trim()) return;
+    const updatedGoals = {
+      ...cg0,
+      target_roles: searchRole.trim() ? [searchRole.trim()] : (cg0.target_roles || []),
+      target_industries: [],
+      location_preference: searchLoc.trim() || undefined,
+      seeking: cg0.seeking || 'both',
+      saved_at: new Date().toISOString(),
+    };
+    try { await base44.auth.updateMe({ career_goals: updatedGoals, location: searchLoc.trim() || undefined }); } catch (e) {}
+    const freshUser = { ...initialUser, career_goals: updatedGoals, location: searchLoc.trim() };
+    setUser(freshUser);
+    ranRef.current = false;
+    setPhase('Finding jobs and people for you…');
+    setJobsList([]);
+    setPeopleList([]);
+    setBestPath(null);
+    setTailored(null);
+    setError('');
+    // Force the effect to re-run with the new user object
+    setRunKey(k => k + 1);
+  };
+
+  const [runKey, setRunKey] = useState(0);
 
   useEffect(() => {
     if (!user || ranRef.current) return;
@@ -297,7 +333,7 @@ export default function MagicMoment() {
         setPhase(null);
       }
     })();
-  }, [user]);
+  }, [user, runKey]);
 
   const downloadResume = () => {
     if (!tailored?.tailoredResume?.tailored_content && !tailored?.tailored_content) return;
@@ -312,15 +348,48 @@ export default function MagicMoment() {
 
   if (phase) return <MagicMomentLoader phase={phase} />;
 
+  // Search bar — always visible so the user (or tester) can try any role + location
+  const SearchBar = (
+    <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div style={{ flex: '1 1 180px', position: 'relative' }}>
+        <Search size={14} color={INDIGO_DIM} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+        <input
+          value={searchRole}
+          onChange={e => setSearchRole(e.target.value)}
+          placeholder="Role (e.g. HR, Marketing, Finance)"
+          style={{ width: '100%', fontFamily: FONT, fontSize: 13, color: TEXT, background: CARD,
+            border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 14px 11px 36px', outline: 'none' }}
+        />
+      </div>
+      <div style={{ flex: '1 1 160px', position: 'relative' }}>
+        <MapPin size={14} color={INDIGO_DIM} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+        <input
+          value={searchLoc}
+          onChange={e => setSearchLoc(e.target.value)}
+          placeholder="Location (e.g. Miami, FL)"
+          style={{ width: '100%', fontFamily: FONT, fontSize: 13, color: TEXT, background: CARD,
+            border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 14px 11px 36px', outline: 'none' }}
+        />
+      </div>
+      <button type="submit" style={pill({ padding: '11px 20px' })}>Search</button>
+    </form>
+  );
+
   // Empty ONLY when both lists are truly empty
   const bothEmpty = jobsList.length === 0 && peopleList.length === 0;
 
   if (error && bothEmpty) {
     return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #faf5ff 0%, #fff 40%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
-        <div style={{ textAlign: 'center', maxWidth: 420 }}>
-          <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, marginBottom: 20 }}>{error}</p>
-          <button onClick={() => navigate('/FreeTierDashboard')} style={pill({})}>Go to dashboard →</button>
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #faf5ff 0%, #fff 40%)', paddingBottom: 48 }}>
+        <div style={{ maxWidth: 620, margin: '0 auto', padding: '28px 16px' }}>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <h1 style={{ fontFamily: FONT, fontSize: 26, fontWeight: 800, color: TEXT, margin: '0 0 8px' }}>Let's try that again.</h1>
+            <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>{error}</p>
+          </div>
+          {SearchBar}
+          <div style={{ textAlign: 'center', marginTop: 20 }}>
+            <button onClick={() => navigate('/FreeTierDashboard')} style={pill({})}>Go to dashboard →</button>
+          </div>
         </div>
       </div>
     );
@@ -345,6 +414,24 @@ export default function MagicMoment() {
           </p>
         </div>
 
+        {/* Search bar */}
+        {SearchBar}
+
+        {/* Empty-state prompt — when both lists are empty, show guidance instead of just the resume card */}
+        {bothEmpty && !error && (
+          <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
+            <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>
+              No matches found for this search.
+            </p>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 12px', lineHeight: 1.5 }}>
+              Try a different role or location above — e.g. "HR" in "Miami, FL" or "Marketing" in "New York, NY".
+            </p>
+            <button onClick={() => navigate('/FreeTierDashboard')} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>
+              ← Back to dashboard
+            </button>
+          </div>
+        )}
+
         {/* Best path card (optional) */}
         {bestPath && (
           <BestPathCard job={bestPath.job} person={bestPath.person} user={user} />
@@ -366,8 +453,8 @@ export default function MagicMoment() {
           </div>
         )}
 
-        {/* Resume card */}
-        <HeroResume tailored={tailored} onDownload={downloadResume} />
+        {/* Resume card — only show when there are jobs or people to contextually attach it to */}
+        {!bothEmpty && <HeroResume tailored={tailored} onDownload={downloadResume} />}
       </div>
       {showPro && <ProUpgradeModal user={user} onClose={() => setShowPro(false)} source="magic_moment" />}
       {showSoftWall && <SoftWallModal user={user} onClose={() => setShowSoftWall(false)} source="soft_wall" />}
