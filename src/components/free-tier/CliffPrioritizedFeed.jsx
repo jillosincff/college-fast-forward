@@ -391,7 +391,8 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp,
                 )}
                 {!isPremium && !access.excludePrompts && visibleSlots.length >= dailyLimit && (
                   <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 text-center">
-                    <p className="text-sm font-bold text-purple-900">CLIFF has more matches ready for you.</p>
+                    <p className="text-sm font-bold text-purple-900">You've seen today's 3 free roles.</p>
+                    <p className="text-xs text-purple-600 mt-1">Pro unlocks the full list — up to 30 jobs a day.</p>
                     <button
                       onClick={() => onUpgrade?.('Unlimited Daily Matches')}
                       className="mt-3 px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer"

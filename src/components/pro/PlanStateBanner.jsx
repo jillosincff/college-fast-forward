@@ -57,7 +57,7 @@ export default function PlanStateBanner({ user, onUpgrade }) {
             You've used your free cycle.
           </p>
           <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.78)', margin: 0, lineHeight: 1.5 }}>
-            Unlock CLIFF Pro to run this for every job — unlimited tailored resumes, alumni or parent matches, and ready-to-send outreach.
+            Pro unlocks up to 30 jobs a day (vs. 3 on free), more people from your school, and ready-to-send outreach for every role.
           </p>
         </div>
         <button
