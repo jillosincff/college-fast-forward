@@ -90,7 +90,7 @@ export default function NextMoveHero({ user, firstName }) {
         <button
           onClick={() => {
             try { base44.analytics.track({ eventName: 'next_move_fallback_clicked' }); } catch {}
-            const el = document.getElementById('cliff-best-opportunities');
+            const el = document.getElementById('cff-daily-feed');
             if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
             else { window.dispatchEvent(new CustomEvent('cff:focus-opportunities')); }
           }}
