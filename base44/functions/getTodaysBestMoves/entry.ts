@@ -32,15 +32,16 @@ Deno.serve(async (req) => {
     const readyResume = (resumes || []).find(r => r.status === 'completed' && !r.downloaded_at && (r.company_name || '').trim());
     if (readyResume) {
       const company = readyResume.company_name.trim();
+      const role = (readyResume.role_title || '').trim();
       const conn = (pipeline || []).find(r => (r.company || '').toLowerCase() === company.toLowerCase() && r.alumni_name);
-      const reasons = ['Your tailored resume is already prepared — you\'re one step from done'];
-      if ((readyResume.ats_score || 0) >= 75) reasons.unshift('Excellent fit — your resume scores strongly for this role');
+      const reasons = ['Resume ready — apply when you\'re set'];
+      if ((readyResume.ats_score || 0) >= 75) reasons.unshift('Strong fit for your background');
       if (conn) reasons.push(`One possible connection available: ${conn.alumni_name}`);
       candidates.push({
         score: 92, kind: 'apply',
-        title: `Apply to ${company}`,
+        title: role ? `Apply to ${role} at ${company}` : `Apply to ${company}`,
         reasons, time: '6 min', action_label: 'Continue',
-        action: { type: 'workspace', company, role: readyResume.role_title || '' },
+        action: { type: 'workspace', company, role, jobUrl: readyResume.job_url || '' },
         company,
       });
     }
