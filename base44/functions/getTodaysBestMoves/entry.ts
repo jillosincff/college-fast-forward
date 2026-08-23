@@ -21,6 +21,13 @@ Deno.serve(async (req) => {
     ]);
 
     const daysSince = (r) => Math.floor((Date.now() - new Date(r.status_date || r.created_date).getTime()) / 86400000);
+    // Every next-move title names the role + company so a student never sees a
+    // vague "Apply to Acme Corp" when the role is known. Falls back to company
+    // only when no role is available (never a dangling "at ").
+    const roleAt = (role, company) => {
+      const r = (role || '').trim();
+      return r ? `${r} at ${company}` : company;
+    };
     const avoids = (memories || []).filter(m => (m.confidence || 0) >= 70 && ['disliked_industries', 'avoided_companies', 'excluded_locations'].includes(m.category));
     const prefers = (memories || []).filter(m => (m.confidence || 0) >= 50 && ['preferred_industries', 'preferred_locations', 'target_companies'].includes(m.category));
 
@@ -39,7 +46,7 @@ Deno.serve(async (req) => {
       if (conn) reasons.push(`One possible connection available: ${conn.alumni_name}`);
       candidates.push({
         score: 92, kind: 'apply',
-        title: role ? `Apply to ${role} at ${company}` : `Apply to ${company}`,
+        title: `Apply to ${roleAt(role, company)}`,
         reasons, time: '6 min', action_label: 'Continue',
         action: { type: 'workspace', company, role, jobUrl: readyResume.job_url || '' },
         company,
@@ -56,7 +63,7 @@ Deno.serve(async (req) => {
       const company = followUp.company.trim();
       candidates.push({
         score: 88, kind: 'followup',
-        title: `Follow up with ${company}`,
+        title: `Follow up on ${roleAt(followUp.job_title, company)}`,
         reasons: [
           `You ${followUp.status === 'applied' ? 'applied' : 'reached out'} ${daysSince(followUp)} days ago — this is usually the right follow-up window`,
           'Your draft is already prepared',
@@ -132,7 +139,7 @@ Deno.serve(async (req) => {
         if (skippedBy) reasons.push(`I skipped ${skippedBy.value} ${skippedBy.category === 'excluded_locations' ? 'listings' : 'roles'} because ${skippedBy.source === 'explicit' ? "you told me you're not interested" : "you keep passing on them"}`);
         candidates.push({
           score: 65, kind: 'newjob',
-          title: `Start your ${best.company} application`,
+          title: `Apply to ${roleAt(best.role || best.title, best.company)}`,
           reasons, time: '5 min', action_label: 'Apply',
           action: { type: 'workspace', company: best.company, role: best.role || best.title || '', jobUrl: best.jobUrl || best.job_url || '', location: best.location || '' },
           company: best.company,
@@ -152,7 +159,7 @@ Deno.serve(async (req) => {
       const company = unprepared.company.trim();
       candidates.push({
         score: 55, kind: 'complete',
-        title: `Finish your ${company} application`,
+        title: `Finish your ${roleAt(unprepared.job_title, company)} application`,
         reasons: ['You already started this one — finishing it beats starting something new'],
         time: '6 min', action_label: 'Complete',
         action: { type: 'workspace', company, role: unprepared.job_title || '' },
