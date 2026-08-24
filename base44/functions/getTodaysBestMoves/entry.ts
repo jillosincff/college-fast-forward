@@ -50,6 +50,7 @@ Deno.serve(async (req) => {
         reasons, time: '6 min', action_label: 'Continue',
         action: { type: 'workspace', company, role, jobUrl: readyResume.job_url || '' },
         company,
+        _warm: !!conn,
       });
     }
 
@@ -90,6 +91,51 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Mirror of the workspace verdict engine (cliffVerdict.js). A job that would
+    // show "Skip" in the workspace must never be recommended as the next move —
+    // recommending it and then telling the student to skip it is a contradiction.
+    const goals = user.career_goals || {};
+    const goalTargets = [goals.target_role, ...(goals.target_roles || [])].filter(Boolean).map(t => String(t).toLowerCase());
+    const goalIndustries = (goals.target_industries || []).map(i => String(i).toLowerCase());
+    const prefLocs = (user.preferred_locations || [])
+      .map(l => String(l.display_label || l.city || l.metro || l.state || '').toLowerCase())
+      .filter(Boolean);
+    const strictLocation = user.location_flexibility === 'stay' || user.relocation_openness === 'no';
+    const verdictScore = (s) => {
+      const role = String(s.role || s.title || s.job_title || '').toLowerCase();
+      const location = String(s.location || '').toLowerCase();
+      let score = 0;
+      const targetHit = goalTargets.find(t => role.includes(t) || t.includes(role));
+      const industryHit = goalIndustries.find(i => role.includes(i));
+      if (targetHit) score += 3;
+      else if (industryHit) score += 2;
+      else if (goalTargets.length || goalIndustries.length) score -= 1;
+      const isRemote = /remote/.test(location) || s.is_remote === true;
+      if (isRemote && ['required', 'preferred'].includes(user.remote_preference)) score += 2;
+      if (prefLocs.length) {
+        const locMatch = prefLocs.find(p => location.includes(p) || (p.includes(',') && location.includes(p.split(',')[0].trim())));
+        if (locMatch) score += 2;
+        else if (!isRemote && location) {
+          if (strictLocation) score -= 3;
+          else if (user.relocation_openness !== 'yes') score -= 1;
+        }
+      }
+      for (const m of (memories || [])) {
+        const v = String(m.value || '').toLowerCase();
+        if (!v) continue;
+        if (m.category === 'preferred_locations' && !prefLocs.length && location.includes(v)) score += 2;
+        else if (m.category === 'preferred_industries' && role.includes(v) && !industryHit) score += 1;
+        else if (m.category === 'disliked_industries' && role.includes(v)) score -= 2;
+      }
+      if (s.hasAlumni || (s.alumniCount || 0) > 0 || (s.parentCount || 0) > 0) score += 3;
+      if (s.posted_date) {
+        const days = Math.floor((Date.now() - new Date(s.posted_date).getTime()) / 86400000);
+        if (days >= 0 && days <= 3) score += 2;
+        else if (days > 21) score -= 1;
+      }
+      return score;
+    };
+
     // One best new job from today's curated drop — memory-aware, CLIFF picks it
     const drop = (drops || [])[0];
     if (drop) {
@@ -126,7 +172,9 @@ Deno.serve(async (req) => {
       passes.forEach((s, i) => { s._loc = locByKey[String(i)] || null; });
       const nonViolating = passes.filter(s => !s._loc?.hard_constraint_violation);
       const locSkipped = passes.length - nonViolating.length;
-      const ranked = nonViolating.length ? nonViolating : passes;
+      const rankedAll = nonViolating.length ? nonViolating : passes;
+      // Never recommend a job the workspace would grade "Skip" (score < 2 = low tier)
+      const ranked = rankedAll.filter(s => verdictScore(s) >= 2);
       ranked.sort((a, b) =>
         ((b._loc?.ranking_adjustment || 0) + (prefHit(b) ? 1 : 0)) - ((a._loc?.ranking_adjustment || 0) + (prefHit(a) ? 1 : 0)));
       const best = ranked[0];
@@ -164,16 +212,25 @@ Deno.serve(async (req) => {
         time: '6 min', action_label: 'Complete',
         action: { type: 'workspace', company, role: unprepared.job_title || '' },
         company,
+        _warm: !!unprepared.alumni_name,
       });
     }
 
+    // Verdict gate: apply/complete moves point at jobs the workspace grades.
+    // If the workspace would say "Skip", never recommend it as the next move.
+    // (+2 mirrors the workspace's existing-progress bonus; >= 2 = at least "consider".)
+    const gated = candidates.filter(c => {
+      if (!['apply', 'complete'].includes(c.kind)) return true;
+      return verdictScore({ role: c.action?.role || '', company: c.company, hasAlumni: c._warm }) + 2 >= 2;
+    });
+
     // Rank, dedupe by company, keep 3. Never pad with busywork.
-    candidates.sort((a, b) => b.score - a.score);
+    gated.sort((a, b) => b.score - a.score);
     const moves = [];
-    for (const c of candidates) {
+    for (const c of gated) {
       if (moves.length >= 3) break;
       if (c.company && moves.some(m => (m.company || '').toLowerCase() === c.company.toLowerCase())) continue;
-      const { score: _score, ...move } = c; // confidence is advice, not a number — never expose scores
+      const { score: _score, _warm: _w, ...move } = c; // confidence is advice, not a number — never expose scores
       moves.push(move);
     }
 
@@ -187,7 +244,7 @@ Deno.serve(async (req) => {
     };
     const label = (c) => c.kind === 'followup' ? `following up with ${c.company}` : (c.company || c.title);
     const chosen = new Set(moves.map(m => m.title));
-    const passedOver = candidates.filter(c => !chosen.has(c.title));
+    const passedOver = gated.filter(c => !chosen.has(c.title));
     moves.forEach((m, i) => {
       const whyNot = [];
       const alt = passedOver.find(c => (c.company || '').toLowerCase() !== (m.company || '').toLowerCase());
