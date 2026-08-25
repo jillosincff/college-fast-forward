@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { loadBestMoves, writeMovesCache, runMoveAction } from '@/lib/bestMoves';
+import { loadBestMoves, completeMove, runMoveAction } from '@/lib/bestMoves';
 import MissionDraftModal from './MissionDraftModal';
 import { Sparkles, ArrowRight, Clock, Check } from 'lucide-react';
 
@@ -23,12 +23,7 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
     return () => { cancelled = true; };
   }, [user?.email]);
 
-  const save = (next) => {
-    setState(next);
-    writeMovesCache(user.email, next);
-  };
-
-  const markDone = (i) => save({ ...state, done: state.done.map((d, j) => (j === i ? true : d)) });
+  const markDone = (i, sentViaModal = false) => setState(completeMove(user.email, state, i, { sentViaModal }));
 
   const go = (m, i) => {
     if (runMoveAction(m) === 'followup') { setDraftTask({ ...m.action, kind: 'followup', index: i }); return; }
@@ -143,7 +138,7 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
           task={draftTask}
           user={user}
           onClose={() => setDraftTask(null)}
-          onSent={() => { markDone(draftTask.index); setDraftTask(null); }}
+          onSent={() => { markDone(draftTask.index, true); setDraftTask(null); }}
         />
       )}
     </div>

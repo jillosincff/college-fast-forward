@@ -51,7 +51,11 @@ Deno.serve(async (req) => {
       return aScore - bScore;
     });
 
-    const best = ranked[0];
+    // Rotate daily through the top of the pool so the card never feels frozen —
+    // same student, different (still strong) warm connection across days.
+    const rotationPool = ranked.slice(0, Math.min(ranked.length, 5));
+    const dayNumber = Math.floor(Date.now() / 86400000);
+    const best = rotationPool[dayNumber % rotationPool.length];
 
     return Response.json({
       match_found: true,

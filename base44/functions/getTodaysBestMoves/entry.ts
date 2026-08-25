@@ -55,9 +55,14 @@ Deno.serve(async (req) => {
     }
 
     // Follow-up window open, draft ready. Skip if company is missing.
+    // A completed follow-up never resurfaces for at least 5 days, and leads
+    // older than 21 days with no reply are cold — stop nagging about them.
+    const daysFrom = (iso) => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
     const followUp = (pipeline || []).find(r =>
       ((['reached_out', 'messaged'].includes(r.status) && daysSince(r) >= 5) || (r.status === 'applied' && daysSince(r) >= 7)) &&
+      daysSince(r) <= 21 &&
       (r.follow_up_count || 0) < 2 &&
+      (!r.follow_up_date || daysFrom(r.follow_up_date) >= 5) &&
       (r.company || '').trim()
     );
     if (followUp) {

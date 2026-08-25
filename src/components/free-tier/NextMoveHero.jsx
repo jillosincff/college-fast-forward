@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, Clock, Check } from 'lucide-react';
-import { loadBestMoves, writeMovesCache, runMoveAction } from '@/lib/bestMoves';
+import { loadBestMoves, completeMove, runMoveAction } from '@/lib/bestMoves';
 import { base44 } from '@/api/base44Client';
 import MissionDraftModal from './MissionDraftModal';
 
@@ -46,10 +46,9 @@ export default function NextMoveHero({ user, firstName }) {
   const titleBroken = !move || !move.title || !move.title.trim() || BROKEN_TAIL.test(move.title.trim());
   const showFallback = !!move && titleBroken;
 
-  const markDone = (i) => {
-    const next = { ...state, done: doneFlags.map((d, j) => (j === i ? true : d)) };
+  const markDone = (i, sentViaModal = false) => {
+    const next = completeMove(user.email, state, i, { sentViaModal });
     setState(next);
-    writeMovesCache(user.email, next);
     setWhyOpen(false);
     setJustDone(true);
     setTimeout(() => setJustDone(false), 1600);
@@ -173,7 +172,7 @@ export default function NextMoveHero({ user, firstName }) {
           task={draftTask}
           user={user}
           onClose={() => setDraftTask(null)}
-          onSent={() => { markDone(draftTask.index); setDraftTask(null); }}
+          onSent={() => { markDone(draftTask.index, true); setDraftTask(null); }}
         />
       )}
     </div>
