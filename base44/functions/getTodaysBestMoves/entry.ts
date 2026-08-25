@@ -12,13 +12,19 @@ Deno.serve(async (req) => {
     const email = user.email;
     const today = new Date().toISOString().slice(0, 10);
 
-    const [memories, pipeline, resumes, drops, discoveries] = await Promise.all([
+    const [memories, pipelineRaw, resumesRaw, drops, discoveries] = await Promise.all([
       base44.entities.StudentMemory.filter({ user_email: email, active: true }, '-confidence', 100).catch(() => []),
       base44.entities.NetworkingPipeline.filter({ user_email: email }, '-created_date', 100).catch(() => []),
       base44.entities.TailoredResume.filter({ user_email: email }, '-created_date', 30).catch(() => []),
       base44.entities.UserDailyDrop.filter({ user_email: email, drop_date: today }).catch(() => []),
       base44.entities.CliffDiscovery.filter({ user_email: email, status: 'new' }, '-created_date', 10).catch(() => []),
     ]);
+
+    // Demo/test employers must never reach a live queue
+    const DEMO_COMPANIES = new Set(['acme', 'acme corp', 'acme inc', 'globex', 'initech', 'test company', 'demo company']);
+    const isDemo = (name) => DEMO_COMPANIES.has(String(name || '').toLowerCase().trim());
+    const pipeline = (pipelineRaw || []).filter(r => !isDemo(r.company));
+    const resumes = (resumesRaw || []).filter(r => !isDemo(r.company_name));
 
     const daysSince = (r) => Math.floor((Date.now() - new Date(r.status_date || r.created_date).getTime()) / 86400000);
     // Every next-move title names the role + company so a student never sees a
@@ -115,6 +121,11 @@ Deno.serve(async (req) => {
       if (targetHit) score += 3;
       else if (industryHit) score += 2;
       else if (goalTargets.length || goalIndustries.length) score -= 1;
+      // Level fit: internship vs full-time (mirrors cliffVerdict.js)
+      const seeking = String(goals.seeking || '').toLowerCase();
+      const looksIntern = /\bintern(ship)?\b|co-?op/.test(role);
+      if (seeking === 'internship' && role && !looksIntern) score -= 3;
+      else if (seeking === 'fulltime' && looksIntern) score -= 3;
       const isRemote = /remote/.test(location) || s.is_remote === true;
       if (isRemote && ['required', 'preferred'].includes(user.remote_preference)) score += 2;
       if (prefLocs.length) {

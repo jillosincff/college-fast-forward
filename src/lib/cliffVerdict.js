@@ -26,6 +26,13 @@ export function computeCliffVerdict(lead, ctx = {}) {
   else if (industryHit) { score += 2; reasons.push(`Matches your ${industryHit} focus`); }
   else if (targets.length || industries.length) { score -= 1; cautions.push('Outside your stated targets'); }
 
+  // Level fit: internship vs full-time. An off-level role is never a default pick —
+  // a student targeting internships must not be handed full-time BD roles.
+  const seeking = (careerGoals.seeking || '').toLowerCase();
+  const looksIntern = /\bintern(ship)?\b|co-?op/.test(role);
+  if (seeking === 'internship' && role && !looksIntern) { score -= 3; cautions.push("Looks full-time — you're targeting internships"); }
+  else if (seeking === 'fulltime' && looksIntern) { score -= 3; cautions.push("Internship — you're targeting full-time roles"); }
+
   // Explicit work-location preferences (onboarding / dashboard prompt)
   const lp = locationPrefs || {};
   const prefLocs = (lp.preferred_locations || [])

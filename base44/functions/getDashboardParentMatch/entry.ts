@@ -9,7 +9,12 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const desiredIndustry = user.target_industry || user.desired_industry || user.industry;
+    // Canonical profile first: career_goals is the single source of truth for
+    // the student's field — legacy flat fields are fallbacks only.
+    const cg = user.career_goals || {};
+    const goalIndustries = Array.isArray(cg.target_industries) ? cg.target_industries : [];
+    const goalRoles = Array.isArray(cg.target_roles) ? cg.target_roles : [];
+    const desiredIndustry = goalIndustries[0] || user.target_industry || user.desired_industry || user.industry;
     const schoolCode = (user.school_code || '').toUpperCase();
 
     // School is required; industry only improves ranking — new students without a
@@ -33,13 +38,20 @@ Deno.serve(async (req) => {
       return Response.json({ match_found: false });
     }
 
-    // Filter to parents whose company or role title loosely matches the industry
-    const industryKeywords = industryLower.split(/[\s,]+/).filter(k => k.length > 2);
+    // Filter to parents whose company or role title loosely matches the student's field
+    const STOPWORDS = new Set(['and', 'the', 'for', 'other']);
+    const fieldTerms = [...goalIndustries, ...goalRoles, industryLower].join(' ').toLowerCase();
+    const industryKeywords = fieldTerms.split(/[\s,&/]+/).filter(k => k.length > 2 && !STOPWORDS.has(k));
     const matching = parents.filter(p => {
       const haystack = `${p.role_title} ${p.company_name} ${p.company_domain}`.toLowerCase();
       return industryKeywords.some(kw => haystack.includes(kw));
     });
 
+    // A student with a stated field never gets an unrelated parent presented as
+    // their warm connection — an honest "no match yet" beats a random one.
+    if (industryKeywords.length > 0 && matching.length === 0) {
+      return Response.json({ match_found: false });
+    }
     const pool = matching.length > 0 ? matching : parents;
 
     // Sort by seniority — pick the most senior person first

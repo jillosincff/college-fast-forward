@@ -41,19 +41,25 @@ export function deriveStudentProfile(user) {
     else if (yearsLeft === 2) studentYear = 'sophomore';
     else studentYear = 'freshman';
   }
+  // Stage is only "known" when it comes from real data (explicit year or grad
+  // year) — a defaulted stage must never be asserted as the student's identity.
+  const stageKnown = !!studentYear;
   if (!studentYear) studentYear = 'junior';
 
-  // Goal: explicit, else sensible default by year
-  const rawGoal = String(cg.employment_type || user?.employment_type || '').toLowerCase();
+  // Goal: the canonical career_goals.seeking first (what the goals modal saves),
+  // then legacy fields, else a sensible default by year.
+  const rawGoal = String(cg.seeking || cg.employment_type || user?.employment_type || '').toLowerCase();
   let goal = rawGoal.includes('intern') ? 'internship'
     : (rawGoal.includes('full') || rawGoal.includes('entry')) ? 'fulltime' : null;
   if (!goal) goal = (studentYear === 'senior' || studentYear === 'recent_grad') ? 'fulltime' : 'internship';
 
   return {
     studentYear,
+    stageKnown,
     goal,
     major: user?.major || cg.major || null,
-    industry: cg.industry || (Array.isArray(cg.industries) ? cg.industries[0] : null) || null,
+    industry: (Array.isArray(cg.target_industries) && cg.target_industries[0])
+      || cg.industry || (Array.isArray(cg.industries) ? cg.industries[0] : null) || null,
     graduationYear: gradYear,
   };
 }

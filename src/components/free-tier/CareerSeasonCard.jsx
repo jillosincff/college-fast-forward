@@ -35,7 +35,12 @@ export default function CareerSeasonCard({ user }) {
   const { season, voice, monthName, monthlyFocus, canWait, upcomingSeason } = ci;
 
   const yearLabel = YEAR_LABELS[profile.studentYear] || 'student';
-  const whoYouAre = profile.studentYear === 'recent_grad'
+  const seekingLabel = profile.goal === 'internship' ? 'internships' : 'full-time roles';
+  // Never invent an identity: only assert stage/major when they come from real
+  // profile data — otherwise describe the student by their stated focus.
+  const whoYouAre = !profile.stageKnown
+    ? (profile.industry ? `You're targeting ${profile.industry} ${seekingLabel}.` : "You're building your search plan.")
+    : profile.studentYear === 'recent_grad'
     ? `You're a recent graduate${profile.major ? ` in ${profile.major}` : ''}.`
     : `You're a ${yearLabel}${profile.major ? ` ${profile.major}` : ''} student.`;
 
