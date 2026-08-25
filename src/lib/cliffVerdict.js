@@ -1,6 +1,8 @@
 // CLIFF Confidence Engine — deterministic, honest verdicts from real signals.
 // No percentages, no fake precision. Just coaching.
 
+import { resolveLevel, violatesLevel } from '@/lib/studentProfile';
+
 export const TIER_DISPLAY = {
   best: { icon: '🔥', label: 'Best Opportunity', line: 'Worth applying today.', bg: '#fff7ed', border: '#fdba74', text: '#c2410c' },
   good: { icon: '⭐', label: 'Good Opportunity', line: 'Worth applying if you have time.', bg: '#eef2ff', border: '#c7d2fe', text: '#4338ca' },
@@ -26,12 +28,14 @@ export function computeCliffVerdict(lead, ctx = {}) {
   else if (industryHit) { score += 2; reasons.push(`Matches your ${industryHit} focus`); }
   else if (targets.length || industries.length) { score -= 1; cautions.push('Outside your stated targets'); }
 
-  // Level fit: internship vs full-time. An off-level role is never a default pick —
-  // a student targeting internships must not be handed full-time BD roles.
-  const seeking = (careerGoals.seeking || '').toLowerCase();
-  const looksIntern = /\bintern(ship)?\b|co-?op/.test(role);
-  if (seeking === 'internship' && role && !looksIntern) { score -= 3; cautions.push("Looks full-time — you're targeting internships"); }
-  else if (seeking === 'fulltime' && looksIntern) { score -= 3; cautions.push("Internship — you're targeting full-time roles"); }
+  // Level fit: internship vs full-time, resolved by the shared profile module so
+  // this matches what the feed searched for. An off-level role is disqualifying —
+  // a student targeting internships must never be handed a full-time BD role.
+  const { level } = resolveLevel(careerGoals, ctx.user || {});
+  if (role && violatesLevel(level, role, lead.employment_type || '')) {
+    score -= 99;
+    cautions.push(level === 'internship' ? "Full-time role — you're targeting internships" : "Internship — you're targeting full-time roles");
+  }
 
   // Explicit work-location preferences (onboarding / dashboard prompt)
   const lp = locationPrefs || {};

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { resolveStudentProfile, violatesLevel, violatesExclusions } from '../../shared/studentProfile.ts';
 
 // CLIFF's daily ranking engine. Answers one question:
 // "If the student only has 20 minutes today, what should they do?"
@@ -105,13 +106,13 @@ Deno.serve(async (req) => {
     // Mirror of the workspace verdict engine (cliffVerdict.js). A job that would
     // show "Skip" in the workspace must never be recommended as the next move —
     // recommending it and then telling the student to skip it is a contradiction.
+    // Same profile resolver the feed and career plan use — one identity everywhere.
+    const profile = resolveStudentProfile(user, memories);
     const goals = user.career_goals || {};
-    const goalTargets = [goals.target_role, ...(goals.target_roles || [])].filter(Boolean).map(t => String(t).toLowerCase());
-    const goalIndustries = (goals.target_industries || []).map(i => String(i).toLowerCase());
-    const prefLocs = (user.preferred_locations || [])
-      .map(l => String(l.display_label || l.city || l.metro || l.state || '').toLowerCase())
-      .filter(Boolean);
-    const strictLocation = user.location_flexibility === 'stay' || user.relocation_openness === 'no';
+    const goalTargets = profile.fieldTerms;
+    const goalIndustries = [];
+    const prefLocs = profile.locations.map(l => l.toLowerCase());
+    const strictLocation = profile.strictLocation;
     const verdictScore = (s) => {
       const role = String(s.role || s.title || s.job_title || '').toLowerCase();
       const location = String(s.location || '').toLowerCase();
@@ -121,11 +122,10 @@ Deno.serve(async (req) => {
       if (targetHit) score += 3;
       else if (industryHit) score += 2;
       else if (goalTargets.length || goalIndustries.length) score -= 1;
-      // Level fit: internship vs full-time (mirrors cliffVerdict.js)
-      const seeking = String(goals.seeking || '').toLowerCase();
-      const looksIntern = /\bintern(ship)?\b|co-?op/.test(role);
-      if (seeking === 'internship' && role && !looksIntern) score -= 3;
-      else if (seeking === 'fulltime' && looksIntern) score -= 3;
+      // Level and exclusion violations are disqualifying, not a small penalty —
+      // a full-time BD role can never be the top move for an internship search.
+      if (role && violatesLevel(profile, role)) return -99;
+      if (violatesExclusions(profile, { title: role, company: s.company || '', location })) return -99;
       const isRemote = /remote/.test(location) || s.is_remote === true;
       if (isRemote && ['required', 'preferred'].includes(user.remote_preference)) score += 2;
       if (prefLocs.length) {

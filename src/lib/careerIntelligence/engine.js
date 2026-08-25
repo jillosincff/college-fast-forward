@@ -7,6 +7,7 @@
 // employer visits, campus clubs, Handshake, CampusGroups, recruiting calendars)
 // register in SIGNAL_SOURCES and return the same recommendation shape.
 import { ROADMAP_RECOMMENDATIONS, YEAR_VOICE, CAN_WAIT } from './roadmaps';
+import { resolveLevel, resolveField } from '@/lib/studentProfile';
 
 const SIGNAL_SOURCES = [
   { key: 'builtin_roadmaps', getRecommendations: () => ROADMAP_RECOMMENDATIONS },
@@ -46,20 +47,19 @@ export function deriveStudentProfile(user) {
   const stageKnown = !!studentYear;
   if (!studentYear) studentYear = 'junior';
 
-  // Goal: the canonical career_goals.seeking first (what the goals modal saves),
-  // then legacy fields, else a sensible default by year.
-  const rawGoal = String(cg.seeking || cg.employment_type || user?.employment_type || '').toLowerCase();
-  let goal = rawGoal.includes('intern') ? 'internship'
-    : (rawGoal.includes('full') || rawGoal.includes('entry')) ? 'fulltime' : null;
-  if (!goal) goal = (studentYear === 'senior' || studentYear === 'recent_grad') ? 'fulltime' : 'internship';
+  // Goal: resolved by the shared profile module (explicit setting, then the
+  // student's own role wording) so the plan can't claim a different level than
+  // the job feed used. Only fall back to a year-based default when truly unknown.
+  const resolved = resolveLevel(cg, user || {});
+  let goal = resolved.known ? resolved.level : null;
+  if (!goal || goal === 'both') goal = (studentYear === 'senior' || studentYear === 'recent_grad') ? 'fulltime' : 'internship';
 
   return {
     studentYear,
     stageKnown,
     goal,
     major: user?.major || cg.major || null,
-    industry: (Array.isArray(cg.target_industries) && cg.target_industries[0])
-      || cg.industry || (Array.isArray(cg.industries) ? cg.industries[0] : null) || null,
+    industry: resolveField(cg, user || {}),
     graduationYear: gradYear,
   };
 }

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { resolveStudentProfile, violatesLevel, violatesExclusions } from '../../shared/studentProfile.ts';
 
 // ── Inline Fantastic Jobs fetcher (avoids sub-function auth issues) ──────────
 // TEST MODE: Set to true to bypass APIs and test fallback pool variety
@@ -714,19 +715,20 @@ Deno.serve(async (req) => {
       return seenCompanies.has(companyKey);
     };
 
+    // ── SINGLE PROFILE SOURCE OF TRUTH ───────────────────────────────────
+    // Field, level, location and exclusions all come from one resolver that
+    // every other CLIFF surface uses, so the feed can never search for a
+    // different identity than the dashboard displays.
+    const memories = await base44.entities.StudentMemory
+      .filter({ user_email: user.email, active: true }, '-confidence', 100).catch(() => []);
+    const profile = resolveStudentProfile(user, memories);
     const goals = user.career_goals || {};
-    const targetIndustries = (goals.target_industries || goals.industries || []).filter(Boolean).map(i => i.toLowerCase());
-    const targetRole = (Array.isArray(goals.target_roles) ? goals.target_roles[0] : goals.target_roles) || goals.role || '';
-    const sizePref = goals.company_size_preference || 'all';
-    // Structured work-location preferences drive RETRIEVAL, not just post-filtering
-    const structuredLoc = (Array.isArray(user.preferred_locations) && user.preferred_locations[0])
-      ? (user.preferred_locations[0].display_label || user.preferred_locations[0].city || '')
-      : '';
-    const remotePref = user.remote_preference || '';
-    const location = structuredLoc
-      || (['required', 'preferred'].includes(remotePref) ? 'Remote' : '')
-      || goals.location_preference || user.location_preference || user.location || '';
-    const seeking = goals.seeking || 'both';
+    const targetIndustries = profile.fieldTerms;
+    const targetRole = profile.field || '';
+    const location = profile.primaryLocation;
+    const seeking = profile.level;
+    console.log('[getDailyDrop] Resolved profile: field=%s level=%s (known:%s) location=%s excludes=%j',
+      profile.field, profile.level, profile.levelKnown, location, profile.exclusions);
 
     // Size pref - but allow all sizes to get more results
     const sizeArray = ['large', 'mid', 'startup']; // Ignore size filter to maximize results
@@ -844,12 +846,12 @@ Deno.serve(async (req) => {
     // the company-only cooldown was starving the live feed.
     // HARD SEEKING FILTER: internship seekers NEVER see full-time jobs, and
     // full-time seekers NEVER see internships. Not a ranking nudge — a hard cut.
-    const isInternJob = (j) =>
-      /\bintern(ship)?s?\b|\bco[- ]?op\b/.test(((j.job_title || '') + ' ' + (j.employment_type || '')).toLowerCase());
-
+    // EXCLUSIONS are applied here at RETRIEVAL, not after the feed is built —
+    // a student who said "no sales" must never have sales roles occupy their
+    // three daily slots and then get filtered out downstream, leaving one job.
     const eligibleJobs = allJobs.filter(j => {
-      if (seeking === 'internship' && !isInternJob(j)) return false;
-      if (seeking === 'fulltime' && isInternJob(j)) return false;
+      if (violatesLevel(profile, j.job_title || '', j.employment_type || '')) return false;
+      if (violatesExclusions(profile, { title: j.job_title, company: j.name, location: j.location })) return false;
       const ck = (j.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const rk = (j.job_title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       return !seenPairs.has(ck + '|' + rk);
@@ -862,12 +864,7 @@ Deno.serve(async (req) => {
     // A student who sees 12 irrelevant jobs never comes back. Every job gets a
     // relevance score; jobs with ZERO connection to their target role are cut,
     // and the rest are ranked best-fit-first.
-    const STOPWORDS = new Set(['and', 'or', 'of', 'the', 'a', 'an', 'in', 'for', 'to', 'entry', 'level']);
-    const roleWords = [...new Set(
-      (targetRole + ' ' + targetIndustries.join(' '))
-        .toLowerCase().split(/[^a-z0-9]+/)
-        .filter(w => w.length >= 3 && !STOPWORDS.has(w))
-    )];
+    const roleWords = profile.fieldTerms;
     const locCity = (location || '').toLowerCase().split(',')[0].trim();
     const nowMs = Date.now();
 
@@ -1151,9 +1148,16 @@ Deno.serve(async (req) => {
         { company: 'Lucid Motors', role: 'Designer', jobDescription: 'Luxury EV design role.', jobSource: 'lucidmotors.com/careers', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
       ];
       // Match the student's seeking intent — internship seekers must NEVER see full-time fallbacks
-      const fallbackSlots = seeking === 'internship' ? internFallbackSlots
+      const levelMatched = seeking === 'internship' ? internFallbackSlots
         : seeking === 'fulltime' ? fulltimeFallbackSlots
         : [...internFallbackSlots.slice(0, 3), ...fulltimeFallbackSlots];
+      // Curated filler still has to respect the student's field and exclusions —
+      // a marketing student must never be shown a curated engineering internship.
+      const onField = levelMatched.filter(fb =>
+        !violatesExclusions(profile, { title: fb.role, company: fb.company, location: '' }) &&
+        (roleWords.length === 0 || roleWords.some(w => fb.role.toLowerCase().includes(w) || fb.jobDescription.toLowerCase().includes(w)))
+      );
+      const fallbackSlots = onField.length > 0 ? onField : [];
       
       // AGGRESSIVE shuffle using crypto-random for true randomness each day
       const shuffled = [...fallbackSlots];
@@ -1221,6 +1225,10 @@ Deno.serve(async (req) => {
       from_cache: false,
       is_premium: isPremium,
       daily_limit: dailyLimit,
+      // The feed reports the identity it searched for, so the UI can show an
+      // honest "nothing matched your focus today" instead of a wrong-field job.
+      profile_chip: profile.chip,
+      needs_focus: !profile.field,
     });
 
   } catch (error) {
