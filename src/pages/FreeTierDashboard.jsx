@@ -24,7 +24,6 @@ import FirstWarmMatchCard from '@/components/free-tier/FirstWarmMatchCard';
 import FirstApplicationPackageCard from '@/components/free-tier/FirstApplicationPackageCard';
 import GoalsCaptureCard from '@/components/free-tier/GoalsCaptureCard';
 import NextMoveHero from '@/components/free-tier/NextMoveHero';
-import TodaysBestMoves from '@/components/free-tier/TodaysBestMoves';
 import ApplyConfirmToast from '@/components/free-tier/ApplyConfirmToast';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { getFirstName } from '@/lib/firstName';
@@ -314,10 +313,7 @@ export default function FreeTierDashboard() {
 
         {/* 1. Next best move — CLIFF's single highest-leverage action, reasoning visible */}
         {!isTrialExpired && !focusMode && (
-          <>
-            <NextMoveHero user={user} firstName={firstName} />
-            <TodaysBestMoves user={user} hideHero />
-          </>
+          <NextMoveHero user={user} firstName={firstName} />
         )}
 
         {/* 2. The free warm connection — the standout value moment */}
