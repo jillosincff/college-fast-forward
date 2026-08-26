@@ -46,9 +46,9 @@ export default function ApplicationTracker() {
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
   // Status moves from user actions — each button maps to a concrete pipeline status
-  const handleTransition = (app, targetStatus) => {
+  const handleTransition = (app, targetStatus, opts = {}) => {
     const updates = { status: targetStatus, status_date: new Date().toISOString() };
-    if (targetStatus === 'interview') updates.interview_date = new Date().toISOString();
+    if (targetStatus === 'interview') updates.interview_date = opts.interviewDate || new Date().toISOString();
     if (targetStatus === 'offer') updates.offer_date = new Date().toISOString();
     setApplications(prev => prev.map(a => a.id === app.id ? { ...a, ...updates } : a));
     if (!String(app.id).startsWith('app-')) {

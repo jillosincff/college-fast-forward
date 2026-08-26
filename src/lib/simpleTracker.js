@@ -122,3 +122,10 @@ export function formatAppliedDate(dateStr) {
   if (diff <= 7) return `Applied ${diff} days ago`;
   return `Applied ${dateLabel}`;
 }
+
+export function formatInterviewDate(dateStr) {
+  if (!dateStr) return null;
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+}

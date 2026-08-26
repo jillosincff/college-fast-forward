@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { getStatusGroup, getStatusLabel, getActions, formatAppliedDate, needsFollowUp } from '@/lib/simpleTracker';
+import { getStatusGroup, getStatusLabel, getActions, formatAppliedDate, formatInterviewDate, needsFollowUp } from '@/lib/simpleTracker';
 import FollowUpDraft from './FollowUpDraft';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -12,6 +13,17 @@ export default function TrackerAppCard({ app, user, onTransition, onLogFollowUp,
   const actions = getActions(group);
   const primary = actions.find(a => a.primary);
   const secondary = actions.filter(a => !a.primary);
+  const [showInterviewPicker, setShowInterviewPicker] = useState(false);
+  const [interviewDate, setInterviewDate] = useState('');
+
+  const handleActionClick = (target) => {
+    if (target === 'interview') {
+      setInterviewDate(app.interview_date ? app.interview_date.slice(0, 16) : '');
+      setShowInterviewPicker(true);
+    } else {
+      onTransition(app, target);
+    }
+  };
 
   return (
     <div style={{
@@ -44,6 +56,14 @@ export default function TrackerAppCard({ app, user, onTransition, onLogFollowUp,
         {formatAppliedDate(app.created_date)}
       </p>
 
+      {/* Interview date (shown when in Interviews tab) */}
+      {group === 'interviews' && app.interview_date && !showInterviewPicker && (
+        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '4px 0 0' }}>
+          📅 {formatInterviewDate(app.interview_date)}{' '}
+          <button onClick={() => setShowInterviewPicker(true)} style={{ fontFamily: dm, fontSize: 11, fontWeight: 600, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', minWidth: 'auto', textDecoration: 'underline' }}>Edit</button>
+        </p>
+      )}
+
       {/* Follow-up draft (3–5 days, no reply, no follow-up sent) */}
       {needsFollowUp(app) && (
         <FollowUpDraft app={app} user={user} onSent={() => onLogFollowUp(app)} />
@@ -53,19 +73,34 @@ export default function TrackerAppCard({ app, user, onTransition, onLogFollowUp,
       {actions.length > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', marginTop: 12 }}>
           {primary && (
-            <button onClick={() => onTransition(app, primary.target)}
+            <button onClick={() => handleActionClick(primary.target)}
               style={{ fontFamily: dm, fontSize: 12.5, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 9, padding: '9px 16px', cursor: 'pointer', minHeight: 40 }}>
               {primary.label} →
             </button>
           )}
           {secondary.map(s => (
-            <button key={s.target} onClick={() => onTransition(app, s.target)}
+            <button key={s.target} onClick={() => handleActionClick(s.target)}
               style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', minHeight: 'auto' }}
               onMouseEnter={e => { e.currentTarget.style.color = '#374151'; }}
               onMouseLeave={e => { e.currentTarget.style.color = '#6b7280'; }}>
               {s.label}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Interview date/time picker */}
+      {showInterviewPicker && (
+        <div style={{ marginTop: 10, background: '#f5f3ff', borderRadius: 10, padding: '12px 14px', border: '1px solid #ddd6fe' }}>
+          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6d28d9', margin: '0 0 8px' }}>Interview date & time</p>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <input type="datetime-local" value={interviewDate} onChange={e => setInterviewDate(e.target.value)}
+              style={{ fontFamily: dm, fontSize: 13, padding: '8px 10px', border: '1px solid #ddd6fe', borderRadius: 7, color: '#374151' }} />
+            <button onClick={() => { onTransition(app, 'interview', { interviewDate: interviewDate ? new Date(interviewDate).toISOString() : new Date().toISOString() }); setShowInterviewPicker(false); }}
+              style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#fff', background: '#6d28d9', border: 'none', borderRadius: 7, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto' }}>Save</button>
+            <button onClick={() => setShowInterviewPicker(false)}
+              style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: '8px', minHeight: 'auto' }}>Cancel</button>
+          </div>
         </div>
       )}
 
