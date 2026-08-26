@@ -15,6 +15,7 @@ import {
   saveProgress, loadSavedProgress,
 } from './onboardingShared';
 import { saveServerProgress, loadServerProgress } from './serverProgress';
+import { trackConversionEvent } from '@/lib/tracking';
 
 /**
  * The agent-hiring flow — 11 screens:
@@ -423,6 +424,8 @@ CRITICAL RULES:
               resume_skipped: resumeSkipped,
             },
           }).catch(() => {});
+          // Canonical funnel event (admin conversion funnel source of truth)
+          trackConversionEvent('onboarding_completed');
         }
       } catch (updateErr) {
         console.warn('Failed to update user persona during onboarding:', updateErr);
@@ -439,7 +442,7 @@ CRITICAL RULES:
         // user (no persona), so a plain hash change gets bounced by
         // OnboardingGuard back to GatorAuth → onboarding screen 1 (the
         // "Meet CLIFF" loop). Reloading re-fetches the updated user.
-        window.location.hash = '#/FreeTierDashboard';
+        window.location.hash = '#/MagicMoment';
         window.location.reload();
       } else {
         if (onAlreadyAuthed) onAlreadyAuthed();
@@ -450,7 +453,7 @@ CRITICAL RULES:
       // Flag that the funnel is DONE — after OAuth, GatorAuth finalizes the
       // profile from the saved answers instead of restarting onboarding.
       try { localStorage.setItem('cff_funnel_completed', 'true'); sessionStorage.setItem('cff_funnel_completed', 'true'); } catch {}
-      const redirectPath = planType === 'free' ? '/#/FreeTierDashboard' : '/#/GatorAuth';
+      const redirectPath = planType === 'free' ? '/#/MagicMoment' : '/#/GatorAuth';
       base44.auth.loginWithProvider('google', window.location.origin + redirectPath);
     }
   };

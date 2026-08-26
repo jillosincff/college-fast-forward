@@ -6,6 +6,7 @@ import {
 import {
   trackUpgradeModalViewed, trackUpgradeClicked,
   trackParentSendInitiated, trackParentSendCompleted,
+  trackConversionEvent,
 } from '@/lib/tracking';
 import { X, Loader2, Check, Gift, Sparkles, Lock } from 'lucide-react';
 
@@ -30,7 +31,10 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
   const [error, setError] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('monthly'); // 'annual' | 'monthly'
 
-  useEffect(() => { trackUpgradeModalViewed({ source }); }, []);
+  useEffect(() => {
+    trackUpgradeModalViewed({ source });
+    trackConversionEvent('upgrade_modal_viewed', { trigger: source });
+  }, []);
 
   const startPro = async () => {
     setBusy(true); setError('');

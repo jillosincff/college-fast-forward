@@ -104,7 +104,18 @@ function OnboardingGuard({ children }) {
   const hasPersona = !!user.persona?.trim();
   const onboardingDone = user.onboarding_completed === true;
 
-  if (hasPersona && onboardingDone) return children;
+  if (hasPersona && onboardingDone) {
+    // Force Magic Moment for students who haven't completed it yet.
+    // Existing users who completed MM on this device are bypassed via localStorage.
+    if (user.persona === 'student' || user.roles?.includes('student')) {
+      let mmDone = user.magic_moment_completed === true;
+      if (!mmDone) {
+        try { mmDone = !!localStorage.getItem('cff_magic_moment_completed_at'); } catch {}
+      }
+      if (!mmDone) return <Navigate to="/MagicMoment" replace />;
+    }
+    return children;
+  }
 
   if (hasPersona && !onboardingDone) {
     if (user.persona === 'parent' || user.roles?.includes('parent')) {

@@ -8,7 +8,7 @@ import {
   VIOLET, GRAD_INDIGO, SHADOW, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
 import { Briefcase, Users, Sparkles, Search, MapPin } from 'lucide-react';
-import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted } from '@/lib/tracking';
+import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted, trackConversionEvent } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import SoftWallModal from '@/components/conversion/SoftWallModal';
 import { getChipCuratedJobs } from '../../base44/shared/curatedJobs';
@@ -110,6 +110,9 @@ export default function MagicMoment() {
   useEffect(() => {
     if (!user || ranRef.current) return;
     ranRef.current = true;
+    // Log offered BEFORE started so the funnel is sequential (offered ≤ started)
+    trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' });
+    trackConversionEvent('magic_moment_started', { trigger: 'post_onboarding' });
     trackMagicMomentStarted({
       target_field: ((user.career_goals?.target_industries) || []).join(', '),
       target_role: (user.career_goals?.target_roles || [])[0] || '',
@@ -347,7 +350,15 @@ export default function MagicMoment() {
           hero_company: tailorFor?.name || '',
           has_tailored_resume: !!tailoredResult,
         });
+        trackConversionEvent('magic_moment_completed', {
+          jobs_count: liveChecked.length,
+          people_count: realPeople.length,
+          best_path: !!best,
+          result_type: resultType,
+        });
         markMagicMomentCompleted();
+        // Set the user flag so OnboardingGuard stops redirecting to MM
+        base44.auth.updateMe({ magic_moment_completed: true }).catch(() => {});
         setPhase(null);
 
         console.log('[MagicMoment] RESULT', JSON.stringify({

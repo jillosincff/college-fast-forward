@@ -60,3 +60,10 @@ export const trackMagicMomentStarted      = (p = {}) => track(EVENTS.MAGIC_MOMEN
 export const trackMagicMomentCompleted    = (p = {}) => track(EVENTS.MAGIC_MOMENT_COMPLETED, p);
 export const trackSoftWallViewed          = (p = {}) => track(EVENTS.SOFT_WALL_VIEWED, withMm(p));
 export const trackSoftWallUpgradeClicked  = (p = {}) => track(EVENTS.SOFT_WALL_UPGRADE_CLICKED, withMm(p));
+
+// ── ConversionEvent logger (admin funnel source of truth) ───────────────────
+// Idempotent: one event per user per event_name. Use for the canonical funnel:
+// onboarding_completed → magic_moment_offered → started → completed →
+// upgrade_modal_viewed → checkout_started → pro_activated
+export const trackConversionEvent = (event_name, props = {}) =>
+  base44.functions.invoke('logConversionEvent', { event_name, ...props }).catch(() => {});

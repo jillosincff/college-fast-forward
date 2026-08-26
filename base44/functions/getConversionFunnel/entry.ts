@@ -20,8 +20,9 @@ Deno.serve(async (req) => {
     const students = (users || []).filter(u => !['parent', 'alumni'].includes(u.persona) && !u.roles?.includes('parent') && !u.roles?.includes('alumni'));
     const distinct = (name) => new Set((events || []).filter(e => e.event_name === name).map(e => e.user_email)).size;
 
-    const mmStarted = (plans || []).filter(p => ['in_progress', 'completed'].includes(p.magic_moment_status)).length;
-    const mmCompleted = (plans || []).filter(p => p.magic_moment_status === 'completed').length;
+    // Read from ConversionEvent (same source as offered) so offered ≤ started ≤ completed
+    const mmStarted = distinct('magic_moment_started');
+    const mmCompleted = distinct('magic_moment_completed');
     const proUsers = (plans || []).filter(p => p.plan === 'pro');
 
     const steps = [

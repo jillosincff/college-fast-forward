@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Gift } from 'lucide-react';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
+import { trackConversionEvent } from '@/lib/tracking';
 
 const dm = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 const GRAD = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
@@ -27,7 +28,10 @@ export default function CliffProPaywall({ onClose, onUpgrade, trigger = 'generic
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [askParent, setAskParent] = useState(false);
-  useEffect(() => { logEvent('paywall_viewed', { trigger }); }, [trigger]);
+  useEffect(() => {
+    logEvent('paywall_viewed', { trigger });
+    trackConversionEvent('upgrade_modal_viewed', { trigger });
+  }, [trigger]);
 
   const startPro = async () => {
     logEvent('upgrade_cta_clicked', { trigger });

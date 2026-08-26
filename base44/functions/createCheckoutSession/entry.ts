@@ -35,20 +35,22 @@ Deno.serve(async (req) => {
 
     const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
 
-    // Post-pay landing: a dedicated activation page that welcomes the new Pro
-    // user and resumes the flow they were mid-way through when they upgraded.
-    let successUrlFinal = successUrl || 'https://collegefastforward.com/#/ProActivated?upgrade=success';
+    // Post-pay landing: use the configured app URL (APP_BASE_URL) so the redirect
+    // always works regardless of which domain the user started on.
+    const APP_URL = Deno.env.get('APP_BASE_URL') || 'https://college-fast-forward-fce23588.base44.app';
+    let successUrlFinal = successUrl || `${APP_URL}/#/ProActivated?upgrade=success`;
     if (!successUrl) {
       if (returnTo) successUrlFinal += `&return_to=${encodeURIComponent(returnTo)}`;
       if (source) successUrlFinal += `&source=${encodeURIComponent(source)}`;
     }
+    const cancelUrlFinal = cancelUrl || `${APP_URL}/#/FreeTierDashboard`;
 
     const body = new URLSearchParams({
       mode: 'subscription',
       'line_items[0][price]': PRICES[plan],
       'line_items[0][quantity]': '1',
       success_url: successUrlFinal,
-      cancel_url: cancelUrl || 'https://collegefastforward.com/#/FreeTierDashboard',
+      cancel_url: cancelUrlFinal,
       client_reference_id: clientUser.id,
       'metadata[user_id]': clientUser.id,
       'metadata[user_email]': clientUser.email,
@@ -83,6 +85,21 @@ Deno.serve(async (req) => {
 
     if (session.error) {
       return Response.json({ success: false, error: session.error.message }, { status: 500 });
+    }
+
+    // Log checkout_started to ConversionEvent (idempotent — one per user)
+    const event_key = `${clientUser.id}:checkout_started`;
+    const existingEvt = await base44.asServiceRole.entities.ConversionEvent
+      .filter({ event_key }).catch(() => []);
+    if (existingEvt?.length === 0) {
+      await base44.asServiceRole.entities.ConversionEvent.create({
+        user_id: clientUser.id,
+        user_email: clientUser.email,
+        event_name: 'checkout_started',
+        event_key,
+        trigger: source || null,
+        plan_at_event: 'free',
+      }).catch(() => {});
     }
 
     return Response.json({ success: true, url: session.url });

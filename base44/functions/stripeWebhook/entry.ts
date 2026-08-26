@@ -220,6 +220,17 @@ Deno.serve(async (req) => {
               school_code: billingUser.school_name || billingUser.school || '',
               properties: { plan: plan || subscriptionTier, source: 'self_pay' },
             }).catch(() => {});
+            // ConversionEvent (admin funnel source of truth)
+            const evtKey = `${billingUser.id}:pro_activated`;
+            base44.asServiceRole.entities.ConversionEvent.create({
+              user_id: billingUser.id,
+              user_email: billingUser.email,
+              event_name: 'pro_activated',
+              event_key: evtKey,
+              trigger: 'self_pay',
+              school_code: billingUser.school_name || billingUser.school || '',
+              plan_at_event: plan || subscriptionTier,
+            }).catch(() => {});
           }
 
           if (isFoundingMember) {
@@ -396,6 +407,17 @@ Deno.serve(async (req) => {
                 user_id: giftStudent.id,
                 user_email: giftStudent.email,
                 properties: { source: 'parent_gift', plan: plan || 'pro_monthly' },
+              }).catch(() => {});
+              // ConversionEvent (admin funnel source of truth)
+              const giftEvtKey = `${giftStudent.id}:pro_activated`;
+              base44.asServiceRole.entities.ConversionEvent.create({
+                user_id: giftStudent.id,
+                user_email: giftStudent.email,
+                event_name: 'pro_activated',
+                event_key: giftEvtKey,
+                trigger: 'parent_gift',
+                school_code: giftStudent.school_name || giftStudent.school || '',
+                plan_at_event: plan || 'pro_monthly',
               }).catch(() => {});
 
               try {
