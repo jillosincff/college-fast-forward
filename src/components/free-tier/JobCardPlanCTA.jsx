@@ -69,8 +69,8 @@ export default function JobCardPlanCTA({ access, pursuit, verdict, rank = 0, onU
   const nextStep = pursuitNextStep(pursuit);
   if (nextStep) {
     return (
-      <button onClick={() => { track('preparation_resumed', { cta: nextStep }); goWorkspace(nextStep); }} className={primaryBtn} style={primaryStyle}>
-        {nextStep}
+      <button onClick={() => { track('preparation_resumed', { cta: 'Prepare this application' }); goWorkspace('Prepare this application'); }} className={primaryBtn} style={primaryStyle}>
+        Prepare this application
       </button>
     );
   }
@@ -78,8 +78,8 @@ export default function JobCardPlanCTA({ access, pursuit, verdict, rank = 0, onU
   // 2. Pro / excluded / plan unknown — clean execution CTA, zero plan messaging
   if (!access || access.loading || access.isPro || access.excludePrompts) {
     return (
-      <button onClick={() => goWorkspace('Let CLIFF Handle This')} className={primaryBtn} style={primaryStyle}>
-        ✨ Let CLIFF Handle This
+      <button onClick={() => goWorkspace('Prepare this application')} className={primaryBtn} style={primaryStyle}>
+        Prepare this application
       </button>
     );
   }

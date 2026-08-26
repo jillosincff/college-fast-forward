@@ -49,7 +49,7 @@ export default function PlanOpportunityCard({ opp }) {
         </span>
         <button onClick={go}
           style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', display: 'flex', alignItems: 'center', gap: 5 }}>
-          Continue <ArrowRight size={13} />
+          Prepare this application <ArrowRight size={13} />
         </button>
       </div>
     </div>

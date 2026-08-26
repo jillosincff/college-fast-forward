@@ -19,7 +19,7 @@ export default function BestOpportunityCard({ lead, verdict, rank, pursuit, onDe
   const role = lead.role || lead.job_title || '';
   const reasons = (verdict?.reasons || []).slice(0, 2);
   const caution = (verdict?.cautions || [])[0];
-  const ctaLabel = pursuit ? 'Review My Next Step' : 'Prepare This Application';
+  const ctaLabel = 'Prepare this application';
 
   const pursue = () => {
     try { base44.analytics.track({ eventName: 'best_opportunity_pursued', properties: { company, role, rank } }); } catch {}
