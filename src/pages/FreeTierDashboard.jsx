@@ -32,7 +32,6 @@ import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 import PeakMomentSharePrompt from '@/components/free-tier/PeakMomentSharePrompt';
 import GoalMemoryStrip from '@/components/free-tier/GoalMemoryStrip';
 import DashboardStatsRow from '@/components/free-tier/DashboardStatsRow';
-import CareerSeasonCard from '@/components/free-tier/CareerSeasonCard';
 import CliffTimeline from '@/components/free-tier/CliffTimeline';
 import PlanStateBanner from '@/components/pro/PlanStateBanner';
 import PostMagicMomentFlow from '@/components/conversion/PostMagicMomentFlow';
@@ -344,10 +343,7 @@ export default function FreeTierDashboard() {
 
         {/* 6. Longer-horizon context — below the day's work */}
         {!isTrialExpired && !focusMode && (
-          <>
-            <CliffTimeline user={user} />
-            <CareerSeasonCard user={user} />
-          </>
+          <CliffTimeline user={user} />
         )}
       </div>
       )}
