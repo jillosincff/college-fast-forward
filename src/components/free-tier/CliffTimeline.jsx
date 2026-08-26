@@ -4,8 +4,18 @@ import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 import { getCareerIntelligenceTimelineItems } from '@/lib/careerIntelligence/engine';
 import { getTrajectoryTimelineItem } from '@/lib/careerTrajectory/engine';
 import { base44 } from '@/api/base44Client';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { matchesHeroPriority } from '@/lib/dashboardDedup';
+
+// Daily record of items the student marked done — so "Did it" actually retires
+// a task for the rest of the day instead of it snapping back on reload.
+const doneKey = () => `cliff_timeline_done_${new Date().toISOString().slice(0, 10)}`;
+function readDone() {
+  try { return new Set(JSON.parse(localStorage.getItem(doneKey())) || []); } catch { return new Set(); }
+}
+function writeDone(set) {
+  try { localStorage.setItem(doneKey(), JSON.stringify([...set])); } catch {}
+}
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -34,6 +44,15 @@ export default function CliffTimeline({ user }) {
   const [data, setData] = useState(null);
   const [trajectory, setTrajectory] = useState(null);
   const [, setHeroTick] = useState(0);
+  const [done, setDone] = useState(() => readDone());
+
+  const markDone = (text) => {
+    setDone(prev => {
+      const next = new Set(prev); next.add(text);
+      writeDone(next);
+      return next;
+    });
+  };
 
   // Re-check dedup once the hero registers its Today's Priority
   useEffect(() => {
@@ -61,9 +80,10 @@ export default function CliffTimeline({ user }) {
   // Career Intelligence + Trajectory items appear exactly like other CLIFF recommendations
   const trajItem = getTrajectoryTimelineItem(user, trajectory);
   const allItems = [...(data?.timeline || []), ...getCareerIntelligenceTimelineItems(user), ...(trajItem ? [trajItem] : [])];
-  // Dedup layer: never repeat the hero's Today's Priority, and cap at 3 actions
+  // Dedup layer: never repeat the hero's Today's Priority; retire anything
+  // marked done today; cap at 3 actions.
   const heroDup = allItems.some(it => matchesHeroPriority(it.text));
-  const items = allItems.filter(it => !matchesHeroPriority(it.text)).slice(0, 3);
+  const items = allItems.filter(it => !matchesHeroPriority(it.text) && !done.has(it.text)).slice(0, 3);
   const waiting = data?.waiting || [];
   const suppressed = data?.suppressed || [];
   if (!items.length && !waiting.length) return null;
@@ -100,6 +120,10 @@ export default function CliffTimeline({ user }) {
                   <button onClick={() => runAction(a.action)}
                     style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: dm, fontSize: 12, fontWeight: 800, color: gi === 0 ? '#fff' : '#6d28d9', background: gi === 0 ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)' : '#f5f3ff', border: 'none', borderRadius: 999, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: '7px 14px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                     {a.cta} <ArrowRight size={12} />
+                  </button>
+                  <button onClick={() => markDone(a.text)} aria-label="Mark done"
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6b7280', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 999, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: '7px 12px', flexShrink: 0 }}>
+                    <Check size={12} /> Did it
                   </button>
                 </div>
               ))}
