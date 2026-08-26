@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { loadBestMoves, completeMove, runMoveAction, readMovesCache, MOVES_UPDATED } from '@/lib/bestMoves';
+import { loadBestMoves, completeMove, runMoveAction, readMovesCache, clearMovesCache, MOVES_UPDATED, GOALS_UPDATED } from '@/lib/bestMoves';
 import MissionDraftModal from './MissionDraftModal';
 import { ListChecks, ArrowRight, Clock, Check } from 'lucide-react';
 
@@ -22,8 +22,16 @@ export default function TodaysBestMoves({ user, onShowMoreJobs, hideHero = false
       .finally(() => { if (!cancelled) setLoading(false); });
     // The hero and this list share one cache — when the hero advances, re-read it
     const sync = () => { const c = readMovesCache(user.email); if (c && !cancelled) setState(c); };
+    // Goals changed — drop the old-goal queue and re-ask CLIFF.
+    const rebuild = () => {
+      clearMovesCache(user.email);
+      loadBestMoves(user.email)
+        .then(s => { if (!cancelled) setState(s); })
+        .catch(() => { if (!cancelled) setState({ moves: [], done: [] }); });
+    };
     window.addEventListener(MOVES_UPDATED, sync);
-    return () => { cancelled = true; window.removeEventListener(MOVES_UPDATED, sync); };
+    window.addEventListener(GOALS_UPDATED, rebuild);
+    return () => { cancelled = true; window.removeEventListener(MOVES_UPDATED, sync); window.removeEventListener(GOALS_UPDATED, rebuild); };
   }, [user?.email]);
 
   const markDone = (i, sentViaModal = false) => setState(completeMove(user.email, state, i, { sentViaModal }));

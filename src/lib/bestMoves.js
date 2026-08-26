@@ -32,6 +32,14 @@ export function isRenderableMove(m) {
 // so completing a move updates the whole queue the same day.
 export const MOVES_UPDATED = 'cliff:moves-updated';
 
+// Fired when the student edits their career goals. Today's queue was built for
+// the OLD goals, so every surface must drop its cache and re-ask CLIFF.
+export const GOALS_UPDATED = 'cff:goals-updated';
+
+export function clearMovesCache(email) {
+  try { localStorage.removeItem(movesStorageKey(email)); } catch {}
+}
+
 export const moveKey = (m) =>
   [m.kind || '', (m.company || '').toLowerCase().trim(), (m.action?.role || '').toLowerCase().trim()].join('|');
 

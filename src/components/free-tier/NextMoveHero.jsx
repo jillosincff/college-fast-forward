@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, Clock, Check } from 'lucide-react';
-import { loadBestMoves, completeMove, runMoveAction, readMovesCache, isRenderableMove, MOVES_UPDATED } from '@/lib/bestMoves';
+import { loadBestMoves, completeMove, runMoveAction, readMovesCache, isRenderableMove, clearMovesCache, MOVES_UPDATED, GOALS_UPDATED } from '@/lib/bestMoves';
 import { base44 } from '@/api/base44Client';
 import MissionDraftModal from './MissionDraftModal';
 
@@ -30,8 +30,18 @@ export default function NextMoveHero({ user, firstName }) {
       .catch(() => { if (!cancelled) setState({ moves: [], done: [] }); })
       .finally(() => { if (!cancelled) setLoading(false); });
     const sync = () => { const c = readMovesCache(user.email); if (c && !cancelled) setState(c); };
+    // Goals changed — the cached queue is about the old goals, so rebuild it.
+    const rebuild = () => {
+      clearMovesCache(user.email);
+      setLoading(true);
+      loadBestMoves(user.email)
+        .then(s => { if (!cancelled) setState(s); })
+        .catch(() => { if (!cancelled) setState({ moves: [], done: [] }); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    };
     window.addEventListener(MOVES_UPDATED, sync);
-    return () => { cancelled = true; window.removeEventListener(MOVES_UPDATED, sync); };
+    window.addEventListener(GOALS_UPDATED, rebuild);
+    return () => { cancelled = true; window.removeEventListener(MOVES_UPDATED, sync); window.removeEventListener(GOALS_UPDATED, rebuild); };
   }, [user?.email]);
 
   const moves = state?.moves || [];

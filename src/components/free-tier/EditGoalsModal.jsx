@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import AvoidingPreferencesStrip from './AvoidingPreferencesStrip';
+import { clearMovesCache } from '@/lib/bestMoves';
 
 export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFresh, openedFromNudge = false }) {
   const queryClient = useQueryClient();
@@ -59,6 +60,16 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           saved_at: new Date().toISOString()
         }
       });
+      // A stale active CareerPlan keeps the dashboard label ("Still focused on…")
+      // and its opportunities pinned to the OLD goal — archive it so the new
+      // goals are the single source of truth everywhere.
+      const stalePlans = await base44.entities.CareerPlan
+        .filter({ user_email: user.email, status: 'active' }).catch(() => []);
+      await Promise.all((stalePlans || []).map(p =>
+        base44.entities.CareerPlan.update(p.id, { status: 'archived' }).catch(() => {})
+      ));
+      // Today's ranked move queue was built for the old goals — drop the cache.
+      clearMovesCache(user.email);
       // Refresh user data so the dashboard shows updated goals
       const refreshedUser = await base44.auth.me();
       // Delete cached daily drop so a fresh one is generated with new goals

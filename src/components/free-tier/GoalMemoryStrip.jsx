@@ -11,7 +11,7 @@ export default function GoalMemoryStrip({ user }) {
   useEffect(() => {
     if (!user?.email) return;
     let cancelled = false;
-    Promise.all([
+    const load = () => Promise.all([
       base44.entities.CareerPlan.filter({ user_email: user.email, status: 'active' }, '-created_date', 1).catch(() => []),
       base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 50).catch(() => []),
       base44.entities.TailoredResume.filter({ user_email: user.email }, '-created_date', 10).catch(() => []),
@@ -31,7 +31,11 @@ export default function GoalMemoryStrip({ user }) {
       if ((resumes || []).some(r => r.status === 'completed' && !r.downloaded_at)) list.push('📄 Resume ready');
       setChips(list.slice(0, 4));
     });
-    return () => { cancelled = true; };
+    load();
+    // Goals changed — the focus chip must never keep showing the old goal.
+    const onGoalsUpdated = () => load();
+    window.addEventListener('cff:goals-updated', onGoalsUpdated);
+    return () => { cancelled = true; window.removeEventListener('cff:goals-updated', onGoalsUpdated); };
   }, [user?.email]);
 
   if (!chips.length) return null;
