@@ -13,6 +13,10 @@ import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
 import TailoringResults from '@/components/resume-tailor/TailoringResults';
 import ApplyTailorStep from '@/components/resume-tailor/ApplyTailorStep';
 import ContextualResumeUpload from '@/components/resume-tailor/ContextualResumeUpload';
+import FreeTailorStatusBanner from '@/components/resume-tailor/FreeTailorStatusBanner';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
+import useAccessPlan from '@/hooks/useAccessPlan';
+import { readWorkspaceJob } from '@/lib/cliffWorkspace';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
 import { getFastTrackVariant, trackQueuedView, trackQueuedUpgradeClick, trackQueuedBackOut } from '@/utils/tailoringLatency';
 
@@ -119,8 +123,26 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const hasResumes = resumes.length > 0;
   const canAddMore = isFastIQ || resumes.length === 0;
   const [showProPaywall, setShowProPaywall] = useState(false);
+  const [showSoftWall, setShowSoftWall] = useState(false);
+  // Canonical free-tailor flag — the same access plan the Job Workspace checks,
+  // so the two surfaces can never disagree about the one free tailoring.
+  const { isPro, magicMomentAvailable: planFreeTailor } = useAccessPlan(user);
+  const proAccess = isFastIQ || isPro;
   // One-time free "magic moment": first complete CLIFF-powered application is on us
-  const magicMomentAvailable = !isFastIQ && tailoredResumes.filter(t => t.status !== 'pending').length === 0;
+  const magicMomentAvailable = !proAccess && planFreeTailor && tailoredResumes.filter(t => t.status !== 'pending').length === 0;
+  const canTailor = proAccess || magicMomentAvailable;
+  // Last job the student opened in the workspace — lets the free tailor point at
+  // a real role instead of a blank resume lab.
+  const jobContext = (() => { const j = readWorkspaceJob(); return j?.company || j?.role ? j : null; })();
+
+  const startFreeTailorOnJob = () => {
+    const j = jobContext || {};
+    setApplyContext({ company: j.company || '', role: j.role || '', jd: j.jobDescription || '', jobUrl: j.jobUrl || '', location: j.location || '' });
+    setCompanyName(j.company || '');
+    setJobTitle(j.role || '');
+    setJobDescription(j.jobDescription || '');
+    setPhase('applyTailor');
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -858,6 +880,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     return (
       <>
         {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
+        {showSoftWall && <SoftWallModal user={user} source="resume_studio" onClose={() => setShowSoftWall(false)} />}
         {showProPaywall && (
           <CliffProPaywall
             trigger="resume_tailor_limit"
@@ -876,7 +899,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <button
-                onClick={() => isFastIQ ? setPhase('builder') : onOpenUpgrade()}
+                onClick={() => proAccess ? setPhase('builder') : setShowSoftWall(true)}
                 style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 14px' : '10px 18px', fontSize: 13, fontWeight: 600, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
               >
                 ✨ Build from scratch
@@ -899,28 +922,15 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
             </div>
           </div>
 
-          {/* One-time magic moment banner */}
-          {magicMomentAvailable && hasResumes && (
-            <div style={{ background: '#f5f3ff', border: '1.5px solid #c4b5fd', borderRadius: 12, padding: '16px 20px', marginBottom: 24 }}>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#6b21a8', margin: '0 0 4px' }}>
-                🎁 Your first CLIFF-powered application is on us.
-              </p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#7c3aed', margin: 0, lineHeight: 1.5 }}>
-                Pick a job and CLIFF will fully tailor your resume — complete, instant, and free. This is exactly what CLIFF Pro does for every application.
-              </p>
-            </div>
-          )}
-
-          {/* Free tier gate banner */}
-          {!isFastIQ && resumes.length >= 1 && (
-            <div style={{ background: '#F5F3FF', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0 }}>
-                Free accounts include 1 master resume. Upgrade to CLIFF Pro for unlimited versions and advanced tailoring.
-              </p>
-              <button onClick={() => onOpenUpgrade()} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>
-                Upgrade to Pro →
-              </button>
-            </div>
+          {/* Free-tier status — remaining vs used, always visible */}
+          {!proAccess && (
+            <FreeTailorStatusBanner
+              available={magicMomentAvailable}
+              jobContext={jobContext}
+              onUseFree={startFreeTailorOnJob}
+              onChooseJob={() => navigate('FreeTierDashboard')}
+              onUnlock={() => setShowSoftWall(true)}
+            />
           )}
 
           {/* Analysis section */}
@@ -951,7 +961,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                   <div style={{ background: 'rgba(124,58,237,0.15)', border: '1.5px solid rgba(124,58,237,0.45)', borderRadius: 12, padding: '16px 18px', marginBottom: 24 }}>
                     <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#7c3aed', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top fix</p>
                     <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#fff', margin: '0 0 14px', lineHeight: 1.5 }}>{analysis.top_fix}</p>
-                    <button onClick={() => handleTailor(resumes.find(r => r.is_active) || resumes[0])} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '12px 22px', fontSize: 14, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', whiteSpace: 'nowrap' }}>Improve my resume →</button>
+                    <button onClick={() => canTailor ? handleTailor(resumes.find(r => r.is_active) || resumes[0]) : setShowSoftWall(true)} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '12px 22px', fontSize: 14, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', whiteSpace: 'nowrap' }}>{canTailor ? 'Improve my resume →' : '🔒 Improve my resume'}</button>
                   </div>
 
                   {/* Score — supporting detail */}
@@ -1025,10 +1035,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                     <button
-                      onClick={() => (isFastIQ || magicMomentAvailable) ? handleTailor(resume) : setShowProPaywall(true)}
-                      style={{ background: (isFastIQ || magicMomentAvailable) ? '#7c3aed' : '#F5F5F5', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: (isFastIQ || magicMomentAvailable) ? '#fff' : '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+                      onClick={() => canTailor ? handleTailor(resume) : setShowSoftWall(true)}
+                      style={{ background: canTailor ? '#7c3aed' : '#F5F5F5', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, color: canTailor ? '#fff' : '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
                     >
-                      {isFastIQ ? 'Tailor →' : magicMomentAvailable ? 'Tailor free →' : 'Tailor'}
+                      {proAccess ? 'Tailor →' : magicMomentAvailable ? 'Tailor free →' : '🔒 Tailor'}
                     </button>
                     {resume.original_file_url && (
                       <button

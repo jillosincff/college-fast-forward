@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
 import CliffProPaywall from '@/components/pro/CliffProPaywall';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
 import useAccessPlan from '@/hooks/useAccessPlan';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -10,18 +11,23 @@ const isDone = s => ['ready_for_review', 'approved', 'complete'].includes(s || '
 export default function ReadyToApplyCard({ job, pursuit, user }) {
   const [showApply, setShowApply] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showSoftWall, setShowSoftWall] = useState(false);
   const { isPro, magicMomentAvailable, magicMomentCompleted, excludePrompts } = useAccessPlan(user);
   const company = job?.company || '';
   const role = job?.role || job?.job_title || '';
   const jobUrl = job?.jobUrl || job?.job_url || '';
 
+  // Same free-tailor flag Resume Studio uses — a free student whose one free
+  // tailoring is gone hits the soft wall here instead of a dead-end resume lab.
+  const canTailor = isPro || excludePrompts || magicMomentAvailable;
   const goTailor = () => {
+    if (!canTailor) { setShowSoftWall(true); return; }
     const params = new URLSearchParams({ company, role, job_url: jobUrl, from: 'workspace' });
     window.location.hash = `#/ResumeTailoring?${params.toString()}`;
   };
 
   const rows = [
-    { label: 'Resume', ready: isDone(pursuit?.resume_status), action: 'Tailor now →', onClick: goTailor },
+    { label: 'Resume', ready: isDone(pursuit?.resume_status), action: canTailor ? 'Tailor now →' : '🔒 Tailor now', onClick: goTailor },
     { label: 'Cover letter', ready: isDone(pursuit?.cover_letter_status), hint: 'Drafted during Apply' },
     { label: 'Connection', ready: isDone(pursuit?.connection_search_status), hint: 'Optional advantage' },
   ];
@@ -76,6 +82,7 @@ export default function ReadyToApplyCard({ job, pursuit, user }) {
         </div>
       )}
       {showPaywall && <CliffProPaywall onClose={() => setShowPaywall(false)} trigger="magic_moment_completed_workspace" />}
+      {showSoftWall && <SoftWallModal user={user} source="workspace_resume" onClose={() => setShowSoftWall(false)} />}
 
       {showApply && (
         <WarmApplyFlow job={{ company, role, jobUrl }} user={user} applyOnly onClose={() => setShowApply(false)} />

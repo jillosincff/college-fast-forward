@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 import { recordRecommendation } from '@/functions/recordRecommendation';
@@ -21,8 +21,6 @@ const primaryStyle = { minHeight: 'auto', background: 'linear-gradient(135deg, #
 // Plan-aware primary CTA for a job feed card. One primary action, subtle plan cues.
 // Uses the canonical access plan (useAccessPlan upstream) — no plan logic of its own.
 export default function JobCardPlanCTA({ access, pursuit, verdict, rank = 0, onUpgrade, companyName, jobTitle, jobDesc, jobUrl, location, salary, alumniCount }) {
-  const [showPreview, setShowPreview] = useState(false);
-
   const plan = access?.isPro ? 'pro' : 'free';
   const mmStatus = access?.magicMomentCompleted ? 'completed' : access?.magicMomentAvailable ? 'available' : 'none';
 
@@ -84,13 +82,12 @@ export default function JobCardPlanCTA({ access, pursuit, verdict, rank = 0, onU
     );
   }
 
-  // 3. Free with the one-time magic moment available (only for jobs that support the full workflow)
+  // 3. Free with the one-time magic moment available — same destination as every
+  // other card (the Job Workspace owns the resume step for this role).
   if (access.magicMomentAvailable && (jobDesc || jobUrl)) {
     const goMagic = () => {
       track('free_magic_moment_cta_clicked');
-      grade('pursued');
-      const params = new URLSearchParams({ company: companyName, role: jobTitle, job_url: jobUrl || '', from: 'feed' });
-      window.location.hash = `#/ResumeTailoring?${params.toString()}`;
+      goWorkspace('Prepare this application');
     };
     return (
       <div>
@@ -100,7 +97,7 @@ export default function JobCardPlanCTA({ access, pursuit, verdict, rank = 0, onU
           </span>
         )}
         <button onClick={goMagic} className={primaryBtn} style={primaryStyle}>
-          Prepare This Application Free
+          Prepare this application
         </button>
         {rank === 0 ? (
           <p className="text-[11px] text-gray-500 text-center mt-1.5 mb-0">CLIFF will tailor your resume and prepare your next steps.</p>
@@ -111,39 +108,16 @@ export default function JobCardPlanCTA({ access, pursuit, verdict, rank = 0, onU
     );
   }
 
-  // 4. Free after the magic moment — honest preview, one small Pro label
+  // 4. Free after the magic moment — same CTA and destination. The workspace shows
+  // the plan for this job and puts the soft wall on the resume step itself.
   return (
     <div>
-      <button
-        onClick={() => { if (!showPreview) track('pro_preview_opened'); setShowPreview(v => !v); }}
-        className={primaryBtn}
-        style={primaryStyle}
-      >
-        See How CLIFF Can Help
+      <button onClick={() => goWorkspace('Prepare this application')} className={primaryBtn} style={primaryStyle}>
+        Prepare this application
       </button>
-      {showPreview && (
-        <div className="mt-2 bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-1.5">
-          <p className="text-xs font-bold text-purple-900 m-0">For {jobTitle || 'this role'} at {companyName}, CLIFF can:</p>
-          <ul className="m-0 pl-4 text-[11px] text-purple-800 leading-relaxed space-y-0.5">
-            <li>Tailor your resume to this exact job description</li>
-            <li>Research {companyName} and prep talking points</li>
-            {alumniCount > 0
-              ? <li>Reach out to {alumniCount} possible warm connection{alumniCount === 1 ? '' : 's'} here</li>
-              : <li>Search your school network for a warm connection</li>}
-            <li>Run a mock interview tuned to this kind of role</li>
-          </ul>
-          <button
-            onClick={() => { track('pro_cta_clicked', { upgrade_trigger: 'job_card' }); onUpgrade?.('CLIFF Pro'); }}
-            className="w-full py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-extrabold transition-colors cursor-pointer mt-1"
-            style={{ minHeight: 'auto' }}
-          >
-            Let CLIFF Prepare This <span className="text-[9px] font-bold bg-white/20 rounded-full px-1.5 py-0.5 ml-1 align-middle">Pro</span>
-          </button>
-          <p className="text-[10px] text-purple-600 text-center m-0">
-            CLIFF Pro can tailor your resume, research the company and prepare your next move.
-          </p>
-        </div>
-      )}
+      <p className="text-[10px] text-gray-500 text-center mt-1 mb-0">
+        Your free resume tailoring is used — CLIFF Pro tailors every application.
+      </p>
     </div>
   );
 }

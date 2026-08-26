@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Clock, ArrowRight } from 'lucide-react';
 import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
+import SoftWallModal from '@/components/conversion/SoftWallModal';
+import useAccessPlan from '@/hooks/useAccessPlan';
 import { computeVerdict, computeNextStep, computePlan } from './workspaceNextStep';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -15,6 +17,10 @@ const VERDICT_STYLES = {
 // CLIFF decides the step — the student never chooses the workflow.
 export default function WorkspaceNextStep({ job, pursuit, fit, fitLoading, user }) {
   const [showApply, setShowApply] = useState(false);
+  const [showSoftWall, setShowSoftWall] = useState(false);
+  // Same free-tailor flag as Resume Studio — never offer a tailor that can't run.
+  const { isPro, magicMomentAvailable, excludePrompts } = useAccessPlan(user);
+  const canTailor = isPro || excludePrompts || magicMomentAvailable;
   const company = job?.company || '';
   const role = job?.role || job?.job_title || '';
   const jobUrl = job?.jobUrl || job?.job_url || '';
@@ -43,6 +49,7 @@ export default function WorkspaceNextStep({ job, pursuit, fit, fitLoading, user 
 
   const act = () => {
     if (step.cta === 'tailor') {
+      if (!canTailor) { setShowSoftWall(true); return; }
       const params = new URLSearchParams({ company, role, job_url: jobUrl, from: 'workspace' });
       window.location.hash = `#/ResumeTailoring?${params.toString()}`;
     } else if (step.cta === 'apply') setShowApply(true);
@@ -77,7 +84,7 @@ export default function WorkspaceNextStep({ job, pursuit, fit, fitLoading, user 
         ) : (
           <button onClick={act}
             style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: step.cta === 'back' ? '#6b7280' : 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 24px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: step.cta === 'back' ? 'none' : '0 6px 20px rgba(124,58,237,0.3)' }}>
-            {step.ctaLabel} <ArrowRight size={15} />
+            {step.cta === 'tailor' && !canTailor ? '🔒 ' : ''}{step.ctaLabel} <ArrowRight size={15} />
           </button>
         )}
       </div>
@@ -96,6 +103,8 @@ export default function WorkspaceNextStep({ job, pursuit, fit, fitLoading, user 
           ))}
         </div>
       )}
+
+      {showSoftWall && <SoftWallModal user={user} source="workspace_next_step" onClose={() => setShowSoftWall(false)} />}
 
       {showApply && (
         <WarmApplyFlow
