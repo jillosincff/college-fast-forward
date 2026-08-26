@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { resolveStudentProfile } from '../../shared/studentProfile.ts';
 
 // Returns the best parent match for the student's target industry + school ecosystem.
 // Used by CliFF to power the personalized welcome bubble on dashboard mount.
@@ -9,12 +10,12 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Canonical profile first: career_goals is the single source of truth for
-    // the student's field — legacy flat fields are fallbacks only.
-    const cg = user.career_goals || {};
-    const goalIndustries = Array.isArray(cg.target_industries) ? cg.target_industries : [];
-    const goalRoles = Array.isArray(cg.target_roles) ? cg.target_roles : [];
-    const desiredIndustry = goalIndustries[0] || user.target_industry || user.desired_industry || user.industry;
+    // Single profile source of truth — the same resolver the job feed and
+    // next-move queue use. The legacy `target_industry` flat field is stale for
+    // many students (e.g. "Engineering & Technology" left over from onboarding)
+    // and must never override the field their career goals actually state.
+    const profile = resolveStudentProfile(user, []);
+    const desiredIndustry = profile.field;
     const schoolCode = (user.school_code || '').toUpperCase();
 
     // School is required; industry only improves ranking — new students without a
@@ -22,8 +23,6 @@ Deno.serve(async (req) => {
     if (!schoolCode) {
       return Response.json({ match_found: false });
     }
-
-    const industryLower = (desiredIndustry || '').toLowerCase();
 
     // Seniority keywords ordered by priority — highest first
     const SENIOR_KEYWORDS = ['ceo', 'cto', 'coo', 'cfo', 'chief', 'president', 'vp', 'vice president', 'svp', 'evp', 'partner', 'director', 'head', 'principal', 'senior manager', 'manager'];
@@ -38,10 +37,8 @@ Deno.serve(async (req) => {
       return Response.json({ match_found: false });
     }
 
-    // Filter to parents whose company or role title loosely matches the student's field
-    const STOPWORDS = new Set(['and', 'the', 'for', 'other']);
-    const fieldTerms = [...goalIndustries, ...goalRoles, industryLower].join(' ').toLowerCase();
-    const industryKeywords = fieldTerms.split(/[\s,&/]+/).filter(k => k.length > 2 && !STOPWORDS.has(k));
+    // Filter to parents whose company or role title matches the student's field
+    const industryKeywords = profile.fieldTerms;
     const matching = parents.filter(p => {
       const haystack = `${p.role_title} ${p.company_name} ${p.company_domain}`.toLowerCase();
       return industryKeywords.some(kw => haystack.includes(kw));
