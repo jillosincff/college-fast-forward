@@ -11,7 +11,11 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const email = user.email;
-    const today = new Date().toISOString().slice(0, 10);
+    // Same 4AM-ET drop-date logic as getDailyDrop — a UTC date here made the
+    // queue miss the day's drop entirely between 8PM and midnight ET.
+    const etNow = new Date(Date.now() - 4 * 3600000);
+    if (etNow.getUTCHours() < 4) etNow.setUTCDate(etNow.getUTCDate() - 1);
+    const today = etNow.toISOString().slice(0, 10);
 
     const [memories, pipelineRaw, resumesRaw, drops, discoveries] = await Promise.all([
       base44.entities.StudentMemory.filter({ user_email: email, active: true }, '-confidence', 100).catch(() => []),
