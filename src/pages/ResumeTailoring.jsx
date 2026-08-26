@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
 import CliffProPaywall from '@/components/pro/CliffProPaywall';
 import { maybeActivateTrial } from '@/utils/trialActivation';
@@ -890,6 +891,14 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         )}
         <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: 'clamp(22px, 5vw, 40px) clamp(16px, 4vw, 24px)', width: '100%' }}>
           <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap'); @keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+          {/* Back to dashboard */}
+          <button
+            onClick={() => navigate('FreeTierDashboard')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#64748b', marginBottom: 18, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <ArrowLeft size={16} /> Back to dashboard
+          </button>
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: window.innerWidth < 600 ? 'wrap' : 'nowrap' }}>
