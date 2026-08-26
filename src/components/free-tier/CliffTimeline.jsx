@@ -7,15 +7,9 @@ import { base44 } from '@/api/base44Client';
 import { ArrowRight, Check } from 'lucide-react';
 import { matchesHeroPriority } from '@/lib/dashboardDedup';
 
-// Daily record of items the student marked done — so "Did it" actually retires
-// a task for the rest of the day instead of it snapping back on reload.
-const doneKey = () => `cliff_timeline_done_${new Date().toISOString().slice(0, 10)}`;
-function readDone() {
-  try { return new Set(JSON.parse(localStorage.getItem(doneKey())) || []); } catch { return new Set(); }
-}
-function writeDone(set) {
-  try { localStorage.setItem(doneKey(), JSON.stringify([...set])); } catch {}
-}
+// Completed plan items are stored server-side (CompletedPlanItem) so they are
+// permanently logged with a date in the student's history and never resurface
+// on the dashboard after a refresh or the next day.
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -44,13 +38,23 @@ export default function CliffTimeline({ user }) {
   const [data, setData] = useState(null);
   const [trajectory, setTrajectory] = useState(null);
   const [, setHeroTick] = useState(0);
-  const [done, setDone] = useState(() => readDone());
+  const [done, setDone] = useState(() => new Set());
 
-  const markDone = (text) => {
-    setDone(prev => {
-      const next = new Set(prev); next.add(text);
-      writeDone(next);
-      return next;
+  // Load everything this student has already marked done
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.CompletedPlanItem.filter({ user_email: user.email })
+      .then(rows => setDone(new Set((rows || []).map(r => r.item_text))))
+      .catch(() => {});
+  }, [user?.email]);
+
+  const markDone = async (item) => {
+    setDone(prev => new Set(prev).add(item.text));
+    await base44.entities.CompletedPlanItem.create({
+      user_email: user.email,
+      item_text: item.text,
+      cta: item.cta || '',
+      completed_at: new Date().toISOString(),
     });
   };
 
@@ -121,7 +125,7 @@ export default function CliffTimeline({ user }) {
                     style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: dm, fontSize: 12, fontWeight: 800, color: gi === 0 ? '#fff' : '#6d28d9', background: gi === 0 ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)' : '#f5f3ff', border: 'none', borderRadius: 999, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: '7px 14px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                     {a.cta} <ArrowRight size={12} />
                   </button>
-                  <button onClick={() => markDone(a.text)} aria-label="Mark done"
+                  <button onClick={() => markDone(a)} aria-label="Mark done"
                     style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#6b7280', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 999, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: '7px 12px', flexShrink: 0 }}>
                     <Check size={12} /> Did it
                   </button>

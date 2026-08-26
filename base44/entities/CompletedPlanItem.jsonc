@@ -1,0 +1,68 @@
+{
+  "name": "CompletedPlanItem",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Student who completed this dashboard plan item"
+    },
+    "item_text": {
+      "type": "string",
+      "description": "The exact plan item text the student marked done \u2014 used to permanently retire it from the dashboard"
+    },
+    "cta": {
+      "type": "string",
+      "description": "The action label shown on the item when it was completed"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the student marked it done"
+    }
+  },
+  "required": [
+    "user_email",
+    "item_text"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
