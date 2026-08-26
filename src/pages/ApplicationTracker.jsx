@@ -145,6 +145,18 @@ export default function ApplicationTracker() {
     else if (type === 'detail') setSelectedApp(item.app);
   };
 
+  // Remove an application from the tracker (and the underlying pipeline record)
+  const handleDelete = (app) => {
+    if (!app?.id) return;
+    const label = `${app.company}${app.jobTitle && app.jobTitle !== '—' ? ` · ${app.jobTitle}` : ''}`;
+    if (!window.confirm(`Remove "${label}" from your tracker?`)) return;
+    setApplications(prev => prev.filter(a => a.id !== app.id));
+    if (selectedApp?.id === app.id) setSelectedApp(null);
+    if (!String(app.id).startsWith('app-')) {
+      base44.entities.NetworkingPipeline.delete(app.id).catch(() => {});
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9ff', fontFamily: dm }}>
       {/* Hero */}
@@ -238,6 +250,7 @@ export default function ApplicationTracker() {
                     highlighted={isHighlighted(item)}
                     onAction={handleAction}
                     onOpen={setSelectedApp}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>

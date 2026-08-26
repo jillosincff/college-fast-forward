@@ -1,8 +1,10 @@
+import { Trash2 } from 'lucide-react';
+
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // One compact status card: company, role, status, one CLIFF recommendation,
 // and a single next action. Pipeline chips live in the detail panel.
-export default function MissionAppCard({ item, highlighted, onAction, onOpen }) {
+export default function MissionAppCard({ item, highlighted, onAction, onOpen, onDelete }) {
   const { app, insight } = item;
   const h = insight.health;
   const hasAction = insight.action && insight.action.type !== 'none';
@@ -33,9 +35,22 @@ export default function MissionAppCard({ item, highlighted, onAction, onOpen }) 
             {app.jobTitle !== '—' ? `${app.jobTitle} · ${insight.stage}` : insight.stage}
           </p>
         </div>
-        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: h.color, background: h.bg, border: `1px solid ${h.color}33`, borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-          {h.icon} {h.label}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: h.color, background: h.bg, border: `1px solid ${h.color}33`, borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>
+            {h.icon} {h.label}
+          </span>
+          {onDelete && (
+            <button
+              onClick={e => { e.stopPropagation(); onDelete(app); }}
+              title="Remove from tracker"
+              style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: 4, minHeight: 'auto', minWidth: 'auto', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#dc2626'; e.currentTarget.style.background = '#fef2f2'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#9ca3af'; e.currentTarget.style.background = 'none'; }}
+            >
+              <Trash2 size={15} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* One CLIFF recommendation */}
