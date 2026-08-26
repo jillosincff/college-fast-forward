@@ -7,7 +7,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 // Admin-only. Defaults to dryRun so the recipient list can be reviewed before sending.
 // Idempotent: skips anyone who already has an 'onboarding_abandonment' EmailLog entry.
 
-const APP_BASE = 'https://collegefastforward.com';
+const APP_BASE = Deno.env.get('APP_BASE_URL') || 'https://college-fast-forward-fce23588.base44.app';
 const EMAIL_TYPE = 'onboarding_abandonment';
 // Don't chase someone who signed up minutes ago and may still be mid-flow.
 const MIN_AGE_HOURS = 24;
@@ -71,13 +71,14 @@ Deno.serve(async (req) => {
 
     const { dryRun = true } = await req.json().catch(() => ({}));
 
-    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
 
     const ageCutoff = Date.now() - MIN_AGE_HOURS * 3600000;
     const stranded = allUsers.filter((u) => {
       const noPersona = !String(u.persona || '').trim();
+      const hasPersonaNotOnboarded = String(u.persona || '').trim() && u.onboarding_completed !== true;
       const oldEnough = u.created_date && new Date(u.created_date).getTime() < ageCutoff;
-      return noPersona && oldEnough && u.role !== 'admin' && u.email && !isTestAccount(u.email);
+      return (noPersona || hasPersonaNotOnboarded) && oldEnough && u.role !== 'admin' && u.email && !isTestAccount(u.email);
     });
 
     // Skip anyone who already received this email.
