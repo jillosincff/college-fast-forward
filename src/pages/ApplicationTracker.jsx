@@ -1,161 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import AddApplicationModal from '@/components/tracker/AddApplicationModal';
-import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
-import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
-import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
-import AttentionBanner from '@/components/tracker/mission/AttentionBanner';
-import MissionAppCard from '@/components/tracker/mission/MissionAppCard';
-import RecommendationFeedbackPrompt from '@/components/tracker/RecommendationFeedbackPrompt';
-import { deriveInsight, FILTERS } from '@/components/tracker/mission/trackerLogic';
+import TrackerAppCard from '@/components/tracker/simple/TrackerAppCard';
+import { TABS, getStatusGroup } from '@/lib/simpleTracker';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
-// Tracker status key → NetworkingPipeline status (for saving edits back)
-const TRACKER_STATUS_TO_PIPELINE = {
-  applied: 'identified',
-  in_review: 'reached_out',
-  interviewing: 'interview',
-  offered: 'offer',
-  rejected: 'no_response',
+const EMPTY_MESSAGES = {
+  applied: 'No applications in progress yet.',
+  waiting: 'Nothing waiting on you right now.',
+  interviews: 'No interviews scheduled yet.',
+  offers: "No offers yet — they're coming.",
+  done: 'Nothing here yet.',
 };
-
-// Map NetworkingPipeline statuses → tracker statuses
-const PIPELINE_STATUS_MAP = {
-  identified: 'applied',
-  matched: 'applied',
-  reached_out: 'in_review',
-  messaged: 'in_review',
-  replied: 'in_review',
-  coffee_chat: 'interviewing',
-  intro_made: 'in_review',
-  interview: 'interviewing',
-  offer: 'offered',
-  no_response: 'rejected',
-  applied: 'applied',
-};
-
-// Pull the resume version/label out of the notes field
-function extractResumeVersion(notes) {
-  if (!notes) return '—';
-  const submitted = notes.match(/Resume submitted:\s*(.+)/i);
-  if (submitted) return submitted[1].trim().split('\n')[0];
-  if (/Resume tailored via CLiFF/i.test(notes)) return 'Tailored via CLiFF';
-  return '—';
-}
-
-function pipelineToApp(record) {
-  return {
-    id: record.id,
-    company: record.company || '—',
-    logo: (record.company?.[0] || '?').toUpperCase(),
-    jobTitle: record.job_title || '—',
-    dateApplied: record.created_date,
-    statusDate: record.status_date || record.updated_date || record.created_date,
-    followUpCount: record.follow_up_count || 0,
-    resumeVersion: extractResumeVersion(record.notes),
-    status: PIPELINE_STATUS_MAP[record.status] || 'applied',
-    notes: record.notes || '',
-    location: record.location || '',
-    jobUrl: record.job_url || '',
-  };
-}
-
-// Today's Mission → Tracker sync: ?highlight=Company auto-highlights that card
-function readHighlightParam() {
-  try {
-    return (new URLSearchParams(window.location.hash.split('?')[1] || '').get('highlight') || '').toLowerCase();
-  } catch { return ''; }
-}
 
 export default function ApplicationTracker() {
   const { user } = useAuth();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('attention'); // students see work first
-  const [selectedApp, setSelectedApp] = useState(null);
+  const [filter, setFilter] = useState('applied');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showFollowUpModal, setShowFollowUpModal] = useState(false);
-  const [followUpApp, setFollowUpApp] = useState(null);
-  const [showReminderModal, setShowReminderModal] = useState(false);
-  const [highlight] = useState(readHighlightParam);
 
-  // Load the user's real tracked applications from their pipeline
+  const loadApps = (email) => {
+    base44.entities.NetworkingPipeline.filter({ user_email: email }, '-created_date', 200)
+      .then(records => setApplications(records))
+      .catch(() => setApplications([]))
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      if (!user?.email) { setLoading(false); return; }
-      try {
-        const records = await base44.entities.NetworkingPipeline.filter(
-          { user_email: user.email }, '-created_date', 200
-        );
-        if (!cancelled) setApplications(records.map(pipelineToApp));
-      } catch {
-        if (!cancelled) setApplications([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
+    if (!user?.email) { setLoading(false); return; }
+    loadApps(user.email);
   }, [user?.email]);
 
-  // Arriving from an apply flow (?highlight=Company) — jump straight to the tab
-  // that contains the new application so it's immediately visible.
-  useEffect(() => {
-    if (!highlight || loading || !applications.length) return;
-    const match = applications.find(a => a.company.toLowerCase().includes(highlight));
-    if (match) setFilter(deriveInsight(match).group);
-  }, [highlight, loading, applications]);
-
-  // Every application gets a health + recommendation — never a blank Next Action
-  const items = applications.map(app => ({ app, insight: deriveInsight(app) }));
-
-  const isHighlighted = (item) => highlight && item.app.company.toLowerCase().includes(highlight);
-
-  // Highest-priority application for the attention banner
-  const topAttention = items
-    .filter(i => i.insight.group === 'attention' && i.insight.action?.type !== 'none')
-    .sort((a, b) => (isHighlighted(b) ? 1000 : b.insight.priority) - (isHighlighted(a) ? 1000 : a.insight.priority))[0] || null;
-
-  const attentionCount = items.filter(i => i.insight.group === 'attention').length;
-  const reassurance = items.length === 0
-    ? "Track your first application and I'll take it from there."
-    : attentionCount === 0
-      ? 'Everything important is under control.'
-      : "You're making good progress — a couple of things need your attention.";
-
-  const counts = FILTERS.reduce((acc, f) => {
-    acc[f.id] = items.filter(i => i.insight.group === f.id).length;
+  const counts = TABS.reduce((acc, t) => {
+    acc[t.id] = applications.filter(a => getStatusGroup(a.status) === t.id).length;
     return acc;
   }, {});
 
-  const visible = items
-    .filter(i => i.insight.group === filter)
-    .sort((a, b) => (isHighlighted(b) ? 1000 : b.insight.priority) - (isHighlighted(a) ? 1000 : a.insight.priority));
+  const visible = applications
+    .filter(a => getStatusGroup(a.status) === filter)
+    .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-  // Dispatch a card's next action
-  const handleAction = (item) => {
-    const type = item.insight.action?.type;
-    if (type === 'followup') { setFollowUpApp(item.app); setShowFollowUpModal(true); }
-    else if (type === 'practice') navigate('MockInterview');
-    else if (type === 'detail') setSelectedApp(item.app);
+  // Status moves from user actions — each button maps to a concrete pipeline status
+  const handleTransition = (app, targetStatus) => {
+    const updates = { status: targetStatus, status_date: new Date().toISOString() };
+    if (targetStatus === 'interview') updates.interview_date = new Date().toISOString();
+    if (targetStatus === 'offer') updates.offer_date = new Date().toISOString();
+    setApplications(prev => prev.map(a => a.id === app.id ? { ...a, ...updates } : a));
+    if (!String(app.id).startsWith('app-')) {
+      base44.entities.NetworkingPipeline.update(app.id, updates).catch(() => {});
+    }
   };
 
-  // Remove an application from the tracker (and the underlying pipeline record)
+  // Follow-up sent: stay in Applied, just log the date so the nudge retires
+  const handleLogFollowUp = (app) => {
+    const now = new Date().toISOString();
+    const updates = { reached_out_date: now, follow_up_count: (app.follow_up_count || 0) + 1 };
+    setApplications(prev => prev.map(a => a.id === app.id ? { ...a, ...updates } : a));
+    if (!String(app.id).startsWith('app-')) {
+      base44.entities.NetworkingPipeline.update(app.id, updates).catch(() => {});
+    }
+  };
+
   const handleDelete = (app) => {
     if (!app?.id) return;
-    const label = `${app.company}${app.jobTitle && app.jobTitle !== '—' ? ` · ${app.jobTitle}` : ''}`;
+    const label = `${app.company}${app.job_title ? ` · ${app.job_title}` : ''}`;
     if (!window.confirm(`Remove "${label}" from your tracker?`)) return;
     setApplications(prev => prev.filter(a => a.id !== app.id));
-    if (selectedApp?.id === app.id) setSelectedApp(null);
     if (!String(app.id).startsWith('app-')) {
       base44.entities.NetworkingPipeline.delete(app.id).catch(() => {});
     }
   };
+
+  const reassurance = applications.length === 0
+    ? "Add an application you've submitted and I'll help you track what's next."
+    : "Track your applications and I'll suggest the next small step.";
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9ff', fontFamily: dm }}>
@@ -181,7 +104,7 @@ export default function ApplicationTracker() {
         {loading ? (
           <div style={{ background: '#fff', borderRadius: 12, padding: '60px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
             <span style={{ display: 'inline-block', width: 28, height: 28, border: '3px solid #ede9fe', borderTopColor: '#6d28d9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-            <p style={{ fontSize: 14, color: '#888', marginTop: 16 }}>CLIFF is checking your applications…</p>
+            <p style={{ fontSize: 14, color: '#888', marginTop: 16 }}>Loading your applications…</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : applications.length === 0 ? (
@@ -191,7 +114,7 @@ export default function ApplicationTracker() {
               No applications tracked yet
             </h3>
             <p style={{ fontSize: 14, color: '#666', maxWidth: 380, margin: '0 auto 24px', lineHeight: 1.6 }}>
-              Track your first application and CLIFF will watch it, remind you at the right moments, and tell you exactly what to do next.
+              Add an application you've already submitted and CLIFF will help you track what's next.
             </p>
             <button onClick={() => setShowAddModal(true)} style={{ background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: dm, minHeight: 'auto', boxShadow: '0 8px 24px rgba(109,40,217,0.30)' }}>
               + Add Application
@@ -199,18 +122,14 @@ export default function ApplicationTracker() {
           </div>
         ) : (
           <>
-            <RecommendationFeedbackPrompt user={user} />
-
-            <AttentionBanner item={topAttention} onAction={handleAction} />
-
-            {/* Filter pills — work first */}
+            {/* Tabs */}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-              {FILTERS.map(f => {
-                const active = filter === f.id;
+              {TABS.map(t => {
+                const active = filter === t.id;
                 return (
                   <button
-                    key={f.id}
-                    onClick={() => setFilter(f.id)}
+                    key={t.id}
+                    onClick={() => setFilter(t.id)}
                     style={{
                       fontFamily: dm, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', minHeight: 40,
                       color: active ? '#fff' : '#4b5563',
@@ -219,37 +138,25 @@ export default function ApplicationTracker() {
                       borderRadius: 100, padding: '8px 16px',
                     }}
                   >
-                    {f.label}{counts[f.id] > 0 ? ` · ${counts[f.id]}` : ''}
+                    {t.label}{counts[t.id] > 0 ? ` · ${counts[t.id]}` : ''}
                   </button>
                 );
               })}
             </div>
 
             {visible.length === 0 ? (
-              filter === 'attention' ? (
-                <div style={{ background: '#fff', borderRadius: 14, padding: '48px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
-                  <div style={{ fontSize: 44, marginBottom: 12 }}>🎉</div>
-                  <h3 style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>
-                    Everything is under control.
-                  </h3>
-                  <p style={{ fontSize: 14, color: '#6b7280', margin: 0, lineHeight: 1.6, maxWidth: 380, marginLeft: 'auto', marginRight: 'auto' }}>
-                    Nothing requires your attention today. CLIFF is monitoring your applications — come back tomorrow.
-                  </p>
-                </div>
-              ) : (
-                <div style={{ background: '#fff', borderRadius: 14, padding: '36px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
-                  <p style={{ fontSize: 14, color: '#6b7280', margin: 0 }}>Nothing here right now.</p>
-                </div>
-              )
+              <div style={{ background: '#fff', borderRadius: 14, padding: '48px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
+                <p style={{ fontSize: 14, color: '#6b7280', margin: 0 }}>{EMPTY_MESSAGES[filter]}</p>
+              </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 560, margin: '0 auto' }}>
-                {visible.map(item => (
-                  <MissionAppCard
-                    key={item.app.id}
-                    item={item}
-                    highlighted={isHighlighted(item)}
-                    onAction={handleAction}
-                    onOpen={setSelectedApp}
+                {visible.map(app => (
+                  <TrackerAppCard
+                    key={app.id}
+                    app={app}
+                    user={user}
+                    onTransition={handleTransition}
+                    onLogFollowUp={handleLogFollowUp}
                     onDelete={handleDelete}
                   />
                 ))}
@@ -259,61 +166,25 @@ export default function ApplicationTracker() {
         )}
       </div>
 
-      {/* Detail Panel */}
-      {selectedApp && (
-        <ApplicationDetailPanel
-          app={selectedApp}
-          onClose={() => setSelectedApp(null)}
-          onUpdate={(updatedApp) => {
-            setSelectedApp(updatedApp);
-            setApplications(prev => prev.map(a => a.id === updatedApp.id ? updatedApp : a));
-            if (updatedApp.id && !String(updatedApp.id).startsWith('app-')) {
-              base44.entities.NetworkingPipeline.update(updatedApp.id, {
-                status: TRACKER_STATUS_TO_PIPELINE[updatedApp.status] || 'identified',
-                status_date: new Date().toISOString(),
-                notes: updatedApp.notes || '',
-              }).catch(() => {});
-            }
-          }}
-          onFollowUp={() => setShowFollowUpModal(true)}
-          onReminder={() => setShowReminderModal(true)}
-        />
-      )}
-
       {/* Floating add button */}
-      <button
-        onClick={() => setShowAddModal(true)}
-        style={{
-          position: 'fixed', bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 20, width: 56, height: 56, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', fontSize: 24, cursor: 'pointer',
-          boxShadow: '0 8px 24px rgba(109,40,217,0.35)', minHeight: 'auto', zIndex: 50,
-        }}
-      >
-        +
-      </button>
+      {applications.length > 0 && (
+        <button
+          onClick={() => setShowAddModal(true)}
+          style={{
+            position: 'fixed', bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 20, width: 56, height: 56, borderRadius: '50%',
+            background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', color: '#fff', border: 'none', cursor: 'pointer',
+            boxShadow: '0 8px 24px rgba(109,40,217,0.35)', minHeight: 'auto', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Plus size={24} />
+        </button>
+      )}
 
       <AddApplicationModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSuccess={(newApp) => setApplications([newApp, ...applications])}
+        onSuccess={() => { if (user?.email) loadApps(user.email); }}
       />
-
-      <FollowUpDraftModal
-        isOpen={showFollowUpModal}
-        onClose={() => { setShowFollowUpModal(false); setFollowUpApp(null); }}
-        application={followUpApp || selectedApp}
-      />
-
-      <FollowUpReminderModal
-        isOpen={showReminderModal}
-        onClose={() => setShowReminderModal(false)}
-        application={selectedApp}
-      />
-
-      <style>{`
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes slideDown { from { transform: translateX(-50%) translateY(-20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
-      `}</style>
     </div>
   );
 }
