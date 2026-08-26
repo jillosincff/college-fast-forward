@@ -5,10 +5,10 @@ import { ListChecks, ArrowRight, Clock, Check } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
-// Today's plan: the SHORT backup queue behind the Next Move hero.
-// The hero owns the #1 action — this block only ever shows what comes after it,
-// so the two never disagree. Max 2 rows, each with a real target and one button.
-export default function TodaysBestMoves({ user, onShowMoreJobs }) {
+// Today's plan: CLIFF's ranked daily queue — the #1 move first, then up to two
+// more behind it. When this block sits beside a NextMoveHero, pass hideHero so
+// the two don't duplicate the top move; standalone (premium) shows all three.
+export default function TodaysBestMoves({ user, onShowMoreJobs, hideHero = false }) {
   const [state, setState] = useState(null);
   const [loading, setLoading] = useState(true);
   const [draftTask, setDraftTask] = useState(null);
@@ -37,15 +37,16 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
 
   const moves = state?.moves || [];
   const done = state?.done || [];
-  // The hero renders the first not-yet-done move. The plan starts after it.
+  // The first not-yet-done move is the "hero". Skip it only when a separate
+  // NextMoveHero card is showing the same move; otherwise lead with it.
   const heroIdx = moves.findIndex((_, i) => !done[i]);
-  const backups = moves
+  const visible = moves
     .map((m, i) => ({ m, i }))
-    .filter(({ i }) => !done[i] && i !== heroIdx)
-    .slice(0, 2);
+    .filter(({ i }) => !done[i] && !(hideHero && i === heroIdx))
+    .slice(0, hideHero ? 2 : 3);
 
-  // Nothing urgent behind the hero: say so plainly, never invent filler.
-  if (backups.length === 0) {
+  // Nothing actionable right now: say so plainly, never invent filler.
+  if (visible.length === 0) {
     return (
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '16px 18px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -72,11 +73,11 @@ export default function TodaysBestMoves({ user, onShowMoreJobs }) {
         <h3 style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#111827', margin: 0 }}>Today's plan</h3>
       </div>
       <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '0 0 12px' }}>
-        After your next move, these are up.
+        {hideHero ? 'After your next move, these are up.' : 'Ranked by impact — start at the top.'}
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {backups.map(({ m, i }) => (
+        {visible.map(({ m, i }) => (
           <div key={i} style={{ background: '#f8f9fc', border: '1px solid #eef0f5', borderRadius: 12, padding: '12px 14px' }}>
             <p style={{ fontFamily: dm, fontSize: 13.5, fontWeight: 800, color: '#111827', margin: '0 0 8px', lineHeight: 1.35, wordBreak: 'break-word' }}>
               {m.title}
