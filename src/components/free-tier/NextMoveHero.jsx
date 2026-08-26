@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, Clock, Check } from 'lucide-react';
-import { loadBestMoves, completeMove, runMoveAction } from '@/lib/bestMoves';
+import { loadBestMoves, completeMove, runMoveAction, readMovesCache, isRenderableMove, MOVES_UPDATED } from '@/lib/bestMoves';
 import { base44 } from '@/api/base44Client';
 import MissionDraftModal from './MissionDraftModal';
 
@@ -29,7 +29,9 @@ export default function NextMoveHero({ user, firstName }) {
       .then(s => { if (!cancelled) setState(s); })
       .catch(() => { if (!cancelled) setState({ moves: [], done: [] }); })
       .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    const sync = () => { const c = readMovesCache(user.email); if (c && !cancelled) setState(c); };
+    window.addEventListener(MOVES_UPDATED, sync);
+    return () => { cancelled = true; window.removeEventListener(MOVES_UPDATED, sync); };
   }, [user?.email]);
 
   const moves = state?.moves || [];
@@ -38,13 +40,9 @@ export default function NextMoveHero({ user, firstName }) {
   const move = idx >= 0 ? moves[idx] : null;
   const remaining = doneFlags.filter((d, i) => !d && i !== idx).length;
 
-  // Defensive: a move title must always name its target. If the backend ever
-  // returns a dangling title ("Apply to " / "Follow up with " with no company)
-  // or an empty title, never render the broken hero — fall back to a neutral
-  // "pick your next role" card that points at the opportunities below.
-  const BROKEN_TAIL = /^(apply to|follow up with|start your|finish your)\s*$/i;
-  const titleBroken = !move || !move.title || !move.title.trim() || BROKEN_TAIL.test(move.title.trim());
-  const showFallback = !!move && titleBroken;
+  // Shared validity rule with Today's plan: a move must name a real target and
+  // have somewhere to send the student, or the hero falls back to "pick a role".
+  const showFallback = !!move && !isRenderableMove(move);
 
   const markDone = (i, sentViaModal = false) => {
     const next = completeMove(user.email, state, i, { sentViaModal });

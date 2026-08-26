@@ -14,6 +14,24 @@ export const movesStorageKey = (email) =>
 // move dismissed twice across days stops being shown entirely.
 const ledgerKey = (email) => `cliff_move_ledger_v1_${email}`;
 
+// Every rendered move must name a real target: role + company, or a named
+// person. A dangling "Apply to " row is worse than no row at all.
+const BROKEN_TAIL = /^(apply to|follow up on|follow up with|message|start your|finish your|prepare resume for)\s*$/i;
+
+export function isRenderableMove(m) {
+  const title = (m?.title || '').trim();
+  if (!title || BROKEN_TAIL.test(title)) return false;
+  const a = m.action || {};
+  // A workspace/apply row without a company has nowhere to send the student.
+  if (a.type === 'workspace' && !(a.company || '').trim()) return false;
+  if (a.type === 'followup' && !(a.company || '').trim() && !(a.contactName || '').trim()) return false;
+  return true;
+}
+
+// Both the hero and the plan re-read the shared cache when either one advances,
+// so completing a move updates the whole queue the same day.
+export const MOVES_UPDATED = 'cliff:moves-updated';
+
 export const moveKey = (m) =>
   [m.kind || '', (m.company || '').toLowerCase().trim(), (m.action?.role || '').toLowerCase().trim()].join('|');
 
@@ -51,6 +69,7 @@ export async function loadBestMoves(email) {
   // does not come back, and any move acted on / dismissed twice stops showing.
   const ledger = readLedger(email);
   const moves = (data?.moves || []).filter(m => {
+    if (!isRenderableMove(m)) return false;
     const entry = ledger[moveKey(m)];
     if (!entry) return true;
     if (m.kind === 'followup') return false;
@@ -68,6 +87,7 @@ export function completeMove(email, state, index, { sentViaModal = false } = {})
   const move = state.moves[index];
   const next = { ...state, done: state.done.map((d, j) => (j === index ? true : d)) };
   writeMovesCache(email, next);
+  try { window.dispatchEvent(new CustomEvent(MOVES_UPDATED)); } catch {}
   if (move) {
     bumpLedger(email, move);
     const a = move.action || {};
