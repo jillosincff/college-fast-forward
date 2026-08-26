@@ -68,12 +68,12 @@ export async function loadBestMoves(email) {
   // Never re-serve a move the student already acted on: a completed follow-up
   // does not come back, and any move acted on / dismissed twice stops showing.
   const ledger = readLedger(email);
+  // A move the student already acted on ("Did it" / "Send") is done for good —
+  // it never resurfaces, so the plan actually evolves day to day.
   const moves = (data?.moves || []).filter(m => {
     if (!isRenderableMove(m)) return false;
     const entry = ledger[moveKey(m)];
-    if (!entry) return true;
-    if (m.kind === 'followup') return false;
-    return (entry.count || 0) < 2;
+    return !entry; // any prior action prunes the move
   });
   const state = { moves, done: moves.map(() => false) };
   writeMovesCache(email, state);
