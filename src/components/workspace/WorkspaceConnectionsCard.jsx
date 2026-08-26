@@ -52,7 +52,7 @@ export default function WorkspaceConnectionsCard({ job, user }) {
 
   useEffect(() => {
     let cancelled = false;
-    findWorkspaceConnections({ companyName: company })
+    findWorkspaceConnections({ companyName: company, targetRole: role, location: user?.location || user?.preferred_locations?.[0] || '' })
       .then(res => {
         const data = res?.data || res;
         if (cancelled) return;

@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
-import { normCompany, makeCompanyMatcher, rankAndDedupe } from '../../shared/peopleSearch.ts';
+import { normCompany, makeCompanyMatcher, rankAndDedupe, runPublicAlumniSearch, stampAlumniShown } from '../../shared/peopleSearch.ts';
 
 // Ordered, permission-respecting connection search for the CLIFF Job Workspace.
 // Search order: (1) own-school parents/helpers, (2) cached school alumni found via
@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { companyName, targetRole, magic_moment } = await req.json().catch(() => ({}));
+    const { companyName, targetRole, magic_moment, location } = await req.json().catch(() => ({}));
 
     // Soft wall: alumni matches are a Pro feature (free only during the Magic Moment).
     if (!(await canRunGated(base44, user, magic_moment))) {
@@ -98,7 +98,27 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── LAYER 2 — public web research (only if Layers 1-3 found nobody) ───
+    // Same Jesse-style query as the Magic Moment: real alumni of [School] at
+    // [Company], found via LLM + internet context. Without this, the workspace
+    // showed "no one found" for companies where UF alumni clearly exist on
+    // LinkedIn — the opt-in graph is just thin for newer companies like Canva.
+    if (connections.length === 0) {
+      const school = user.school_name || user.school || user.university || '';
+      const publicFinds = await runPublicAlumniSearch(sr, {
+        school,
+        schoolCode,
+        companyName,
+        targetRole,
+        location,
+      });
+      connections.push(...publicFinds);
+    }
+
     const deduped = rankAndDedupe(connections, targetRole, 8);
+
+    // Soft-cap: stamp last_shown_at = now on served public-web alumni.
+    await stampAlumniShown(sr, deduped);
 
     return Response.json({ connections: deduped, recommended: deduped[0] || null });
   } catch (error) {
