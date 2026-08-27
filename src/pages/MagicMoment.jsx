@@ -215,15 +215,26 @@ export default function MagicMoment() {
             lj = [...lj, ...stateJobs];
           }
 
-          // Curated remote jobs are a FALLBACK — only add them if metro + state
-          // live pools are thin. Never jump to Humana/Teladoc/Cigna before
-          // trying in-market healthcare first.
-          let cj = [];
-          if (lj.length < 3) {
-            cj = onChip(getChipCuratedJobs(chipText, location));
-            console.log('[MagicMoment] JOBS', { stage: 'curated_fallback', curated_count: cj.length, reason: 'live_pools_thin' });
+          // Dedupe the LIVE pool first — the job API frequently returns the same
+          // posting several times, which made a 1-job pool look like 3+ and
+          // wrongly suppressed the curated list (one lonely remote card).
+          const seenLive = new Set();
+          const liveUnique = [];
+          for (const j of lj) {
+            const k = ((j.name || '') + '|' + (j.job_title || '')).toLowerCase();
+            if (seenLive.has(k)) continue;
+            seenLive.add(k);
+            liveUnique.push(j);
           }
-          let oj = [...lj, ...cj];
+          const inMarketLive = hasMarket ? liveUnique.filter(j => ['same_location', 'nearby'].includes(tierOf(j))) : liveUnique;
+          console.log('[MagicMoment] JOBS', { stage: 'live_deduped', unique: liveUnique.length, after_location: inMarketLive.length });
+
+          // Curated roles top up the list so the cycle is never a single card.
+          // In-market live jobs still SORT first (tierOrder below), so Miami
+          // results always lead ahead of remote curated ones.
+          const cj = onChip(getChipCuratedJobs(chipText, location));
+          console.log('[MagicMoment] JOBS', { stage: 'curated', curated_count: cj.length });
+          let oj = [...liveUnique, ...cj];
 
           const seenJ = new Set();
           const dedupedJ = [];
