@@ -99,7 +99,7 @@ function OnboardingGuard({ children }) {
 
   // Preview bypass: let the owner account view guarded dashboards directly,
   // regardless of persona/onboarding state.
-  if (user.email === 'josinoff@gmail.com') return children;
+  if (user.email === 'josinoff@gmail.com' || user.email === 'losinoff@gmail.com') return children;
 
   const hasPersona = !!user.persona?.trim();
   const onboardingDone = user.onboarding_completed === true;

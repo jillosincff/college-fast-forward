@@ -261,6 +261,14 @@ export default function GatorAuth() {
     // returns persona/onboarding_completed from the auth layer — we must ignore those
     // stale flags and treat them as a brand-new user.
     const checkAndRoute = async () => {
+      // Preview bypass: owner test accounts go straight to the dashboard,
+      // skipping the entity-exists check that would route them to onboarding.
+      const bypassEmails = ['josinoff@gmail.com', 'losinoff@gmail.com'];
+      if (bypassEmails.includes(user.email)) {
+        window.location.hash = '#/FreeTierDashboard';
+        return;
+      }
+
       // ── FIRST: verify the User entity record actually exists in the database. ──
       // If a user was deleted (e.g. admin testing) but keeps their auth account,
       // auth.me() still returns stale persona/onboarding_completed flags — AND
