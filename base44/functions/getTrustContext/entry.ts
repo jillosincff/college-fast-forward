@@ -71,8 +71,18 @@ Deno.serve(async (req) => {
     const applied = ['applied', 'follow_up_due', 'interviewing', 'offer'].includes(pursuit?.application_status || '');
     const interviewed = pursuit?.application_status === 'interviewing' || pursuit?.interview_status !== 'none' && !!pursuit?.interview_status || !!pipe?.interview_date;
     const offered = pursuit?.application_status === 'offer' || !!pipe?.offer_date;
+    // "Recommendation made" = when CLIFF first engaged this opportunity for the
+    // student. The pursuit, resume, and networking records are created
+    // independently (a resume can be tailored before the workspace ever opens a
+    // pursuit), so using only pursuit.created_date can land AFTER the resume
+    // date and look chronologically impossible. Use the earliest real timestamp.
+    const earliestDate = (dates) => {
+      const ts = (dates || []).filter(Boolean).map((d) => new Date(d).getTime()).filter((n) => !isNaN(n));
+      return ts.length ? new Date(Math.min(...ts)).toISOString() : null;
+    };
+    const recommendedDate = earliestDate([pursuit?.created_date, resume?.created_date, netRec?.created_date]);
     const timeline = [
-      { key: 'recommended', label: 'Recommendation made', done: !!pursuit, date: pursuit?.created_date || null },
+      { key: 'recommended', label: 'Recommendation made', done: !!pursuit || !!resume || !!netRec, date: recommendedDate },
       { key: 'resume', label: 'Resume prepared', done: !!resume && resume.status !== 'pending', date: resume?.created_date || null },
       { key: 'applied', label: 'Application submitted', done: applied, date: null },
       { key: 'follow_up', label: 'Follow-up sent', done: !!pipe?.follow_up_date, date: pipe?.follow_up_date || null },
