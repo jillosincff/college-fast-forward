@@ -261,14 +261,40 @@ Deno.serve(async (req) => {
     // filters (domain employer names, aggregator titles) and the location match
     // that are common to both the strict and relaxed passes. Returns null if the
     // posting fails these shared gates.
+    // JSearch leaks location + class-year cruft into job_title
+    // ("Business Development Intern (Class of 2028) New York, New York, United States")
+    // and appends country to employer_name ("Guidepoint Australia"). Strip both so
+    // the Next Move card reads "Apply to Business Development Intern at Guidepoint".
+    const TRAILING_COUNTRY = /\s+(australia|united states|united kingdom|canada|india|germany|france|ireland|singapore|netherlands|united arab emirates|new zealand|uk|usa|us)$/i;
+    function cleanCompanyName(name: string) {
+      if (!name) return name;
+      return name.replace(TRAILING_COUNTRY, '').trim() || name;
+    }
+    function cleanJobTitle(title: string, job: any) {
+      if (!title) return title;
+      let cleaned = title.replace(/\s*\([^)]*(class of|graduating|graduat|20\d{2})[^)]*\)\s*/gi, ' ');
+      // Strip trailing location that duplicates the structured city/state/country.
+      const locParts = [job.job_city, job.job_state, job.job_country].filter(Boolean);
+      for (let i = 0; i < locParts.length; i++) {
+        const suffix = locParts.slice(i).join(', ');
+        if (suffix.length > 3) {
+          const esc = suffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          cleaned = cleaned.replace(new RegExp(',?\\s*' + esc + '\\s*$', 'i'), '');
+        }
+      }
+      return cleaned.replace(/\s{2,}/g, ' ').trim() || title;
+    }
+
     const normalizeJob = (job) => {
-      const org = job.employer_name?.trim();
-      const title = job.job_title?.trim();
+      const rawOrg = job.employer_name?.trim();
+      const rawTitle = job.job_title?.trim();
       const url = job.job_apply_link || job.apply_options?.[0]?.apply_link;
-      if (!org || !title || !url) return null;
-      if (/\.(com|net|org|io|app|co|dev|xyz)\b/i.test(org) || /https?:\/\//i.test(org)) return null;
-      if (/^[a-z]+$/.test(org) && org.length > 7) return null;
-      if (/\bjobs\b/i.test(title) || /\|/.test(title) || /apply (today|now)/i.test(title)) return null;
+      if (!rawOrg || !rawTitle || !url) return null;
+      if (/\.(com|net|org|io|app|co|dev|xyz)\b/i.test(rawOrg) || /https?:\/\//i.test(rawOrg)) return null;
+      if (/^[a-z]+$/.test(rawOrg) && rawOrg.length > 7) return null;
+      if (/\bjobs\b/i.test(rawTitle) || /\|/.test(rawTitle) || /apply (today|now)/i.test(rawTitle)) return null;
+      const org = cleanCompanyName(rawOrg);
+      const title = cleanJobTitle(rawTitle, job);
       const locText = [job.job_city, job.job_state].filter(Boolean).join(', ')
         || (job.job_is_remote ? 'Remote' : (job.job_country || ''));
       if (!jobMatchesLocation(locText, prefCity, prefState)) return null;

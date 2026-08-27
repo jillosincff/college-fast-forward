@@ -4,7 +4,7 @@
 // fills with live remote roles and surfaces an honest short-pool message.
 import { base44 } from '@/api/base44Client';
 import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
-import { checkJobLive, hasApplyUrl } from '@/lib/jobFreshness';
+import { checkJobLive, hasApplyUrl, cleanJobDisplay } from '@/lib/jobFreshness';
 
 const TIER_ORDER = { same_location: 0, nearby: 1, remote: 2, other: 3 };
 
@@ -71,7 +71,7 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
     const checked = await Promise.all(
       arr.map(async (job) => {
         const chk = await checkJobLive(base44, job);
-        return { ...job, live: chk.ok, _tier: tierOf(job) };
+        return { ...cleanJobDisplay(job), live: chk.ok, _tier: tierOf(job) };
       })
     );
     return checked.filter(j => j.live === true && hasApplyUrl(j));
