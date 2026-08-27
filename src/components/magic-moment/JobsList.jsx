@@ -13,9 +13,11 @@ const TIER_LABELS = {
 export default function JobsList({ jobs, excludeJobKey, onApply }) {
   if (!jobs?.length) return null;
   const exclude = (excludeJobKey || '').toLowerCase().trim();
-  const filtered = exclude
-    ? jobs.filter(j => `${(j.name || '')}|${(j.job_title || '')}`.toLowerCase().trim() !== exclude)
-    : jobs;
+  // Safety net: only render jobs with a verified live apply link.
+  // Non-hiring companies never appear in the Jobs list.
+  const filtered = jobs
+    .filter(j => j.live === true && (j.job_url || j.apply_url || j.url))
+    .filter(j => !exclude || `${(j.name || '')}|${(j.job_title || '')}`.toLowerCase().trim() !== exclude);
   if (!filtered.length) return null;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

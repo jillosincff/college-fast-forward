@@ -6,10 +6,8 @@ import {
   GRAD_INDIGO, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
 import { Briefcase, ExternalLink, ArrowRight, MapPin } from 'lucide-react';
-import { getChipCuratedJobs } from '../../../base44/shared/curatedJobs';
-import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
-import { checkJobLive } from '@/lib/jobFreshness';
 import { logJobApplied } from '@/lib/magicMomentLog';
+import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
 import JobsList from '@/components/magic-moment/JobsList';
 
@@ -21,6 +19,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
   const navigate = useNavigate();
   const [jobsList, setJobsList] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
+  const [shortMessage, setShortMessage] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
   const [nextIdx, setNextIdx] = useState(0);
 
@@ -40,105 +39,14 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
         });
         const chipText = chipParts.join(' ').trim();
         const chipLabel = industries[0] || role || '';
-        const chipKeywords = chipKeywordsFor(chipText);
         setHeroMeta({ chipLabel, chipText });
 
-        const locParts = (location || '').split(',').map(p => p.trim()).filter(Boolean);
-        const userCity = locParts[0] || '';
-        const userState = locParts[1] || '';
-        const hasMarket = !!(userCity || userState);
-
-        const tierOf = (j) => {
-          const loc = (j.location || '').toLowerCase();
-          if (!loc) return 'other';
-          const isRemote = /\bremote\b|work\s*from\s*home/.test(loc);
-          const cityHit = userCity && loc.includes(userCity.toLowerCase());
-          const stateHit = userState && loc.includes(userState.toLowerCase());
-          if (isRemote) return 'remote';
-          if (cityHit) return 'same_location';
-          if (stateHit) return 'nearby';
-          return 'other';
-        };
-
-        const isJunk = (j) => /\b(independent|1099|own business|own biz|build your own|be your own|partner program|independent partner|work[- ]from[- ]home opportunity|unlimited earning|franchise|mlm|multi[- ]level)\b/i
-          .test(`${j.job_title || ''} ${j.hiring_description || ''}`);
-        const isNonStudentLevel = (j) => /\b(charge nurse|director of nursing|nurse manager|nursing supervisor|clinical director|VP of|vice president|chief .+ officer|head of|department head|senior director|principal engineer)\b/i
-          .test(j.job_title || '');
-        const isOnChip = (j) => checkOnChip(j.job_title, chipKeywords).ok;
-        const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j));
-        const onChip = (arr) => arr.filter(j => isOnChip(j));
-
-        const fetchJobs = async (locOverride) => {
-          const loc = locOverride !== undefined ? locOverride : location;
-          try {
-            const r = await base44.functions.invoke('getLiveJobMatchesFn', {
-              career_goals: { role, industries, locations: [loc], seeking: cg.seeking || 'both' },
-              force_refresh: true,
-            });
-            return r?.data?.companies || r?.companies || [];
-          } catch (e) {
-            return [];
-          }
-        };
-
         setJobsLoading(true);
-        const metroRaw = await fetchJobs(location);
-        let lj = onChip(legit(metroRaw));
-
-        if (lj.length < 3 && userState) {
-          const stateRaw = await fetchJobs(userState);
-          lj = [...lj, ...onChip(legit(stateRaw))];
-        }
-
-        const seenLive = new Set();
-        const liveUnique = [];
-        for (const j of lj) {
-          const k = ((j.name || '') + '|' + (j.job_title || '')).toLowerCase();
-          if (seenLive.has(k)) continue;
-          seenLive.add(k);
-          liveUnique.push(j);
-        }
-
-        const cj = onChip(getChipCuratedJobs(chipText, location));
-        const oj = [...liveUnique, ...cj];
-
-        const seenJ = new Set();
-        const dedupedJ = [];
-        for (const j of oj) {
-          const k = (j.name + '|' + j.job_title).toLowerCase();
-          if (seenJ.has(k)) continue;
-          if (hasMarket) {
-            const t = tierOf(j);
-            if (t === 'other') continue;
-          }
-          seenJ.add(k);
-          dedupedJ.push(j);
-        }
-        if (dedupedJ.length === 0 && oj.length > 0) {
-          for (const j of oj) {
-            const k = (j.name + '|' + j.job_title).toLowerCase();
-            if (seenJ.has(k)) continue;
-            seenJ.add(k);
-            dedupedJ.push(j);
-          }
-        }
-        const tierOrder = { same_location: 0, nearby: 1, remote: 2, other: 3 };
-        const tierRank = (j) => tierOrder[tierOf(j)] ?? 3;
-        dedupedJ.sort((a, b) => tierRank(a) - tierRank(b));
-        const topJobs = dedupedJ.slice(0, 8);
-
-        const LIVE_CHECK_LIMIT = 4;
-        const liveChecked = await Promise.all(
-          topJobs.map(async (job, i) => {
-            if (i >= LIVE_CHECK_LIMIT) return { ...job, live: undefined, _tier: tierOf(job) };
-            const chk = await checkJobLive(base44, job);
-            return { ...job, live: chk.ok, _tier: tierOf(job) };
-          })
-        );
-        const _finalRank = (j) => tierOrder[j._tier] ?? tierOf(j) ?? 3;
-        liveChecked.sort((a, b) => _finalRank(a) - _finalRank(b));
-
-        setJobsList(liveChecked);
+        const { jobs, shortMessage: sm } = await buildLiveJobsList({
+          role, industries, location, seeking: cg.seeking, chipText,
+        });
+        setJobsList(jobs);
+        setShortMessage(sm);
         setNextIdx(0);
         setJobsLoading(false);
       } catch (e) {
@@ -194,6 +102,11 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
             <Briefcase size={14} color={INDIGO_DIM} />
             <span style={{ fontSize: 12, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em' }}>More jobs for you</span>
           </div>
+          {shortMessage && (
+            <p style={{ fontSize: 12, color: TEXT3, margin: '0 0 10px', lineHeight: 1.4, fontFamily: FONT }}>
+              {shortMessage}
+            </p>
+          )}
           <JobsList jobs={jobsList.filter((_, i) => i !== nextIdx)} excludeJobKey={nextJob ? `${nextJob.name}|${nextJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} />
         </div>
       )}
@@ -209,7 +122,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
 }
 
 function NextMoveCard({ job, city, onApply, onDidIt }) {
-  const jobUrl = job.job_url || job.url || '#';
+  const jobUrl = job.job_url || job.apply_url || job.url || '#';
   const tierLabel = job._tier === 'same_location' || job._tier === 'nearby'
     ? `Matches your ${city || 'location'} preference`
     : job._tier === 'remote'

@@ -9,10 +9,8 @@ import {
 import { Briefcase, Sparkles, Search, MapPin } from 'lucide-react';
 import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted, trackConversionEvent } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
-import { getChipCuratedJobs } from '../../base44/shared/curatedJobs';
-import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
-import { checkJobLive } from '@/lib/jobFreshness';
 import { logJobApplied } from '@/lib/magicMomentLog';
+import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import ExampleBestPathCard from '@/components/magic-moment/ExampleBestPathCard';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
 import JobsList from '@/components/magic-moment/JobsList';
@@ -37,6 +35,7 @@ export default function MagicMoment() {
 
   const [jobsList, setJobsList] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
+  const [shortMessage, setShortMessage] = useState('');
   const [showPro, setShowPro] = useState(false);
   const [error, setError] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
@@ -64,6 +63,7 @@ export default function MagicMoment() {
     ranRef.current = false;
     setJobsList([]);
     setJobsLoading(true);
+    setShortMessage('');
     setError('');
     setRunKey(k => k + 1);
   };
@@ -94,122 +94,30 @@ export default function MagicMoment() {
         });
         const chipText = chipParts.join(' ').trim();
         const chipLabel = industries[0] || role || '';
-        const chipKeywords = chipKeywordsFor(chipText);
         setHeroMeta({ chipLabel, chipText });
 
-        const locParts = (location || '').split(',').map(p => p.trim()).filter(Boolean);
-        const userCity = locParts[0] || '';
-        const userState = locParts[1] || '';
-        const hasMarket = !!(userCity || userState);
-
-        const tierOf = (j) => {
-          const loc = (j.location || '').toLowerCase();
-          if (!loc) return 'other';
-          const isRemote = /\bremote\b|work\s*from\s*home/.test(loc);
-          const cityHit = userCity && loc.includes(userCity.toLowerCase());
-          const stateHit = userState && loc.includes(userState.toLowerCase());
-          if (isRemote) return 'remote';
-          if (cityHit) return 'same_location';
-          if (stateHit) return 'nearby';
-          return 'other';
-        };
-
-        const isJunk = (j) => /\b(independent|1099|own business|own biz|build your own|be your own|partner program|independent partner|work[- ]from[- ]home opportunity|unlimited earning|franchise|mlm|multi[- ]level)\b/i
-          .test(`${j.job_title || ''} ${j.hiring_description || ''}`);
-        const isNonStudentLevel = (j) => /\b(charge nurse|director of nursing|nurse manager|nursing supervisor|clinical director|VP of|vice president|chief .+ officer|head of|department head|senior director|principal engineer)\b/i
-          .test(j.job_title || '');
-        const isOnChip = (j) => checkOnChip(j.job_title, chipKeywords).ok;
-        const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j));
-        const onChip = (arr) => arr.filter(j => isOnChip(j));
-
-        const fetchJobs = async (locOverride) => {
-          const loc = locOverride !== undefined ? locOverride : location;
-          try {
-            const r = await base44.functions.invoke('getLiveJobMatchesFn', {
-              career_goals: { role, industries, locations: [loc], seeking: cg.seeking || 'both' },
-              force_refresh: true,
-            });
-            return r?.data?.companies || r?.companies || [];
-          } catch (e) {
-            return [];
-          }
-        };
-
-        // ── JOBS ONLY — no findCliffPeople, no people hang ──
         setJobsLoading(true);
-        const metroRaw = await fetchJobs(location);
-        let lj = onChip(legit(metroRaw));
-
-        if (lj.length < 3 && userState) {
-          const stateRaw = await fetchJobs(userState);
-          lj = [...lj, ...onChip(legit(stateRaw))];
-        }
-
-        const seenLive = new Set();
-        const liveUnique = [];
-        for (const j of lj) {
-          const k = ((j.name || '') + '|' + (j.job_title || '')).toLowerCase();
-          if (seenLive.has(k)) continue;
-          seenLive.add(k);
-          liveUnique.push(j);
-        }
-
-        const cj = onChip(getChipCuratedJobs(chipText, location));
-        const oj = [...liveUnique, ...cj];
-
-        const seenJ = new Set();
-        const dedupedJ = [];
-        for (const j of oj) {
-          const k = (j.name + '|' + j.job_title).toLowerCase();
-          if (seenJ.has(k)) continue;
-          if (hasMarket) {
-            const t = tierOf(j);
-            if (t === 'other') continue; // never bait-and-switch with another metro
-          }
-          seenJ.add(k);
-          dedupedJ.push(j);
-        }
-        if (dedupedJ.length === 0 && oj.length > 0) {
-          for (const j of oj) {
-            const k = (j.name + '|' + j.job_title).toLowerCase();
-            if (seenJ.has(k)) continue;
-            seenJ.add(k);
-            dedupedJ.push(j);
-          }
-        }
-        const tierOrder = { same_location: 0, nearby: 1, remote: 2, other: 3 };
-        const tierRank = (j) => tierOrder[tierOf(j)] ?? 3;
-        dedupedJ.sort((a, b) => tierRank(a) - tierRank(b));
-        const topJobs = dedupedJ.slice(0, 8);
-
-        const LIVE_CHECK_LIMIT = 4;
-        const liveChecked = await Promise.all(
-          topJobs.map(async (job, i) => {
-            if (i >= LIVE_CHECK_LIMIT) return { ...job, live: undefined, _tier: tierOf(job) };
-            const chk = await checkJobLive(base44, job);
-            return { ...job, live: chk.ok, _tier: tierOf(job) };
-          })
-        );
-        const _finalRank = (j) => tierOrder[j._tier] ?? tierOf(j) ?? 3;
-        liveChecked.sort((a, b) => _finalRank(a) - _finalRank(b));
-
-        setJobsList(liveChecked);
+        const { jobs, shortMessage: sm } = await buildLiveJobsList({
+          role, industries, location, seeking: cg.seeking, chipText,
+        });
+        setJobsList(jobs);
+        setShortMessage(sm);
         setJobsLoading(false);
 
         // ── Track completion ──
         base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
         trackMagicMomentCompleted({
-          jobs_count: liveChecked.length,
+          jobs_count: jobs.length,
           people_count: 0,
           best_path: false,
           people_source: 'locked_free',
           result_type: 'jobs_only',
-          hero_job_title: liveChecked[0]?.job_title || '',
-          hero_company: liveChecked[0]?.name || '',
+          hero_job_title: jobs[0]?.job_title || '',
+          hero_company: jobs[0]?.name || '',
           has_tailored_resume: false,
         });
         trackConversionEvent('magic_moment_completed', {
-          jobs_count: liveChecked.length,
+          jobs_count: jobs.length,
           people_count: 0,
           best_path: false,
           result_type: 'jobs_only',
@@ -292,15 +200,11 @@ export default function MagicMoment() {
         ) : jobsList.length > 0 ? (
           <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
             <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Jobs for you" />
-            {(() => {
-              const hasInMarket = jobsList.some(j => j._tier === 'same_location' || j._tier === 'nearby');
-              const allRemote = !hasInMarket && jobsList.every(j => j._tier === 'remote' || !j._tier);
-              return allRemote && searchLoc ? (
-                <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '0 0 10px', lineHeight: 1.4 }}>
-                  No roles found specifically in {searchLoc} — showing remote roles in your field.
-                </p>
-              ) : null;
-            })()}
+            {shortMessage && (
+              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '0 0 10px', lineHeight: 1.4 }}>
+                {shortMessage}
+              </p>
+            )}
             <JobsList jobs={jobsList} onApply={handleRowApply} />
           </div>
         ) : (
