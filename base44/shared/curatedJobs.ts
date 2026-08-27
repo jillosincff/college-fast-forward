@@ -212,6 +212,32 @@ const NYC_HEALTHCARE: CuratedJob[] = [
     'https://www.pfizer.com/careers'),
 ];
 
+// ── Healthcare — Miami ──────────────────────────────────────────────────────
+// Local Miami health systems with student-level coordinator/analyst/technician
+// roles. Without these, a Miami healthcare search fell through to NYC_HEALTHCARE
+// (stripped as "another metro") and left ONLY the remote healthcare list — the
+// inverted "remote jobs + local people" screen.
+const MIAMI_HEALTHCARE: CuratedJob[] = [
+  mk('Jackson Health System', 'Patient Care Coordinator', 'Healthcare', 'Miami, FL',
+    'Jackson Health System Patient Care Coordinators guide patients through care plans at the flagship public hospital network in Miami-Dade — a strong entry point for pre-health and healthcare admin students.',
+    'https://jacksonhealth.org/careers/'),
+  mk('University of Miami Health System', 'Clinical Research Coordinator', 'Healthcare', 'Miami, FL',
+    'UHealth Clinical Research Coordinators run trials at the leading academic medical center in South Florida — a classic launchpad for pre-med and life-sciences students.',
+    'https://umiamihealth.careers/'),
+  mk('Miami VA Medical Center', 'Medical Support Assistant', 'Healthcare', 'Miami, FL',
+    'Miami VA Medical Support Assistants schedule, coordinate, and support veteran patient care — a federal entry role with tuition assistance and benefits.',
+    'https://www.va.gov/miami-health-care/'),
+  mk('Baptist Health South Florida', 'Patient Care Technician', 'Healthcare', 'Miami, FL',
+    'Baptist Health Patient Care Technicians support bedside care across Miami-Dade hospitals — a direct clinical entry role for students pursuing nursing or medicine.',
+    'https://careers.baptisthealth.net/'),
+  mk('Nicklaus Children\'s Hospital', 'Clinical Care Coordinator', 'Healthcare', 'Miami, FL',
+    'Nicklaus Children\'s Clinical Care Coordinators manage pediatric patient flow and family communication at the premier children\'s hospital in South Florida.',
+    'https://www.nicklauschildrens.org/careers'),
+  mk('Mount Sinai Medical Center', 'Healthcare Data Analyst', 'Healthcare', 'Miami, FL',
+    'Mount Sinai Miami Beach Healthcare Data Analysts turn hospital operations data into insight across departments — a great analyst entry role in a Miami health system.',
+    'https://www.msmc.com/careers/'),
+];
+
 // ── Data / Analytics — NYC ──────────────────────────────────────────────────
 const NYC_DATA: CuratedJob[] = [
   mk('Meta', 'Data Scientist (University Grad)', 'Data', NYC,
@@ -420,6 +446,7 @@ function detectMetro(location: string): string | null {
   const l = (location || '').toLowerCase();
   if (!l) return null;
   if (/new york|\bnyc\b|manhattan|brooklyn|queens|bronx|\bny\b/.test(l)) return 'nyc';
+  if (/\bmiami\b|south florida|broward|fort lauderdale/.test(l)) return 'miami';
   // Extensible: add more metros here as the curated inventory grows.
   return null;
 }
@@ -433,6 +460,7 @@ const BY_MARKET: Record<string, CuratedJob[]> = {
   'operations|nyc': NYC_OPERATIONS,
   'consulting|nyc': NYC_CONSULTING,
   'healthcare|nyc': NYC_HEALTHCARE,
+  'healthcare|miami': MIAMI_HEALTHCARE,
   'data|nyc': NYC_DATA,
   'product|nyc': NYC_PRODUCT,
   'hr|nyc': NYC_HR,

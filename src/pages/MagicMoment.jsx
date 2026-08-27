@@ -128,7 +128,16 @@ export default function MagicMoment() {
         const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
         const industries = cg.target_industries || [];
         const location = cg.location_preference || '';
-        const chipText = `${role || ''} ${(industries || []).join(' ')}`.trim();
+        // Build chipText from UNIQUE tokens so role="Healthcare" + industries
+        // ["Healthcare"] does not produce "Healthcare Healthcare" — which then
+        // leaked into the outreach draft as "roles like Healthcare Healthcare".
+        const _chipSeen = new Set();
+        const chipParts = [role, ...(industries || [])].filter(p => {
+          const k = (p || '').toLowerCase().trim();
+          if (!k || _chipSeen.has(k)) return false;
+          _chipSeen.add(k); return true;
+        });
+        const chipText = chipParts.join(' ').trim();
         const chipLabel = industries[0] || role || '';
         const chipKeywords = chipKeywordsFor(chipText);
         setHeroMeta({ chipLabel, chipText });
