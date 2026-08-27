@@ -5,7 +5,7 @@ import { FONT, TEXT, TEXT2, INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO, R } 
 // Action-aware footer — never sends the student to the dashboard before
 // they've engaged with the people/drafts above. That's how 88% drop after
 // the Magic Moment: they saw jobs and left without copying a message.
-export default function NextStepFooter({ didAction, peopleCount, bestPathCompany, onUpgrade }) {
+export default function NextStepFooter({ didAction, peopleCount, bestPathCompany, hasBestPath, onUpgrade }) {
   const navigate = useNavigate();
   const hasPeople = peopleCount > 0;
 
@@ -21,17 +21,28 @@ export default function NextStepFooter({ didAction, peopleCount, bestPathCompany
       {!didAction && hasPeople ? (
         <>
           <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>
-            Copy your outreach message first ↑
+            {hasBestPath ? 'Copy your Best Path message ↑' : 'Copy your outreach message first ↑'}
           </p>
           <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 14px', lineHeight: 1.5 }}>
-            Scroll up to the people section, copy a message, and open LinkedIn. Once you've reached out, your dashboard takes over — it tracks everyone you've messaged.
+            {hasBestPath
+              ? 'Your best path is ready above — copy the message and open LinkedIn to reach out. Once you have, your dashboard takes over and tracks everyone you\'ve messaged.'
+              : 'Scroll up to the people section, copy a message, and open LinkedIn. Once you\'ve reached out, your dashboard takes over — it tracks everyone you\'ve messaged.'}
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px', background: '#f5f3ff', borderRadius: 10, border: `1px solid ${INDIGO_BORDER}` }}>
-            <MessageSquare size={16} color={INDIGO} />
-            <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM }}>
-              {peopleCount} {peopleCount === 1 ? 'person' : 'people'} waiting above
-            </span>
-          </div>
+          {hasBestPath ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px', background: '#f5f3ff', borderRadius: 10, border: `1px solid ${INDIGO_BORDER}` }}>
+              <MessageSquare size={16} color={INDIGO} />
+              <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM }}>
+                Best Path ready above
+              </span>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px', background: '#f5f3ff', borderRadius: 10, border: `1px solid ${INDIGO_BORDER}` }}>
+              <MessageSquare size={16} color={INDIGO} />
+              <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM }}>
+                {peopleCount} {peopleCount === 1 ? 'person' : 'people'} waiting above
+              </span>
+            </div>
+          )}
         </>
       ) : (
         <>

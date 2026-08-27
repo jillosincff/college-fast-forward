@@ -638,7 +638,7 @@ export default function MagicMoment() {
             {bestPath ? 'CLIFF found your best path.' : 'Here are your matches.'}
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>
-            {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'}{peopleLoading ? ' — finding people from your school…' : (peopleList.length > 0 ? (bestPath ? ' and people from your school on the same lane.' : ' and people from your school.') : ' for you — no school connections found yet.')}
+            {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'}{peopleLoading ? ' — finding people from your school…' : (peopleList.length > 0 ? ' and people from your school.' : ' for you — no school connections found yet.')}
           </p>
         </div>
 
@@ -750,6 +750,7 @@ export default function MagicMoment() {
             didAction={didAction}
             peopleCount={peopleList.length}
             bestPathCompany={bestPath?.job?.name || ''}
+            hasBestPath={!!bestPath}
             onUpgrade={() => setShowPro(true)}
           />
         )}

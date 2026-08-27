@@ -38,16 +38,33 @@ export function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** Dedupes connections by normalized name and ranks tier-first, then role-relevance.
- *  Input is shuffled first so ties (same tier + same relevance) are broken
- *  randomly — different calls return different people within the same tier. */
+/** Penalizes senior/exec titles and administrative / alumni-association roles.
+ *  Peer-level practitioners (e.g. "Informatics Analyst") are preferred over
+ *  Directors/VPs ("peer-level is better when you have it") and over
+ *  alumni-association officers ("Alumni Association President" is a weaker
+ *  contact than someone actually doing the work in the field). */
+function outreachPenalty(roleTitle: string): number {
+  const t = (roleTitle || '').toLowerCase();
+  let p = 0;
+  if (/\b(director|vp|vice president|chief|head of|principal|staff|senior director|executive director)\b/.test(t)) p += 2;
+  if (/(alumni association|association president|alumni president|alumni board|board of|board member)/.test(t)) p += 4;
+  return p;
+}
+
+/** Dedupes connections by normalized name and ranks tier-first, then
+ *  outreach-penalty (peer practitioners before directors/admin), then
+ *  role-relevance. Input is shuffled first so ties are broken randomly. */
 export function rankAndDedupe(
   connections: any[],
   targetRole: string,
   limit = 8,
 ): any[] {
   const shuffled = shuffle(connections);
-  shuffled.sort((a, b) => (a.tier - b.tier) || (roleRelevance(b.role_title, targetRole) - roleRelevance(a.role_title, targetRole)));
+  shuffled.sort((a, b) =>
+    (a.tier - b.tier) ||
+    (outreachPenalty(a.role_title) - outreachPenalty(b.role_title)) ||
+    (roleRelevance(b.role_title, targetRole) - roleRelevance(a.role_title, targetRole)),
+  );
   const seen = new Set<string>();
   const deduped = shuffled.filter((c) => {
     const k = normCompany(c.name);
