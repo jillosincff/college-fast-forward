@@ -487,7 +487,10 @@ export function getChipCuratedJobs(chipText: string, location: string): CuratedJ
   const rk = detectRole(chipText);
   if (!rk) return [];
   const metro = detectMetro(location);
-  const inMarket = (metro && BY_MARKET[`${rk}|${metro}`]) || BY_MARKET[`${rk}|nyc`] || [];
+  // NEVER serve another city's curated list for an unknown metro. Austin/SF
+  // users rely on live search (metro→state→remote) + the role-specific remote
+  // floor — not NYC jobs stamped onto their screen.
+  const inMarket = (metro && BY_MARKET[`${rk}|${metro}`]) || [];
   return [...inMarket, ...(REMOTE_BY_ROLE[rk] || [])];
 }
 
@@ -514,10 +517,9 @@ export function getCuratedFallback(role: string, location: string): CuratedJob[]
   // roles first, then that role's real-company in-market bucket. A Healthcare
   // student must NEVER receive a generic "Analyst" from the generic list.
   if (rk) {
-    const roleShaped = [
-      ...(REMOTE_BY_ROLE[rk] || []),
-      ...(BY_MARKET[`${rk}|nyc`] || []),
-    ];
+    // Unknown metro: stay role-shaped with the remote floor only. Never append
+    // another city's in-market list — that's how Austin/Sales got NYC jobs.
+    const roleShaped = [...(REMOTE_BY_ROLE[rk] || [])];
     if (roleShaped.length > 0) return roleShaped;
   }
   // Only when the role is genuinely unknown.
