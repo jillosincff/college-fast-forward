@@ -1,4 +1,4 @@
-import { Users, ExternalLink, Lock, Sparkles } from 'lucide-react';
+import { Users, ExternalLink, Sparkles } from 'lucide-react';
 import { FONT, TEXT, TEXT2, INDIGO, INDIGO_DIM, INDIGO_BORDER, R, SHADOW_MD, GRAD_INDIGO } from '@/components/onboarding-flow/onboardingShared';
 
 // Replaces the live people section for FREE users in the Magic Moment.
@@ -17,7 +17,6 @@ export default function LockedPeopleCard({ school, chipText, chipLabel, city, on
         <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           People from your school
         </span>
-        <Lock size={11} color={INDIGO_DIM} style={{ marginLeft: 'auto' }} />
       </div>
 
       <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>

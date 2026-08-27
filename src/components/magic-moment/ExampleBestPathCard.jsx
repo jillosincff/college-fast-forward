@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, Briefcase, Users, Sparkles } from 'lucide-react';
+import { Check, Briefcase, Users, Sparkles } from 'lucide-react';
 import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER, R, SHADOW_MD } from '@/components/onboarding-flow/onboardingShared';
 import { buildOutreachDraft } from '@/lib/outreachDraft';
 
@@ -33,7 +33,7 @@ function pickSample(chipText) {
 }
 
 export default function ExampleBestPathCard({ school, chipText, chipLabel, city }) {
-  const [copied, setCopied] = useState(false);
+  const [gotIt, setGotIt] = useState(false);
   const sample = pickSample(chipText);
 
   const draft = buildOutreachDraft({
@@ -45,14 +45,6 @@ export default function ExampleBestPathCard({ school, chipText, chipLabel, city 
     applied: false,
     live: false,
   });
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(draft?.message || '');
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2600);
-    } catch (e) {}
-  };
 
   return (
     <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, boxShadow: SHADOW_MD, position: 'relative' }}>
@@ -77,7 +69,7 @@ export default function ExampleBestPathCard({ school, chipText, chipLabel, city 
             <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: TEXT3, textTransform: 'uppercase' }}>Job</span>
           </div>
           <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>{sample.jobTitle}</p>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>{sample.company} · {city || 'New York, NY'}</p>
+          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>{sample.company}</p>
         </div>
         <div style={{ flex: 1, background: '#f8fafc', borderRadius: 10, padding: '12px', border: '1px solid #e2e8f0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -94,8 +86,8 @@ export default function ExampleBestPathCard({ school, chipText, chipLabel, city 
         {draft?.message}
       </div>
 
-      <button onClick={handleCopy} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: FONT, fontSize: 12, fontWeight: 800, color: '#fff', background: INDIGO, border: 'none', borderRadius: 999, padding: '10px 16px', cursor: 'pointer', minHeight: 'auto', width: '100%', justifyContent: 'center' }}>
-        {copied ? <><Check size={14} /> Copied — see how it works</> : <><Copy size={14} /> Copy example message</>}
+      <button onClick={() => setGotIt(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: FONT, fontSize: 12, fontWeight: 800, color: '#fff', background: INDIGO, border: 'none', borderRadius: 999, padding: '10px 16px', cursor: 'pointer', minHeight: 'auto', width: '100%', justifyContent: 'center' }}>
+        {gotIt ? <><Check size={14} /> Got it</> : 'Got it'}
       </button>
     </div>
   );

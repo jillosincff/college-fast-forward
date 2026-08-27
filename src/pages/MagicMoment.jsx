@@ -6,7 +6,7 @@ import {
   FONT, CARD, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
   GRAD_INDIGO, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { Briefcase, Sparkles, Search, MapPin, ArrowRight } from 'lucide-react';
+import { Briefcase, Sparkles, Search, MapPin } from 'lucide-react';
 import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted, trackConversionEvent } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import { getChipCuratedJobs } from '../../base44/shared/curatedJobs';
@@ -320,30 +320,11 @@ export default function MagicMoment() {
           onAskParent={() => setShowPro(true)}
         />
 
-        {/* Paywall — after example + jobs visible */}
-        {jobsVisible && (
-          <div style={{ background: GRAD_INDIGO, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center', boxShadow: SHADOW_MD }}>
-            <Sparkles size={20} color="#fff" style={{ marginBottom: 8 }} />
-            <h2 style={{ fontFamily: FONT, fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Unlock your full plan</h2>
-            <p style={{ fontFamily: FONT, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: '0 0 14px', lineHeight: 1.5 }}>
-              Get real alumni from your school, tailored resumes, and daily scouted jobs — all powered by CLIFF.
-            </p>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setShowPro(true)} style={{ flex: 1, fontFamily: FONT, fontSize: 13, fontWeight: 800, color: INDIGO_DIM, background: '#fff', border: 'none', borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto' }}>
-                Upgrade to Pro
-              </button>
-              <button onClick={() => setShowPro(true)} style={{ flex: 1, fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto' }}>
-                Ask a parent
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Continue your plan — only after example + jobs are visible */}
+        {/* Continue your plan — secondary, below the pay module */}
         {!jobsLoading && (
-          <div style={{ textAlign: 'center', marginTop: 8 }}>
-            <button onClick={() => navigate('/FreeTierDashboard')} style={pill({})}>
-              Continue your plan <ArrowRight size={14} />
+          <div style={{ textAlign: 'center', marginTop: 4, marginBottom: 8 }}>
+            <button onClick={() => navigate('/FreeTierDashboard')} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
+              Continue with free →
             </button>
           </div>
         )}
