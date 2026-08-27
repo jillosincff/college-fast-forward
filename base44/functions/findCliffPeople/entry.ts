@@ -23,6 +23,7 @@ export default async function (req: Request) {
     const {
       companyName, targetRole, magic_moment,
       schoolName, schoolCode: schoolCodeRaw, chipText, location,
+      school_level,
     } = await req.json().catch(() => ({}));
 
     // Free during the Magic Moment; Pro-gated otherwise.
@@ -30,12 +31,32 @@ export default async function (req: Request) {
       return Response.json({ connections: [], recommended: null, upgrade_required: true, message: SOFT_WALL_MESSAGE });
     }
 
-    const target = normCompany(companyName);
-    if (!target) return Response.json({ connections: [], recommended: null });
-
     const schoolCode = (schoolCodeRaw || user.school_code || '').toUpperCase();
     const school = schoolName || user.school || '';
     const sr = base44.asServiceRole;
+
+    // ── School-level search (not company-scoped) ────────────────────────────
+    // "[School] alumni in healthcare in Miami" — runs Layer 2 directly with a
+    // school + field + location query so UM/UF healthcare alumni in Miami
+    // surface even when no curated company has a cached match. Used as the
+    // FIRST people search in the Magic Moment; the company scan is extra.
+    if (school_level) {
+      const publicFinds = await runPublicAlumniSearch(sr, {
+        school, schoolCode, companyName: '', targetRole, chipText, location,
+      });
+      const deduped = rankAndDedupe(publicFinds, targetRole, 5);
+      await stampAlumniShown(sr, deduped);
+      return Response.json({
+        connections: deduped,
+        recommended: deduped[0] || null,
+        people_source: deduped.length === 0 ? 'none' : 'public_web',
+        person_found: deduped.length > 0,
+      });
+    }
+
+    const target = normCompany(companyName);
+    if (!target) return Response.json({ connections: [], recommended: null });
+
     const companyMatch = makeCompanyMatcher(companyName);
 
     const connections = [];

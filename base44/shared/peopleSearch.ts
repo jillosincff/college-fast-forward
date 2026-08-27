@@ -73,19 +73,23 @@ export async function runPublicAlumniSearch(
   opts: {
     school: string;
     schoolCode: string;
-    companyName: string;
+    companyName?: string;
     targetRole?: string;
     chipText?: string;
     location?: string;
   },
 ): Promise<any[]> {
-  const { school, schoolCode, companyName, targetRole, chipText, location } = opts;
+  const { school, schoolCode, companyName = '', targetRole, chipText, location } = opts;
   if (!school) return [];
 
   const connections: any[] = [];
   try {
     const roleHint = targetRole || chipText || 'a relevant role';
-    const prompt = `Find 3 real people who are alumni of ${school} and currently work at ${companyName}, ideally in ${roleHint} or an adjacent function. For each person give: name, title (their job title at ${companyName}), source_url (the LinkedIn profile URL or other public page where you found them), and summary (one sentence on why they're a good connection for the student). Only include real people you found via web search — do not fabricate. Return as JSON.`;
+    // School-level search (no company): "[School] alumni in healthcare in Miami"
+    // — finds alumni in the field+market directly, not gated to one employer.
+    const companyClause = companyName ? `and currently work at ${companyName}` : '';
+    const locationClause = !companyName && location ? ` in ${location}` : '';
+    const prompt = `Find 3 real people who are alumni of ${school} ${companyClause}, ideally in ${roleHint} or an adjacent function${locationClause}. For each person give: name, title (their job title${companyName ? ` at ${companyName}` : ''}), company (where they work now), source_url (the LinkedIn profile URL or other public page where you found them), and summary (one sentence on why they're a good connection for the student). Only include real people you found via web search — do not fabricate. Return as JSON.`;
 
     const llmRes = await sr.integrations.Core.InvokeLLM({
       prompt,
@@ -101,6 +105,7 @@ export async function runPublicAlumniSearch(
               properties: {
                 name: { type: 'string' },
                 title: { type: 'string' },
+                company: { type: 'string' },
                 source_url: { type: 'string' },
                 summary: { type: 'string' },
               },
@@ -121,7 +126,7 @@ export async function runPublicAlumniSearch(
         source: 'public_web',
         name: p.name,
         role_title: p.title || null,
-        company: companyName,
+        company: p.company || companyName,
         school,
         graduation_year: null,
         linkedin_url: isLinkedIn ? p.source_url : null,

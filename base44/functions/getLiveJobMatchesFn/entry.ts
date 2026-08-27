@@ -58,7 +58,10 @@ function jobMatchesLocation(locText, city, stateAbbr) {
   if (!city && !stateAbbr) return true;
   if (!locText) return false;
   const l = locText.toLowerCase();
-  if (/remote/.test(l)) return true;
+  // Remote is NOT a market match — a Miami query must not keep remote rows.
+  // Remote is the widen tier (filled by curated jobs in the frontend), not an
+  // in-market hit. Letting remote through here was why the live pool showed
+  // "No roles found specifically in Miami" while still full of remote UHC/CVS.
   if (city && l.includes(city.toLowerCase())) return true;
   if (stateAbbr && new RegExp(`\\b${stateAbbr.toLowerCase()}\\b`).test(l)) return true;
   return false;

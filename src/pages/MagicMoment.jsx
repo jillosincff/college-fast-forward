@@ -279,78 +279,148 @@ export default function MagicMoment() {
         const PEOPLE_DEADLINE_MS = 40_000;
         const peoplePhase = async () => {
           setPhase('Finding people from your school…');
-          // Curated companies are instant and don't block on the live job API.
-          // Cap at 4 — the Magic Moment only needs 3 people; scanning 8 was the
-          // root cause of multi-minute hangs (each Layer 2 LLM web-search ~30-60s).
-          const scanCompanies = [...new Set(getChipCuratedJobs(chipText, location).map(j => j.name).filter(Boolean))]
-            .filter(c => c.length > 1)
-            .slice(0, 4);
-
           let peopleGated = false;
           const allPeople = [];
-          const deadline = Date.now() + PEOPLE_DEADLINE_MS;
-          for (let i = 0; i < scanCompanies.length; i += 4) {
-            if (Date.now() > deadline) break; // hard deadline — never hang
-            const batch = scanCompanies.slice(i, i + 4);
-            const results = await Promise.all(batch.map(company =>
-              base44.functions.invoke('findCliffPeople', {
-                companyName: company, targetRole: role, magic_moment: true,
-                schoolName: user.school, schoolCode: user.school_code,
-                chipText, location,
-              }).then(r => ({ company, res: r }))
-                .catch(() => ({ company, res: { connections: [] } }))
-            ));
-            if (results.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) {
-              peopleGated = true; break;
-            }
-            for (const r of results) {
-              const conns = r.res?.data?.connections || r.res?.connections || [];
+
+          // ── 1. ONE school-level search first ───────────────────────────────
+          // "[School] alumni in healthcare in Miami" — NOT company-scoped. This
+          // finds alumni in the field+market directly, so UM/UF healthcare alumni
+          // in Miami surface even when no curated company has a cached match.
+          // (The old code ONLY scanned curated companies — Humana/Teladoc/Cigna —
+          //  and asked "who from your school works at THIS company?", which
+          //  returned 0 when nobody was cached at those four firms.)
+          try {
+            const schoolRes = await base44.functions.invoke('findCliffPeople', {
+              school_level: true, magic_moment: true,
+              targetRole: role, chipText,
+              schoolName: user.school, schoolCode: user.school_code,
+              location,
+            });
+            if (schoolRes?.data?.upgrade_required || schoolRes?.upgrade_required) {
+              peopleGated = true;
+            } else {
+              const conns = schoolRes?.data?.connections || schoolRes?.connections || [];
               for (const c of conns) allPeople.push(c);
+            }
+          } catch (e) {
+            console.warn('[MagicMoment] school-level people search error:', e?.message || e);
+          }
+
+          // ── 2. Company scan (for Best Path) — only if school-level found nobody
+          // Capped at 4 companies. Each batch is RACED against the remaining
+          // deadline so a slow Layer 2 LLM web-search can't hang past 40s — the
+          // old code awaited Promise.all of 4 searches (60s+), bypassing the cap.
+          if (!peopleGated && allPeople.length === 0) {
+            const scanCompanies = [...new Set(getChipCuratedJobs(chipText, location).map(j => j.name).filter(Boolean))]
+              .filter(c => c.length > 1)
+              .slice(0, 4);
+
+            const deadline = Date.now() + PEOPLE_DEADLINE_MS;
+            for (let i = 0; i < scanCompanies.length; i += 4) {
+              const remaining = deadline - Date.now();
+              if (remaining <= 0) break; // hard deadline — never hang
+              const batch = scanCompanies.slice(i, i + 4);
+              // Race the batch against the remaining deadline — if it times out,
+              // drop the in-flight searches and proceed with what we have.
+              const results = await Promise.race([
+                Promise.all(batch.map(company =>
+                  base44.functions.invoke('findCliffPeople', {
+                    companyName: company, targetRole: role, magic_moment: true,
+                    schoolName: user.school, schoolCode: user.school_code,
+                    chipText, location,
+                  }).then(r => ({ company, res: r }))
+                    .catch(() => ({ company, res: { connections: [] } }))
+                )),
+                new Promise(resolve => setTimeout(() => resolve(null), remaining)),
+              ]);
+              if (results === null) break; // timed out — stop scanning
+              if (results.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) {
+                peopleGated = true; break;
+              }
+              for (const r of results) {
+                const conns = r.res?.data?.connections || r.res?.connections || [];
+                for (const c of conns) allPeople.push(c);
+              }
             }
           }
           return { allPeople, peopleGated };
         };
 
-        const [jobsResult, peopleResult] = await Promise.all([jobsPhase(), peoplePhase()]);
+        // ── Jobs + People: decoupled render ──────────────────────────────────
+        // Jobs render FIRST (don't block on people). People attach when they
+        // arrive — within the 40s deadline, or later in the background. The old
+        // Promise.all waited for BOTH, so a 60s people search hung the loader.
+        const jobsPromise = jobsPhase();
+        const peoplePromise = peoplePhase();
 
+        const jobsResult = await jobsPromise;
         const { liveChecked, topJobs } = jobsResult;
         setJobsList(liveChecked);
+        setPhase(null); // FIRST PAINT — jobs render now
 
-        if (peopleResult.peopleGated) { setShowSoftWall(true); setPhase(null); return; }
-
-        // Dedupe by name + filter to real → take 3
-        const peopleSeen = new Set();
-        const realPeople = [];
-        for (const p of peopleResult.allPeople) {
-          const key = (p.name || '').toLowerCase();
-          if (!key || peopleSeen.has(key)) continue;
-          const g = gatePersonReal(p);
-          if (!g.ok) continue;
-          peopleSeen.add(key);
-          realPeople.push(p);
-          if (realPeople.length >= 3) break;
-        }
-        setPeopleList(realPeople);
-
-        // ── 4. Detect best path (person company ∩ live job company) ───────
-        let best = null;
-        for (const person of realPeople) {
-          const pCompany = (person.company || '').toLowerCase();
-          if (!pCompany) continue;
-          for (const job of liveChecked) {
-            if (!job.live) continue;
-            const jCompany = (job.name || '').toLowerCase();
-            if (pCompany === jCompany || pCompany.includes(jCompany) || jCompany.includes(pCompany)) {
-              best = { job, person };
-              break;
-            }
+        // Shared handler: dedupe + filter to real + best-path detection.
+        let _peopleState = { realPeople: [], best: null };
+        const processPeople = (pr) => {
+          if (!pr || pr.__timeout) return;
+          if (pr.peopleGated) { setShowSoftWall(true); return; }
+          const peopleSeen = new Set();
+          const realPeople = [];
+          for (const p of pr.allPeople) {
+            const key = (p.name || '').toLowerCase();
+            if (!key || peopleSeen.has(key)) continue;
+            const g = gatePersonReal(p);
+            if (!g.ok) continue;
+            peopleSeen.add(key);
+            realPeople.push(p);
+            if (realPeople.length >= 3) break;
           }
-          if (best) break;
-        }
-        setBestPath(best);
+          setPeopleList(realPeople);
 
-        // ── FIRST PAINT — render the lists now; resume tailoring is non-blocking ──
-        setPhase(null);
+          // Detect best path (person company ∩ live job company)
+          let best = null;
+          for (const person of realPeople) {
+            const pCompany = (person.company || '').toLowerCase();
+            if (!pCompany) continue;
+            for (const job of liveChecked) {
+              if (!job.live) continue;
+              const jCompany = (job.name || '').toLowerCase();
+              if (pCompany === jCompany || pCompany.includes(jCompany) || jCompany.includes(pCompany)) {
+                best = { job, person };
+                break;
+              }
+            }
+            if (best) break;
+          }
+          setBestPath(best);
+          _peopleState = { realPeople, best };
+        };
+
+        // Wait up to 40s for people; if they don't arrive, proceed and attach
+        // them later whenever the promise resolves.
+        let peopleTimedOut = false;
+        try {
+          const raced = await Promise.race([
+            peoplePromise,
+            new Promise(resolve => setTimeout(() => resolve({ __timeout: true }), PEOPLE_DEADLINE_MS)),
+          ]);
+          if (raced?.__timeout) peopleTimedOut = true;
+          else processPeople(raced);
+        } catch (e) {
+          // peoplePhase shouldn't throw, but guard anyway
+        }
+
+        // If people timed out, attach them in the background when they land.
+        if (peopleTimedOut) {
+          peoplePromise.then(processPeople).catch(() => {});
+        }
+
+        const realPeople = _peopleState.realPeople;
+        const best = _peopleState.best;
+
+        if (peopleTimedOut && realPeople.length === 0) {
+          // People still loading — note it on the page; they'll attach when ready.
+          // Don't set a blocking phase; jobs are already rendered.
+        }
 
         // ── Track completion (the cycle was shown to the student) ──────────
         base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
