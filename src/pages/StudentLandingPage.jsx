@@ -5,6 +5,7 @@ import MinimalOnboarding from '@/components/onboarding-flow/MinimalOnboarding';
 import { useAuth } from '@/lib/AuthContext';
 import Reveal from '@/components/landing/Reveal';
 import MagicMomentVisual from '@/components/landing/MagicMomentVisual';
+import FreeVsProSection from '@/components/landing/FreeVsProSection';
 
 // ── Design Tokens ───────────────────────────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -273,6 +274,9 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
         </div>
       </section>
+
+      {/* ── FREE VS PRO ── */}
+      <FreeVsProSection onGetStarted={go} />
 
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" style={{ padding: 'clamp(64px, 12vw, 96px) clamp(20px, 5vw, 32px)', background: '#fff', borderTop: '1px solid #f1f5f9', scrollMarginTop: 80 }}>
