@@ -30,7 +30,7 @@ function makeTierOf(userCity, userState) {
  *   jobs         — only live-verified roles with apply URLs, sorted by tier
  *   shortMessage — set when the in-market pool was short and remote fill was used
  */
-export async function buildLiveJobsList({ role, industries, location, seeking, chipText }) {
+export async function buildLiveJobsList({ role, industries, location, seeking, chipText, maxJobs = 10 }) {
   const chipKeywords = chipKeywordsFor(chipText);
   const isOnChip = (j) => checkOnChip(j.job_title, chipKeywords).ok;
   const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j));
@@ -88,8 +88,10 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
   const hasMarket = !!(userCity || userState);
   const inMarket = hasMarket ? pool.filter(j => tierOf(j) !== 'other') : pool;
 
-  // 3. Live-check all candidates, keep only verified live
-  let liveJobs = await liveCheck(inMarket.slice(0, 10));
+  // 3. Live-check all candidates, keep only verified live.
+  //    Pro requests more — check a wider pool so we can return up to maxJobs.
+  const checkLimit = maxJobs > 10 ? Math.min(maxJobs + 10, 35) : 10;
+  let liveJobs = await liveCheck(inMarket.slice(0, checkLimit));
 
   // 4. If short, fill with live remote
   let shortMessage = '';
@@ -100,13 +102,14 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
       const k = ((j.name || '') + '|' + (j.job_title || '')).toLowerCase();
       return !liveJobs.some(lj => ((lj.name || '') + '|' + (lj.job_title || '')).toLowerCase() === k);
     });
-    const remoteLive = await liveCheck(remoteNew.slice(0, 6));
+    const remoteLimit = maxJobs > 10 ? 15 : 6;
+    const remoteLive = await liveCheck(remoteNew.slice(0, remoteLimit));
     liveJobs = [...liveJobs, ...remoteLive];
   }
 
-  // 5. Sort by tier (metro → state → remote)
+  // 5. Sort by tier (metro → state → remote), cap at maxJobs
   const tierRank = (j) => TIER_ORDER[j._tier] ?? 3;
   liveJobs.sort((a, b) => tierRank(a) - tierRank(b));
 
-  return { jobs: liveJobs, shortMessage };
+  return { jobs: liveJobs.slice(0, maxJobs), shortMessage };
 }

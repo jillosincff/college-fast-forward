@@ -22,6 +22,7 @@ import PeakMomentSharePrompt from './PeakMomentSharePrompt';
 import WarmApplyBar from './WarmApplyBar';
 import TodaysBestMoves from './TodaysBestMoves';
 import JessePeopleCard from '@/components/premium/JessePeopleCard';
+import ProHomeFeed from '@/components/premium/ProHomeFeed';
 import MomentumScore from './MomentumScore';
 import ProgressSinceLastVisit from './ProgressSinceLastVisit';
 import JobWorkspaceCard from './JobWorkspaceCard';
@@ -352,9 +353,18 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       {/* Tab Navigation */}
       <DashboardBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Tools Tab */}
+      {/* Tools Tab — paste-link hero + Ask CLIFF live here, not on the home */}
       {activeTab === 'tools' && (
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px' }}>
+          <WarmApplyBar user={user} />
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={() => setShowChat(true)}
+              style={{ width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '14px 20px', cursor: 'pointer', minHeight: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            >
+              <MessageCircle size={16} /> Ask CLIFF
+            </button>
+          </div>
           <ToolsTab user={user} onUpgrade={() => {}} />
         </div>
       )}
@@ -366,42 +376,8 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         </div>
       )}
 
-      {/* Floating CLIFF Chat Button (Dashboard only) — toggles the chat panel */}
-      {activeTab === 'dashboard' && !showChat && (
-        <button
-          onClick={() => setShowChat(true)}
-          style={{
-            position: 'fixed',
-            bottom: isMobile ? 84 : 40,
-            right: isMobile ? 16 : 40,
-            background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-            border: 'none',
-            borderRadius: 100,
-            padding: isMobile ? '12px 16px' : '14px 20px',
-            boxShadow: '0 8px 24px rgba(124,58,237,0.4)',
-            cursor: 'pointer',
-            zIndex: 999,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 12px 32px rgba(124,58,237,0.5)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 8px 24px rgba(124,58,237,0.4)';
-          }}
-        >
-          <MessageCircle size={18} color="#fff" />
-          <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff' }}>Ask CLIFF</span>
-        </button>
-      )}
-
-      {/* Floating CLIFF Chat Panel — opened by the purple bubble, X closes it back to the bubble */}
-      {activeTab === 'dashboard' && showChat && (
+      {/* CLIFF Chat Panel — opened from the Tools tab, X closes it */}
+      {showChat && (
         <div style={{
           position: 'fixed',
           bottom: isMobile ? 0 : 40,
@@ -460,147 +436,12 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         }
       `}</style>
 
-      {/* ── Dashboard Tab Content ── */}
+      {/* ── Dashboard Tab — same layout as free home, with people unlocked ── */}
       {activeTab === 'dashboard' && (
-      <>
-      {/* ── Premium Welcome Banner ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #4c1d95 55%, #6d28d9 100%)',
-        padding: isMobile ? '20px 16px 24px' : '28px 24px 32px',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Subtle glow */}
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(167,139,250,0.28)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-
-        <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h1 style={{ fontFamily: dm, fontSize: isMobile ? 20 : 28, fontWeight: 800, color: '#fff', margin: '0 0 10px', lineHeight: isMobile ? 1.25 : 1.2, letterSpacing: '-0.01em' }}>
-            Let's get locked in and get you hired, {firstName}
-          </h1>
-          <ProgressSinceLastVisit user={user} />
-
-          {/* Stats row */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            {stats.map((s, i) => (
-              <StatPill key={i} {...s} theme={t} isMobile={isMobile} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Network Modal */}
-      {showNetworkModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setShowNetworkModal(false)}>
-          <div style={{ background: '#fff', borderRadius: 20, padding: '28px 24px', maxWidth: 420, width: '100%', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: 0 }}>Your {college || 'UF'} Network</p>
-              <button onClick={() => setShowNetworkModal(false)} style={{ background: 'none', border: 'none', fontSize: 22, color: '#6b7280', cursor: 'pointer', padding: 0, lineHeight: 1 }}>×</button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {[
-                { icon: GraduationCap, label: 'Verified Alumni in Network', value: `${alumniCount}`, color: '#2563eb' },
-                { icon: Users, label: 'Verified Parents in Network', value: `${parentsCount}`, color: '#7c3aed' },
-                { icon: Building2, label: 'Companies with Inside Contacts', value: `${companiesCount}`, color: '#0891b2' },
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 16px' }}>
-                  <item.icon size={22} color={item.color} style={{ flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '0 0 2px' }}>{item.label}</p>
-                    <p style={{ fontFamily: dm, fontSize: 18, fontWeight: 900, color: item.color, margin: 0 }}>{item.value}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '16px 0 0', textAlign: 'center' }}>Counts reflect verified members who have joined and listed their employer in the {college || 'UF'} network.</p>
-          </div>
-        </div>
-      )}
-
-      {/* ── Main Content ── */}
-      {(() => {
-        // Sidebar column is always reserved — Resume Corner (real data) fills it,
-        // and the parent network widget joins once its count is unlocked.
-        const sidebarUnlocked = parentCount !== null && parentCount >= 20;
-        const showSidebar = true;
-        return (
-      <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px', overflowX: 'hidden' }} className="premium-dashboard-container">
-        <div style={{ display: 'grid', gridTemplateColumns: (showSidebar && !isMobile) ? 'minmax(0, 1fr) 340px' : 'minmax(0, 1fr)', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
-          {/* Left Column - Job Feed */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
-            {/* The primary daily experience: CLIFF's ranked plan, not a job list */}
-            <TodaysBestMoves
-              user={user}
-              onShowMoreJobs={() => {
-                setShowMoreJobs(true);
-                setTimeout(() => document.getElementById('cff-daily-feed')?.scrollIntoView({ behavior: 'smooth' }), 100);
-              }}
-            />
-
-            {/* Momentum score + Job Workspace inline on mobile (sidebar is desktop-only) */}
-            {isMobile && (
-              <>
-                <MomentumScore user={user} />
-                <JobWorkspaceCard user={user} />
-              </>
-            )}
-
-            {/* Primary action: paste a job → warm connection → outreach → tracked */}
-            <WarmApplyBar user={user} />
-
-            {/* People from your school — Layer 1 (opt-in) → Layer 2 (Jesse) → LinkedIn fallback */}
-            <JessePeopleCard user={user} />
-
-            {/* ── Job feeds: escape hatch only — revealed by "Show me more jobs" ── */}
-            <div id="cff-daily-feed" />
-            {showMoreJobs && (
-              <OrganizedFeeds 
-                key={`${JSON.stringify(user?.career_goals?.target_roles)}-${JSON.stringify(user?.career_goals?.target_industries)}-${user?.career_goals?.company_size_preference}`} 
-                user={user} 
-                verifiedAlumniCount={alumniCount} 
-                verifiedParentsCount={parentsCount} 
-                isPremium={true}
-              />
-            )}
-          </div>
-
-          {/* Right Column (Desktop Only) - Sticky sidebar, only when Parent Network is unlocked */}
-          {showSidebar && !isMobile && (
-            <aside style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: 16, 
-              width: '340px', 
-              flexShrink: 0,
-              position: 'sticky',
-              top: 24,
-            }} className="desktop-only">
-              <MomentumScore user={user} />
-              <JobWorkspaceCard user={user} />
-              {sidebarUnlocked && (
-                <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
-              )}
-            </aside>
-          )}
-        </div>
-      </div>
-        );
-      })()}
-
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav user={user} onOpenPipeline={() => setShowKanbanModal(true)} />
-
-      {/* Fix sidebar overflow - ensure full height */}
-      <style>{`
-        .premium-ftd-sidebar,
-        .premium-ftd-sidebar > *,
-        .premium-dashboard-container {
-          overflow: visible !important;
-          max-height: none !important;
-          height: auto !important;
-        }
-      `}</style>
-
-      </>
+        <>
+          <ProHomeFeed user={user} onOpenTools={() => setActiveTab('tools')} />
+          <MobileBottomNav user={user} onOpenPipeline={() => setShowKanbanModal(true)} />
+        </>
       )}
 
       {/* Pipeline Kanban Modal */}
