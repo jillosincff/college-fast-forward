@@ -38,6 +38,7 @@ import PostMagicMomentFlow from '@/components/conversion/PostMagicMomentFlow';
 import PreparedWorkProPrompt from '@/components/conversion/PreparedWorkProPrompt';
 import LocationPrefPrompt from '@/components/free-tier/LocationPrefPrompt';
 import useAccessPlan from '@/hooks/useAccessPlan';
+import FreeHomeFeed from '@/components/free-tier/FreeHomeFeed';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -271,9 +272,6 @@ export default function FreeTierDashboard() {
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
       <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} navRef={navRef} />
 
-      {/* Conversion Engine: one-time post-Magic-Moment reflection → next move → Pro offer */}
-      <PostMagicMomentFlow user={user} onUpgrade={triggerUpgrade} />
-
       {/* Tab Navigation (desktop top tabs + mobile bottom nav) */}
       <DashboardBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -288,72 +286,26 @@ export default function FreeTierDashboard() {
         </div>
       )}
 
-      {/* Dashboard Tab (default) */}
+      {/* CLIFF Chat Widget - Floating, available on all tabs */}
+      <CliffChatWidget mode="widget" onOpenUpgrade={triggerUpgrade} />
+
+      {/* Dashboard Tab (default) — clean 4-section free home */}
       {activeTab === 'dashboard' && (
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }} className="main-dashboard-container">
-        {/* CLIFF Chat Widget - Floating for dashboard */}
-        <CliffChatWidget mode="widget" onOpenUpgrade={triggerUpgrade} />
-
-        {/* Loss-framed reactivation header for expired trials */}
-        {isTrialExpired && (
-          <TrialEndedHeader
-            firstName={firstName}
-            user={user}
-            theme={campusTheme}
-            onReactivate={() => triggerUpgrade('Premium Reactivation')}
-          />
-        )}
-
-        {/* Referral prompt at peak moments (reply received / interview landed) */}
-        {!focusMode && <PeakMomentSharePrompt user={user} />}
-
-        {/* One-time work-location question for students who onboarded before this step existed */}
-        {!focusMode && !isTrialExpired && <LocationPrefPrompt user={user} onUpdated={setUser} />}
-
-        {/* 1. Next best move — CLIFF's single highest-leverage action, reasoning visible */}
-        {!isTrialExpired && !focusMode && (
-          <NextMoveHero user={user} firstName={firstName} />
-        )}
-
-        {/* 2. The free warm connection — the standout value moment */}
-        {!focusMode && (
-          <FirstWarmMatchCard user={user} onUpgrade={triggerUpgrade} />
-        )}
-
-        {/* 3. Upgrade — free cycle done; unlock unlimited cycles.
-            Renders even during first-session focus once the Magic Moment is completed. */}
-        {(!focusMode || magicMomentCompleted) && <PlanStateBanner user={user} onUpgrade={triggerUpgrade} />}
-        {!focusMode && !isTrialExpired && <PreparedWorkProPrompt user={user} onUpgrade={triggerUpgrade} />}
-
-        {/* 4. Today's plan + activity stats (secondary) */}
-        {needsGoalsCapture
-          ? <GoalsCaptureCard user={user} onSaved={setUser} />
-          : <FirstApplicationPackageCard user={user} />}
-        {!isTrialExpired && !focusMode && (
-          <>
-            <GoalMemoryStrip user={user} />
-            <DashboardStatsRow user={user} />
-          </>
-        )}
-
-        {/* 5. Daily Drop Feed */}
-        <div id="cff-daily-feed">
-          <CliffPrioritizedFeed user={user} schoolAbbr={schoolAbbr} onUpgrade={triggerUpgrade} />
+        <div>
+          {isTrialExpired && (
+            <TrialEndedHeader
+              firstName={firstName}
+              user={user}
+              theme={campusTheme}
+              onReactivate={() => triggerUpgrade('Premium Reactivation')}
+            />
+          )}
+          <FreeHomeFeed user={user} onUpgrade={triggerUpgrade} />
         </div>
-
-        {/* 6. Longer-horizon context — below the day's work */}
-        {!isTrialExpired && !focusMode && (
-          <CliffTimeline user={user} />
-        )}
-      </div>
       )}
 
       {/* "Did you finish?" — closes the Track & Redirect loop */}
       <ApplyConfirmToast />
-
-      {showWelcomeToast && (
-        <FirstVisitToast firstName={firstName} focusMode={focusMode} onDismiss={() => setShowWelcomeToast(false)} />
-      )}
 
       {showOutreachToast && (
         <div style={{
