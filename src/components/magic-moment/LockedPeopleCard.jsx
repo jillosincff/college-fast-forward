@@ -27,7 +27,7 @@ export default function LockedPeopleCard({ school, chipText, chipLabel, city, on
       </p>
 
       {/* Pre-filled LinkedIn (free) */}
-      <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, padding: '11px 16px', borderRadius: 999, textDecoration: 'none', marginBottom: 12, width: '100%', justifyContent: 'center' }}>
+      <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff', background: '#0A66C2', border: 'none', padding: '12px 16px', borderRadius: 999, textDecoration: 'none', marginBottom: 12, width: '100%', justifyContent: 'center', cursor: 'pointer' }}>
         Search LinkedIn now <ExternalLink size={12} />
       </a>
 

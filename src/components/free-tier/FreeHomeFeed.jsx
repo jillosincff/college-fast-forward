@@ -5,7 +5,7 @@ import {
   FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
   GRAD_INDIGO, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { Briefcase, ExternalLink, ArrowRight, MapPin, Check } from 'lucide-react';
+import { Briefcase, ExternalLink, ArrowRight, MapPin } from 'lucide-react';
 import { getChipCuratedJobs } from '../../../base44/shared/curatedJobs';
 import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
 import { checkJobLive } from '@/lib/jobFreshness';
@@ -22,7 +22,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
   const [jobsList, setJobsList] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
-  const [didNext, setDidNext] = useState(false);
+  const [nextIdx, setNextIdx] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -73,6 +73,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
           try {
             const r = await base44.functions.invoke('getLiveJobMatchesFn', {
               career_goals: { role, industries, locations: [loc], seeking: cg.seeking || 'both' },
+              force_refresh: true,
             });
             return r?.data?.companies || r?.companies || [];
           } catch (e) {
@@ -138,6 +139,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
         liveChecked.sort((a, b) => _finalRank(a) - _finalRank(b));
 
         setJobsList(liveChecked);
+        setNextIdx(0);
         setJobsLoading(false);
       } catch (e) {
         setJobsLoading(false);
@@ -145,7 +147,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
     })();
   }, [user]);
 
-  const nextJob = jobsList[0] || null;
+  const nextJob = jobsList[nextIdx] || null;
   const city = user?.career_goals?.location_preference || user?.location || '';
 
   return (
@@ -160,10 +162,14 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
         <NextMoveCard
           job={nextJob}
           city={city}
-          didIt={didNext}
           onApply={() => logJobApplied({ user, job: nextJob })}
-          onDidIt={() => { logJobApplied({ user, job: nextJob }); setDidNext(true); }}
+          onDidIt={() => { logJobApplied({ user, job: nextJob }); setNextIdx(i => Math.min(i + 1, jobsList.length)); }}
         />
+      ) : jobsList.length > 0 ? (
+        <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
+          <p style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>You're all caught up.</p>
+          <p style={{ fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>CLIFF refreshes matches daily — check back tomorrow for new opportunities.</p>
+        </div>
       ) : (
         <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
           <p style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>No jobs matched right now.</p>
@@ -188,7 +194,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
             <Briefcase size={14} color={INDIGO_DIM} />
             <span style={{ fontSize: 12, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em' }}>More jobs for you</span>
           </div>
-          <JobsList jobs={jobsList.slice(1)} excludeJobKey={nextJob ? `${nextJob.name}|${nextJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} />
+          <JobsList jobs={jobsList.filter((_, i) => i !== nextIdx)} excludeJobKey={nextJob ? `${nextJob.name}|${nextJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} />
         </div>
       )}
 
@@ -202,8 +208,8 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
   );
 }
 
-function NextMoveCard({ job, city, didIt, onApply, onDidIt }) {
-  const jobUrl = job.job_url || (job.curated ? `https://www.google.com/search?q=${encodeURIComponent(job.name + ' ' + job.job_title + ' careers')}` : '#');
+function NextMoveCard({ job, city, onApply, onDidIt }) {
+  const jobUrl = job.job_url || job.url || '#';
   const tierLabel = job._tier === 'same_location' || job._tier === 'nearby'
     ? `Matches your ${city || 'location'} preference`
     : job._tier === 'remote'
@@ -226,8 +232,8 @@ function NextMoveCard({ job, city, didIt, onApply, onDidIt }) {
             Apply <ExternalLink size={14} />
           </a>
         )}
-        <button onClick={onDidIt} disabled={didIt} style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: didIt ? 'rgba(255,255,255,0.5)' : '#fff', background: 'transparent', border: '1.5px solid rgba(255,255,255,0.4)', borderRadius: 999, padding: '12px 18px', cursor: didIt ? 'default' : 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          {didIt ? <><Check size={14} /> Done</> : 'Did it'}
+        <button onClick={onDidIt} style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff', background: 'transparent', border: '1.5px solid rgba(255,255,255,0.5)', borderRadius: 999, padding: '12px 18px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          Did it <ArrowRight size={14} />
         </button>
       </div>
     </div>
