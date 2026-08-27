@@ -275,9 +275,6 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
       </section>
 
-      {/* ── FREE VS PRO ── */}
-      <FreeVsProSection onGetStarted={go} />
-
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" style={{ padding: 'clamp(64px, 12vw, 96px) clamp(20px, 5vw, 32px)', background: '#fff', borderTop: '1px solid #f1f5f9', scrollMarginTop: 80 }}>
         <Reveal>
@@ -320,6 +317,9 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
         </Reveal>
       </section>
+
+      {/* ── FREE VS PRO ── */}
+      <FreeVsProSection onGetStarted={go} />
 
       {/* ── SIMPLE PROOF ── */}
       <section style={{ padding: 'clamp(56px, 10vw, 88px) clamp(20px, 5vw, 32px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>

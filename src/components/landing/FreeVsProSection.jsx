@@ -19,7 +19,7 @@ const FREE_BULLETS = [
 const PRO_BULLETS = [
   'People from your school + outreach drafts',
   'Up to 30 matching jobs a day',
-  '$X/mo · Ask a parent to unlock',
+  'Ask a parent to unlock for you',
 ];
 
 export default function FreeVsProSection({ onGetStarted }) {
