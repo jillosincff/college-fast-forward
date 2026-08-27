@@ -1,25 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Users, ExternalLink, Copy, Check, Sparkles } from 'lucide-react';
+import { Users, ExternalLink, Copy, Check, Sparkles, Search } from 'lucide-react';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
-// Paid-only people panel. Calls Layer 1 (findCliffPeople) first; if empty,
-// calls Layer 2 (findJessePeople, ~18s hard cap). Falls back to pre-filled
-// LinkedIn search if both are empty/slow. Best Path badge only when a
-// returned person's company matches a LIVE job with a verified apply URL.
+const MAX_JESSE_RETRIES = 5;
+const RETRY_DELAY_MS = 12000;
+
+// Paid-only people panel. Calls Layer 1 (findCliffPeople with school_level)
+// first for a fast LLM-based public search. If empty, calls Layer 2
+// (findJessePeople) which uses the Jesse agent — but Jesse takes ~60-90s, so
+// it uses an async retry pattern: the function returns { pending: true,
+// searchId } and this component retries with that searchId until results
+// arrive. Results are cached 24h server-side, so repeat visits are instant.
 export default function JessePeopleCard({ user }) {
   const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false); // Jesse search in progress
   const [source, setSource] = useState('');
-  const [bestPath, setBestPath] = useState(null); // { person, job }
+  const [bestPath, setBestPath] = useState(null);
   const [copied, setCopied] = useState(null);
+  const retryCountRef = useRef(0);
 
   useEffect(() => {
     if (!user?.email) return;
     let mounted = true;
-    (async () => {
+    let retryTimer = null;
+
+    const run = async (retrySearchId = null) => {
       const cg = user.career_goals || {};
       const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
       const industries = cg.target_industries || [];
@@ -30,30 +39,43 @@ export default function JessePeopleCard({ user }) {
       });
       const chipText = chipParts.join(' ').trim();
       const school = user.school || user.school_code || '';
+      const schoolCode = (user.school_code || '').toUpperCase();
 
       // Fetch people + live jobs in parallel (jobs for Best Path matching)
       const [peopleResult, jobsResult] = await Promise.all([
-        fetchPeople(user, { role, industries, location, chipText, school }),
+        fetchPeople(user, { role, industries, location, chipText, school, schoolCode }, retrySearchId),
         buildLiveJobsList({ role, industries, location, seeking: cg.seeking, chipText }),
       ]);
 
       if (!mounted) return;
       setPeople(peopleResult.people);
       setSource(peopleResult.source);
+      setSearching(peopleResult.pending || false);
 
-      // Best Path: person.company matches a live job's company
       if (peopleResult.people.length && jobsResult.jobs.length) {
         const match = matchBestPath(peopleResult.people, jobsResult.jobs);
         if (match) setBestPath(match);
       }
       setLoading(false);
-    })();
-    return () => { mounted = false; };
+
+      // If Jesse is still searching, retry with the searchId after a delay
+      if (peopleResult.pending && peopleResult.searchId && retryCountRef.current < MAX_JESSE_RETRIES && mounted) {
+        retryCountRef.current += 1;
+        retryTimer = setTimeout(() => run(peopleResult.searchId), RETRY_DELAY_MS);
+      } else if (peopleResult.pending) {
+        // Exhausted retries — stop searching, show LinkedIn fallback
+        setSearching(false);
+      }
+    };
+
+    run();
+    return () => { mounted = false; if (retryTimer) clearTimeout(retryTimer); };
   }, [user?.email]);
 
-  const linkedInFallbackUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${user?.school || ''} ${source === 'jesse' ? '' : ''} ${user?.career_goals?.target_roles?.[0] || ''} ${user?.career_goals?.location_preference || ''}`.trim())}`;
+  const linkedInFallbackUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${user?.school || ''} ${user?.career_goals?.target_roles?.[0] || ''} ${user?.career_goals?.location_preference || ''}`.trim())}`;
 
-  if (loading) {
+  // Loading state — first call, no results yet
+  if (loading && !searching) {
     return (
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '24px 20px', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -64,6 +86,26 @@ export default function JessePeopleCard({ user }) {
           <div style={{ width: 16, height: 16, border: '2px solid #ede9fe', borderTop: '2px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', margin: 0 }}>Finding people from your school…</p>
         </div>
+      </div>
+    );
+  }
+
+  // Jesse search in progress — show searching state (not the LinkedIn fallback)
+  if (searching) {
+    return (
+      <div style={{ background: '#fff', border: '1px solid #ddd6fe', borderRadius: 16, padding: '20px 20px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Users size={16} color="#7c3aed" />
+          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em' }}>People from your school</span>
+          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#6d28d9', background: '#ede9fe', borderRadius: 999, padding: '2px 8px' }}>searching</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <div style={{ width: 16, height: 16, border: '2px solid #ede9fe', borderTop: '2px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', margin: 0 }}>CLIFF is searching LinkedIn for alumni at your school…</p>
+        </div>
+        <p style={{ fontFamily: dm, fontSize: 12, color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
+          This takes about a minute. We're finding real people from {user?.school || 'your school'} in your field — check back shortly.
+        </p>
       </div>
     );
   }
@@ -81,7 +123,7 @@ export default function JessePeopleCard({ user }) {
           CLIFF couldn't find verified alumni for this search. Search LinkedIn directly — we've pre-filled it with your school and field.
         </p>
         <a href={linkedInFallbackUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: '#0A66C2', border: 'none', padding: '12px 16px', borderRadius: 999, textDecoration: 'none', width: '100%' }}>
-          Search LinkedIn <ExternalLink size={14} />
+          <Search size={14} /> Search LinkedIn <ExternalLink size={14} />
         </a>
       </div>
     );
@@ -94,7 +136,7 @@ export default function JessePeopleCard({ user }) {
         <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           People from your school
         </span>
-        {source === 'jesse' && (
+        {(source === 'jesse' || source === 'cache') && (
           <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#6d28d9', background: '#ede9fe', borderRadius: 999, padding: '2px 8px' }}>via Jesse</span>
         )}
       </div>
@@ -193,38 +235,38 @@ function matchBestPath(people, jobs) {
   return null;
 }
 
-// Layer 1 (findCliffPeople) → Layer 2 (findJessePeople) → empty fallback.
-async function fetchPeople(user, { role, industries, location, chipText, school }) {
-  const schoolCode = (user.school_code || '').toUpperCase();
-  const params = {
-    schoolName: school, schoolCode,
-    chipText, location, targetRole: role,
-    magic_moment: false, // paid dashboard, not onboarding
-  };
-
-  // Layer 1: opt-in graph + cached alumni + public web
-  try {
-    const r1 = await base44.functions.invoke('findCliffPeople', params);
-    const c1 = r1?.data?.connections || r1?.connections || [];
-    if (c1.length >= 3) return { people: c1, source: 'layer1' };
-    // Layer 2: Jesse (paid only, ~18s hard cap)
+// Layer 1 (findCliffPeople with school_level) → Layer 2 (findJessePeople with
+// async retry). If Jesse is still searching, returns { pending: true, searchId }
+// so the caller can retry.
+async function fetchPeople(user, { role, industries, location, chipText, school, schoolCode }, retrySearchId = null) {
+  // On first call (no retrySearchId), try Layer 1: findCliffPeople with
+  // school_level=true runs a fast LLM + internet search (~5-10s). If it finds
+  // people, we skip Jesse entirely.
+  if (!retrySearchId) {
     try {
-      const r2 = await base44.functions.invoke('findJessePeople', {
-        schoolName: school, schoolCode, chipText, location, targetRole: role,
+      const r1 = await base44.functions.invoke('findCliffPeople', {
+        schoolName: school, schoolCode,
+        chipText, location, targetRole: role,
+        magic_moment: false, school_level: true,
       });
-      const c2 = r2?.data?.connections || r2?.connections || [];
-      if (c2.length > 0) return { people: c2, source: 'jesse' };
-    } catch (e) { /* Jesse failed — fall through */ }
-    // Return whatever Layer 1 found (even if < 3)
-    if (c1.length > 0) return { people: c1, source: 'layer1' };
-  } catch (e) { /* Layer 1 failed — try Jesse directly */ }
-  // Last resort: try Jesse directly
+      const c1 = r1?.data?.connections || r1?.connections || [];
+      if (c1.length > 0) return { people: c1, source: 'layer1', pending: false };
+    } catch (e) { /* Layer 1 failed — fall through to Jesse */ }
+  }
+
+  // Layer 2: Jesse (paid only, async retry pattern)
   try {
     const r2 = await base44.functions.invoke('findJessePeople', {
       schoolName: school, schoolCode, chipText, location, targetRole: role,
+      searchId: retrySearchId,
     });
     const c2 = r2?.data?.connections || r2?.connections || [];
-    if (c2.length > 0) return { people: c2, source: 'jesse' };
-  } catch (e) {}
-  return { people: [], source: 'none' };
+    if (c2.length > 0) return { people: c2, source: 'jesse', pending: false };
+    // If pending, return the searchId for retry
+    const pending = r2?.data?.pending || r2?.pending;
+    const searchId = r2?.data?.searchId || r2?.searchId;
+    if (pending && searchId) return { people: [], source: 'jesse', pending: true, searchId };
+  } catch (e) { /* Jesse failed — fall through */ }
+
+  return { people: [], source: 'none', pending: false };
 }
