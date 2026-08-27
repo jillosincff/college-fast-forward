@@ -21,6 +21,7 @@ import PremiumActivationSequence from './PremiumActivationSequence';
 import PeakMomentSharePrompt from './PeakMomentSharePrompt';
 import WarmApplyBar from './WarmApplyBar';
 import TodaysBestMoves from './TodaysBestMoves';
+import JessePeopleCard from '@/components/premium/JessePeopleCard';
 import MomentumScore from './MomentumScore';
 import ProgressSinceLastVisit from './ProgressSinceLastVisit';
 import JobWorkspaceCard from './JobWorkspaceCard';
@@ -545,6 +546,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
             {/* Primary action: paste a job → warm connection → outreach → tracked */}
             <WarmApplyBar user={user} />
+
+            {/* People from your school — Layer 1 (opt-in) → Layer 2 (Jesse) → LinkedIn fallback */}
+            <JessePeopleCard user={user} />
 
             {/* ── Job feeds: escape hatch only — revealed by "Show me more jobs" ── */}
             <div id="cff-daily-feed" />
