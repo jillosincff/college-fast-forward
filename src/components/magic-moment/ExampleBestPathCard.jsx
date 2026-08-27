@@ -9,29 +9,30 @@ import { buildOutreachDraft } from '@/lib/outreachDraft';
 // findCliffPeople, no 40s hang.
 
 const SAMPLE_BY_CHIP = {
-  marketing: { company: 'Spotify', jobTitle: 'Marketing Coordinator', personName: 'Maya Patel', personRole: 'Senior Marketing Manager' },
   sales: { company: 'Salesforce', jobTitle: 'Sales Development Representative', personName: 'Chris Hayes', personRole: 'Sales Director' },
-  finance: { company: 'Goldman Sachs', jobTitle: 'Analyst, Investment Banking', personName: 'Priya Shah', personRole: 'Vice President' },
+  marketing: { company: 'Spotify', jobTitle: 'Marketing Coordinator', personName: 'Maya Patel', personRole: 'Senior Marketing Manager' },
+  finance: { company: 'Goldman Sachs', jobTitle: 'Financial Analyst', personName: 'Priya Shah', personRole: 'Finance Manager' },
+  operations: { company: 'Amazon', jobTitle: 'Operations Analyst', personName: 'Sam Rivera', personRole: 'Operations Manager' },
   healthcare: { company: 'Pfizer', jobTitle: 'Clinical Operations Associate', personName: 'Alex Kim', personRole: 'Clinical Research Manager' },
-  software: { company: 'Stripe', jobTitle: 'Software Engineer', personName: 'Jordan Lee', personRole: 'Senior Engineer' },
+  legal: { company: 'Kirkland & Ellis', jobTitle: 'Legal Intern', personName: 'Jordan Lee', personRole: 'Associate Counsel' },
+  engineering: { company: 'Tesla', jobTitle: 'Mechanical Engineer', personName: 'Riley Chen', personRole: 'Senior Engineer' },
+  technology: { company: 'Stripe', jobTitle: 'Software Engineer', personName: 'Devon Park', personRole: 'Senior Engineer' },
   communications: { company: 'Edelman', jobTitle: 'Communications Assistant', personName: 'Taylor Brooks', personRole: 'Account Supervisor' },
-  consulting: { company: 'Deloitte', jobTitle: 'Strategy & Operations Analyst', personName: 'Sam Rivera', personRole: 'Senior Consultant' },
-  data: { company: 'Bloomberg', jobTitle: 'Data Analyst', personName: 'Nina Gupta', personRole: 'Lead Data Scientist' },
-  product: { company: 'Figma', jobTitle: 'Product Designer', personName: 'Riley Chen', personRole: 'Senior Product Designer' },
+  other: { company: 'LinkedIn', jobTitle: 'Business Analyst', personName: 'Nina Gupta', personRole: 'Senior Business Analyst' },
 };
 
 function pickSample(chipText) {
   const c = (chipText || '').toLowerCase();
-  if (/product|\bux\b|\bui\b|design|user experience|user interface/.test(c)) return SAMPLE_BY_CHIP.product;
-  if (/market|media|content|brand|social|advertis/.test(c)) return SAMPLE_BY_CHIP.marketing;
-  if (/\bsale|business development|\bsdr|\bbdr|account executive/.test(c)) return SAMPLE_BY_CHIP.sales;
-  if (/financ|bank|invest|asset|wealth/.test(c)) return SAMPLE_BY_CHIP.finance;
+  if (/\bsale|business development|\bsdr|\bbdr|account executive|account manager/.test(c)) return SAMPLE_BY_CHIP.sales;
+  if (/market|advertis|brand|social media|content strategy/.test(c)) return SAMPLE_BY_CHIP.marketing;
+  if (/financ|bank|invest|asset|wealth|\baccounting|\baudit|\btax\b|\bcpa/.test(c)) return SAMPLE_BY_CHIP.finance;
+  if (/operation|\bops\b|supply chain|logistic|project manage/.test(c)) return SAMPLE_BY_CHIP.operations;
   if (/health|clinical|nurs|patient|medical|pharma|biotech|pre-?med/.test(c)) return SAMPLE_BY_CHIP.healthcare;
-  if (/software|engineer|develop|frontend|backend|fullstack|\bswe/.test(c)) return SAMPLE_BY_CHIP.software;
-  if (/communicat|public relations|\bpr\b|press/.test(c)) return SAMPLE_BY_CHIP.communications;
-  if (/consult|strategy|advisory/.test(c)) return SAMPLE_BY_CHIP.consulting;
-  if (/\bdata\b|analyst|analytics|quant/.test(c)) return SAMPLE_BY_CHIP.data;
-  return SAMPLE_BY_CHIP.marketing;
+  if (/legal|\blaw\b|attorney|paralegal|compliance|counsel/.test(c)) return SAMPLE_BY_CHIP.legal;
+  if (/engineer|mechanical|electrical|\bcivil\b|manufactur|aerospace|industrial/.test(c)) return SAMPLE_BY_CHIP.engineering;
+  if (/software|develop|frontend|backend|fullstack|\bswe\b|\btech|cyber|data|analyst|analytic|quant|product|\bux\b|\bui\b|design|user experience|user interface/.test(c)) return SAMPLE_BY_CHIP.technology;
+  if (/communicat|public relations|\bpr\b|press|media relations/.test(c)) return SAMPLE_BY_CHIP.communications;
+  return SAMPLE_BY_CHIP.other;
 }
 
 export default function ExampleBestPathCard({ school, chipText, chipLabel, city }) {
