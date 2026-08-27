@@ -183,96 +183,109 @@ export default function MagicMoment() {
           }
         };
 
-        setPhase('Finding matching jobs…');
-        let liveJobs = onChip(legit(await fetchJobs(location)));
+        // ── Jobs + People IN PARALLEL ─────────────────────────────────────
+        // These are independent lists (see header comment). Running them
+        // concurrently cuts total wait from (jobs + people) to max(jobs, people).
+        // The people search uses curated companies (instant — no dependency on
+        // the live job API) and is capped at 4 companies with a HARD 40s deadline
+        // so a slow Layer 2 LLM web-search can never hang the Magic Moment.
 
-        // ONE widening call to state if the metro was thin — don't stack a
-        // third "anywhere" call (that's what pushed total time past 30s).
-        if (liveJobs.length < 3 && userState) {
-          setPhase('Widening the search…');
-          liveJobs = [...liveJobs, ...onChip(legit(await fetchJobs(userState)))];
-        }
+        const jobsPhase = async () => {
+          setPhase('Finding matching jobs…');
+          let lj = onChip(legit(await fetchJobs(location)));
 
-        // Curated fallback — always available for known chips. Merge with live
-        // results so the user sees real volume even when the API was slow or thin.
-        const curatedJobs = onChip(getChipCuratedJobs(chipText, location));
-        let onChipJobs = [...liveJobs, ...curatedJobs];
-
-        // Dedupe + location gate + sort by tier
-        const seenJobs = new Set();
-        const dedupedJobs = [];
-        for (const j of onChipJobs) {
-          const k = (j.name + '|' + j.job_title).toLowerCase();
-          if (seenJobs.has(k)) continue;
-          if (hasMarket) {
-            const t = tierOf(j);
-            if (t === 'other') continue; // never bait-and-switch with another metro
+          // ONE widening call to state if the metro was thin — don't stack a
+          // third "anywhere" call (that's what pushed total time past 30s).
+          if (lj.length < 3 && userState) {
+            setPhase('Widening the search…');
+            lj = [...lj, ...onChip(legit(await fetchJobs(userState)))];
           }
-          seenJobs.add(k);
-          dedupedJobs.push(j);
-        }
 
-        // Safety net: if the location gate rejected EVERYTHING, fall back to
-        // all on-chip jobs (sorted by tier) rather than showing "no matches found".
-        // This catches edge cases where the user's location doesn't match any
-        // job location strings (e.g. onboarding persistence gaps).
-        if (dedupedJobs.length === 0 && onChipJobs.length > 0) {
-          for (const j of onChipJobs) {
+          const cj = onChip(getChipCuratedJobs(chipText, location));
+          let oj = [...lj, ...cj];
+
+          const seenJ = new Set();
+          const dedupedJ = [];
+          for (const j of oj) {
             const k = (j.name + '|' + j.job_title).toLowerCase();
-            if (seenJobs.has(k)) continue;
-            seenJobs.add(k);
-            dedupedJobs.push(j);
+            if (seenJ.has(k)) continue;
+            if (hasMarket) {
+              const t = tierOf(j);
+              if (t === 'other') continue; // never bait-and-switch with another metro
+            }
+            seenJ.add(k);
+            dedupedJ.push(j);
           }
-        }
-        const tierOrder = { same_location: 0, nearby: 1, remote: 2, other: 3 };
-        dedupedJobs.sort((a, b) => (tierOrder[tierOf(a)] || 3) - (tierOrder[tierOf(b)] || 3));
-        const topJobs = dedupedJobs.slice(0, 8);
+          // Safety net: if the location gate rejected EVERYTHING, fall back to
+          // all on-chip jobs (sorted by tier) rather than showing "no matches found".
+          if (dedupedJ.length === 0 && oj.length > 0) {
+            for (const j of oj) {
+              const k = (j.name + '|' + j.job_title).toLowerCase();
+              if (seenJ.has(k)) continue;
+              seenJ.add(k);
+              dedupedJ.push(j);
+            }
+          }
+          const tierOrder = { same_location: 0, nearby: 1, remote: 2, other: 3 };
+          dedupedJ.sort((a, b) => (tierOrder[tierOf(a)] || 3) - (tierOrder[tierOf(b)] || 3));
+          const topJobs = dedupedJ.slice(0, 8);
 
-        // ── 2. Live-check up to 8 jobs in parallel ────────────────────────
-        setPhase('Confirming live postings…');
-        const liveChecked = await Promise.all(
-          topJobs.map(async (job) => {
-            const chk = await checkJobLive(base44, job);
-            return { ...job, live: chk.ok, _tier: tierOf(job) };
-          })
-        );
+          setPhase('Confirming live postings…');
+          const liveChecked = await Promise.all(
+            topJobs.map(async (job) => {
+              const chk = await checkJobLive(base44, job);
+              return { ...job, live: chk.ok, _tier: tierOf(job) };
+            })
+          );
+          return { liveChecked, topJobs };
+        };
+
+        const PEOPLE_DEADLINE_MS = 40_000;
+        const peoplePhase = async () => {
+          setPhase('Finding people from your school…');
+          // Curated companies are instant and don't block on the live job API.
+          // Cap at 4 — the Magic Moment only needs 3 people; scanning 8 was the
+          // root cause of multi-minute hangs (each Layer 2 LLM web-search ~30-60s).
+          const scanCompanies = [...new Set(getChipCuratedJobs(chipText, location).map(j => j.name).filter(Boolean))]
+            .filter(c => c.length > 1)
+            .slice(0, 4);
+
+          let peopleGated = false;
+          const allPeople = [];
+          const deadline = Date.now() + PEOPLE_DEADLINE_MS;
+          for (let i = 0; i < scanCompanies.length; i += 4) {
+            if (Date.now() > deadline) break; // hard deadline — never hang
+            const batch = scanCompanies.slice(i, i + 4);
+            const results = await Promise.all(batch.map(company =>
+              base44.functions.invoke('findCliffPeople', {
+                companyName: company, targetRole: role, magic_moment: true,
+                schoolName: user.school, schoolCode: user.school_code,
+                chipText, location,
+              }).then(r => ({ company, res: r }))
+                .catch(() => ({ company, res: { connections: [] } }))
+            ));
+            if (results.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) {
+              peopleGated = true; break;
+            }
+            for (const r of results) {
+              const conns = r.res?.data?.connections || r.res?.connections || [];
+              for (const c of conns) allPeople.push(c);
+            }
+          }
+          return { allPeople, peopleGated };
+        };
+
+        const [jobsResult, peopleResult] = await Promise.all([jobsPhase(), peoplePhase()]);
+
+        const { liveChecked, topJobs } = jobsResult;
         setJobsList(liveChecked);
 
-        // ── 3. Find people from the school on similar paths ───────────────
-        setPhase('Finding people from your school…');
-        const jobCompanies = [...new Set(topJobs.map(j => j.name).filter(Boolean))];
-        const curatedCompanies = [...new Set(getChipCuratedJobs(chipText, location).map(j => j.name).filter(Boolean))];
-        const scanCompanies = [...jobCompanies, ...curatedCompanies]
-          .filter((c, i, arr) => c.length > 1 && arr.indexOf(c) === i)
-          .slice(0, 8);
-
-        let peopleGated = false;
-        const allPeople = [];
-        for (let i = 0; i < scanCompanies.length; i += 4) {
-          const batch = scanCompanies.slice(i, i + 4);
-          const results = await Promise.all(batch.map(company =>
-            base44.functions.invoke('findCliffPeople', {
-              companyName: company, targetRole: role, magic_moment: true,
-              schoolName: user.school, schoolCode: user.school_code,
-              chipText, location,
-            }).then(r => ({ company, res: r }))
-              .catch(() => ({ company, res: { connections: [] } }))
-          ));
-          if (results.some(r => r.res?.data?.upgrade_required || r.res?.upgrade_required)) {
-            peopleGated = true; break;
-          }
-          for (const r of results) {
-            const conns = r.res?.data?.connections || r.res?.connections || [];
-            for (const c of conns) allPeople.push(c);
-          }
-        }
-
-        if (peopleGated) { setShowSoftWall(true); setPhase(null); return; }
+        if (peopleResult.peopleGated) { setShowSoftWall(true); setPhase(null); return; }
 
         // Dedupe by name + filter to real → take 3
         const peopleSeen = new Set();
         const realPeople = [];
-        for (const p of allPeople) {
+        for (const p of peopleResult.allPeople) {
           const key = (p.name || '').toLowerCase();
           if (!key || peopleSeen.has(key)) continue;
           const g = gatePersonReal(p);
