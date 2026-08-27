@@ -82,8 +82,8 @@ export default function ProHomeFeed({ user, onOpenTools }) {
         </div>
       )}
 
-      {/* 2. People from your school — Layer 1 → Jesse → LinkedIn fallback */}
-      <JessePeopleCard user={user} />
+      {/* 2. People from your school — company-scoped fast search → Jesse on demand */}
+      <JessePeopleCard user={user} jobs={jobsList} jobsLoading={jobsLoading} />
 
       {/* 3. Jobs for you — live Apply URLs only */}
       {!jobsLoading && jobsList.length > 1 && (

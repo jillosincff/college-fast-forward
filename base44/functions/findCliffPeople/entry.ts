@@ -23,7 +23,7 @@ export default async function (req: Request) {
     const {
       companyName, targetRole, magic_moment,
       schoolName, schoolCode: schoolCodeRaw, chipText, location,
-      school_level,
+      school_level, fast_only,
     } = await req.json().catch(() => ({}));
 
     // Free during the Magic Moment; Pro-gated otherwise.
@@ -158,7 +158,9 @@ export default async function (req: Request) {
     // ── LAYER 2 — public web research (only if Layer 1 found nobody) ───────
     // Shared with findWorkspaceConnections — extracted to peopleSearch.ts so
     // both the Magic Moment and the Job Workspace use identical discovery logic.
-    if (connections.length === 0) {
+    // fast_only = skip Layer 2 (LLM public web search). Used by the Pro dashboard's
+    // company-scoped fast scan: just the opt-in graph + cache, no LLM credits burned.
+    if (connections.length === 0 && !fast_only) {
       const publicFinds = await runPublicAlumniSearch(sr, {
         school,
         schoolCode,

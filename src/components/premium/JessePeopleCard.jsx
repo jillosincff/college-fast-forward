@@ -1,170 +1,271 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Users, ExternalLink, Copy, Check, Sparkles, Search } from 'lucide-react';
-import { buildLiveJobsList } from '@/lib/jobsPipeline';
+import { Users, ExternalLink, Copy, Check, Sparkles, Search, Loader2 } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 const MAX_JESSE_RETRIES = 5;
 const RETRY_DELAY_MS = 12000;
 
-// Paid-only people panel. Calls Layer 1 (findCliffPeople with school_level)
-// first for a fast LLM-based public search. If empty, calls Layer 2
-// (findJessePeople) which uses the Jesse agent — but Jesse takes ~60-90s, so
-// it uses an async retry pattern: the function returns { pending: true,
-// searchId } and this component retries with that searchId until results
-// arrive. Results are cached 24h server-side, so repeat visits are instant.
-export default function JessePeopleCard({ user }) {
+// Pro people panel — company-first, Jesse on demand.
+//
+// Flow:
+// 1. Jobs load (live Apply only) — passed from ProHomeFeed.
+// 2. Fast people: Layer 1 + cache, company-scoped to the employers in the
+//    jobs list. Hit → show 3 + Best Path. Miss → honest message + explicit ask.
+// 3. Ask: "Want CLIFF to find where [school] alumni in [chip] landed in [city]?"
+//    [Find them] [Not now]
+// 4. Only when the user clicks [Find them] does Jesse start. Show progress.
+//    Results cached 24h server-side.
+//
+// Never starts Jesse on page load. Never runs for free users (findJessePeople
+// gates on isProUser server-side).
+export default function JessePeopleCard({ user, jobs, jobsLoading }) {
   const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searching, setSearching] = useState(false); // Jesse search in progress
   const [source, setSource] = useState('');
   const [bestPath, setBestPath] = useState(null);
   const [copied, setCopied] = useState(null);
+  const [jesseState, setJesseState] = useState('idle'); // 'idle' | 'searching' | 'done'
+  const [jessePeople, setJessePeople] = useState([]);
+  const [jesseError, setJesseError] = useState(false);
   const retryCountRef = useRef(0);
+  const jesseTimerRef = useRef(null);
 
+  // Derive career context once
+  const cg = user?.career_goals || {};
+  const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
+  const industries = cg.target_industries || [];
+  const location = cg.location_preference || '';
+  const school = user?.school || user?.school_code || 'your school';
+  const schoolCode = (user?.school_code || '').toUpperCase();
+  const chipParts = [role, ...industries].filter((p, i, a) => {
+    const k = (p || '').toLowerCase().trim();
+    return k && a.findIndex(x => (x || '').toLowerCase().trim() === k) === i;
+  });
+  const chipText = chipParts.join(' ').trim() || role || 'your field';
+
+  // ── Phase 1: company-scoped fast search (Layer 1 + cache, no LLM, no Jesse)
   useEffect(() => {
-    if (!user?.email) return;
+    if (!user?.email || jobsLoading) return;
     let mounted = true;
-    let retryTimer = null;
 
-    const run = async (retrySearchId = null) => {
-      const cg = user.career_goals || {};
-      const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
-      const industries = cg.target_industries || [];
-      const location = cg.location_preference || '';
-      const chipParts = [role, ...industries].filter((p, i, a) => {
-        const k = (p || '').toLowerCase().trim();
-        return k && a.findIndex(x => (x || '').toLowerCase().trim() === k) === i;
-      });
-      const chipText = chipParts.join(' ').trim();
-      const school = user.school || user.school_code || '';
-      const schoolCode = (user.school_code || '').toUpperCase();
+    const run = async () => {
+      const liveJobs = (jobs || []).filter(j => j.live !== false && (j.job_url || j.apply_url || j.url));
+      const companies = [...new Set(liveJobs.map(j => j.name).filter(Boolean))].slice(0, 6);
 
-      // Fetch people + live jobs in parallel (jobs for Best Path matching)
-      const [peopleResult, jobsResult] = await Promise.all([
-        fetchPeople(user, { role, industries, location, chipText, school, schoolCode }, retrySearchId),
-        buildLiveJobsList({ role, industries, location, seeking: cg.seeking, chipText }),
-      ]);
+      if (companies.length === 0) {
+        // No live jobs → no companies to search → straight to ask
+        if (mounted) { setPeople([]); setLoading(false); }
+        return;
+      }
+
+      // One fast findCliffPeople call per company — opt-in graph + cache only
+      const results = await Promise.all(
+        companies.map(c =>
+          base44.functions.invoke('findCliffPeople', {
+            schoolName: school, schoolCode,
+            companyName: c, targetRole: role,
+            magic_moment: false, fast_only: true,
+          }).catch(() => ({ connections: [] }))
+        )
+      );
 
       if (!mounted) return;
-      setPeople(peopleResult.people);
-      setSource(peopleResult.source);
-      setSearching(peopleResult.pending || false);
+      const all = results.flatMap(r => r?.data?.connections || r?.connections || []);
+      const seen = new Set();
+      const deduped = all.filter(c => {
+        const k = (c.name || '').toLowerCase();
+        if (!k || seen.has(k)) return false;
+        seen.add(k); return true;
+      });
 
-      if (peopleResult.people.length && jobsResult.jobs.length) {
-        const match = matchBestPath(peopleResult.people, jobsResult.jobs);
+      setPeople(deduped.slice(0, 3));
+      setSource(deduped.length > 0 ? 'cliff' : '');
+
+      if (deduped.length && liveJobs.length) {
+        const match = matchBestPath(deduped, liveJobs);
         if (match) setBestPath(match);
       }
       setLoading(false);
-
-      // If Jesse is still searching, retry with the searchId after a delay
-      if (peopleResult.pending && peopleResult.searchId && retryCountRef.current < MAX_JESSE_RETRIES && mounted) {
-        retryCountRef.current += 1;
-        retryTimer = setTimeout(() => run(peopleResult.searchId), RETRY_DELAY_MS);
-      } else if (peopleResult.pending) {
-        // Exhausted retries — stop searching, show LinkedIn fallback
-        setSearching(false);
-      }
     };
 
     run();
-    return () => { mounted = false; if (retryTimer) clearTimeout(retryTimer); };
-  }, [user?.email]);
+    return () => { mounted = false; };
+  }, [user?.email, jobsLoading, jobs]);
 
-  const linkedInFallbackUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${user?.school || ''} ${user?.career_goals?.target_roles?.[0] || ''} ${user?.career_goals?.location_preference || ''}`.trim())}`;
+  // ── Phase 2: Jesse search — only when user clicks [Find them]
+  const startJesseSearch = () => {
+    setJesseState('searching');
+    setJesseError(false);
+    setJessePeople([]);
+    retryCountRef.current = 0;
+    runJesseSearch(null);
+  };
 
-  // Loading state — first call, no results yet
-  if (loading && !searching) {
+  const runJesseSearch = async (retrySearchId) => {
+    try {
+      const r = await base44.functions.invoke('findJessePeople', {
+        schoolName: school, schoolCode, chipText, location, targetRole: role,
+        searchId: retrySearchId,
+      });
+      const connections = r?.data?.connections || r?.connections || [];
+      if (connections.length > 0) {
+        setJessePeople(connections.slice(0, 3));
+        setJesseState('done');
+        const liveJobs = (jobs || []).filter(j => j.live !== false && (j.job_url || j.apply_url || j.url));
+        if (liveJobs.length) {
+          const match = matchBestPath(connections, liveJobs);
+          if (match) setBestPath(match);
+        }
+        return;
+      }
+      const pending = r?.data?.pending || r?.pending;
+      const searchId = r?.data?.searchId || r?.searchId;
+      if (pending && searchId && retryCountRef.current < MAX_JESSE_RETRIES) {
+        retryCountRef.current += 1;
+        jesseTimerRef.current = setTimeout(() => runJesseSearch(searchId), RETRY_DELAY_MS);
+      } else {
+        // Exhausted retries or search failed with no results
+        setJesseState('done');
+        if (!connections.length) setJesseError(true);
+      }
+    } catch (e) {
+      setJesseState('done');
+      setJesseError(true);
+    }
+  };
+
+  // Cleanup Jesse retry timer on unmount
+  useEffect(() => () => { if (jesseTimerRef.current) clearTimeout(jesseTimerRef.current); }, []);
+
+  // ── Render ──
+  const showJesseResults = jesseState === 'done' && jessePeople.length > 0;
+  const displayPeople = showJesseResults ? jessePeople : people;
+  const linkedInFallbackUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${school} ${role} ${location}`.trim())}`;
+
+  // Loading — fast search in progress
+  if (loading) {
     return (
-      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '24px 20px', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Users size={16} color="#7c3aed" />
-          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em' }}>People from your school</span>
-        </div>
+      <div style={cardStyle}>
+        <Header label="People from your school" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 16, height: 16, border: '2px solid #ede9fe', borderTop: '2px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', margin: 0 }}>Finding people from your school…</p>
+          <p style={{ ...bodyStyle, fontWeight: 600 }}>Finding people at these companies…</p>
         </div>
       </div>
     );
   }
 
-  // Jesse search in progress — show searching state (not the LinkedIn fallback)
-  if (searching) {
+  // Jesse searching — progress state
+  if (jesseState === 'searching') {
     return (
-      <div style={{ background: '#fff', border: '1px solid #ddd6fe', borderRadius: 16, padding: '20px 20px', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Users size={16} color="#7c3aed" />
-          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em' }}>People from your school</span>
-          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#6d28d9', background: '#ede9fe', borderRadius: 999, padding: '2px 8px' }}>searching</span>
+      <div style={{ ...cardStyle, border: '1px solid #ddd6fe' }}>
+        <Header label="People from your school" badge="searching" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <Loader2 size={16} color="#7c3aed" style={{ animation: 'spin 0.7s linear infinite' }} />
+          <p style={{ ...bodyStyle, fontWeight: 600 }}>CLIFF is searching for {school} alumni in {chipText}{location ? ` in ${location}` : ''}…</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <div style={{ width: 16, height: 16, border: '2px solid #ede9fe', borderTop: '2px solid #7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', margin: 0 }}>CLIFF is searching LinkedIn for alumni at your school…</p>
-        </div>
-        <p style={{ fontFamily: dm, fontSize: 12, color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
-          This takes about a minute. We're finding real people from {user?.school || 'your school'} in your field — check back shortly.
+        <p style={{ fontSize: 12, color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
+          This takes about a minute. CLIFF is scanning public sources to find real alumni who landed in your field — check back shortly.
         </p>
       </div>
     );
   }
 
-  // No people found — honest LinkedIn fallback
-  if (people.length === 0) {
+  // People found (fast search or Jesse results)
+  if (displayPeople.length > 0) {
+    const sourceLabel = showJesseResults ? 'via CliFF' : (source === 'cliff' ? 'via CliFF' : '');
     return (
-      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 20px', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <Users size={16} color="#7c3aed" />
-          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em' }}>People from your school</span>
+      <div style={cardStyle}>
+        <Header label="People from your school" badge={sourceLabel} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {displayPeople.map((person, i) => (
+            <PersonRow
+              key={i}
+              person={person}
+              isBestPath={bestPath?.person === person}
+              job={bestPath?.person === person ? bestPath.job : null}
+              user={user}
+              chipText={chipText}
+              copied={copied === i}
+              onCopy={() => { setCopied(i); setTimeout(() => setCopied(null), 2000); }}
+            />
+          ))}
         </div>
-        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>No alumni found right now.</p>
-        <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: '0 0 12px', lineHeight: 1.5 }}>
-          CLIFF couldn't find verified alumni for this search. Search LinkedIn directly — we've pre-filled it with your school and field.
+      </div>
+    );
+  }
+
+  // Jesse done but no results — honest message + LinkedIn fallback
+  if (jesseState === 'done' && jesseError) {
+    return (
+      <div style={cardStyle}>
+        <Header label="People from your school" />
+        <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>No alumni found right now.</p>
+        <p style={{ ...bodyStyle, margin: '0 0 12px' }}>
+          CLIFF couldn't find verified {school} alumni in {chipText}{location ? ` in ${location}` : ''}. Search LinkedIn directly — we've pre-filled it.
         </p>
-        <a href={linkedInFallbackUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: '#0A66C2', border: 'none', padding: '12px 16px', borderRadius: 999, textDecoration: 'none', width: '100%' }}>
+        <a href={linkedInFallbackUrl} target="_blank" rel="noopener noreferrer" style={linkedInBtnStyle}>
           <Search size={14} /> Search LinkedIn <ExternalLink size={14} />
         </a>
       </div>
     );
   }
 
+  // Fast search miss — honest message + explicit ask
   return (
-    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 20px', marginBottom: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-        <Users size={16} color="#7c3aed" />
-        <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          People from your school
-        </span>
-        {(source === 'jesse' || source === 'cache') && (
-          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#6d28d9', background: '#ede9fe', borderRadius: 999, padding: '2px 8px' }}>via Jesse</span>
-        )}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {people.slice(0, 3).map((person, i) => (
-          <PersonRow
-            key={i}
-            person={person}
-            isBestPath={bestPath?.person === person}
-            job={bestPath?.person === person ? bestPath.job : null}
-            user={user}
-            copied={copied === i}
-            onCopy={() => { setCopied(i); setTimeout(() => setCopied(null), 2000); }}
-          />
-        ))}
+    <div style={{ ...cardStyle, border: '1px solid #e9d5ff' }}>
+      <Header label="People from your school" />
+      <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
+        Nobody from {school} at these companies yet.
+      </p>
+      <p style={{ ...bodyStyle, margin: '0 0 14px' }}>
+        CLIFF checked your school's alumni network and the employers in your job matches — no warm connections surfaced.
+      </p>
+      {/* Explicit ask — not hidden in a tiny link */}
+      <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 12, padding: '14px 14px' }}>
+        <p style={{ fontSize: 13, fontWeight: 700, color: '#4c1d95', margin: '0 0 4px' }}>
+          Want CLIFF to find where {school} alumni in {chipText} landed{location ? ` in ${location}` : ''}?
+        </p>
+        <p style={{ fontSize: 12, color: '#7c3aed', margin: '0 0 12px' }}>
+          Takes about a minute. CLIFF searches public sources for real alumni in your field.
+        </p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={startJesseSearch} style={findBtnStyle}>
+            <Search size={14} /> Find them
+          </button>
+          <button onClick={() => setJesseState('done')} style={notNowBtnStyle}>
+            Not now
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-function PersonRow({ person, isBestPath, job, user, copied, onCopy }) {
-  const draft = buildDraft(person, user, job);
-  const linkedinUrl = person.linkedin_url || person.source_url || '';
+// ── Sub-components ──
 
-  const handleCopy = () => {
-    navigator.clipboard?.writeText(draft).catch(() => {});
-    onCopy();
-  };
+function Header({ label, badge }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+      <Users size={16} color="#7c3aed" />
+      <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+      {badge && (
+        <span style={{
+          fontFamily: dm, fontSize: 9, fontWeight: 700,
+          color: badge === 'searching' ? '#6d28d9' : '#4c1d95',
+          background: badge === 'searching' ? '#ede9fe' : '#f5f3ff',
+          borderRadius: 999, padding: '2px 8px',
+        }}>{badge}</span>
+      )}
+    </div>
+  );
+}
+
+function PersonRow({ person, isBestPath, job, user, chipText, copied, onCopy }) {
+  const draft = buildDraft(person, user, job, chipText);
+  const linkedinUrl = person.linkedin_url || person.source_url || '';
 
   return (
     <div style={{ background: isBestPath ? '#f5f3ff' : '#f8f9fc', border: isBestPath ? '1px solid #ddd6fe' : '1px solid #f1f5f9', borderRadius: 12, padding: '12px 14px' }}>
@@ -187,12 +288,11 @@ function PersonRow({ person, isBestPath, job, user, copied, onCopy }) {
           <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ width: 28, height: 28, borderRadius: 6, background: '#0A66C2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, fontWeight: 800, flexShrink: 0, minHeight: 'auto', minWidth: 'auto', textDecoration: 'none', fontFamily: dm }}>in</a>
         )}
       </div>
-      {/* CLIFF-written outreach draft */}
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
         <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{draft}</p>
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
-        <button onClick={handleCopy} style={{ flex: 1, fontFamily: dm, fontSize: 12, fontWeight: 700, color: copied ? '#059669' : '#7c3aed', background: copied ? '#d1fae5' : '#fff', border: '1px solid ' + (copied ? '#a7f3d0' : '#ddd6fe'), borderRadius: 999, padding: '8px 12px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+        <button onClick={onCopy} style={{ flex: 1, fontFamily: dm, fontSize: 12, fontWeight: 700, color: copied ? '#059669' : '#7c3aed', background: copied ? '#d1fae5' : '#fff', border: '1px solid ' + (copied ? '#a7f3d0' : '#ddd6fe'), borderRadius: 999, padding: '8px 12px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
           {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy message</>}
         </button>
         {linkedinUrl && (
@@ -205,12 +305,12 @@ function PersonRow({ person, isBestPath, job, user, copied, onCopy }) {
   );
 }
 
-// CLIFF writes the draft: school + company + chip; if Best Path, name the open job.
-function buildDraft(person, user, job) {
+// ── Helpers ──
+
+function buildDraft(person, user, job, chipText) {
   const school = user?.school || user?.school_code || 'your school';
-  const chip = (user?.career_goals?.target_roles || [])[0] || (user?.career_goals?.target_industries || [])[0] || 'this field';
   const firstName = (person.name || '').split(' ')[0];
-  let msg = `Hi ${firstName}, I'm a student at ${school} interested in ${chip}. I came across your profile and noticed you're ${person.role_title || 'working'}${person.company ? ` at ${person.company}` : ''}.`;
+  let msg = `Hi ${firstName}, I'm a student at ${school} interested in ${chipText || 'this field'}. I came across your profile and noticed you're ${person.role_title || 'working'}${person.company ? ` at ${person.company}` : ''}.`;
   if (job) {
     msg += `\n\nI saw ${person.company} is hiring for ${job.job_title} — I'd love to hear about your experience there and any advice you might have.`;
   } else {
@@ -220,9 +320,8 @@ function buildDraft(person, user, job) {
   return msg;
 }
 
-// Best Path: person.company matches a live job's company (verified apply URL).
 function matchBestPath(people, jobs) {
-  const liveJobs = jobs.filter(j => j.live === true && (j.job_url || j.apply_url || j.url));
+  const liveJobs = jobs.filter(j => (j.job_url || j.apply_url || j.url));
   for (const person of people) {
     const personCompany = (person.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     if (!personCompany) continue;
@@ -235,38 +334,28 @@ function matchBestPath(people, jobs) {
   return null;
 }
 
-// Layer 1 (findCliffPeople with school_level) → Layer 2 (findJessePeople with
-// async retry). If Jesse is still searching, returns { pending: true, searchId }
-// so the caller can retry.
-async function fetchPeople(user, { role, industries, location, chipText, school, schoolCode }, retrySearchId = null) {
-  // On first call (no retrySearchId), try Layer 1: findCliffPeople with
-  // school_level=true runs a fast LLM + internet search (~5-10s). If it finds
-  // people, we skip Jesse entirely.
-  if (!retrySearchId) {
-    try {
-      const r1 = await base44.functions.invoke('findCliffPeople', {
-        schoolName: school, schoolCode,
-        chipText, location, targetRole: role,
-        magic_moment: false, school_level: true,
-      });
-      const c1 = r1?.data?.connections || r1?.connections || [];
-      if (c1.length > 0) return { people: c1, source: 'layer1', pending: false };
-    } catch (e) { /* Layer 1 failed — fall through to Jesse */ }
-  }
-
-  // Layer 2: Jesse (paid only, async retry pattern)
-  try {
-    const r2 = await base44.functions.invoke('findJessePeople', {
-      schoolName: school, schoolCode, chipText, location, targetRole: role,
-      searchId: retrySearchId,
-    });
-    const c2 = r2?.data?.connections || r2?.connections || [];
-    if (c2.length > 0) return { people: c2, source: 'jesse', pending: false };
-    // If pending, return the searchId for retry
-    const pending = r2?.data?.pending || r2?.pending;
-    const searchId = r2?.data?.searchId || r2?.searchId;
-    if (pending && searchId) return { people: [], source: 'jesse', pending: true, searchId };
-  } catch (e) { /* Jesse failed — fall through */ }
-
-  return { people: [], source: 'none', pending: false };
-}
+// ── Styles ──
+const cardStyle = {
+  background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16,
+  padding: '20px 20px', marginBottom: 16,
+};
+const bodyStyle = {
+  fontFamily: dm, fontSize: 13, color: '#6b7280', lineHeight: 1.5,
+};
+const linkedInBtnStyle = {
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+  fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff',
+  background: '#0A66C2', border: 'none', padding: '12px 16px',
+  borderRadius: 999, textDecoration: 'none', width: '100%',
+};
+const findBtnStyle = {
+  flex: 1, fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#fff',
+  background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none',
+  borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto',
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+};
+const notNowBtnStyle = {
+  fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6b7280',
+  background: '#fff', border: '1px solid #e5e7eb', borderRadius: 999,
+  padding: '12px 16px', cursor: 'pointer', minHeight: 'auto',
+};
