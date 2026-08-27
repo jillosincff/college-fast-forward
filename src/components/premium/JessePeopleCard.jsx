@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Users, ExternalLink, Copy, Check, Sparkles, Search, Loader2, Mail } from 'lucide-react';
+import { Users, ExternalLink, Copy, Check, Zap, Briefcase, Search, Loader2, Mail } from 'lucide-react';
+import { logJobApplied } from '@/lib/magicMomentLog';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -12,11 +13,15 @@ const RETRY_DELAY_MS = 12000;
 // Flow:
 // 1. Jobs load (live Apply only) — passed from ProHomeFeed.
 // 2. Fast people: Layer 1 + cache, company-scoped to the employers in the
-//    jobs list. Hit → show 3 + Best Path. Miss → honest message + explicit ask.
+//    jobs list. Hit → show 3 people. Miss → honest message + explicit ask.
 // 3. Ask: "Want CLIFF to find where [school] alumni in [chip] landed in [city]?"
 //    [Find them] [Not now]
 // 4. Only when the user clicks [Find them] does Jesse start. Show progress.
 //    Results cached 24h server-side.
+//
+// Person-first Best Path: each person is checked against the live jobs list.
+// A matching live role → "Open role at [Company]" badge + Apply + job-specific
+// draft. No match → quiet line, outreach still allowed. Never a fake "they're hiring."
 //
 // Never starts Jesse on page load. Never runs for free users (findJessePeople
 // gates on isProUser server-side).
@@ -24,7 +29,6 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
   const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
   const [source, setSource] = useState('');
-  const [bestPath, setBestPath] = useState(null);
   const [copied, setCopied] = useState(null);
   const [jesseState, setJesseState] = useState('idle'); // 'idle' | 'searching' | 'done'
   const [jessePeople, setJessePeople] = useState([]);
@@ -82,11 +86,6 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
 
       setPeople(deduped.slice(0, 3));
       setSource(deduped.length > 0 ? 'cliff' : '');
-
-      if (deduped.length && liveJobs.length) {
-        const match = matchBestPath(deduped, liveJobs);
-        if (match) setBestPath(match);
-      }
       setLoading(false);
     };
 
@@ -113,11 +112,6 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
       if (connections.length > 0) {
         setJessePeople(connections.slice(0, 3));
         setJesseState('done');
-        const liveJobs = (jobs || []).filter(j => j.live !== false && (j.job_url || j.apply_url || j.url));
-        if (liveJobs.length) {
-          const match = matchBestPath(connections, liveJobs);
-          if (match) setBestPath(match);
-        }
         return;
       }
       const pending = r?.data?.pending || r?.pending;
@@ -179,13 +173,21 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
     return (
       <div style={cardStyle}>
         <Header label="People from your school" badge={sourceLabel} />
+        {/* Person-first Best Path intro copy */}
+        <div style={{ marginBottom: 14 }}>
+          <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
+            These are {school} alumni in {chipText}.
+          </p>
+          <p style={{ ...bodyStyle, margin: 0 }}>
+            Where we found an opening at their company that fits you, we'll show it.
+          </p>
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {displayPeople.map((person, i) => (
             <PersonRow
               key={i}
               person={person}
-              isBestPath={bestPath?.person === person}
-              job={bestPath?.person === person ? bestPath.job : null}
+              matchedJob={findPersonJob(person, jobs)}
               user={user}
               chipText={chipText}
               location={location}
@@ -264,10 +266,11 @@ function Header({ label, badge }) {
   );
 }
 
-function PersonRow({ person, isBestPath, job, user, chipText, location, copied, onCopy }) {
-  const draft = buildDraft(person, user, job, chipText, location);
+function PersonRow({ person, matchedJob, user, chipText, location, copied, onCopy }) {
+  const draft = buildDraft(person, user, matchedJob, chipText, location);
   const linkedinUrl = person.linkedin_url || person.source_url || '';
   const [emailCopied, setEmailCopied] = useState(false);
+  const jobUrl = matchedJob ? (matchedJob.job_url || matchedJob.apply_url || matchedJob.url) : '';
 
   const copyEmail = () => {
     if (!person.email) return;
@@ -277,7 +280,7 @@ function PersonRow({ person, isBestPath, job, user, chipText, location, copied, 
   };
 
   return (
-    <div style={{ background: isBestPath ? '#f5f3ff' : '#f8f9fc', border: isBestPath ? '1px solid #ddd6fe' : '1px solid #f1f5f9', borderRadius: 12, padding: '12px 14px' }}>
+    <div style={{ background: matchedJob ? '#f5f3ff' : '#f8f9fc', border: matchedJob ? '1px solid #ddd6fe' : '1px solid #f1f5f9', borderRadius: 12, padding: '12px 14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
         <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 800, flexShrink: 0, fontFamily: dm }}>
           {(person.name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
@@ -285,9 +288,9 @@ function PersonRow({ person, isBestPath, job, user, chipText, location, copied, 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>{person.name}</p>
-            {isBestPath && (
-              <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', borderRadius: 999, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                <Sparkles size={9} /> Best Path
+            {matchedJob && (
+              <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', background: '#059669', borderRadius: 999, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                <Zap size={9} /> Open role at {person.company}
               </span>
             )}
           </div>
@@ -297,19 +300,50 @@ function PersonRow({ person, isBestPath, job, user, chipText, location, copied, 
           <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ width: 28, height: 28, borderRadius: 6, background: '#0A66C2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, fontWeight: 800, flexShrink: 0, minHeight: 'auto', minWidth: 'auto', textDecoration: 'none', fontFamily: dm }}>in</a>
         )}
       </div>
+
+      {/* Matched live job title */}
+      {matchedJob && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+          <Briefcase size={12} color="#7c3aed" />
+          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#4c1d95', margin: 0 }}>{matchedJob.job_title}</p>
+        </div>
+      )}
+
+      {/* Draft message */}
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
         <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{draft}</p>
       </div>
+
+      {/* Action buttons — Apply (live URL) + Copy message when matched; Copy + LinkedIn otherwise */}
       <div style={{ display: 'flex', gap: 8 }}>
+        {matchedJob && jobUrl && (
+          <a
+            href={jobUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => logJobApplied({ user, job: matchedJob })}
+            style={{ flex: 1, fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#fff', background: '#7c3aed', border: 'none', borderRadius: 999, padding: '8px 12px', textDecoration: 'none', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+          >
+            <ExternalLink size={13} /> Apply
+          </a>
+        )}
         <button onClick={onCopy} style={{ flex: 1, fontFamily: dm, fontSize: 12, fontWeight: 700, color: copied ? '#059669' : '#7c3aed', background: copied ? '#d1fae5' : '#fff', border: '1px solid ' + (copied ? '#a7f3d0' : '#ddd6fe'), borderRadius: 999, padding: '8px 12px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
           {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy message</>}
         </button>
         {linkedinUrl && (
           <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ flex: 1, fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: '#0A66C2', border: 'none', borderRadius: 999, padding: '8px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-            <ExternalLink size={13} /> Open LinkedIn
+            <ExternalLink size={13} /> LinkedIn
           </a>
         )}
       </div>
+
+      {/* No matching live role — quiet line, do not imply they're hiring */}
+      {!matchedJob && (
+        <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '8px 0 0', fontStyle: 'italic' }}>
+          No matching opening found yet — you can still reach out.
+        </p>
+      )}
+
       {person.email && (
         <button onClick={copyEmail} style={{ width: '100%', marginTop: 8, fontFamily: dm, fontSize: 12, fontWeight: 600, color: emailCopied ? '#059669' : '#6b7280', background: emailCopied ? '#d1fae5' : '#f8f9fc', border: '1px solid ' + (emailCopied ? '#a7f3d0' : '#e5e7eb'), borderRadius: 999, padding: '7px 12px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
           {emailCopied ? <><Check size={12} /> Email copied</> : <><Mail size={12} /> Copy email</>}
@@ -328,8 +362,9 @@ function buildDraft(person, user, job, chipText, location) {
   const field = chipText || 'this field';
   const locClause = location ? ` in ${location}` : '';
 
+  // Job-specific draft — names the role + company, references the alum connection
   if (job && company) {
-    return `Hi ${firstName} — ${schoolShort} student looking at ${field}${locClause}. I saw ${company} is hiring for ${job.job_title}. Would you have 10 minutes to share how you got started there?`;
+    return `Hi ${firstName} — ${schoolShort} student here. I'm applying for ${job.job_title} at ${company} and saw you're a ${schoolShort} alum who landed there. Would you have 10 minutes to share what the path was like?`;
   }
   if (company) {
     return `Hi ${firstName} — ${schoolShort} student looking at ${field}${locClause}. Would you have 10 minutes to share how you got started at ${company}?`;
@@ -337,18 +372,17 @@ function buildDraft(person, user, job, chipText, location) {
   return `Hi ${firstName} — ${schoolShort} student looking at ${field}${locClause}. Would you have 10 minutes to share how you got started?`;
 }
 
-function matchBestPath(people, jobs) {
-  const liveJobs = jobs.filter(j => (j.job_url || j.apply_url || j.url));
-  for (const person of people) {
-    const personCompany = (person.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (!personCompany) continue;
-    const job = liveJobs.find(j => {
-      const jobCompany = (j.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      return jobCompany && (jobCompany.includes(personCompany) || personCompany.includes(jobCompany));
-    });
-    if (job) return { person, job };
-  }
-  return null;
+// Find the best live, on-chip job at a person's company (if any).
+// Jobs list is already filtered to live + verified apply URL + on-chip by
+// buildLiveJobsList, so any match here is safe to surface as an Apply CTA.
+function findPersonJob(person, jobs) {
+  const liveJobs = (jobs || []).filter(j => j.live !== false && (j.job_url || j.apply_url || j.url));
+  const personCompany = (person.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!personCompany) return null;
+  return liveJobs.find(j => {
+    const jobCompany = (j.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return jobCompany && (jobCompany.includes(personCompany) || personCompany.includes(jobCompany));
+  }) || null;
 }
 
 // ── Styles ──
