@@ -281,6 +281,8 @@ export default function MagicMoment() {
           setPhase('Finding people from your school…');
           let peopleGated = false;
           const allPeople = [];
+          let school_level_called = false;
+          let school_level_error = '';
 
           // ── 1. ONE school-level search first ───────────────────────────────
           // "[School] alumni in healthcare in Miami" — NOT company-scoped. This
@@ -290,6 +292,7 @@ export default function MagicMoment() {
           //  and asked "who from your school works at THIS company?", which
           //  returned 0 when nobody was cached at those four firms.)
           try {
+            school_level_called = true;
             const schoolRes = await base44.functions.invoke('findCliffPeople', {
               school_level: true, magic_moment: true,
               targetRole: role, chipText,
@@ -303,7 +306,8 @@ export default function MagicMoment() {
               for (const c of conns) allPeople.push(c);
             }
           } catch (e) {
-            console.warn('[MagicMoment] school-level people search error:', e?.message || e);
+            school_level_error = e?.message || String(e);
+            console.warn('[MagicMoment] school-level people search error:', school_level_error);
           }
 
           // ── 2. Company scan (for Best Path) — only if school-level found nobody
@@ -343,7 +347,7 @@ export default function MagicMoment() {
               }
             }
           }
-          return { allPeople, peopleGated };
+          return { allPeople, peopleGated, school_level_called, school_level_error };
         };
 
         // ── Jobs + People: decoupled render ──────────────────────────────────
@@ -398,13 +402,18 @@ export default function MagicMoment() {
         // Wait up to 40s for people; if they don't arrive, proceed and attach
         // them later whenever the promise resolves.
         let peopleTimedOut = false;
+        let peopleResult = null;
         try {
           const raced = await Promise.race([
             peoplePromise,
             new Promise(resolve => setTimeout(() => resolve({ __timeout: true }), PEOPLE_DEADLINE_MS)),
           ]);
-          if (raced?.__timeout) peopleTimedOut = true;
-          else processPeople(raced);
+          if (raced?.__timeout) {
+            peopleTimedOut = true;
+          } else {
+            peopleResult = raced;
+            processPeople(raced);
+          }
         } catch (e) {
           // peoplePhase shouldn't throw, but guard anyway
         }
@@ -416,6 +425,30 @@ export default function MagicMoment() {
 
         const realPeople = _peopleState.realPeople;
         const best = _peopleState.best;
+
+        // ── CONSOLIDATED RUN DIAGNOSTIC (one line per run) ───────────────
+        // Tells us, from the exact run, whether school_level ran, what the
+        // people search returned, and how many in-market live jobs survived
+        // remote exclusion. No behavior change — logging only.
+        const inMarketLiveCount = liveChecked.filter(
+          j => j.live && j._tier && j._tier !== 'remote' && j._tier !== 'other'
+        ).length;
+        console.log('[MagicMoment] RUN', {
+          LOCATION: { city: userCity, state: userState, hasMarket },
+          JOBS: {
+            inMarketLive: inMarketLiveCount,
+            liveConfirmed: liveChecked.filter(j => j.live).length,
+            totalChecked: liveChecked.length,
+          },
+          PEOPLE: {
+            school_level_called: peopleResult?.school_level_called ?? (peopleTimedOut ? 'timed_out_pending' : false),
+            people_count: realPeople.length,
+            people_source: peopleSource,
+            error: peopleResult?.school_level_error || '',
+            people_gated: peopleResult?.peopleGated || false,
+            timed_out: peopleTimedOut,
+          },
+        });
 
         if (peopleTimedOut && realPeople.length === 0) {
           // People still loading — note it on the page; they'll attach when ready.
