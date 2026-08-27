@@ -18,7 +18,7 @@ const SAMPLE_BY_CHIP = {
   engineering: { company: 'Tesla', jobTitle: 'Mechanical Engineer', personName: 'Riley Chen', personRole: 'Senior Engineer' },
   technology: { company: 'Stripe', jobTitle: 'Software Engineer', personName: 'Devon Park', personRole: 'Senior Engineer' },
   communications: { company: 'Edelman', jobTitle: 'Communications Assistant', personName: 'Taylor Brooks', personRole: 'Account Supervisor' },
-  other: { company: 'LinkedIn', jobTitle: 'Business Analyst', personName: 'Nina Gupta', personRole: 'Senior Business Analyst' },
+  education: { company: 'Teach For America', jobTitle: 'Program Coordinator', personName: 'Morgan Bell', personRole: 'Program Director' },
 };
 
 function pickSample(chipText) {
@@ -32,7 +32,8 @@ function pickSample(chipText) {
   if (/engineer|mechanical|electrical|\bcivil\b|manufactur|aerospace|industrial/.test(c)) return SAMPLE_BY_CHIP.engineering;
   if (/software|develop|frontend|backend|fullstack|\bswe\b|\btech|cyber|data|analyst|analytic|quant|product|\bux\b|\bui\b|design|user experience|user interface/.test(c)) return SAMPLE_BY_CHIP.technology;
   if (/communicat|public relations|\bpr\b|press|media relations/.test(c)) return SAMPLE_BY_CHIP.communications;
-  return SAMPLE_BY_CHIP.other;
+  if (/educat|teach|nonprofit|non-profit|\bngo\b|social impact|community|public service/.test(c)) return SAMPLE_BY_CHIP.education;
+  return SAMPLE_BY_CHIP.marketing;
 }
 
 export default function ExampleBestPathCard({ school, chipText, chipLabel, city }) {
