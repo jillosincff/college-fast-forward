@@ -198,16 +198,31 @@ export default function MagicMoment() {
 
         const jobsPhase = async () => {
           setPhase('Finding matching jobs…');
-          let lj = onChip(legit(await fetchJobs(location)));
+          // ── Location debugging: log why Miami in-market might be 0 ──
+          console.log('[MagicMoment] LOCATION', { raw: location, city: userCity, state: userState, hasMarket });
+
+          const metroRaw = await fetchJobs(location);
+          let lj = onChip(legit(metroRaw));
+          console.log('[MagicMoment] JOBS', { stage: 'metro', jsearch_count: metroRaw.length, after_chip: lj.length });
 
           // ONE widening call to state if the metro was thin — don't stack a
           // third "anywhere" call (that's what pushed total time past 30s).
           if (lj.length < 3 && userState) {
             setPhase('Widening the search…');
-            lj = [...lj, ...onChip(legit(await fetchJobs(userState)))];
+            const stateRaw = await fetchJobs(userState);
+            const stateJobs = onChip(legit(stateRaw));
+            console.log('[MagicMoment] JOBS', { stage: 'state', jsearch_count: stateRaw.length, after_chip: stateJobs.length });
+            lj = [...lj, ...stateJobs];
           }
 
-          const cj = onChip(getChipCuratedJobs(chipText, location));
+          // Curated remote jobs are a FALLBACK — only add them if metro + state
+          // live pools are thin. Never jump to Humana/Teladoc/Cigna before
+          // trying in-market healthcare first.
+          let cj = [];
+          if (lj.length < 3) {
+            cj = onChip(getChipCuratedJobs(chipText, location));
+            console.log('[MagicMoment] JOBS', { stage: 'curated_fallback', curated_count: cj.length, reason: 'live_pools_thin' });
+          }
           let oj = [...lj, ...cj];
 
           const seenJ = new Set();
@@ -543,7 +558,7 @@ export default function MagicMoment() {
           if (!remaining.length) {
             // Honest empty state — don't hide the people section; acknowledge
             // that no connections were found and offer a LinkedIn helper.
-            const linkedInUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${heroMeta.chipText} ${user?.school || ''}`)}`;
+            const linkedInUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${user?.school || ''} ${heroMeta.chipText} ${searchLoc || ''}`)}`;
             return (
               <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
                 <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label="People from your school" />
