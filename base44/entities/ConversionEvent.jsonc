@@ -24,7 +24,10 @@
         "prompt_shown",
         "prompt_dismissed",
         "continue_free",
-        "subscription_activated"
+        "subscription_activated",
+        "pro_activated",
+        "parent_payment_completed",
+        "upgrade_modal_viewed"
       ],
       "description": "Conversion funnel step this event records"
     },

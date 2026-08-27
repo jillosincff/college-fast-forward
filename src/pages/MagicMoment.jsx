@@ -110,9 +110,10 @@ export default function MagicMoment() {
   useEffect(() => {
     if (!user || ranRef.current) return;
     ranRef.current = true;
-    // Log offered BEFORE started so the funnel is sequential (offered ≤ started)
-    trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' });
-    trackConversionEvent('magic_moment_started', { trigger: 'post_onboarding' });
+    // Await offered BEFORE started so the funnel is sequential — offered can
+    // never be skipped by a race that fires started but not offered.
+    trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' })
+      .then(() => trackConversionEvent('magic_moment_started', { trigger: 'post_onboarding' }));
     trackMagicMomentStarted({
       target_field: ((user.career_goals?.target_industries) || []).join(', '),
       target_role: (user.career_goals?.target_roles || [])[0] || '',
@@ -231,8 +232,12 @@ export default function MagicMoment() {
           const topJobs = dedupedJ.slice(0, 8);
 
           setPhase('Confirming live postings…');
+          // Only live-check the top 4 — the rest render without Apply until
+          // validated. Checking all 8 added latency with diminishing returns.
+          const LIVE_CHECK_LIMIT = 4;
           const liveChecked = await Promise.all(
-            topJobs.map(async (job) => {
+            topJobs.map(async (job, i) => {
+              if (i >= LIVE_CHECK_LIMIT) return { ...job, live: undefined, _tier: tierOf(job) };
               const chk = await checkJobLive(base44, job);
               return { ...job, live: chk.ok, _tier: tierOf(job) };
             })
@@ -313,39 +318,10 @@ export default function MagicMoment() {
         }
         setBestPath(best);
 
-        // ── 5. Resume tailoring (best-path job or first live job) ──────────
-        const tailorFor = best?.job || liveChecked.find(j => j.live) || null;
-        let tailoredResult = null;
-        if (tailorFor) {
-          try {
-            const resumeUrl = user.resume_url || user.resume_file_url;
-            let resumeText = '';
-            if (resumeUrl) {
-              let resumes = [];
-              try { resumes = await base44.entities.Resume.filter({ student_email: user.email }, '-created_date', 5); } catch (e) {}
-              resumeText = resumes?.[0]?.parsed_text || '';
-              if (!resumeText) {
-                const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({ file_url: resumeUrl, json_schema: RESUME_SCHEMA });
-                const parsed = extracted?.output || extracted;
-                resumeText = parsedResumeToText(parsed);
-                if (resumeText.length > 100) await saveParsedResume(base44, user.email, parsed, resumeUrl, '').catch(() => {});
-              }
-            }
-            if (resumeText.length > 100) {
-              setPhase('Tailoring your resume…');
-              try {
-                const tailRes = await base44.functions.invoke('tailorResume', {
-                  resumeText, jobTitle: tailorFor.job_title, companyName: tailorFor.name,
-                  jobDescription: tailorFor.hiring_description || '',
-                });
-                tailoredResult = tailRes?.data || tailRes;
-              } catch (e) {}
-              if (tailoredResult) setTailored(tailoredResult);
-            }
-          } catch (e) {}
-        }
+        // ── FIRST PAINT — render the lists now; resume tailoring is non-blocking ──
+        setPhase(null);
 
-        // ── 6. Track completion ───────────────────────────────────────────
+        // ── Track completion (the cycle was shown to the student) ──────────
         base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
         const peopleSource = realPeople[0]?.source || 'none';
         const resultType = best
@@ -353,6 +329,7 @@ export default function MagicMoment() {
           : (liveChecked.length > 0 && realPeople.length > 0
               ? 'jobs_and_people'
               : (liveChecked.length > 0 ? 'jobs_only' : 'people_only'));
+        const tailorFor = best?.job || liveChecked.find(j => j.live) || null;
         trackMagicMomentCompleted({
           jobs_count: liveChecked.length,
           people_count: realPeople.length,
@@ -361,7 +338,7 @@ export default function MagicMoment() {
           result_type: resultType,
           hero_job_title: tailorFor?.job_title || '',
           hero_company: tailorFor?.name || '',
-          has_tailored_resume: !!tailoredResult,
+          has_tailored_resume: false,
         });
         trackConversionEvent('magic_moment_completed', {
           jobs_count: liveChecked.length,
@@ -372,7 +349,6 @@ export default function MagicMoment() {
         markMagicMomentCompleted();
         // Set the user flag so OnboardingGuard stops redirecting to MM
         base44.auth.updateMe({ magic_moment_completed: true }).catch(() => {});
-        setPhase(null);
 
         console.log('[MagicMoment] RESULT', JSON.stringify({
           chip: chipText, location, jobs_count: liveChecked.length,
@@ -381,6 +357,37 @@ export default function MagicMoment() {
           people_source: peopleSource, result_type: resultType,
           reject_samples: rejected.slice(0, 10),
         }, null, 2));
+
+        // ── Resume tailoring (background — updates `tailored` state when done) ──
+        // Non-blocking: the lists are already rendered. If tailoring succeeds,
+        // the resume card populates with the tailored result.
+        if (tailorFor) {
+          (async () => {
+            try {
+              const resumeUrl = user.resume_url || user.resume_file_url;
+              let resumeText = '';
+              if (resumeUrl) {
+                let resumes = [];
+                try { resumes = await base44.entities.Resume.filter({ student_email: user.email }, '-created_date', 5); } catch (e) {}
+                resumeText = resumes?.[0]?.parsed_text || '';
+                if (!resumeText) {
+                  const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({ file_url: resumeUrl, json_schema: RESUME_SCHEMA });
+                  const parsed = extracted?.output || extracted;
+                  resumeText = parsedResumeToText(parsed);
+                  if (resumeText.length > 100) await saveParsedResume(base44, user.email, parsed, resumeUrl, '').catch(() => {});
+                }
+              }
+              if (resumeText.length > 100) {
+                const tailRes = await base44.functions.invoke('tailorResume', {
+                  resumeText, jobTitle: tailorFor.job_title, companyName: tailorFor.name,
+                  jobDescription: tailorFor.hiring_description || '',
+                });
+                const tr = tailRes?.data || tailRes;
+                if (tr) setTailored(tr);
+              }
+            } catch (e) {}
+          })();
+        }
       } catch (e) {
         setError('CLIFF hit a snag building your plan. Please try again in a moment.');
         setPhase(null);

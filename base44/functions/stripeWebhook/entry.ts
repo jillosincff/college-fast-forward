@@ -402,6 +402,17 @@ Deno.serve(async (req) => {
                 user_email: giftStudent.email,
                 properties: { parent_email: billingUser?.email || '', source: 'parent_invite', plan: plan || 'pro_monthly' },
               }).catch(() => {});
+              // ConversionEvent (admin funnel source of truth)
+              const parentPayEvtKey = `${giftStudent.id}:parent_payment_completed`;
+              base44.asServiceRole.entities.ConversionEvent.create({
+                user_id: giftStudent.id,
+                user_email: giftStudent.email,
+                event_name: 'parent_payment_completed',
+                event_key: parentPayEvtKey,
+                trigger: 'parent_gift',
+                school_code: giftStudent.school_name || giftStudent.school || '',
+                plan_at_event: plan || 'pro_monthly',
+              }).catch(() => {});
               base44.asServiceRole.entities.AnalyticsEvent.create({
                 event_name: 'pro_activated',
                 user_id: giftStudent.id,
