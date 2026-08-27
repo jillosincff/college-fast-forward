@@ -38,6 +38,10 @@
       "type": "string",
       "description": "LinkedIn profile URL if found"
     },
+    "email": {
+      "type": "string",
+      "description": "Work email if returned by Jesse enrich (Pro only). Never scraped or guessed."
+    },
     "description": {
       "type": "string",
       "maxLength": 1000,

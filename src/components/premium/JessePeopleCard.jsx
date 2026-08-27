@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Users, ExternalLink, Copy, Check, Sparkles, Search, Loader2 } from 'lucide-react';
+import { Users, ExternalLink, Copy, Check, Sparkles, Search, Loader2, Mail } from 'lucide-react';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -266,6 +266,14 @@ function Header({ label, badge }) {
 function PersonRow({ person, isBestPath, job, user, chipText, copied, onCopy }) {
   const draft = buildDraft(person, user, job, chipText);
   const linkedinUrl = person.linkedin_url || person.source_url || '';
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const copyEmail = () => {
+    if (!person.email) return;
+    try { navigator.clipboard?.writeText(person.email); } catch {}
+    setEmailCopied(true);
+    setTimeout(() => setEmailCopied(false), 2000);
+  };
 
   return (
     <div style={{ background: isBestPath ? '#f5f3ff' : '#f8f9fc', border: isBestPath ? '1px solid #ddd6fe' : '1px solid #f1f5f9', borderRadius: 12, padding: '12px 14px' }}>
@@ -282,7 +290,7 @@ function PersonRow({ person, isBestPath, job, user, chipText, copied, onCopy }) 
               </span>
             )}
           </div>
-          {person.role_title && <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '1px 0 0' }}>{person.role_title}{person.company ? ` · ${person.company}` : ''}</p>}
+          {person.role_title && <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '1px 0 0' }}>{person.role_title}{person.company ? ` · ${person.company}` : ''}{person.school ? ` · ${person.school}` : ''}</p>}
         </div>
         {linkedinUrl && (
           <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ width: 28, height: 28, borderRadius: 6, background: '#0A66C2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 10, fontWeight: 800, flexShrink: 0, minHeight: 'auto', minWidth: 'auto', textDecoration: 'none', fontFamily: dm }}>in</a>
@@ -301,6 +309,11 @@ function PersonRow({ person, isBestPath, job, user, chipText, copied, onCopy }) 
           </a>
         )}
       </div>
+      {person.email && (
+        <button onClick={copyEmail} style={{ width: '100%', marginTop: 8, fontFamily: dm, fontSize: 12, fontWeight: 600, color: emailCopied ? '#059669' : '#6b7280', background: emailCopied ? '#d1fae5' : '#f8f9fc', border: '1px solid ' + (emailCopied ? '#a7f3d0' : '#e5e7eb'), borderRadius: 999, padding: '7px 12px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+          {emailCopied ? <><Check size={12} /> Email copied</> : <><Mail size={12} /> Copy email</>}
+        </button>
+      )}
     </div>
   );
 }

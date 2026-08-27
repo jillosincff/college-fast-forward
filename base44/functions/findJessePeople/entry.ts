@@ -61,7 +61,7 @@ export default async function (req: Request) {
             const bt = b.last_shown_at ? new Date(b.last_shown_at).getTime() : 0;
             return at - bt;
           });
-          const cached = sorted.slice(0, 5).map(a => ({
+          const cached = sorted.map(a => ({
             tier: 2, source: 'jesse',
             name: a.name,
             role_title: a.role_title || '',
@@ -69,14 +69,15 @@ export default async function (req: Request) {
             school: school || schoolCode,
             graduation_year: null,
             linkedin_url: a.linkedin_url || '',
+            email: a.email || '',
             persona: 'alumni',
             school_code: schoolCode,
             why: a.description || `${school} alum found via Jesse`,
             label: 'Found via Jesse',
             source_url: a.source_url || a.linkedin_url || '',
             _alumni_id: a.id,
-          }));
-          const deduped = rankAndDedupe(cached, targetRole || chipText || '', 5);
+          })).filter((c: any) => !EXCLUDED_TITLES.test(c.role_title || ''));
+          const deduped = rankAndDedupe(cached, targetRole || chipText || '', 3);
           await stampAlumniShown(sr, deduped);
           return Response.json({
             connections: deduped,
@@ -109,7 +110,7 @@ export default async function (req: Request) {
       const icpDescription = buildICP(school, chipText, location, companyName);
       const researchRes = await fetch(`${JESSE_BASE}/people-search/research`, {
         method: 'POST', headers,
-        body: JSON.stringify({ searchId, icpDescription, numProspects: 5 }),
+        body: JSON.stringify({ searchId, icpDescription, numProspects: 6 }),
       });
       if (!researchRes.ok) return Response.json({ connections: [], pending: true });
     }
@@ -136,7 +137,7 @@ export default async function (req: Request) {
 
     // 4) Map results — Jesse returns people[] with full_name, title, company_name
     const people: any[] = pollData.people || pollData.prospects || pollData.results || pollData.data || [];
-    const connections: any[] = people.slice(0, 5).map((p: any) => {
+    const connections: any[] = people.slice(0, 8).map((p: any) => {
       const linkedinUrl = extractLinkedInUrl(p);
       return {
         tier: 4,
@@ -147,6 +148,7 @@ export default async function (req: Request) {
         school: school || schoolCode,
         graduation_year: null,
         linkedin_url: linkedinUrl,
+        email: p.email || p.work_email || p.personal_email || '',
         persona: 'alumni',
         school_code: schoolCode,
         why: p.rationale || p.summary || `${school} alum found via Agent Jesse`,
@@ -169,6 +171,7 @@ export default async function (req: Request) {
           degree_info: c.graduation_year || '',
           location: location || '',
           linkedin_url: c.linkedin_url || '',
+          email: c.email || '',
           description: c.why || '',
           verified: false,
           expires_at: expires,
@@ -178,8 +181,11 @@ export default async function (req: Request) {
       } catch (e) { /* cache best-effort */ }
     }
 
-    // 6) Rank + dedupe (peer-level before senior, same as findCliffPeople)
-    const deduped = rankAndDedupe(connections, targetRole || chipText || '', 5);
+    // 6) Drop excluded titles (VP/MD/chief/founder), then rank + dedupe to 3.
+    //    Peer-level coordinators/AEs/associates rank above any remaining directors
+    //    via outreachPenalty in rankAndDedupe.
+    const peerOnly = connections.filter((c: any) => !EXCLUDED_TITLES.test(c.role_title || ''));
+    const deduped = rankAndDedupe(peerOnly, targetRole || chipText || '', 3);
     await stampAlumniShown(sr, deduped);
 
     return Response.json({
@@ -209,10 +215,13 @@ function extractLinkedInUrl(p: any): string {
   return '';
 }
 
+// Hard-exclude titles — these NEVER belong in a peer-level student contact list.
+const EXCLUDED_TITLES = /\b(managing director|partner|vp|vice president|svp|evp|chief|president|founder|alumni association)\b/i;
+
 function buildICP(school: string, chipText: string, location: string, companyName: string): string {
   const companyClause = companyName ? ` and currently work at ${companyName}` : '';
   const locationClause = location ? ` in ${location}` : '';
-  return `${school} graduates working in ${chipText || 'business'}${locationClause}${companyClause}. Early-career titles only: intern, coordinator, analyst, associate, specialist, recruiter, SDR, BDR. Exclude managing director, partner, VP, chief, president.`;
+  return `${school} graduates working in ${chipText || 'business'}${locationClause}${companyClause}. Prefer titles: intern, coordinator, assistant, associate, specialist, account executive, recruiter, SDR, BDR, analyst. Exclude: managing director, partner, VP, SVP, EVP, chief, president, founder, alumni association officer. Prefer grad years ~2018-2026 when available.`;
 }
 
 function sleep(ms: number): Promise<void> { return new Promise(r => setTimeout(r, ms)); }
