@@ -47,6 +47,9 @@ function outreachPenalty(roleTitle: string): number {
   const t = (roleTitle || '').toLowerCase();
   let p = 0;
   if (/\b(director|vp|vice president|chief|head of|principal|staff|senior director|executive director)\b/.test(t)) p += 2;
+  // "Manager" titles (Sales Manager, Marketing Manager) are OK-ish but should
+  // not outrank true peer-level roles (coordinator, AE, specialist) when both exist.
+  if (/\bmanager\b/.test(t)) p += 1;
   if (/(alumni association|association president|alumni president|alumni board|board of|board member)/.test(t)) p += 4;
   return p;
 }

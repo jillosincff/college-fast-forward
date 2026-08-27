@@ -188,6 +188,7 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
               job={bestPath?.person === person ? bestPath.job : null}
               user={user}
               chipText={chipText}
+              location={location}
               copied={copied === i}
               onCopy={() => { setCopied(i); setTimeout(() => setCopied(null), 2000); }}
             />
@@ -263,8 +264,8 @@ function Header({ label, badge }) {
   );
 }
 
-function PersonRow({ person, isBestPath, job, user, chipText, copied, onCopy }) {
-  const draft = buildDraft(person, user, job, chipText);
+function PersonRow({ person, isBestPath, job, user, chipText, location, copied, onCopy }) {
+  const draft = buildDraft(person, user, job, chipText, location);
   const linkedinUrl = person.linkedin_url || person.source_url || '';
   const [emailCopied, setEmailCopied] = useState(false);
 
@@ -320,17 +321,20 @@ function PersonRow({ person, isBestPath, job, user, chipText, copied, onCopy }) 
 
 // ── Helpers ──
 
-function buildDraft(person, user, job, chipText) {
-  const school = user?.school || user?.school_code || 'your school';
+function buildDraft(person, user, job, chipText, location) {
+  const schoolShort = user?.school_code || user?.school || 'your school';
   const firstName = (person.name || '').split(' ')[0];
-  let msg = `Hi ${firstName}, I'm a student at ${school} interested in ${chipText || 'this field'}. I came across your profile and noticed you're ${person.role_title || 'working'}${person.company ? ` at ${person.company}` : ''}.`;
-  if (job) {
-    msg += `\n\nI saw ${person.company} is hiring for ${job.job_title} — I'd love to hear about your experience there and any advice you might have.`;
-  } else {
-    msg += `\n\nI'd love to hear about your career path and any advice you might have for someone starting out.`;
+  const company = person.company || '';
+  const field = chipText || 'this field';
+  const locClause = location ? ` in ${location}` : '';
+
+  if (job && company) {
+    return `Hi ${firstName} — ${schoolShort} student looking at ${field}${locClause}. I saw ${company} is hiring for ${job.job_title}. Would you have 10 minutes to share how you got started there?`;
   }
-  msg += `\n\nThanks for your time!`;
-  return msg;
+  if (company) {
+    return `Hi ${firstName} — ${schoolShort} student looking at ${field}${locClause}. Would you have 10 minutes to share how you got started at ${company}?`;
+  }
+  return `Hi ${firstName} — ${schoolShort} student looking at ${field}${locClause}. Would you have 10 minutes to share how you got started?`;
 }
 
 function matchBestPath(people, jobs) {
