@@ -17,10 +17,12 @@ const SAMPLE_BY_CHIP = {
   communications: { company: 'Edelman', jobTitle: 'Communications Assistant', personName: 'Taylor Brooks', personRole: 'Account Supervisor' },
   consulting: { company: 'Deloitte', jobTitle: 'Strategy & Operations Analyst', personName: 'Sam Rivera', personRole: 'Senior Consultant' },
   data: { company: 'Bloomberg', jobTitle: 'Data Analyst', personName: 'Nina Gupta', personRole: 'Lead Data Scientist' },
+  product: { company: 'Figma', jobTitle: 'Product Designer', personName: 'Riley Chen', personRole: 'Senior Product Designer' },
 };
 
 function pickSample(chipText) {
   const c = (chipText || '').toLowerCase();
+  if (/product|\bux\b|\bui\b|design|user experience|user interface/.test(c)) return SAMPLE_BY_CHIP.product;
   if (/market|media|content|brand|social|advertis/.test(c)) return SAMPLE_BY_CHIP.marketing;
   if (/\bsale|business development|\bsdr|\bbdr|account executive/.test(c)) return SAMPLE_BY_CHIP.sales;
   if (/financ|bank|invest|asset|wealth/.test(c)) return SAMPLE_BY_CHIP.finance;
