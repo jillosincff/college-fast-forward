@@ -59,6 +59,7 @@ export default function MagicMoment() {
   const [phase, setPhase] = useState('Finding jobs and people for you…');
   const [jobsList, setJobsList] = useState([]);
   const [peopleList, setPeopleList] = useState([]);
+  const [peopleLoading, setPeopleLoading] = useState(true);
   const [bestPath, setBestPath] = useState(null);
   const [tailored, setTailored] = useState(null);
   const [showPro, setShowPro] = useState(false);
@@ -98,6 +99,7 @@ export default function MagicMoment() {
     setPhase('Finding jobs and people for you…');
     setJobsList([]);
     setPeopleList([]);
+    setPeopleLoading(true);
     setBestPath(null);
     setTailored(null);
     setError('');
@@ -268,7 +270,12 @@ export default function MagicMoment() {
             }
           }
           const tierOrder = { same_location: 0, nearby: 1, remote: 2, other: 3 };
-          dedupedJ.sort((a, b) => (tierOrder[tierOf(a)] || 3) - (tierOrder[tierOf(b)] || 3));
+          // BUG FIX: `0 || 3` === 3 in JS (0 is falsy), so same_location jobs
+          // (rank 0) were treated as rank 3 and sorted BELOW remote (rank 2) —
+          // that's why Miami jobs sat under remote UHC/CVS. Nullish coalescing
+          // preserves 0.
+          const tierRank = (j) => tierOrder[tierOf(j)] ?? 3;
+          dedupedJ.sort((a, b) => tierRank(a) - tierRank(b));
           const topJobs = dedupedJ.slice(0, 8);
 
           setPhase('Confirming live postings…');
@@ -282,6 +289,10 @@ export default function MagicMoment() {
               return { ...job, live: chk.ok, _tier: tierOf(job) };
             })
           );
+          // Defensive final sort on the computed _tier so in-market jobs are
+          // guaranteed above remote in the rendered list.
+          const _finalRank = (j) => tierOrder[j._tier] ?? tierOf(j) ?? 3;
+          liveChecked.sort((a, b) => _finalRank(a) - _finalRank(b));
           return { liveChecked, topJobs };
         };
 
@@ -375,6 +386,7 @@ export default function MagicMoment() {
         let _peopleState = { realPeople: [], best: null };
         const processPeople = (pr) => {
           if (!pr || pr.__timeout) return;
+          setPeopleLoading(false);
           if (pr.peopleGated) { setShowSoftWall(true); return; }
           const peopleSeen = new Set();
           const realPeople = [];
@@ -395,7 +407,11 @@ export default function MagicMoment() {
             const pCompany = (person.company || '').toLowerCase();
             if (!pCompany) continue;
             for (const job of liveChecked) {
-              if (!job.live) continue;
+              // In-market curated jobs (e.g. Jackson Health) form a Best Path
+              // even without a live HIRING check — a Jackson alum + a Jackson
+              // posting is a real warm path. Live remote jobs still match too.
+              const isInMarket = job._tier === 'same_location' || job._tier === 'nearby';
+              if (!isInMarket && !job.live) continue;
               const jCompany = (job.name || '').toLowerCase();
               if (pCompany === jCompany || pCompany.includes(jCompany) || jCompany.includes(pCompany)) {
                 best = { job, person };
@@ -427,8 +443,11 @@ export default function MagicMoment() {
           // peoplePhase shouldn't throw, but guard anyway
         }
 
-        // If people timed out, attach them in the background when they land.
+        // If people timed out, stop the loader — jobs are already up, and
+        // people attach in the background when they land (processPeople flips
+        // the list then). Don't spin "Finding people…" forever.
         if (peopleTimedOut) {
+          setPeopleLoading(false);
           peoplePromise.then(processPeople).catch(() => {});
         }
 
@@ -619,7 +638,7 @@ export default function MagicMoment() {
             {bestPath ? 'CLIFF found your best path.' : 'Here are your matches.'}
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>
-            {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'}{peopleList.length > 0 ? (bestPath ? ' and people from your school on the same lane.' : ' and people from your school.') : ' for you — no school connections found yet.'}
+            {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'}{peopleLoading ? ' — finding people from your school…' : (peopleList.length > 0 ? (bestPath ? ' and people from your school on the same lane.' : ' and people from your school.') : ' for you — no school connections found yet.')}
           </p>
         </div>
 
@@ -679,8 +698,25 @@ export default function MagicMoment() {
             ? peopleList.filter(p => (p.name || '').toLowerCase().trim() !== excludeName.toLowerCase().trim())
             : peopleList;
           if (!remaining.length) {
-            // Honest empty state — don't hide the people section; acknowledge
-            // that no connections were found and offer a LinkedIn helper.
+            // While the school-level people search is still running, show a
+            // loading state — NOT the "no connections" empty state. People
+            // attach in the background when they land; this prevents the false
+            // "no connections found" subtitle during the search window.
+            if (peopleLoading) {
+              return (
+                <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
+                  <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label={heroMeta.chipLabel ? `People from your school in ${heroMeta.chipLabel.toLowerCase()}` : 'People from your school'} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 16, height: 16, border: '2px solid #e9d5ff', borderTop: `2px solid ${INDIGO}`, borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+                    <div>
+                      <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Finding people from your school…</p>
+                      <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '4px 0 0', lineHeight: 1.4 }}>CLIFF is searching for alumni in this field. This usually takes a few seconds.</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+            // Honest empty state — search completed and found nobody.
             const linkedInUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${user?.school || ''} ${heroMeta.chipText} ${searchLoc || ''}`)}`;
             return (
               <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
