@@ -74,7 +74,7 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
         return { ...cleanJobDisplay(job), live: chk.ok, _tier: tierOf(job) };
       })
     );
-    return checked.filter(j => j.live === true && hasApplyUrl(j));
+    return checked.filter(j => j.live === true && hasApplyUrl(j) && !j.curated);
   };
 
   // 1. Fetch metro, then state if short

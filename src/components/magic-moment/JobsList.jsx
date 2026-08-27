@@ -1,5 +1,5 @@
-import React from 'react';
-import { Zap, ExternalLink, MapPin } from 'lucide-react';
+import React, { useState } from 'react';
+import { Zap, ExternalLink, MapPin, Check } from 'lucide-react';
 import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_BORDER } from '@/components/onboarding-flow/onboardingShared';
 import { applyUrlOf } from '@/lib/jobFreshness';
 
@@ -31,6 +31,7 @@ export default function JobsList({ jobs, excludeJobKey, onApply }) {
 function JobRow({ job, onApply }) {
   const tierLabel = TIER_LABELS[job._tier] || '';
   const applyUrl = job.live ? applyUrlOf(job) : '';
+  const [didIt, setDidIt] = useState(false);
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
@@ -61,21 +62,35 @@ function JobRow({ job, onApply }) {
           <MapPin size={10} /> {job.location}{tierLabel ? ` · ${tierLabel}` : ''}
         </p>
       </div>
-      {job.live && applyUrl && (
-        <a
-          href={applyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => onApply?.(job)}
+      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+        {job.live && applyUrl && (
+          <a
+            href={applyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onApply?.(job)}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
+              fontSize: 12, fontWeight: 800, color: '#fff', background: INDIGO,
+              padding: '10px 16px', borderRadius: 999, textDecoration: 'none', whiteSpace: 'nowrap', minHeight: 'auto',
+            }}
+          >
+            Apply <ExternalLink size={12} />
+          </a>
+        )}
+        <button
+          onClick={() => { onApply?.(job); setDidIt(true); }}
           style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
-            fontSize: 12, fontWeight: 800, color: '#fff', background: INDIGO,
-            padding: '10px 16px', borderRadius: 999, textDecoration: 'none', whiteSpace: 'nowrap', minHeight: 'auto',
+            display: 'inline-flex', alignItems: 'center', gap: 3, fontFamily: FONT,
+            fontSize: 12, fontWeight: 700, color: didIt ? '#15803d' : INDIGO,
+            background: didIt ? '#dcfce7' : 'transparent',
+            border: `1px solid ${didIt ? '#86efac' : INDIGO_BORDER}`,
+            padding: '10px 12px', borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', minHeight: 'auto',
           }}
         >
-          Apply <ExternalLink size={12} />
-        </a>
-      )}
+          {didIt ? <Check size={12} /> : null} Did it
+        </button>
+      </div>
     </div>
   );
 }
