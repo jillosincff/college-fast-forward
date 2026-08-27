@@ -7,7 +7,7 @@ import {
   FONT, CARD, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
   VIOLET, GRAD_INDIGO, SHADOW, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { Briefcase, Users, Sparkles, Search, MapPin } from 'lucide-react';
+import { Briefcase, Users, Sparkles, Search, MapPin, ExternalLink } from 'lucide-react';
 import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted, trackConversionEvent } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import SoftWallModal from '@/components/conversion/SoftWallModal';
@@ -155,6 +155,11 @@ export default function MagicMoment() {
         const isJunk = (j) => /\b(independent|1099|own business|own biz|build your own|be your own|partner program|independent partner|work[- ]from[- ]home opportunity|unlimited earning|franchise|mlm|multi[- ]level)\b/i
           .test(`${j.job_title || ''} ${j.hiring_description || ''}`);
 
+        // Filter out supervisory/licensed roles that are above student level —
+        // e.g. "Charge Nurse" requires RN licensure + experience, not a student match.
+        const isNonStudentLevel = (j) => /\b(charge nurse|director of nursing|nurse manager|nursing supervisor|clinical director|VP of|vice president|chief .+ officer|head of|department head|senior director|principal engineer)\b/i
+          .test(j.job_title || '');
+
         const rejected = [];
         const isOnChip = (j) => {
           const { ok, why } = checkOnChip(j.job_title, chipKeywords);
@@ -162,7 +167,7 @@ export default function MagicMoment() {
           return true;
         };
 
-        const legit = (arr) => arr.filter(j => !isJunk(j));
+        const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j));
         const onChip = (arr) => arr.filter(j => isOnChip(j));
 
         // ── 1. Fetch jobs (single live call + immediate curated fallback) ─
@@ -476,7 +481,7 @@ export default function MagicMoment() {
             {bestPath ? 'CLIFF found your best path.' : 'Here are your matches.'}
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>
-            {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'}{bestPath ? ' and people from your school on the same lane.' : ' and connections from your school.'}
+            {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'}{peopleList.length > 0 ? (bestPath ? ' and people from your school on the same lane.' : ' and people from your school.') : ' for you — no school connections found yet.'}
           </p>
         </div>
 
@@ -512,9 +517,18 @@ export default function MagicMoment() {
             ? jobsList.filter(j => `${(j.name || '')}|${(j.job_title || '')}`.toLowerCase() !== excludeKey)
             : jobsList;
           if (!remaining.length) return null;
+          // Honest location note: if the student asked for a market but every
+          // job came back remote, don't pretend they're in-market.
+          const hasInMarket = remaining.some(j => j._tier === 'same_location' || j._tier === 'nearby');
+          const allRemote = !hasInMarket && remaining.every(j => j._tier === 'remote' || !j._tier);
           return (
             <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
               <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Jobs for you" />
+              {allRemote && searchLoc && (
+                <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '0 0 10px', lineHeight: 1.4 }}>
+                  No roles found specifically in {searchLoc} — showing remote roles in your field.
+                </p>
+              )}
               <JobsList jobs={remaining} onApply={handleRowApply} />
             </div>
           );
@@ -526,7 +540,23 @@ export default function MagicMoment() {
           const remaining = excludeName
             ? peopleList.filter(p => (p.name || '').toLowerCase().trim() !== excludeName.toLowerCase().trim())
             : peopleList;
-          if (!remaining.length) return null;
+          if (!remaining.length) {
+            // Honest empty state — don't hide the people section; acknowledge
+            // that no connections were found and offer a LinkedIn helper.
+            const linkedInUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${heroMeta.chipText} ${user?.school || ''}`)}`;
+            return (
+              <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
+                <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label="People from your school" />
+                <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>No connections found yet.</p>
+                <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 12px', lineHeight: 1.5 }}>
+                  CLIFF couldn't find alumni from your school in this field right now. You can search LinkedIn directly:
+                </p>
+                <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: INDIGO, padding: '10px 16px', borderRadius: 999, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  Search LinkedIn <ExternalLink size={12} />
+                </a>
+              </div>
+            );
+          }
           return (
             <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
               <SectionLabel icon={<Users size={14} color={INDIGO_DIM} />} label={heroMeta.chipLabel ? `People from your school in ${heroMeta.chipLabel.toLowerCase()}` : 'People from your school'} />
@@ -544,6 +574,7 @@ export default function MagicMoment() {
         {!bothEmpty && (
           <NextStepFooter
             didAction={didAction}
+            peopleCount={peopleList.length}
             bestPathCompany={bestPath?.job?.name || ''}
             onUpgrade={() => setShowPro(true)}
           />
