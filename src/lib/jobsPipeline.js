@@ -80,7 +80,12 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
         return { ...cleanJobDisplay(job), live: chk.ok, _tier: tierOf(job) };
       })
     );
-    return checked.filter(j => j.live === true && hasApplyUrl(j) && !j.curated);
+    const live = checked.filter(j => j.live === true && hasApplyUrl(j));
+    // Prefer real live postings. When the provider timed out and only curated
+    // career-page listings survived, show them as a safety net — a premium
+    // user seeing zero jobs is worse than showing vetted career pages.
+    const nonCurated = live.filter(j => !j.curated);
+    return nonCurated.length > 0 ? nonCurated : live;
   };
 
   // 1. Fetch metro, then state if short

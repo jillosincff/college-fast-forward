@@ -45,6 +45,10 @@ export function isDateFresh(job) {
  * Returns { ok, why } — why is one of: fresh | validated | missing_url | stale-http reasons (http_fail | closed).
  */
 export async function checkJobLive(base44, job) {
+  // Curated jobs are pre-vetted real companies with stable career pages —
+  // skip the HTTP validation (which times out on JS-rendered ATS shells)
+  // and trust them as live so the feed always has a safety net.
+  if (job?.curated) return { ok: true, why: 'curated' };
   const url = applyUrlOf(job);
   if (!url) return { ok: false, why: 'missing_url' };
   if (isDateFresh(job)) return { ok: true, why: 'fresh' };
