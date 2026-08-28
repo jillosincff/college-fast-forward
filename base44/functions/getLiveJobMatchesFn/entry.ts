@@ -84,8 +84,12 @@ async function tryBuiltinBackup(base44, searchTerm, isRemote, seeking) {
     });
     const companies = res?.data?.companies || [];
     if (companies.length > 0) {
-      console.log(`[getLiveJobMatchesFn] BuiltIn backup returned ${companies.length} jobs`);
-      return Response.json({ companies, from_cache: false, from_backup: true });
+      // Stamp last_seen so the frontend isDateFresh check passes — without this,
+      // backup jobs fail the freshness check and get dropped by liveCheck.
+      const now = new Date().toISOString();
+      const stamped = companies.map(c => ({ ...c, last_seen: c.last_seen || now }));
+      console.log(`[getLiveJobMatchesFn] BuiltIn backup returned ${stamped.length} jobs`);
+      return Response.json({ companies: stamped, from_cache: false, from_backup: true });
     }
   } catch (e) {
     console.error('[getLiveJobMatchesFn] BuiltIn backup failed:', e.message);
