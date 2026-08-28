@@ -17,7 +17,13 @@ const isNonStudentLevel = (j) => /\b(charge nurse|director of nursing|nurse mana
 function makeTierOf(userCity, userState) {
   return (j) => {
     const loc = (j.location || '').toLowerCase();
-    if (!loc) return 'other';
+    if (!loc) {
+      // BuiltIn backup jobs ship without per-card location data. They were
+      // scraped for the student's market — keep them in-pool rather than
+      // dropping them (which left premium users seeing a single job).
+      if (j.source === 'builtin') return 'same_location';
+      return 'other';
+    }
     if (/\bremote\b|work\s*from\s*home/.test(loc)) return 'remote';
     if (userCity && loc.includes(userCity.toLowerCase())) return 'same_location';
     if (userState && loc.includes(userState.toLowerCase())) return 'nearby';

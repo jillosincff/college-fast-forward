@@ -74,13 +74,13 @@ function jobMatchesLocation(locText, city, stateAbbr) {
 
 // When the primary provider is down, try the BuiltIn scraper as a live backup.
 // Returns a Response with fresh backup jobs, or null if the backup found nothing.
-async function tryBuiltinBackup(base44, searchTerm, isRemote, seeking) {
+async function tryBuiltinBackup(base44, searchTerm, isRemote, seeking, location) {
   try {
     console.log('[getLiveJobMatchesFn] Primary down — trying BuiltIn backup scraper');
     // Service-role invoke: the user-scoped token gets 403 on function-to-function
     // calls. Caller has already verified auth, so the elevation is safe here.
     const res = await base44.asServiceRole.functions.invoke('scrapeBuiltinJobs', {
-      query: searchTerm, remote: isRemote, seeking,
+      query: searchTerm, remote: isRemote, seeking, location,
     });
     const companies = res?.data?.companies || [];
     if (companies.length > 0) {
@@ -226,7 +226,7 @@ Deno.serve(async (req) => {
             return Response.json({ companies: cached, from_cache: true, stale: true });
           }
           // Backup source: scrape BuiltIn directly
-          const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking);
+          const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking, location);
           if (backup) return backup;
           console.log(`[getLiveJobMatchesFn][EMPTY] role=${searchTerm} location=${location} query="${queryStr}" api_status=timeout raw_postings=0`);
           const curatedTO = getCuratedFallback(searchTerm, location);
@@ -242,7 +242,7 @@ Deno.serve(async (req) => {
       const errText = await apiRes.text();
       console.error(`[getLiveJobMatchesFn] Jobs API error ${apiRes.status}: ${errText.slice(0, 300)}`);
       // Backup source: scrape BuiltIn directly
-      const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking);
+      const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking, location);
       if (backup) return backup;
       // Ride out the outage: serve last cached leads (even if >24h old) if we have any.
       if (cacheMatches) {
