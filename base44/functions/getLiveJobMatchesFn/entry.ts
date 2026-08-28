@@ -14,8 +14,14 @@ import { getCuratedFallback } from '../../shared/curatedJobsV2.ts';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const JSEARCH_BASE = 'https://api.openwebninja.com/jsearch';
 
-// Hard seniority blocklist — these NEVER belong in a student feed
-const SENIOR_TITLE_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive|expert|experienced)\b|\b(ii|iii|iv|v)\b/i;
+// Hard seniority blocklist — these NEVER belong in a student feed.
+// NOTE: "executive" is intentionally NOT here. "Account Executive", "Sales
+// Executive", "Business Development Executive" are entry-level sales roles —
+// blocking "executive" was filtering out the majority of sales postings (40 raw
+// → 0 surviving). Truly senior titles containing "executive" (Chief Executive
+// Officer, Executive Director, Executive VP) are already caught by "chief",
+// "director", "vp"/"vice president" below.
+const SENIOR_TITLE_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|expert|experienced)\b|\b(ii|iii|iv|v)\b/i;
 const INTERN_TITLE_RE = /\b(intern|internship|co-?op)\b/i;
 // NOTE: "associate" is intentionally NOT in this set. It co-occurs with senior
 // titles too often ("Associate Director", "Senior Associate", "Associate Product
@@ -335,7 +341,7 @@ Deno.serve(async (req) => {
     // Development" is the wrong hero for a student even if it's the only posting.
     // Kept in sync with the full seniority list: senior, sr., lead, manager, mgr,
     // supervisor, staff, director, vp, chief, head, principal, architect, etc.
-    const HARD_SENIOR_RE = /\b(senior|sr\.?|lead|manager|mgr|supervisor|staff|director|vp|vice president|chief|head|principal|architect|executive|expert|experienced)\b|\b(ii|iii|iv|v)\b/i;
+    const HARD_SENIOR_RE = /\b(senior|sr\.?|lead|manager|mgr|supervisor|staff|director|vp|vice president|chief|head|principal|architect|expert|experienced)\b|\b(ii|iii|iv|v)\b/i;
     const passesEntry = (c, relaxed) => {
       if (c._isIntern) return true;
       if (relaxed) return !(HARD_SENIOR_RE.test(c._title) && !ENTRY_TITLE_RE.test(c._title));
