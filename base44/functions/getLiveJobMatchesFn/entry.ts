@@ -59,9 +59,8 @@ function jobMatchesLocation(locText, city, stateAbbr) {
   if (!locText) return false;
   const l = locText.toLowerCase();
   // Remote is NOT a market match — a Miami query must not keep remote rows.
-  // Remote is the widen tier (filled by curated jobs in the frontend), not an
-  // in-market hit. Letting remote through here was why the live pool showed
-  // "No roles found specifically in Miami" while still full of remote UHC/CVS.
+  // "Remote, FL" must NOT count as a Florida hit for an Orlando student.
+  if (/\bremote\b|work\s*from\s*home/.test(l)) return false;
   if (city && l.includes(city.toLowerCase())) return true;
   if (stateAbbr && new RegExp(`\\b${stateAbbr.toLowerCase()}\\b`).test(l)) return true;
   return false;
@@ -312,6 +311,10 @@ Deno.serve(async (req) => {
         location: locText || location || '',
         salary_range: salary,
         posted_date: postedDate,
+        // JSearch already filtered by date_posted='week' — stamp last_seen so the
+        // frontend isDateFresh check passes without calling validateJobPosting
+        // (which times out and drops good local jobs, causing remote fill).
+        last_seen: new Date().toISOString(),
         logo_url: job.employer_logo || null,
         has_web_result: true,
         verified_posting: true,
