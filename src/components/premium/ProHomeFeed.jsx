@@ -5,10 +5,11 @@ import {
   FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
   GRAD_INDIGO, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { Briefcase, ExternalLink, ArrowRight, MapPin } from 'lucide-react';
+import { Briefcase, ExternalLink, ArrowRight, MapPin, Sparkles } from 'lucide-react';
 import { logJobApplied } from '@/lib/magicMomentLog';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import { getCachedJobs, setCachedJobs } from '@/lib/jobsCache';
+import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 import JobsList from '@/components/magic-moment/JobsList';
 import JessePeopleCard from '@/components/premium/JessePeopleCard';
 
@@ -79,6 +80,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
           city={city}
           onApply={() => logJobApplied({ user, job: nextJob })}
           onDidIt={() => { logJobApplied({ user, job: nextJob }); setNextIdx(i => Math.min(i + 1, jobsList.length)); }}
+          onTailor={() => openCliffWorkspace({ company: nextJob.name, role: nextJob.job_title, jobUrl: nextJob.job_url || nextJob.apply_url, ...nextJob })}
         />
       ) : jobsList.length > 0 ? (
         <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
@@ -107,7 +109,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
               {shortMessage}
             </p>
           )}
-          <JobsList jobs={jobsList.filter((_, i) => i !== nextIdx)} excludeJobKey={nextJob ? `${nextJob.name}|${nextJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} />
+          <JobsList jobs={jobsList.filter((_, i) => i !== nextIdx)} excludeJobKey={nextJob ? `${nextJob.name}|${nextJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} onTailor={(job) => openCliffWorkspace({ company: job.name, role: job.job_title, jobUrl: job.job_url || job.apply_url, ...job })} />
         </div>
       )}
 
@@ -128,7 +130,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
   );
 }
 
-function NextMoveCard({ job, city, onApply, onDidIt }) {
+function NextMoveCard({ job, city, onApply, onDidIt, onTailor }) {
   const jobUrl = job.job_url || job.apply_url || job.url || '#';
   const tierLabel = job._tier === 'same_location' || job._tier === 'nearby'
     ? `Matches your ${city || 'location'} preference`
@@ -152,6 +154,9 @@ function NextMoveCard({ job, city, onApply, onDidIt }) {
             Apply <ExternalLink size={14} />
           </a>
         )}
+        <button onClick={onTailor} style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#4c1d95', background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: 999, padding: '12px 18px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Sparkles size={14} /> Tailor my resume
+        </button>
         <button onClick={onDidIt} style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff', background: 'transparent', border: '1.5px solid rgba(255,255,255,0.5)', borderRadius: 999, padding: '12px 18px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           Did it <ArrowRight size={14} />
         </button>

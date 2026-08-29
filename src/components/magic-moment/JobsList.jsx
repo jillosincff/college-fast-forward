@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, ExternalLink, MapPin, Check } from 'lucide-react';
+import { Zap, ExternalLink, MapPin, Check, Sparkles } from 'lucide-react';
 import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_BORDER } from '@/components/onboarding-flow/onboardingShared';
 import { applyUrlOf } from '@/lib/jobFreshness';
 
@@ -10,7 +10,7 @@ const TIER_LABELS = {
   other: '',
 };
 
-export default function JobsList({ jobs, excludeJobKey, onApply }) {
+export default function JobsList({ jobs, excludeJobKey, onApply, onTailor }) {
   if (!jobs?.length) return null;
   const exclude = (excludeJobKey || '').toLowerCase().trim();
   // Safety net: only render jobs with a verified live apply link.
@@ -22,13 +22,13 @@ export default function JobsList({ jobs, excludeJobKey, onApply }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {filtered.map((job, i) => (
-        <JobRow key={job.job_id || job.id || i} job={job} onApply={onApply} />
+        <JobRow key={job.job_id || job.id || i} job={job} onApply={onApply} onTailor={onTailor} />
       ))}
     </div>
   );
 }
 
-function JobRow({ job, onApply }) {
+function JobRow({ job, onApply, onTailor }) {
   const tierLabel = TIER_LABELS[job._tier] || '';
   const applyUrl = job.live ? applyUrlOf(job) : '';
   const [didIt, setDidIt] = useState(false);
@@ -63,6 +63,19 @@ function JobRow({ job, onApply }) {
         </p>
       </div>
       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+        {onTailor && (
+          <button
+            onClick={() => onTailor(job)}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 3, fontFamily: FONT,
+              fontSize: 12, fontWeight: 800, color: INDIGO, background: '#f5f3ff',
+              border: `1px solid ${INDIGO_BORDER}`,
+              padding: '10px 12px', borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', minHeight: 'auto',
+            }}
+          >
+            <Sparkles size={12} /> Tailor
+          </button>
+        )}
         {job.live && applyUrl && (
           <a
             href={applyUrl}
