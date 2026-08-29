@@ -291,6 +291,10 @@ Deno.serve(async (req) => {
           cleaned = cleaned.replace(new RegExp(',?\\s*' + esc + '\\s*$', 'i'), '');
         }
       }
+      // JSearch frequently appends "City, State, United States" to titles even
+      // when the structured country field is null. Strip any trailing
+      // "United States" / "US" / "USA" so the Next Move card reads cleanly.
+      cleaned = cleaned.replace(/,?\s+(united states|united kingdom|canada|australia|india)\s*$/i, '');
       return cleaned.replace(/\s{2,}/g, ' ').trim() || title;
     }
 
@@ -359,14 +363,18 @@ Deno.serve(async (req) => {
     // (metro → state → remote), never by seniority. "Sr Manager, Software
     // Development" is the wrong hero for a college kid even if it's the only
     // posting in Austin.
-    const buildPool = (mode) => {
+    // ignoreSeeking: when true, drops the intern/full-time filter so entry-level
+    // full-time roles can fill a thin intern pool. The hard-senior gate still applies.
+    const buildPool = (mode, ignoreSeeking = false) => {
       const orgCounts = new Map();
       const pool = [];
       for (const job of jobList) {
         const c = normalizeJob(job);
         if (!c) continue;
-        if (seeking === 'internship' && !c._isIntern) continue;
-        if (seeking === 'fulltime' && c._isIntern) continue;
+        if (!ignoreSeeking) {
+          if (seeking === 'internship' && !c._isIntern) continue;
+          if (seeking === 'fulltime' && c._isIntern) continue;
+        }
         if (mode === 'strict' && !passesEntry(c, false)) continue;
         // Relaxed AND permissive both apply the hard-senior gate — no mode
         // ever lets a senior/director/manager/VP/principal/lead title through.
@@ -394,6 +402,26 @@ Deno.serve(async (req) => {
     if (allCompanies.length === 0) {
       allCompanies = buildPool('permissive');
       console.log(`[getLiveJobMatchesFn] Permissive pass: ${allCompanies.length} jobs`);
+    }
+
+    // Thin intern pool: when seeking='internship' and fewer than 5 intern-titled
+    // roles survived, also include entry-level full-time roles (SDR, Account
+    // Executive, etc.). A student looking for internships benefits from seeing
+    // these — the internship market is often thin, and the same 2 internships
+    // would otherwise show every day until they expire.
+    if (allCompanies.length < 5 && seeking === 'internship') {
+      const entryLevelFill = buildPool('permissive', true);
+      // Merge only non-intern jobs that aren't already in the pool (dedupe by
+      // company+title key).
+      const existing = new Set(allCompanies.map(c => `${c.name}|${c.job_title}`.toLowerCase()));
+      for (const job of entryLevelFill) {
+        const key = `${job.name}|${job.job_title}`.toLowerCase();
+        if (!existing.has(key)) {
+          allCompanies.push(job);
+          existing.add(key);
+        }
+      }
+      console.log(`[getLiveJobMatchesFn] Entry-level fill (seeking=internship): ${allCompanies.length} total jobs`);
     }
 
     // GUARANTEED FALLBACK — the first Magic Moment must never ship an empty
