@@ -12,6 +12,7 @@ import { getCuratedFallback } from '../../shared/curatedJobsV2.ts';
  */
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const STALE_CEILING_MS = 48 * 60 * 60 * 1000; // never serve cache older than 48h on a timeout/error
 const JSEARCH_BASE = 'https://api.openwebninja.com/jsearch';
 
 // Hard seniority blocklist — these NEVER belong in a student feed.
@@ -206,6 +207,11 @@ Deno.serve(async (req) => {
     // (that's how a Sales+Orlando student got served Finance+Nyc jobs on a timeout).
     // No matching cache = give the provider the full 15s to actually respond.
     const cacheMatches = cached?.length > 0 && cachedKey === goalKey;
+    // Stale-serve ceiling — on a JSearch timeout/error we'll serve cache to keep
+    // the dashboard responsive, but never if it's older than 48h. Past that
+    // ceiling, fall through to the BuiltIn backup / curated safety net so a
+    // student never sees week-old jobs just because the API hiccuped.
+    const cacheFresh = cacheAge < STALE_CEILING_MS;
     const timeoutMs = cacheMatches ? 6000 : 15000;
     let apiRes;
     {
@@ -221,8 +227,8 @@ Deno.serve(async (req) => {
         if (e.name === 'AbortError') {
           console.error(`[getLiveJobMatchesFn] Jobs API timed out (${timeoutMs / 1000}s)`);
           // Serve last cached leads immediately (even if >24h old) if we have any.
-          if (cacheMatches) {
-            console.log(`[getLiveJobMatchesFn] Timeout — serving ${cached.length} stale cached leads (same query)`);
+          if (cacheMatches && cacheFresh) {
+            console.log(`[getLiveJobMatchesFn] Timeout — serving ${cached.length} stale cached leads (same query, ${Math.round(cacheAge / 60000)}m old)`);
             return Response.json({ companies: cached, from_cache: true, stale: true });
           }
           // Backup source: scrape BuiltIn directly
@@ -245,8 +251,8 @@ Deno.serve(async (req) => {
       const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking, location);
       if (backup) return backup;
       // Ride out the outage: serve last cached leads (even if >24h old) if we have any.
-      if (cacheMatches) {
-        console.log(`[getLiveJobMatchesFn] Upstream ${apiRes.status} — serving ${cached.length} stale cached leads (same query)`);
+      if (cacheMatches && cacheFresh) {
+        console.log(`[getLiveJobMatchesFn] Upstream ${apiRes.status} — serving ${cached.length} stale cached leads (same query, ${Math.round(cacheAge / 60000)}m old)`);
         return Response.json({ companies: cached, from_cache: true, stale: true });
       }
       // No cache to fall back on — serve curated jobs so the cycle still completes.
