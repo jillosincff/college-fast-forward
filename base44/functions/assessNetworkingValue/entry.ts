@@ -31,10 +31,27 @@ Deno.serve(async (req) => {
     if (!companyName) return Response.json({ error: 'companyName required' }, { status: 400 });
 
     // 1. Tiered, permission-respecting connection search (existing engine)
-    const connRes = await base44.functions.invoke('findWorkspaceConnections', { companyName });
+    // Pass the target role so the public-search + ranking can scope to THIS function
+    // (a sales intern must not be handed an Application Security Engineer).
+    const connRes = await base44.functions.invoke('findWorkspaceConnections', { companyName, targetRole: roleTitle });
     const connData = connRes?.data || connRes || {};
     const connections = connData.connections || [];
-    const best = connections[0] || null;
+
+    // A contact is on-function if their title overlaps the target role's tokens,
+    // or they're a role-agnostic helper (recruiter / talent / HR / campus / advisor).
+    // Unknown titles are allowed through (can't prove a mismatch).
+    const roleWords = (roleTitle || '').toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+    const isOnFunction = (c: any) => {
+      const t = (c?.role_title || '').toLowerCase();
+      if (!t) return true;
+      if (/\b(recruit|talent|hir|people partner|human resources|\bhr\b|campus|university|early talent|early career|advisor|coach)\b/.test(t)) return true;
+      if (roleWords.length && roleWords.some((w) => t.includes(w))) return true;
+      return false;
+    };
+    // Never surface an off-function contact as the "best path" — fall to null
+    // (which renders as "no one found yet" / cold apply) rather than hand the
+    // student a contact from a different function.
+    const best = connections.find(isOnFunction) || null;
 
     // 2. Existing student progress on this opportunity
     const pursuits = await base44.entities.JobPursuit.filter(

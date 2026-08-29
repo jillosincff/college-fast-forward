@@ -8,13 +8,15 @@ import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import TrustPanel from '@/components/workspace/TrustPanel';
-import WarmApplyFlow from '@/components/free-tier/WarmApplyFlow';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ExternalLink, FileText } from 'lucide-react';
 import decodeEntities from '@/utils/decodeEntities';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
-// Job-specific workspace: CLIFF assesses the fit and organizes every prep step in one place.
+// Job-specific workspace: the prep room for ONE job.
+// Order: (1) title + company + Apply (live URL), (2) prepare resume for this role,
+// (3) people at this company in THIS function, (4) mark as applied.
+// Job Fit stays short (one verdict line in the hero; detailed block under "More").
 export default function CliffJobWorkspace() {
   const [job] = useState(() => readWorkspaceJob());
   const [user, setUser] = useState(null);
@@ -22,7 +24,6 @@ export default function CliffJobWorkspace() {
   const [fitLoading, setFitLoading] = useState(true);
   const [fitError, setFitError] = useState(false);
   const [pursuit, setPursuit] = useState(null);
-  const [showApply, setShowApply] = useState(false);
 
   // Keep the unified JobPursuit record in sync with what CLIFF has prepared
   const syncPursuit = (extra = {}) => {
@@ -85,7 +86,7 @@ export default function CliffJobWorkspace() {
         <div style={{ textAlign: 'center', maxWidth: 360 }}>
           <div style={{ fontSize: 44, marginBottom: 12 }}>🎯</div>
           <h2 style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', margin: '0 0 8px' }}>No job selected</h2>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: '0 0 18px' }}>Pick a job from your feed and tap "Let CLIFF Handle This" to open its workspace.</p>
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: '0 0 18px' }}>Pick a job from your feed and tap "Prepare in CLIFF" to open its workspace.</p>
           <button onClick={goBack} style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', border: 'none', borderRadius: 999, padding: '11px 26px', cursor: 'pointer', minHeight: 44 }}>
             Back to dashboard
           </button>
@@ -96,12 +97,13 @@ export default function CliffJobWorkspace() {
 
   const company = decodeEntities(job.company || '');
   const role = decodeEntities(job.role || job.job_title || '');
+  const jobUrl = job.jobUrl || job.job_url || job.apply_url || job.url || '';
 
   // ONE verdict drives the whole page. The hero shows it once; no other block repeats it.
   const verdict = computeVerdict(fit);
   const isSkip = verdict.key === 'skip';
   const goTailor = () => {
-    const params = new URLSearchParams({ company, role, job_url: job.jobUrl || job.job_url || '', from: 'workspace' });
+    const params = new URLSearchParams({ company, role, job_url: jobUrl, from: 'workspace' });
     window.location.hash = `#/ResumeTailoring?${params.toString()}`;
   };
 
@@ -118,12 +120,11 @@ export default function CliffJobWorkspace() {
           ← Back to dashboard
         </button>
 
-        {/* SINGLE JOB HERO — title, company, one verdict badge, one primary action. */}
+        {/* 1) JOB HERO — title, company, one verdict line, Apply (live URL). */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', marginBottom: 16 }}>
           <h1 style={{ fontFamily: dm, fontSize: 'clamp(18px, 4.5vw, 24px)', fontWeight: 900, color: '#111827', margin: '0 0 4px', lineHeight: 1.25, wordBreak: 'break-word' }}>{role}</h1>
           <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#6b7280', margin: 0 }}>{company}</p>
 
-          {/* The only verdict badge on the page. */}
           {fitLoading ? (
             <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#7c3aed', margin: '12px 0 0' }}>Analyzing fit…</p>
           ) : fit && (
@@ -140,62 +141,65 @@ export default function CliffJobWorkspace() {
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}
           </div>
 
-          {/* One primary action. Skip → leave, otherwise Apply. Resume is the single secondary link. */}
+          {/* Apply = the live external URL. Does NOT open a workspace or modal. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 16, flexWrap: 'wrap' }}>
             {isSkip ? (
               <button onClick={goBack} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: '#6b7280', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6 }}>
                 Back to dashboard
               </button>
-            ) : (
-              <button onClick={() => setShowApply(true)} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
-                Apply to job <ArrowRight size={15} />
-              </button>
-            )}
-            {!isSkip && (
-              <button onClick={goTailor} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6d28d9', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44, textDecoration: 'underline' }}>
-                Prepare resume for this role
-              </button>
+            ) : jobUrl ? (
+              <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none', boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
+                Apply to job <ExternalLink size={15} />
+              </a>
+            ) : null}
+            {jobUrl && !isSkip && (
+              <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', textDecoration: 'none' }}>
+                View original posting ↗
+              </a>
             )}
           </div>
 
-          {/* One next-step sentence — replaces the whole Verdict / Next-Step card. */}
           {!fitLoading && (
             <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#4b5563', margin: '14px 0 0', lineHeight: 1.5 }}>{nextLine}</p>
           )}
         </div>
 
-        {/* People at this company — networking is always part of the plan */}
+        {/* 2) PREPARE RESUME FOR THIS ROLE — one entry. */}
+        {!isSkip && (
+          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 24px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>📄</span>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: 0 }}>Prepare resume for this role</p>
+              <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '2px 0 0', lineHeight: 1.5 }}>CLIFF tailors your resume to this job's keywords so you clear ATS filters.</p>
+            </div>
+            <button onClick={goTailor} style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '11px 22px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <FileText size={15} /> Tailor resume <ArrowRight size={14} />
+            </button>
+          </div>
+        )}
+
+        {/* 3) PEOPLE at this company — in THIS function (role-scoped). */}
         {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
 
-        {/* Single Job Fit + Why-this block — gaps appear once, no duplicate verdict */}
-        {user && <TrustPanel job={job} fit={fit} fitLoading={fitLoading} error={fitError} />}
-
+        {/* 4) MARK AS APPLIED — tracks the application + schedules follow-ups. */}
         {user && <WorkspacePrepActions job={job} user={user} />}
 
-        {/* Company prep demoted under a "More" disclosure */}
-        <MoreDisclosure>
+        {/* Job Fit (short) + company prep — available but non-prominent. */}
+        <MoreDisclosure label="Job Fit & company research">
+          {user && <TrustPanel job={job} fit={fit} fitLoading={fitLoading} error={fitError} />}
           <CompanyPrepCard job={job} onPrepared={() => syncPursuit({ companyResearched: true })} />
         </MoreDisclosure>
-
-        {showApply && user && (
-          <WarmApplyFlow
-            job={{ company, role, jobUrl: job.jobUrl || job.job_url || '' }}
-            user={user}
-            applyOnly
-            onClose={() => setShowApply(false)}
-          />
-        )}
       </div>
     </div>
   );
 }
 
-function MoreDisclosure({ children }) {
+function MoreDisclosure({ children, label = 'More' }) {
   const [open, setOpen] = useState(false);
   return (
     <div style={{ marginBottom: 16 }}>
       <button onClick={() => setOpen(v => !v)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44 }}>
-        {open ? '▾ Hide more' : '▸ More'}
+        {open ? `▾ Hide ${label}` : `▸ ${label}`}
       </button>
       {open && <div style={{ marginTop: 8 }}>{children}</div>}
     </div>

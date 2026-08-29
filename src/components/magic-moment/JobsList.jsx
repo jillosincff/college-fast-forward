@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, ExternalLink, MapPin, Check, Sparkles } from 'lucide-react';
+import { Zap, ExternalLink, MapPin, Check } from 'lucide-react';
 import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_BORDER } from '@/components/onboarding-flow/onboardingShared';
 import { applyUrlOf } from '@/lib/jobFreshness';
 
@@ -10,11 +10,15 @@ const TIER_LABELS = {
   other: '',
 };
 
-export default function JobsList({ jobs, excludeJobKey, onApply, onTailor }) {
+// Pro job row — scan-and-apply.
+// Primary:  Apply → live external URL (also logs the application)
+// Secondary: "Prepare in CLIFF" text link → Job Workspace for THIS job (Pro only)
+// No Tailor, no standalone "Did it". After Apply is clicked the row flips to
+// a quiet "✓ Applied" state; the explicit "Mark as applied" lives in the workspace.
+export default function JobsList({ jobs, excludeJobKey, onApply, onPrepare }) {
   if (!jobs?.length) return null;
   const exclude = (excludeJobKey || '').toLowerCase().trim();
   // Safety net: only render jobs with a verified live apply link.
-  // Non-hiring companies never appear in the Jobs list.
   const filtered = jobs
     .filter(j => j.live === true && (j.job_url || j.apply_url || j.url))
     .filter(j => !exclude || `${(j.name || '')}|${(j.job_title || '')}`.toLowerCase().trim() !== exclude);
@@ -22,16 +26,22 @@ export default function JobsList({ jobs, excludeJobKey, onApply, onTailor }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {filtered.map((job, i) => (
-        <JobRow key={job.job_id || job.id || i} job={job} onApply={onApply} onTailor={onTailor} />
+        <JobRow key={job.job_id || job.id || i} job={job} onApply={onApply} onPrepare={onPrepare} />
       ))}
     </div>
   );
 }
 
-function JobRow({ job, onApply, onTailor }) {
+function JobRow({ job, onApply, onPrepare }) {
   const tierLabel = TIER_LABELS[job._tier] || '';
   const applyUrl = job.live ? applyUrlOf(job) : '';
-  const [didIt, setDidIt] = useState(false);
+  const [applied, setApplied] = useState(false);
+
+  const handleApply = () => {
+    onApply?.(job);
+    setApplied(true);
+  };
+
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
@@ -62,26 +72,21 @@ function JobRow({ job, onApply, onTailor }) {
           <MapPin size={10} /> {job.location}{tierLabel ? ` · ${tierLabel}` : ''}
         </p>
       </div>
-      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-        {onTailor && (
-          <button
-            onClick={() => onTailor(job)}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 3, fontFamily: FONT,
-              fontSize: 12, fontWeight: 800, color: INDIGO, background: '#f5f3ff',
-              border: `1px solid ${INDIGO_BORDER}`,
-              padding: '10px 12px', borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', minHeight: 'auto',
-            }}
-          >
-            <Sparkles size={12} /> Tailor
-          </button>
-        )}
-        {job.live && applyUrl && (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+        {applied ? (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
+            fontSize: 12, fontWeight: 800, color: '#15803d', background: '#dcfce7',
+            border: '1px solid #86efac', padding: '10px 16px', borderRadius: 999, whiteSpace: 'nowrap', minHeight: 'auto',
+          }}>
+            <Check size={12} /> Applied
+          </span>
+        ) : applyUrl ? (
           <a
             href={applyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => onApply?.(job)}
+            onClick={handleApply}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
               fontSize: 12, fontWeight: 800, color: '#fff', background: INDIGO,
@@ -90,19 +95,19 @@ function JobRow({ job, onApply, onTailor }) {
           >
             Apply <ExternalLink size={12} />
           </a>
+        ) : null}
+        {onPrepare && (
+          <button
+            onClick={() => onPrepare(job)}
+            style={{
+              fontFamily: FONT, fontSize: 11, fontWeight: 700, color: INDIGO,
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: '2px 4px', minHeight: 'auto', minWidth: 'auto', textDecoration: 'underline',
+            }}
+          >
+            Prepare in CLIFF →
+          </button>
         )}
-        <button
-          onClick={() => { onApply?.(job); setDidIt(true); }}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 3, fontFamily: FONT,
-            fontSize: 12, fontWeight: 700, color: didIt ? '#15803d' : INDIGO,
-            background: didIt ? '#dcfce7' : 'transparent',
-            border: `1px solid ${didIt ? '#86efac' : INDIGO_BORDER}`,
-            padding: '10px 12px', borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', minHeight: 'auto',
-          }}
-        >
-          {didIt ? <Check size={12} /> : null} Did it
-        </button>
       </div>
     </div>
   );

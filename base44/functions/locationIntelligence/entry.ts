@@ -90,6 +90,20 @@ function buildPrefs(user: any, memories: any[]) {
     if (l.state) addStateForms(String(l.state), prefs.tokens);
   }
 
+  // career_goals.location_preference is the field the dashboards actually write
+  // (ProHomeFeed / FreeHomeFeed / onboarding). Without this, a student whose
+  // only preference is "New York, NY" had no tokens here, so locationIntelligence
+  // flagged NYC jobs as "outside your preferred area" — the "NYC is outside
+  // Florida" bug. Treat it as authoritative, same as structured preferred_locations.
+  const cg = user.career_goals || {};
+  const cgLoc = (cg.location_preference || user.location_preference || '').trim();
+  if (cgLoc) {
+    const v = cgLoc.toLowerCase().trim();
+    addToken(v, prefs.tokens);
+    if (NAME_TO_ABBR[v] || STATE_NAMES[v.toUpperCase()]) addStateForms(v, prefs.tokens);
+    if (!prefs.labels.some((l: string) => l.toLowerCase() === v)) prefs.labels.push(cgLoc);
+  }
+
   // Location memories: explicit statements override inferred/behavioral ones
   const locMems = (memories || []).filter((m: any) => m.category === 'preferred_locations');
   const explicit = locMems.filter((m: any) => m.source === 'explicit' || m.pinned);
