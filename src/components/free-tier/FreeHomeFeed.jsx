@@ -8,6 +8,7 @@ import {
 import { Briefcase, ExternalLink, ArrowRight, MapPin } from 'lucide-react';
 import { logJobApplied } from '@/lib/magicMomentLog';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
+import { getCachedJobs, setCachedJobs } from '@/lib/jobsCache';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
 import JobsList from '@/components/magic-moment/JobsList';
 
@@ -17,20 +18,27 @@ import JobsList from '@/components/magic-moment/JobsList';
 
 export default function FreeHomeFeed({ user, onUpgrade }) {
   const navigate = useNavigate();
-  const [jobsList, setJobsList] = useState([]);
-  const [jobsLoading, setJobsLoading] = useState(true);
-  const [shortMessage, setShortMessage] = useState('');
-  const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
+
+  // Compute goal context once for cache key + fetch
+  const cg = user?.career_goals || {};
+  const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
+  const industries = cg.target_industries || [];
+  const location = cg.location_preference || '';
+  const seeking = cg.seeking || '';
+  const cacheKey = `${role}|${industries.join(',')}|${location}|${seeking}`;
+
+  // Serve cached results instantly on remount (no spinner), refresh silently
+  const cached = getCachedJobs(cacheKey);
+  const [jobsList, setJobsList] = useState(cached?.jobs || []);
+  const [jobsLoading, setJobsLoading] = useState(!cached);
+  const [shortMessage, setShortMessage] = useState(cached?.shortMessage || '');
+  const [heroMeta, setHeroMeta] = useState({ chipLabel: industries[0] || role || '', chipText: [role, ...industries].join(' ') });
   const [nextIdx, setNextIdx] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       try {
-        const cg = user.career_goals || {};
-        const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
-        const industries = cg.target_industries || [];
-        const location = cg.location_preference || '';
         const _chipSeen = new Set();
         const chipParts = [role, ...(industries || [])].filter(p => {
           const k = (p || '').toLowerCase().trim();
@@ -41,13 +49,15 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
         const chipLabel = industries[0] || role || '';
         setHeroMeta({ chipLabel, chipText });
 
-        setJobsLoading(true);
+        // Only show the spinner if we have no cached data to show
+        if (!getCachedJobs(cacheKey)) setJobsLoading(true);
         const { jobs, shortMessage: sm } = await buildLiveJobsList({
           role, industries, location, seeking: cg.seeking, chipText,
         });
         setJobsList(jobs);
         setShortMessage(sm);
         setNextIdx(0);
+        setCachedJobs(cacheKey, { jobs, shortMessage: sm });
         setJobsLoading(false);
       } catch (e) {
         setJobsLoading(false);
