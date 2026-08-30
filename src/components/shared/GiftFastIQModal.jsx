@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { X, Loader2, CreditCard } from 'lucide-react';
-import { giftFastIQToStudent } from '@/functions/giftFastIQToStudent';
-import { findStudentOnCFF } from '@/functions/findStudentOnCFF';
-import { createCustomerPortal } from '@/functions/createCustomerPortal';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { base44 } from '@/api/base44Client';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -26,7 +23,7 @@ export default function GiftFastIQModal({ user, onClose }) {
     if (!firstName.trim() || !lastName.trim()) return;
     setSearching(true);
     try {
-      const res = await findStudentOnCFF({ firstName: firstName.trim(), lastName: lastName.trim() });
+      const res = await base44.functions.invoke('findStudentOnCFF', { firstName: firstName.trim(), lastName: lastName.trim() });
       const found = res?.data?.matches || [];
       setMatches(found);
       if (found.length === 0) setStep('notfound');
@@ -53,7 +50,7 @@ export default function GiftFastIQModal({ user, onClose }) {
         plan: plan || selectedPlan,
         ...(studentId ? { studentId } : { studentEmail: studentEmail?.trim().toLowerCase() }),
       };
-      const res = await giftFastIQToStudent(payload);
+      const res = await base44.functions.invoke('giftFastIQToStudent', payload);
       const data = res?.data;
 
       if (res?.status === 402 || data?.reason === 'credit_card_required') {
@@ -76,21 +73,18 @@ export default function GiftFastIQModal({ user, onClose }) {
   };
 
   const handleAddCard = async () => {
-    const returnUrl = `${window.location.origin}/#ParentAllSet?gift=open`;
     try {
       if (user?.stripe_customer_id) {
         // Parent already has a Stripe customer — open billing portal to add/update card
-        const res = await createCustomerPortal({
+        const res = await base44.functions.invoke('createCustomerPortal', {
           customerId: user.stripe_customer_id,
-          returnUrl,
+          returnUrl: `${window.location.origin}/#ParentAllSet?gift=open`,
         });
         if (res?.data?.url) window.location.href = res.data.url;
       } else {
         // No Stripe customer yet — use setup mode checkout (no subscription created)
-        const res = await createCheckoutSession({
+        const res = await base44.functions.invoke('createCheckoutSession', {
           plan: 'setup_only',
-          successUrl: returnUrl,
-          cancelUrl: window.location.href,
           user: { id: user?.id, email: user?.email, full_name: user?.full_name },
         });
         if (res?.data?.url) window.location.href = res.data.url;

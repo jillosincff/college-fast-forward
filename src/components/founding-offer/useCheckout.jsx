@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { base44 } from '@/api/base44Client';
 
 /**
  * Hook to trigger Stripe checkout for FastIQ plans.
@@ -13,18 +13,10 @@ export default function useCheckout(user) {
     setLoading(true);
     setError(null);
     try {
-      const origin = window.location.origin;
-      const successUrl = user?.persona === 'parent'
-        ? `${origin}/#ParentAllSet?payment=success`
-        : `${origin}/#FreeTierDashboard?upgraded=true`;
-      const cancelUrl = user?.persona === 'parent'
-        ? `${origin}/#ParentAllSet?payment=cancelled`
-        : `${origin}/#FreeTierDashboard`;
-
-      const response = await createCheckoutSession({
+      // Do NOT pass successUrl/cancelUrl — the Base44 webview origin can be null,
+      // which produces a bad Stripe success_url. The backend uses APP_BASE_URL.
+      const response = await base44.functions.invoke('createCheckoutSession', {
         plan,
-        successUrl,
-        cancelUrl,
         user: {
             id: user?.id,
             email: user?.email,

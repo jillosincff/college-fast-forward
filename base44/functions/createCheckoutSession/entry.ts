@@ -34,6 +34,10 @@ Deno.serve(async (req) => {
     }
 
     const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!STRIPE_SECRET) {
+      console.error('[createCheckoutSession] STRIPE_SECRET_KEY is not set — cannot create Stripe session');
+      return Response.json({ success: false, error: 'Payment is not configured. Please contact support.' }, { status: 500 });
+    }
 
     // Post-pay landing: use the configured app URL (APP_BASE_URL) so the redirect
     // always works regardless of which domain the user started on.
@@ -84,6 +88,7 @@ Deno.serve(async (req) => {
     const session = await stripeRes.json();
 
     if (session.error) {
+      console.error('[createCheckoutSession] Stripe error:', session.error.message, session.error.code || '', session.error.type || '');
       return Response.json({ success: false, error: session.error.message }, { status: 500 });
     }
 

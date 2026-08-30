@@ -5,7 +5,6 @@ import ATSScoreRing from './ATSScoreRing';
 import FunnelProgress from './FunnelProgress';
 import OpportunityHub from './OpportunityHub';
 import PremiumPaywallModal from './PremiumPaywallModal';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { getLandingTeaser } from '@/functions/getLandingTeaser';
 import PlanComparisonTable from './PlanComparisonTable';
 import OvernightPreviewCard from './OvernightPreviewCard';
@@ -81,11 +80,9 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         return;
       }
       // Already authenticated — call checkout directly
-      const res = await createCheckoutSession({
+      const res = await base44.functions.invoke('createCheckoutSession', {
         plan: 'pro_monthly',
         user: { id: user.id, email: user.email, family_id: user.family_id },
-        successUrl: window.location.origin + '/#FreeTierDashboard?upgrade=success',
-        cancelUrl: window.location.href,
       });
       if (res?.data?.url) {
         window.location.href = res.data.url;

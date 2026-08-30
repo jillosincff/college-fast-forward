@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Zap, ArrowRight, Clock, Loader2 } from 'lucide-react';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { base44 } from '@/api/base44Client';
 
 /**
  * Banner shown to CFF-only subscribers or non-subscribers when they visit FASTIQ.
@@ -17,10 +17,8 @@ export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
   const handleUpgrade = async () => {
     setUpgrading(true);
     try {
-      const response = await createCheckoutSession({
+      const response = await base44.functions.invoke('createCheckoutSession', {
         plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
-        successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
-        cancelUrl: window.location.href,
         user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
       });
       const result = response?.data || response;

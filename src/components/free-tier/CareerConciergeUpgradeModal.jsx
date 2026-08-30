@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Check, Loader2 } from 'lucide-react';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { base44 } from '@/api/base44Client';
 
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
@@ -19,10 +19,8 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
     setLoading(true);
     setError(null);
     try {
-      const response = await createCheckoutSession({
+      const response = await base44.functions.invoke('createCheckoutSession', {
         plan,
-        successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,
-        cancelUrl: window.location.href,
         user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
       });
       const result = response?.data || response;

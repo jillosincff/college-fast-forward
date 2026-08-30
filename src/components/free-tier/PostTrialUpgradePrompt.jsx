@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 
 const GRAD = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
@@ -13,11 +13,8 @@ export default function PostTrialUpgradePrompt({ message }) {
     setLoading(true);
     setError(null);
     try {
-      const origin = window.location.origin || 'https://collegefastforward.com';
-      const res = await createCheckoutSession({
+      const res = await base44.functions.invoke('createCheckoutSession', {
         plan: 'pro_monthly',
-        successUrl: `${origin}/#/FreeTierDashboard?upgraded=true`,
-        cancelUrl: window.location.href,
         user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name },
       });
       const url = res?.data?.url || res?.url;

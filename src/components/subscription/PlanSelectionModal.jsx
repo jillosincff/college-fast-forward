@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Check, Loader2, Shield } from 'lucide-react';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { base44 } from '@/api/base44Client';
 
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
@@ -23,12 +23,9 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
 
   const handleSelectPlan = async (planId) => {
     setLoading(planId);
-    const baseUrl = window.location.origin;
     try {
-      const response = await createCheckoutSession({
+      const response = await base44.functions.invoke('createCheckoutSession', {
         plan: planId,
-        successUrl: `${baseUrl}/#Dashboard?payment=success`,
-        cancelUrl: `${baseUrl}/#FastIQ?payment=cancelled`,
         user: {
           id: user?.id,
           email: user?.email,

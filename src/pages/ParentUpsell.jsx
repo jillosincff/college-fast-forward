@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
@@ -21,11 +21,9 @@ export default function ParentUpsell() {
     setLoading(true);
     setCheckoutError(null);
     try {
-      const res = await createCheckoutSession({
+      const res = await base44.functions.invoke('createCheckoutSession', {
         plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
         user: { id: user.id, email: user.email },
-        successUrl: `${window.location.origin}/#/ParentAllSet?upgraded=true`,
-        cancelUrl: `${window.location.origin}/#/ParentAllSet`,
       });
       const url = res?.data?.url || res?.url;
       if (url) {

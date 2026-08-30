@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SeoLandingLayout from '@/components/seo-landing/SeoLandingLayout';
 import { Section, CrossLinks } from '@/components/seo-landing/SeoSections';
 import { useAuth } from '@/lib/AuthContext';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { base44 } from '@/api/base44Client';
 
 // Brand tokens (matched to SeoSections)
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -66,12 +66,9 @@ export default function Pricing() {
     }
     setLoading(true);
     try {
-      const origin = window.location.origin;
-      const res = await createCheckoutSession({
+      const res = await base44.functions.invoke('createCheckoutSession', {
         plan: 'pro_monthly',
         user: { id: user.id, email: user.email, family_id: user.family_id },
-        successUrl: `${origin}/#FreeTierDashboard?upgrade=success`,
-        cancelUrl: `${origin}/#pricing`,
       });
       const result = res?.data || res;
       if (result?.url) {

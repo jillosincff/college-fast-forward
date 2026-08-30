@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Loader2, X } from 'lucide-react';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 import TrialUsageRecap from '@/components/free-tier/TrialUsageRecap';

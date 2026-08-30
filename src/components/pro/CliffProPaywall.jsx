@@ -42,14 +42,13 @@ export default function CliffProPaywall({ onClose, onUpgrade, trigger = 'generic
     }
     setLoading(true);
     setError(null);
-    const origin = window.location.origin || 'https://collegefastforward.com';
     try {
+      // Do NOT pass successUrl/cancelUrl — the Base44 webview origin can be null,
+      // which produces a bad Stripe success_url. The backend uses APP_BASE_URL.
       const res = await base44.functions.invoke('createCheckoutSession', {
         plan: 'pro_monthly',
         source: 'cliff_pro_paywall',
         trigger,
-        successUrl: `${origin}/#/FreeTierDashboard?upgraded=true`,
-        cancelUrl: `${origin}/#/FreeTierDashboard`,
         user: { id: user.id, email: user.email, persona: user.persona, roles: user.roles, full_name: user.full_name },
       });
       const url = res?.data?.url || res?.url;
