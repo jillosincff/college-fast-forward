@@ -5,6 +5,7 @@ import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
 import {
   FONT, BG, CARD, TEXT, TEXT2, TEXT3,
   INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO, SHADOW_MD, R,
+  ONBOARDING_TARGET_CHIPS, OTHER_CHIP, OPEN_CHIP,
 } from '@/components/onboarding-flow/onboardingShared';
 import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Loader2 } from 'lucide-react';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
@@ -16,10 +17,7 @@ import LocationAutocomplete from '@/components/onboarding-flow/LocationAutocompl
 // Saves answers to localStorage, triggers Google OAuth, and lands on the
 // Magic Moment. Goal: reach the free cycle in under 90 seconds.
 
-const FIELD_CHIPS = ['Marketing', 'Finance', 'Software/Engineering', 'Sales', 'Operations', 'Consulting', 'Healthcare', 'Data/Analytics', 'Product/UX', 'HR/Recruiting', 'Communications/PR', 'Education/Nonprofit'];
-const OTHER_CHIP = 'Other';
-const OPEN_CHIP = "I'm open";
-const TARGET_CHIPS = [...FIELD_CHIPS, OTHER_CHIP, OPEN_CHIP];
+const TARGET_CHIPS = ONBOARDING_TARGET_CHIPS;
 const LOC_CHIPS = ['Remote', 'Open to relocate'];
 const SEEKING_OPTIONS = [
   { value: 'internship', label: 'Internship' },

@@ -38,6 +38,22 @@ export const GREEN = TEAL;
 export const GREEN_LIGHT = TEAL_LIGHT;
 export const GREEN_BORDER = TEAL_BORDER;
 
+// ── Target field chips — single source of truth for ALL onboarding flows ──
+// If you change these, all three onboarding components update automatically.
+export const TARGET_FIELD_CHIPS = [
+  'Sales/Business Development',
+  'Marketing',
+  'Finance/Accounting',
+  'Operations',
+  'Engineering',
+  'Education/Non-profit',
+  'Healthcare',
+  'Legal',
+];
+export const OTHER_CHIP = 'Other';
+export const OPEN_CHIP = "I'm open";
+export const ONBOARDING_TARGET_CHIPS = [...TARGET_FIELD_CHIPS, OTHER_CHIP, OPEN_CHIP];
+
 export const TOP_SCHOOLS = [
   'University of Florida', 'Florida State University', 'University of Central Florida',
   'University of Southern California', 'Penn State University', 'University of Michigan',

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { TARGET_FIELD_CHIPS } from '@/components/onboarding-flow/onboardingShared';
+
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
 const INDIGO = '#6d28d9';
 const INDIGO_DIM = '#5b21b6';
@@ -14,11 +16,7 @@ const GREEN_BORDER = 'rgba(6,182,212,0.22)';
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
 const BLUE = INDIGO;
 
-const FIELD_CHIPS = [
-  'Marketing', 'Finance', 'Software/Engineering', 'Sales', 'Operations',
-  'Consulting', 'Healthcare', 'Data/Analytics', 'Product/UX', 'HR/Recruiting',
-  'Communications/PR', 'Education/Nonprofit',
-];
+const FIELD_CHIPS = TARGET_FIELD_CHIPS;
 const OTHER_CHIP = 'Other';
 const OPEN_CHIP = "I'm open";
 

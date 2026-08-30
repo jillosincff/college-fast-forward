@@ -7,12 +7,13 @@ import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
 import {
   TOP_SCHOOLS, FONT, BG, CARD, TEXT, TEXT2, TEXT3,
   INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO, SHADOW, SHADOW_MD, R,
+  ONBOARDING_TARGET_CHIPS,
 } from '@/components/onboarding-flow/onboardingShared';
 import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Loader2 } from 'lucide-react';
 import LocationAutocomplete from './LocationAutocomplete';
 import { trackOnboardingCompleted } from '@/lib/tracking';
 
-const TARGET_CHIPS = ['Marketing', 'Finance', 'Software', 'Sales', 'Operations', "Other / I'm open"];
+const TARGET_CHIPS = ONBOARDING_TARGET_CHIPS;
 const LOC_CHIPS = ['Remote', 'Open to relocate'];
 const SEEKING_OPTIONS = [
   { value: 'internship', label: 'Internship' },
