@@ -105,14 +105,23 @@ function OnboardingGuard({ children }) {
   const onboardingDone = user.onboarding_completed === true;
 
   if (hasPersona && onboardingDone) {
-    // Force Magic Moment for students who haven't completed it yet.
-    // Existing users who completed MM on this device are bypassed via localStorage.
     if (user.persona === 'student' || user.roles?.includes('student')) {
-      let mmDone = user.magic_moment_completed === true;
+      const mmDone = user.magic_moment_completed === true;
       if (!mmDone) {
-        try { mmDone = !!localStorage.getItem('cff_magic_moment_completed_at'); } catch {}
+        // localStorage only prevents a redirect loop on this device right after
+        // the student finished the cycle but the account flag hasn't propagated yet.
+        let deviceDone = false;
+        try { deviceDone = !!localStorage.getItem('cff_magic_moment_completed_at'); } catch {}
+
+        if (!deviceDone) {
+          // Only force the first-run Magic Moment screen for students who finished
+          // onboarding in the last 7 days. Older students go straight to the dashboard.
+          const onboardingAt = user.onboarding_completed_at || user.created_date;
+          const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+          const isRecent = !onboardingAt || new Date(onboardingAt).getTime() > sevenDaysAgo;
+          if (isRecent) return <Navigate to="/MagicMoment" replace />;
+        }
       }
-      if (!mmDone) return <Navigate to="/MagicMoment" replace />;
     }
     return children;
   }

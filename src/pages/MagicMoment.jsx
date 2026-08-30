@@ -29,7 +29,7 @@ const pill = (extra) => ({
 });
 
 export default function MagicMoment() {
-  const { user: initialUser } = useAuth();
+  const { user: authUser } = useAuth();
   const navigate = useNavigate();
   const ranRef = useRef(false);
 
@@ -40,11 +40,16 @@ export default function MagicMoment() {
   const [error, setError] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
 
-  const cg0 = initialUser?.career_goals || {};
+  const cg0 = authUser?.career_goals || {};
   const fallbackRole = (cg0.target_industries || [])[0] || '';
   const [searchRole, setSearchRole] = useState((cg0.target_roles || [])[0] || fallbackRole || '');
-  const [searchLoc, setSearchLoc] = useState(cg0.location_preference || initialUser?.location || '');
-  const [user, setUser] = useState(initialUser);
+  const [searchLoc, setSearchLoc] = useState(cg0.location_preference || authUser?.location || '');
+  const [user, setUser] = useState(authUser);
+
+  // Keep local user in sync with auth — don't freeze the first null while auth loads.
+  useEffect(() => {
+    if (authUser) setUser(authUser);
+  }, [authUser]);
 
   const handleSearch = async (e) => {
     e?.preventDefault();
@@ -58,7 +63,7 @@ export default function MagicMoment() {
       saved_at: new Date().toISOString(),
     };
     try { await base44.auth.updateMe({ career_goals: updatedGoals, location: searchLoc.trim() || undefined }); } catch (e) {}
-    const freshUser = { ...initialUser, career_goals: updatedGoals, location: searchLoc.trim() };
+    const freshUser = { ...authUser, career_goals: updatedGoals, location: searchLoc.trim() };
     setUser(freshUser);
     ranRef.current = false;
     setJobsList([]);
@@ -104,26 +109,29 @@ export default function MagicMoment() {
         setShortMessage(sm);
         setJobsLoading(false);
 
-        // ── Track completion ──
-        base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
-        trackMagicMomentCompleted({
-          jobs_count: jobs.length,
-          people_count: 0,
-          best_path: false,
-          people_source: 'locked_free',
-          result_type: 'jobs_only',
-          hero_job_title: jobs[0]?.job_title || '',
-          hero_company: jobs[0]?.name || '',
-          has_tailored_resume: false,
-        });
-        trackConversionEvent('magic_moment_completed', {
-          jobs_count: jobs.length,
-          people_count: 0,
-          best_path: false,
-          result_type: 'jobs_only',
-        });
-        markMagicMomentCompleted();
-        base44.auth.updateMe({ magic_moment_completed: true }).catch(() => {});
+        // ── Track completion — only when the student saw at least one real job.
+        // Empty jobs = not complete. They get the example path + retry + search bar.
+        if (jobs.length > 0) {
+          base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
+          trackMagicMomentCompleted({
+            jobs_count: jobs.length,
+            people_count: 0,
+            best_path: false,
+            people_source: 'locked_free',
+            result_type: 'jobs_only',
+            hero_job_title: jobs[0]?.job_title || '',
+            hero_company: jobs[0]?.name || '',
+            has_tailored_resume: false,
+          });
+          trackConversionEvent('magic_moment_completed', {
+            jobs_count: jobs.length,
+            people_count: 0,
+            best_path: false,
+            result_type: 'jobs_only',
+          });
+          markMagicMomentCompleted();
+          base44.auth.updateMe({ magic_moment_completed: true }).catch(() => {});
+        }
       } catch (e) {
         setError('CLIFF hit a snag building your plan. Please try again in a moment.');
         setJobsLoading(false);
@@ -132,6 +140,15 @@ export default function MagicMoment() {
   }, [user, runKey]);
 
   const handleRowApply = (job) => { logJobApplied({ user, job }); };
+
+  // Tapping "Continue with free" marks the cycle complete.
+  const handleContinueFree = () => {
+    base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
+    trackConversionEvent('magic_moment_completed', { result_type: 'continue_free' }).catch(() => {});
+    markMagicMomentCompleted();
+    base44.auth.updateMe({ magic_moment_completed: true }).catch(() => {});
+    navigate('/FreeTierDashboard');
+  };
 
   const SearchBar = (
     <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
@@ -227,7 +244,7 @@ export default function MagicMoment() {
         {/* Continue your plan — secondary, below the pay module */}
         {!jobsLoading && (
           <div style={{ textAlign: 'center', marginTop: 4, marginBottom: 8 }}>
-            <button onClick={() => navigate('/FreeTierDashboard')} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
+            <button onClick={handleContinueFree} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
               Continue with free →
             </button>
           </div>
