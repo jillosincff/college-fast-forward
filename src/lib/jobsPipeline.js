@@ -47,13 +47,14 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
   const userState = locParts[1] || '';
   const tierOf = makeTierOf(userCity, userState);
 
-  // Tracks whether ANY fetch in this pipeline run served cached/stale data
-  // (happens when JSearch times out and the backend falls back to its cache).
-  // Surfaced to the UI so a silent timeout doesn't look like a fresh result.
+  // Tracks whether the PRIMARY fetches (metro + state) served cached/stale
+  // data — happens when JSearch times out and the backend falls back to its
+  // cache. The remote backfill is best-effort; its timeouts must NOT mark the
+  // whole feed stale when the main metro jobs came back fresh.
   let anyStale = false;
   let anyFromCache = false;
 
-  const fetchJobs = async (locOverride) => {
+  const fetchJobs = async (locOverride, trackStale = true) => {
     const loc = locOverride !== undefined ? locOverride : location;
     try {
       const r = await base44.functions.invoke('getLiveJobMatchesFn', {
@@ -61,8 +62,10 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
         force_refresh: true,
       });
       const d = r?.data || r;
-      if (d?.stale) anyStale = true;
-      if (d?.from_cache) anyFromCache = true;
+      if (trackStale) {
+        if (d?.stale) anyStale = true;
+        if (d?.from_cache) anyFromCache = true;
+      }
       return d?.companies || [];
     } catch (e) {
       return [];
@@ -117,7 +120,7 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
   let shortMessage = '';
   if (liveJobs.length < 3) {
     shortMessage = `Few live roles in ${userCity || userState || 'your area'} right now — showing remote roles you can apply to.`;
-    const remoteRaw = onChip(legit(await fetchJobs('Remote')));
+    const remoteRaw = onChip(legit(await fetchJobs('Remote', false)));
     const remoteNew = remoteRaw.filter(j => {
       const k = ((j.name || '') + '|' + (j.job_title || '')).toLowerCase();
       return !liveJobs.some(lj => ((lj.name || '') + '|' + (lj.job_title || '')).toLowerCase() === k);

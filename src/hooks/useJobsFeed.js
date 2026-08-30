@@ -39,22 +39,36 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
     return (async () => {
       if (!getCachedJobs(cacheKey)) setJobsLoading(true);
       setError(false);
-      try {
-        const { jobs, shortMessage: sm, stale, fromCache } = await buildLiveJobsList({
-          role, industries, location, seeking: cg.seeking, chipText, maxJobs,
-        });
-        setJobsList(jobs);
-        setShortMessage(sm);
-        setIsStale(!!stale || !!fromCache);
+
+      // JSearch (the upstream job provider) has intermittent ~6s timeouts. When
+      // that happens the backend serves its last cached results with stale=true
+      // so the feed stays responsive. Those timeouts are transient — a single
+      // retry usually succeeds — so retry once before settling on "cached".
+      let result = null;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          result = await buildLiveJobsList({
+            role, industries, location, seeking: cg.seeking, chipText, maxJobs,
+          });
+          if (!result.stale && !result.fromCache) break; // genuinely fresh — done
+        } catch (e) {
+          result = null;
+        }
+        if (attempt < 2) await new Promise(r => setTimeout(r, 1200));
+      }
+
+      if (result) {
+        setJobsList(result.jobs);
+        setShortMessage(result.shortMessage);
+        setIsStale(!!result.stale || !!result.fromCache);
         setLastUpdated(Date.now());
-        setCachedJobs(cacheKey, { jobs, shortMessage: sm });
-      } catch (e) {
+        setCachedJobs(cacheKey, { jobs: result.jobs, shortMessage: result.shortMessage });
+      } else {
         // Keep whatever jobs we already have so the feed isn't blank — but flag
         // the failure so the UI can show "couldn't refresh" + a retry.
         setError(true);
-      } finally {
-        setJobsLoading(false);
       }
+      setJobsLoading(false);
     })();
   }, [user, cacheKey]);
 
