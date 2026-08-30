@@ -57,7 +57,7 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
       }}>
         <div style={{ flex: '1 1 0', minWidth: 0 }}>
           <span style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>
-            🏅 <span style={{ color: '#E85D20', fontWeight: 600 }}>CliFF</span> — $4.99/week · Cancel anytime&nbsp;
+            🏅 <span style={{ color: '#E85D20', fontWeight: 600 }}>CliFF</span> — $4.99/week — billed monthly at $19.96 · Cancel anytime&nbsp;
           </span>
           <button
             onClick={onUpgrade}

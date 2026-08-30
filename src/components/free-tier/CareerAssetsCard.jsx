@@ -133,7 +133,7 @@ function LockedAssetRow({ icon, title, subtitle, buttonLabel, onUnlock, previewC
                     onClick={() => { setShowPreview(false); onUnlock(); }}
                     style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 10, padding: '11px 20px', cursor: 'pointer', minHeight: 'auto', width: '100%' }}
                   >
-                    ⚡ Upgrade to Unlock — $4.99/wk
+                    ⚡ Upgrade to Unlock — $4.99/week · billed monthly at $19.96
                   </button>
                 </div>
               </div>
@@ -211,7 +211,7 @@ function FeatureGate({ children, onUpgrade }) {
             cursor: 'pointer', minHeight: 'auto',
           }}
         >
-          Unlock — $4.99/wk →
+          Unlock — $4.99/week · billed monthly at $19.96 →
         </button>
       </div>
     </div>
@@ -346,7 +346,7 @@ export default function CareerAssetsCard({ user, onUpgrade, isPremium = false })
             onClick={onUpgrade}
             style={{ width: '100%', fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 10, padding: '11px 0', cursor: 'pointer', minHeight: 'auto', marginTop: 4 }}
           >
-            ⚡ Unlock All Assets — $4.99/wk
+            ⚡ Unlock All Assets — $4.99/week · billed monthly at $19.96
           </button>
         </div>
       )}

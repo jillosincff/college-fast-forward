@@ -19,7 +19,7 @@ export default function PlanComparisonTable({ networkCount = 0 }) {
         <div style={{ ...cell }} />
         <p style={{ ...cell, fontWeight: 700, color: '#374151', textAlign: 'center' }}>Free</p>
         <p style={{ ...cell, fontWeight: 800, color: '#6d28d9', textAlign: 'center', background: '#f5f3ff' }}>
-          Premium · $4.99/wk
+          Premium · $4.99/week — billed monthly at $19.96
         </p>
       </div>
       {rows.map(([feature, free, premium], i) => (

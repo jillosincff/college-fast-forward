@@ -101,7 +101,7 @@ export default function ResumeAtsTeaser({ onUpgrade }) {
               ✨ Clear All Red Flags with Resume Wow
             </button>
             <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', textAlign: 'center', margin: '6px 0 0' }}>
-              AI rewrites your resume to 95%+ · $4.99/wk
+              AI rewrites your resume to 95%+ · $4.99/week — billed monthly at $19.96
             </p>
 
             <button

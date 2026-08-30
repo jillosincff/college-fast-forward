@@ -188,7 +188,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 13, color: '#888', textAlign: 'center',
           margin: '8px 0 0',
         }}>
-          $4.99/week &middot; Cancel anytime
+          $4.99/week — billed monthly at $19.96 &middot; Cancel anytime
         </p>
         </div>
       </div>

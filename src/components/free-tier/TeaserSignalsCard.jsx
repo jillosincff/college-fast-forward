@@ -103,7 +103,7 @@ export default function TeaserSignalsCard({ onUnlock }) {
         style={{ borderTop: '1px solid #e5e7eb', padding: '14px 22px', background: 'linear-gradient(135deg, #eff6ff, #fff)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
       >
         <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0 }}>
-          🔒 Unlock these leads for <strong style={{ color: BLUE }}>$4.99/wk</strong>
+          🔒 Unlock these leads for <strong style={{ color: BLUE }}>$4.99/week — billed monthly at $19.96</strong>
         </p>
         <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: BLUE }}>See All →</span>
       </div>

@@ -769,7 +769,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
             borderRadius: 8, padding: isMobile ? '6px 14px' : '8px 18px', display: 'inline-block',
             boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
           }}>
-            ⚡ Automate for $4.99/wk →
+            ⚡ Automate for $4.99/week · billed monthly at $19.96 →
           </span>
         </div>
       )}

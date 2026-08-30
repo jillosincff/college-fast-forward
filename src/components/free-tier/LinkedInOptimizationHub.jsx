@@ -124,7 +124,7 @@ export default function LinkedInOptimizationHub({ user, onUpgrade, isPremium }) 
                 cursor: 'pointer', minHeight: 'auto',
               }}
             >
-              ⚡ Unlock LinkedIn Hub — $4.99/wk
+              ⚡ Unlock LinkedIn Hub — $4.99/week · billed monthly at $19.96
             </button>
           )}
         </div>
