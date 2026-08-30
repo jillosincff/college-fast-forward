@@ -1,4 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import {
+  APP_BASE, escapeHtml, unsubUrl, emailWrapper, darkHero, ctaButton, bodyText,
+  getFirstName, sendViaSendGrid, isUnsubscribed,
+} from '../../shared/cliffEmailHelpers.ts';
 
 // AUTOMATION: Daily at 7:00 AM ET (11:00 UTC) — runs AFTER checkTrialExpiry (6 AM ET).
 // Sends on-brand CliFF trial emails:
@@ -7,53 +11,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // Skips Stripe-managed subscribers. Dedup via cliff_trial_ending_email_at / cliff_trial_ended_email_at
 // compared against the user's current trial_end_date (so a new trial re-arms both emails).
 
-const escapeHtml = (str) => String(str || '')
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-
-const APP_BASE = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 const APP_URL = `${APP_BASE}/#/FreeTierDashboard`;
-
-// Same token scheme as handleUnsubscribe
-const makeUnsubToken = (userId, email) => btoa(`${userId}:${email}`).replace(/=/g, '');
-const unsubUrl = (userId, email) => `${APP_BASE}/#/Unsubscribe?token=${makeUnsubToken(userId, email)}`;
-
-const emailWrapper = (content, unsubscribeUrl) => `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CliFF</title></head>
-<body style="margin: 0; padding: 0; background: #F5F5F5; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-    <div style="text-align: center; margin-bottom: 32px;">
-      <p style="font-size: 13px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #E85D20; margin: 0;">
-        CLIFF · COLLEGE FAST FORWARD
-      </p>
-    </div>
-    <div style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-      ${content}
-    </div>
-    <div style="text-align: center; margin-top: 24px;">
-      <p style="font-size: 12px; color: #AAAAAA; margin: 0 0 4px;">College Fast Forward · support@collegefastforward.com</p>
-      <p style="font-size: 11px; color: #CCCCCC; margin: 0 0 4px;">You're receiving this because you joined College Fast Forward.</p>
-      <p style="font-size: 11px; color: #CCCCCC; margin: 0;"><a href="${unsubscribeUrl}" style="color: #AAAAAA; text-decoration: underline;">Unsubscribe</a></p>
-    </div>
-  </div>
-</body>
-</html>`;
-
-const darkHero = (label, headline, subtext) => `
-  <div style="background: #0A0A0A; padding: 36px 36px 32px;">
-    <p style="font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #E85D20; margin: 0 0 12px;">${label}</p>
-    <h1 style="font-size: 26px; font-weight: 700; color: #fff; margin: 0 0 10px; line-height: 1.3;">${headline}</h1>
-    <p style="font-size: 15px; color: rgba(255,255,255,0.55); margin: 0; line-height: 1.6;">${subtext}</p>
-  </div>`;
-
-const ctaButton = (label) => `
-  <div style="text-align: center; margin: 8px 0 4px;">
-    <a href="${APP_URL}" style="display: inline-block; background: #E85D20; color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 10px;">${label} →</a>
-  </div>`;
-
-const bodyText = (text) => `<p style="font-size: 15px; color: #444; line-height: 1.7; margin: 0 0 16px;">${text}</p>`;
 
 function endingTomorrowEmail(firstName, unsubscribeUrl) {
   const name = escapeHtml(firstName);
@@ -65,7 +23,7 @@ function endingTomorrowEmail(firstName, unsubscribeUrl) {
         ${bodyText(`Hi ${name},`)}
         ${bodyText(`Quick heads up — your free Premium access ends tomorrow. Until then, everything is still open: unlimited alumni searches, resume tailoring, outreach drafts, and mock interviews.`)}
         ${bodyText(`If you want to keep going after tomorrow, Premium is <strong>$4.99/week</strong> (billed monthly at $19.96). No contracts, cancel anytime.`)}
-        ${ctaButton('Keep Premium — $4.99/week')}
+        ${ctaButton('Keep Premium — $4.99/week', APP_URL)}
         ${bodyText(`<br>— Jill`)}
         <p style="font-size: 13px; color: #888; margin: 0;">P.S. The best use of your last free day? Run an alumni search at your top target company and send one outreach message. That's how interviews start.</p>
       </div>`, unsubscribeUrl),
@@ -82,33 +40,11 @@ function endedEmail(firstName, unsubscribeUrl) {
         ${bodyText(`Hi ${name},`)}
         ${bodyText(`Your free Premium access just ended, so you're back on the free plan. Everything you built — your pipeline, drafts, and saved alumni — is still there waiting for you.`)}
         ${bodyText(`Want full access back? Premium is <strong>$4.99/week</strong> (billed monthly at $19.96): unlimited alumni searches, resume tailoring, AI outreach drafts, and mock interview practice. Cancel anytime.`)}
-        ${ctaButton('Get Premium — $4.99/week')}
+        ${ctaButton('Get Premium — $4.99/week', APP_URL)}
         ${bodyText(`<br>— Jill`)}
         <p style="font-size: 13px; color: #888; margin: 0;">P.S. Students who reach out to just 3 alumni per week hear back from at least one. Premium makes those 3 messages take 10 minutes instead of an hour.</p>
       </div>`, unsubscribeUrl),
   };
-}
-
-async function isUnsubscribed(base44, userId) {
-  const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_id: userId }).catch(() => []);
-  return prefs?.[0]?.all_emails === false;
-}
-
-async function sendViaSendGrid(toEmail, subject, html) {
-  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${Deno.env.get('SENDGRID_API_KEY')}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: toEmail }] }],
-      from: { email: 'support@collegefastforward.com', name: 'Jill at CliFF' },
-      subject,
-      content: [{ type: 'text/html', value: html }],
-    }),
-  });
-  if (!response.ok) throw new Error(`SendGrid ${response.status}: ${await response.text()}`);
 }
 
 Deno.serve(async (req) => {
@@ -141,7 +77,7 @@ Deno.serve(async (req) => {
 
     if (await isUnsubscribed(base44, u.id)) continue;
 
-    const firstName = (u.full_name || '').split(' ')[0] || 'there';
+    const firstName = getFirstName(u.full_name);
     try {
       if (!dry_run) {
         const { subject, html } = endingTomorrowEmail(firstName, unsubUrl(u.id, u.email));
@@ -171,7 +107,7 @@ Deno.serve(async (req) => {
 
     if (await isUnsubscribed(base44, u.id)) continue;
 
-    const firstName = (u.full_name || '').split(' ')[0] || 'there';
+    const firstName = getFirstName(u.full_name);
     try {
       if (!dry_run) {
         const { subject, html } = endedEmail(firstName, unsubUrl(u.id, u.email));

@@ -20,7 +20,8 @@
         "onboarding_abandonment",
         "weekly_parent_digest",
         "pay_it_forward",
-        "first_match_notification"
+        "first_match_notification",
+        "jobs_comeback"
       ],
       "description": "Type of re-engagement email sent"
     },
