@@ -47,6 +47,12 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
   const userState = locParts[1] || '';
   const tierOf = makeTierOf(userCity, userState);
 
+  // Tracks whether ANY fetch in this pipeline run served cached/stale data
+  // (happens when JSearch times out and the backend falls back to its cache).
+  // Surfaced to the UI so a silent timeout doesn't look like a fresh result.
+  let anyStale = false;
+  let anyFromCache = false;
+
   const fetchJobs = async (locOverride) => {
     const loc = locOverride !== undefined ? locOverride : location;
     try {
@@ -54,7 +60,10 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
         career_goals: { role, industries, locations: [loc], seeking: seeking || 'both' },
         force_refresh: true,
       });
-      return r?.data?.companies || r?.companies || [];
+      const d = r?.data || r;
+      if (d?.stale) anyStale = true;
+      if (d?.from_cache) anyFromCache = true;
+      return d?.companies || [];
     } catch (e) {
       return [];
     }
@@ -122,5 +131,5 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
   const tierRank = (j) => TIER_ORDER[j._tier] ?? 3;
   liveJobs.sort((a, b) => tierRank(a) - tierRank(b));
 
-  return { jobs: liveJobs.slice(0, maxJobs), shortMessage };
+  return { jobs: liveJobs.slice(0, maxJobs), shortMessage, stale: anyStale, fromCache: anyFromCache };
 }

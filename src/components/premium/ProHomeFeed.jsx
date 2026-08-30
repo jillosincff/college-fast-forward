@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
@@ -7,9 +6,9 @@ import {
 } from '@/components/onboarding-flow/onboardingShared';
 import { Briefcase, ExternalLink, ArrowRight, MapPin } from 'lucide-react';
 import { logJobApplied } from '@/lib/magicMomentLog';
-import { buildLiveJobsList } from '@/lib/jobsPipeline';
-import { getCachedJobs, setCachedJobs } from '@/lib/jobsCache';
+import { useJobsFeed } from '@/hooks/useJobsFeed';
 import { openCliffWorkspace } from '@/lib/cliffWorkspace';
+import JobsRefreshBar from '@/components/free-tier/JobsRefreshBar';
 import JobsList from '@/components/magic-moment/JobsList';
 import JessePeopleCard from '@/components/premium/JessePeopleCard';
 
@@ -18,50 +17,10 @@ import JessePeopleCard from '@/components/premium/JessePeopleCard';
 // no workspace checklists on first load — those live in the Tools tab.
 export default function ProHomeFeed({ user, onOpenTools }) {
   const navigate = useNavigate();
-
-  // Compute goal context once for cache key + fetch
-  const cg = user?.career_goals || {};
-  const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
-  const industries = cg.target_industries || [];
-  const location = cg.location_preference || '';
-  const seeking = cg.seeking || '';
-  const cacheKey = `${role}|${industries.join(',')}|${location}|${seeking}`;
-
-  // Serve cached results instantly on remount (no spinner), refresh silently
-  const cached = getCachedJobs(cacheKey);
-  const [jobsList, setJobsList] = useState(cached?.jobs || []);
-  const [jobsLoading, setJobsLoading] = useState(!cached);
-  const [shortMessage, setShortMessage] = useState(cached?.shortMessage || '');
+  const {
+    jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, refresh,
+  } = useJobsFeed({ user, maxJobs: 30 });
   const [nextIdx, setNextIdx] = useState(0);
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      try {
-        const _chipSeen = new Set();
-        const chipParts = [role, ...(industries || [])].filter(p => {
-          const k = (p || '').toLowerCase().trim();
-          if (!k || _chipSeen.has(k)) return false;
-          _chipSeen.add(k); return true;
-        });
-        const chipText = chipParts.join(' ').trim();
-
-        // Only show the spinner if we have no cached data to show
-        if (!getCachedJobs(cacheKey)) setJobsLoading(true);
-        const { jobs, shortMessage: sm } = await buildLiveJobsList({
-          role, industries, location, seeking: cg.seeking, chipText,
-          maxJobs: 30, // Pro cap
-        });
-        setJobsList(jobs);
-        setShortMessage(sm);
-        setNextIdx(0);
-        setCachedJobs(cacheKey, { jobs, shortMessage: sm });
-        setJobsLoading(false);
-      } catch (e) {
-        setJobsLoading(false);
-      }
-    })();
-  }, [user]);
 
   const nextJob = jobsList[nextIdx] || null;
   const city = user?.career_goals?.location_preference || user?.location || '';
@@ -99,6 +58,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
       {/* 3. Jobs for you — live Apply URLs only */}
       {!jobsLoading && jobsList.length > 1 && (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, boxShadow: SHADOW_MD }}>
+          <JobsRefreshBar lastUpdated={lastUpdated} isStale={isStale} error={error} onRefresh={refresh} loading={jobsLoading} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
             <Briefcase size={14} color={INDIGO_DIM} />
             <span style={{ fontSize: 12, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em' }}>More jobs for you</span>
