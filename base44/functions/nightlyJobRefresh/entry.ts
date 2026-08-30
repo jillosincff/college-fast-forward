@@ -7,25 +7,36 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 //
 // The User entity blocks bulkUpdate/updateMany (platform restriction), so we
 // clear caches via parallel individual update calls in small concurrency chunks.
+//
+// Auth: a scheduled automation run has no logged-in user — allow it through
+// (mirrors cliffTrialEmailScheduler). If a user IS present, require admin.
 
-const BATCH = 500;
+const PAGE = 500;
 const CONCURRENCY = 20;
 
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    let caller;
-    try { caller = await base44.auth.me(); } catch { caller = null; }
-    if (!caller || caller.role !== 'admin') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
+
+    // Allow scheduled automation (no user) OR an admin manual call.
+    const caller = await base44.auth.me().catch(() => null);
+    if (caller !== null && caller?.role !== 'admin' && !caller?.roles?.includes('admin')) {
+      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
     const svc = base44.asServiceRole;
 
-    // List users and filter to students client-side — User.filter by persona
-    // can be unreliable, and list() always works.
-    const users = await svc.entities.User.list('-created_date', BATCH);
-    const students = (users || []).filter(u => u.persona === 'student');
+    // Page through ALL students — list() with skip pagination. User.filter by
+    // persona can be unreliable, so we list and filter client-side.
+    const students = [];
+    let skip = 0;
+    while (true) {
+      const page = await svc.entities.User.list('-created_date', PAGE, skip);
+      const studentPage = (page || []).filter(u => u.persona === 'student');
+      students.push(...studentPage);
+      if ((page || []).length < PAGE) break;
+      skip += PAGE;
+    }
 
     if (students.length === 0) {
       console.log('[nightlyJobRefresh] No students found');
@@ -36,7 +47,8 @@ export default async function (req: Request): Promise<Response> {
     let failed = 0;
 
     // Process in concurrency chunks — User entity blocks bulk operations (405),
-    // so we use parallel individual updates instead.
+    // so we use parallel individual updates instead. Only the three job-leads
+    // cache fields are touched; no other user data is modified.
     for (let i = 0; i < students.length; i += CONCURRENCY) {
       const chunk = students.slice(i, i + CONCURRENCY);
       const results = await Promise.allSettled(

@@ -212,7 +212,14 @@ Deno.serve(async (req) => {
     // ceiling, fall through to the BuiltIn backup / curated safety net so a
     // student never sees week-old jobs just because the API hiccuped.
     const cacheFresh = cacheAge < STALE_CEILING_MS;
-    const timeoutMs = cacheMatches ? 6000 : 15000;
+    // An explicit Refresh (force_refresh) must bypass the stale-cache safety net
+    // entirely — otherwise a slow JSearch keeps returning yesterday's cached jobs
+    // with stale:true and the dashboard can never break the loop. On force_refresh
+    // give the provider the full 15s and, on timeout/error, fall straight through
+    // to the BuiltIn backup / curated ladder (same as a no-cache load). Normal
+    // loads keep the 6s fast-fail + stale-cache fallback so the dashboard stays snappy.
+    const allowStaleCache = !force_refresh && cacheMatches && cacheFresh;
+    const timeoutMs = allowStaleCache ? 6000 : 15000;
     let apiRes;
     {
       const controller = new AbortController();
@@ -227,7 +234,9 @@ Deno.serve(async (req) => {
         if (e.name === 'AbortError') {
           console.error(`[getLiveJobMatchesFn] Jobs API timed out (${timeoutMs / 1000}s)`);
           // Serve last cached leads immediately (even if >24h old) if we have any.
-          if (cacheMatches && cacheFresh) {
+          // Bypassed entirely on force_refresh — a manual Refresh must never land
+          // back on stale cache; fall through to backup/curated instead.
+          if (allowStaleCache) {
             console.log(`[getLiveJobMatchesFn] Timeout — serving ${cached.length} stale cached leads (same query, ${Math.round(cacheAge / 60000)}m old)`);
             return Response.json({ companies: cached, from_cache: true, stale: true });
           }
@@ -251,7 +260,8 @@ Deno.serve(async (req) => {
       const backup = await tryBuiltinBackup(base44, searchTerm, isRemote, seeking, location);
       if (backup) return backup;
       // Ride out the outage: serve last cached leads (even if >24h old) if we have any.
-      if (cacheMatches && cacheFresh) {
+      // Bypassed on force_refresh — a manual Refresh falls through to backup/curated.
+      if (allowStaleCache) {
         console.log(`[getLiveJobMatchesFn] Upstream ${apiRes.status} — serving ${cached.length} stale cached leads (same query, ${Math.round(cacheAge / 60000)}m old)`);
         return Response.json({ companies: cached, from_cache: true, stale: true });
       }
