@@ -13,9 +13,7 @@ import { logJobApplied } from '@/lib/magicMomentLog';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import ExampleBestPathCard from '@/components/magic-moment/ExampleBestPathCard';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
-import MagicMomentPersonCard from '@/components/magic-moment/MagicMomentPersonCard';
 import JobsList from '@/components/magic-moment/JobsList';
-import { gatePersonReal } from '@/lib/personGate';
 
 // REBUILT first session — SELLS the play immediately.
 // Screen 1: instant Example Best Path (no search, no hang).
@@ -40,8 +38,6 @@ export default function MagicMoment() {
   const [shortMessage, setShortMessage] = useState('');
   const [error, setError] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
-  const [person, setPerson] = useState(null);
-  const [peopleLoading, setPeopleLoading] = useState(true);
   const [proModalConfig, setProModalConfig] = useState(null); // { initialView, source }
   const completedRef = useRef(false);
 
@@ -142,46 +138,9 @@ export default function MagicMoment() {
         setJobsLoading(false);
       }
     })();
-
-    // ── People fetch — parallel, 5s hard timeout ────────────────────────
-    // Tries to load ONE real person for the student's school + field. If it
-    // times out or returns nothing, the LockedPeopleCard fallback stays.
-    (async () => {
-      try {
-        const result = await Promise.race([
-          base44.functions.invoke('findCliffPeople', {
-            school_level: true,
-            targetRole: role,
-            chipText,
-            location,
-            magic_moment: true,
-          }),
-          new Promise(resolve => setTimeout(() => resolve(null), 5000)),
-        ]);
-        if (result) {
-          const p = result.recommended || (result.connections || [])[0];
-          const gated = gatePersonReal(p);
-          if (gated) setPerson(gated);
-        }
-      } catch (e) {}
-      setPeopleLoading(false);
-    })();
   }, [user, runKey]);
 
   const handleRowApply = (job) => { logJobApplied({ user, job }); };
-
-  const handlePersonAction = (action) => {
-    if (action === 'copy') {
-      markComplete({
-        jobs_count: jobsList.length,
-        people_count: 1,
-        best_path: false,
-        people_source: 'public_web',
-        result_type: 'outreach_copied',
-        has_tailored_resume: false,
-      });
-    }
-  };
 
   const handleAskParent = () => setProModalConfig({ initialView: 'parent', source: 'magic_moment_parent' });
   const handleUpgrade = () => setProModalConfig({ initialView: 'main', source: 'magic_moment' });
@@ -273,27 +232,15 @@ export default function MagicMoment() {
           </div>
         )}
 
-        {/* People — one real alum if found in 5s, else locked fallback */}
-        {person ? (
-          <MagicMomentPersonCard
-            person={person}
-            user={user}
-            liveJobCompanies={jobsList.map(j => (j.company || j.name || '').toLowerCase()).filter(Boolean)}
-            chipText={heroMeta.chipText}
-            onAction={handlePersonAction}
-            onAskParent={handleAskParent}
-            onUpgrade={handleUpgrade}
-          />
-        ) : (
-          <LockedPeopleCard
-            school={user?.school}
-            chipText={heroMeta.chipText}
-            chipLabel={heroMeta.chipLabel}
-            city={searchLoc}
-            onUpgrade={handleUpgrade}
-            onAskParent={handleAskParent}
-          />
-        )}
+        {/* People — locked for free (no findCliffPeople during onboarding) */}
+        <LockedPeopleCard
+          school={user?.school}
+          chipText={heroMeta.chipText}
+          chipLabel={heroMeta.chipLabel}
+          city={searchLoc}
+          onUpgrade={handleUpgrade}
+          onAskParent={handleAskParent}
+        />
 
         {/* Continue your plan — secondary, below the pay module */}
         {!jobsLoading && (

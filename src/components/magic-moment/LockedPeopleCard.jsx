@@ -31,15 +31,13 @@ export default function LockedPeopleCard({ school, chipText, chipLabel, city, on
         Search LinkedIn now <ExternalLink size={12} />
       </a>
 
-      {/* Upgrade / Ask parent */}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button onClick={onUpgrade} style={{ flex: 1, fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <Sparkles size={13} /> Unlock with Pro
-        </button>
-        <button onClick={onAskParent} style={{ flex: 1, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto' }}>
-          Ask a parent
-        </button>
-      </div>
+      {/* Ask a parent (primary) / Unlock with Pro (secondary outline) */}
+      <button onClick={onAskParent} style={{ fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '14px 16px', marginBottom: 8, width: '100%', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>
+        Ask a parent to unlock
+      </button>
+      <button onClick={onUpgrade} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '12px 16px', width: '100%', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <Sparkles size={13} /> Unlock with Pro — $19.96/mo
+      </button>
     </div>
   );
 }
