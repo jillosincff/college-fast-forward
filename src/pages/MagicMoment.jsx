@@ -13,7 +13,9 @@ import { logJobApplied } from '@/lib/magicMomentLog';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import ExampleBestPathCard from '@/components/magic-moment/ExampleBestPathCard';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
+import MagicMomentPersonCard from '@/components/magic-moment/MagicMomentPersonCard';
 import JobsList from '@/components/magic-moment/JobsList';
+import { gatePersonReal } from '@/lib/personGate';
 
 // REBUILT first session — SELLS the play immediately.
 // Screen 1: instant Example Best Path (no search, no hang).
@@ -36,9 +38,12 @@ export default function MagicMoment() {
   const [jobsList, setJobsList] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [shortMessage, setShortMessage] = useState('');
-  const [showPro, setShowPro] = useState(false);
   const [error, setError] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
+  const [person, setPerson] = useState(null);
+  const [peopleLoading, setPeopleLoading] = useState(true);
+  const [proModalConfig, setProModalConfig] = useState(null); // { initialView, source }
+  const completedRef = useRef(false);
 
   const cg0 = authUser?.career_goals || {};
   const fallbackRole = (cg0.target_industries || [])[0] || '';
@@ -75,6 +80,16 @@ export default function MagicMoment() {
 
   const [runKey, setRunKey] = useState(0);
 
+  const markComplete = (opts) => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
+    trackMagicMomentCompleted(opts);
+    trackConversionEvent('magic_moment_completed', { result_type: opts.result_type }).catch(() => {});
+    markMagicMomentCompleted();
+    base44.auth.updateMe({ magic_moment_completed: true }).catch(() => {});
+  };
+
   useEffect(() => {
     if (!user || ranRef.current) return;
     ranRef.current = true;
@@ -85,22 +100,24 @@ export default function MagicMoment() {
       target_role: (user.career_goals?.target_roles || [])[0] || '',
       school: user.school || '',
     });
+
+    const cg = user.career_goals || {};
+    const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
+    const industries = cg.target_industries || [];
+    const location = cg.location_preference || '';
+    const _chipSeen = new Set();
+    const chipParts = [role, ...(industries || [])].filter(p => {
+      const k = (p || '').toLowerCase().trim();
+      if (!k || _chipSeen.has(k)) return false;
+      _chipSeen.add(k); return true;
+    });
+    const chipText = chipParts.join(' ').trim();
+    const chipLabel = industries[0] || role || '';
+    setHeroMeta({ chipLabel, chipText });
+
+    // ── Jobs fetch (does NOT wait on people) ─────────────────────────────
     (async () => {
       try {
-        const cg = user.career_goals || {};
-        const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
-        const industries = cg.target_industries || [];
-        const location = cg.location_preference || '';
-        const _chipSeen = new Set();
-        const chipParts = [role, ...(industries || [])].filter(p => {
-          const k = (p || '').toLowerCase().trim();
-          if (!k || _chipSeen.has(k)) return false;
-          _chipSeen.add(k); return true;
-        });
-        const chipText = chipParts.join(' ').trim();
-        const chipLabel = industries[0] || role || '';
-        setHeroMeta({ chipLabel, chipText });
-
         setJobsLoading(true);
         const { jobs, shortMessage: sm } = await buildLiveJobsList({
           role, industries, location, seeking: cg.seeking, chipText,
@@ -108,12 +125,8 @@ export default function MagicMoment() {
         setJobsList(jobs);
         setShortMessage(sm);
         setJobsLoading(false);
-
-        // ── Track completion — only when the student saw at least one real job.
-        // Empty jobs = not complete. They get the example path + retry + search bar.
         if (jobs.length > 0) {
-          base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
-          trackMagicMomentCompleted({
+          markComplete({
             jobs_count: jobs.length,
             people_count: 0,
             best_path: false,
@@ -123,30 +136,59 @@ export default function MagicMoment() {
             hero_company: jobs[0]?.name || '',
             has_tailored_resume: false,
           });
-          trackConversionEvent('magic_moment_completed', {
-            jobs_count: jobs.length,
-            people_count: 0,
-            best_path: false,
-            result_type: 'jobs_only',
-          });
-          markMagicMomentCompleted();
-          base44.auth.updateMe({ magic_moment_completed: true }).catch(() => {});
         }
       } catch (e) {
         setError('CLIFF hit a snag building your plan. Please try again in a moment.');
         setJobsLoading(false);
       }
     })();
+
+    // ── People fetch — parallel, 5s hard timeout ────────────────────────
+    // Tries to load ONE real person for the student's school + field. If it
+    // times out or returns nothing, the LockedPeopleCard fallback stays.
+    (async () => {
+      try {
+        const result = await Promise.race([
+          base44.functions.invoke('findCliffPeople', {
+            school_level: true,
+            targetRole: role,
+            chipText,
+            location,
+            magic_moment: true,
+          }),
+          new Promise(resolve => setTimeout(() => resolve(null), 5000)),
+        ]);
+        if (result) {
+          const p = result.recommended || (result.connections || [])[0];
+          const gated = gatePersonReal(p);
+          if (gated) setPerson(gated);
+        }
+      } catch (e) {}
+      setPeopleLoading(false);
+    })();
   }, [user, runKey]);
 
   const handleRowApply = (job) => { logJobApplied({ user, job }); };
 
+  const handlePersonAction = (action) => {
+    if (action === 'copy') {
+      markComplete({
+        jobs_count: jobsList.length,
+        people_count: 1,
+        best_path: false,
+        people_source: 'public_web',
+        result_type: 'outreach_copied',
+        has_tailored_resume: false,
+      });
+    }
+  };
+
+  const handleAskParent = () => setProModalConfig({ initialView: 'parent', source: 'magic_moment_parent' });
+  const handleUpgrade = () => setProModalConfig({ initialView: 'main', source: 'magic_moment' });
+
   // Tapping "Continue with free" marks the cycle complete.
   const handleContinueFree = () => {
-    base44.functions.invoke('completeMagicMoment', {}).catch(() => {});
-    trackConversionEvent('magic_moment_completed', { result_type: 'continue_free' }).catch(() => {});
-    markMagicMomentCompleted();
-    base44.auth.updateMe({ magic_moment_completed: true }).catch(() => {});
+    markComplete({ result_type: 'continue_free' });
     navigate('/FreeTierDashboard');
   };
 
@@ -231,15 +273,27 @@ export default function MagicMoment() {
           </div>
         )}
 
-        {/* People — locked for free users (no findCliffPeople during onboarding) */}
-        <LockedPeopleCard
-          school={user?.school}
-          chipText={heroMeta.chipText}
-          chipLabel={heroMeta.chipLabel}
-          city={searchLoc}
-          onUpgrade={() => setShowPro(true)}
-          onAskParent={() => setShowPro(true)}
-        />
+        {/* People — one real alum if found in 5s, else locked fallback */}
+        {person ? (
+          <MagicMomentPersonCard
+            person={person}
+            user={user}
+            liveJobCompanies={jobsList.map(j => (j.company || j.name || '').toLowerCase()).filter(Boolean)}
+            chipText={heroMeta.chipText}
+            onAction={handlePersonAction}
+            onAskParent={handleAskParent}
+            onUpgrade={handleUpgrade}
+          />
+        ) : (
+          <LockedPeopleCard
+            school={user?.school}
+            chipText={heroMeta.chipText}
+            chipLabel={heroMeta.chipLabel}
+            city={searchLoc}
+            onUpgrade={handleUpgrade}
+            onAskParent={handleAskParent}
+          />
+        )}
 
         {/* Continue your plan — secondary, below the pay module */}
         {!jobsLoading && (
@@ -250,7 +304,7 @@ export default function MagicMoment() {
           </div>
         )}
       </div>
-      {showPro && <ProUpgradeModal user={user} onClose={() => setShowPro(false)} source="magic_moment" />}
+      {proModalConfig && <ProUpgradeModal user={user} onClose={() => setProModalConfig(null)} source={proModalConfig.source} initialView={proModalConfig.initialView} />}
     </div>
   );
 }
