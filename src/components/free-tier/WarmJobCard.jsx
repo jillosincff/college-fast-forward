@@ -51,7 +51,9 @@ export default function WarmJobCard({ lead, onAddToPipeline, onSelect, user }) {
             <span className="text-lg">💡</span>
             <div>
               <p className="text-xs font-bold text-purple-900">
-                {industryAlumni} UF Alum{industryAlumni !== 1 ? 's' : ''} work in{industry ? ` ${industry}` : ' this industry'}
+                {industryAlumni > 0
+                  ? `${industryAlumni} UF Alum${industryAlumni !== 1 ? 's' : ''} work in${industry ? ` ${industry}` : ' this industry'}`
+                  : `UF alumni in${industry ? ` ${industry}` : ' this industry'} unlock with CLIFF Pro`}
               </p>
               <p className="text-[10px] text-purple-700">Active channel — reach out for a direct intro</p>
             </div>

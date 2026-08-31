@@ -322,7 +322,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
           {/* Phase: not_found — graceful fallback with two clear options */}
           {alumniPhase === 'not_found' && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">
-              <p className="text-xs font-bold text-amber-800">No {school} alumni found at {companyName} — here are your next best options:</p>
+              <p className="text-xs font-bold text-amber-800">People from {school} at {companyName} unlock with CLIFF Pro. Here are your next best options on the free plan:</p>
               <button
                 onClick={handleHiringManagerOutreach}
                 className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors cursor-pointer active:scale-95"

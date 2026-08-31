@@ -11,9 +11,9 @@ export default function HeroPeople({ connections, companyName, school }) {
     const linkedinAlumniUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${school || ''} ${companyName || ''}`.trim())}`;
     return (
       <div data-testid="mm-alumni-fallback" style={{ padding: '14px', background: '#faf7ff', borderRadius: 12, border: `1px solid ${INDIGO_BORDER}` }}>
-        <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>No alum found at {companyName} yet</p>
+        <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>People from your school at {companyName}</p>
         <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 12px', lineHeight: 1.5 }}>
-          CLIFF searched the opt-in network and public sources. You can search LinkedIn for {school ? `${school} ` : ''}alumni at {companyName} yourself — the outreach draft below is ready to paste.
+          Alumni from {school || 'your school'} at {companyName} unlock with CLIFF Pro — names, roles, and a ready-to-send outreach message. You can also search LinkedIn now.
         </p>
         <a href={linkedinAlumniUrl} target="_blank" rel="noopener noreferrer" data-testid="mm-linkedin-alumni-helper"
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#fff', background: GRAD_INDIGO, borderRadius: 999, padding: '10px 16px', textDecoration: 'none', minHeight: 'auto' }}>
