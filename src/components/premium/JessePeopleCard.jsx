@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Users, ExternalLink, Copy, Check, Zap, Briefcase, Search, Loader2, Mail } from 'lucide-react';
 import { logJobApplied } from '@/lib/magicMomentLog';
+import { gatePersonReal } from '@/lib/personGate';
+import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -48,6 +50,21 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
     return k && a.findIndex(x => (x || '').toLowerCase().trim() === k) === i;
   });
   const chipText = chipParts.join(' ').trim() || role || 'your field';
+  const chipKeywords = chipKeywordsFor(chipText);
+
+  // A cached or Jesse person may render ONLY if ALL three gates pass:
+  //   1. gatePersonReal — real name, title or company, https LinkedIn/source URL.
+  //   2. Their company has a live opening in the current feed (findPersonJob) —
+  //      a person whose employer isn't hiring here is dropped, never shown with a
+  //      leftover "no matching opening" row.
+  //   3. Their role matches the student's field chip (checkOnChip on role_title) —
+  //      a Software Engineer must never count as a Sales match.
+  const passesGates = (p) => {
+    if (!gatePersonReal(p)) return false;
+    if (!findPersonJob(p, jobs)) return false;
+    if (!checkOnChip(p.role_title, chipKeywords).ok) return false;
+    return true;
+  };
 
   // ── Phase 1: company-scoped fast search (Layer 1 + cache, no LLM, no Jesse)
   useEffect(() => {
@@ -81,7 +98,7 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
               const k = (p.name || '').toLowerCase();
               if (!k || seen.has(k)) return false;
               seen.add(k); return true;
-            });
+            }).filter(passesGates);
             if (fresh.length > 0) {
               setPeople(prev => [...prev, ...fresh].slice(0, 3));
               setSource('cliff');
@@ -114,7 +131,7 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
         schoolName: school, schoolCode, chipText, location, targetRole: role,
         searchId: retrySearchId,
       });
-      const connections = r?.data?.connections || r?.connections || [];
+      const connections = (r?.data?.connections || r?.connections || []).filter(passesGates);
       if (connections.length > 0) {
         setJessePeople(connections.slice(0, 3));
         setJesseState('done');
@@ -216,14 +233,16 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
     );
   }
 
-  // Jesse done but no results — honest message + LinkedIn fallback
+  // Jesse done but no results — honest, action-oriented (no "nobody/none/0")
   if (jesseState === 'done' && jesseError) {
     return (
       <div style={cardStyle}>
         <Header label="People from your school" />
-        <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>No alumni found right now.</p>
+        <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
+          Search {school} alumni in {chipText} on LinkedIn
+        </p>
         <p style={{ ...bodyStyle, margin: '0 0 12px' }}>
-          CLIFF couldn't find verified {school} alumni in {chipText}{location ? ` in ${location}` : ''}. Search LinkedIn directly — we've pre-filled it.
+          We've pre-filled a LinkedIn search for {school} alumni in {chipText}{location ? ` in ${location}` : ''}.
         </p>
         <a href={linkedInFallbackUrl} target="_blank" rel="noopener noreferrer" style={linkedInBtnStyle}>
           <Search size={14} /> Search LinkedIn <ExternalLink size={14} />
@@ -352,13 +371,6 @@ function PersonRow({ person, matchedJob, user, chipText, location, copied, onCop
           </a>
         )}
       </div>
-
-      {/* No matching live role — quiet line, do not imply they're hiring */}
-      {!matchedJob && (
-        <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '8px 0 0', fontStyle: 'italic' }}>
-          No matching opening found yet — you can still reach out.
-        </p>
-      )}
 
       {person.email && (
         <button onClick={copyEmail} style={{ width: '100%', marginTop: 8, fontFamily: dm, fontSize: 12, fontWeight: 600, color: emailCopied ? '#059669' : '#6b7280', background: emailCopied ? '#d1fae5' : '#f8f9fc', border: '1px solid ' + (emailCopied ? '#a7f3d0' : '#e5e7eb'), borderRadius: 999, padding: '7px 12px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
