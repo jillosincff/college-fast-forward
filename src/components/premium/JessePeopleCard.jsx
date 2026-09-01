@@ -64,29 +64,35 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
         return;
       }
 
-      // One fast findCliffPeople call per company — opt-in graph + cache only
-      const results = await Promise.all(
-        companies.map(c =>
-          base44.functions.invoke('findCliffPeople', {
-            schoolName: school, schoolCode,
-            companyName: c, targetRole: role,
-            magic_moment: false, fast_only: true,
-          }).catch(() => ({ connections: [] }))
-        )
-      );
-
-      if (!mounted) return;
-      const all = results.flatMap(r => r?.data?.connections || r?.connections || []);
+      // Fire all companies in parallel, but surface people the moment any
+      // company resolves — never wait for all 6 before showing a cached person.
       const seen = new Set();
-      const deduped = all.filter(c => {
-        const k = (c.name || '').toLowerCase();
-        if (!k || seen.has(k)) return false;
-        seen.add(k); return true;
-      });
-
-      setPeople(deduped.slice(0, 3));
-      setSource(deduped.length > 0 ? 'cliff' : '');
-      setLoading(false);
+      let remaining = companies.length;
+      await Promise.all(companies.map(c =>
+        base44.functions.invoke('findCliffPeople', {
+          schoolName: school, schoolCode,
+          companyName: c, targetRole: role,
+          magic_moment: false, fast_only: true,
+        })
+          .then(r => {
+            if (!mounted) return;
+            const conns = r?.data?.connections || r?.connections || [];
+            const fresh = conns.filter(p => {
+              const k = (p.name || '').toLowerCase();
+              if (!k || seen.has(k)) return false;
+              seen.add(k); return true;
+            });
+            if (fresh.length > 0) {
+              setPeople(prev => [...prev, ...fresh].slice(0, 3));
+              setSource('cliff');
+            }
+          })
+          .catch(() => {})
+          .finally(() => {
+            remaining -= 1;
+            if (mounted && remaining === 0) setLoading(false);
+          })
+      ));
     };
 
     run();
@@ -138,8 +144,8 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
   const displayPeople = showJesseResults ? jessePeople : people;
   const linkedInFallbackUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${school} ${role} ${location}`.trim())}`;
 
-  // Loading — fast search in progress
-  if (loading) {
+  // Loading — fast search in progress, no people yet
+  if (loading && displayPeople.length === 0) {
     return (
       <div style={cardStyle}>
         <Header label="People from your school" />
@@ -196,6 +202,16 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
             />
           ))}
         </div>
+        {!showJesseResults && jesseState === 'idle' && (
+          <div style={{ marginTop: 14, textAlign: 'center' }}>
+            <button onClick={startJesseSearch} style={{ ...findBtnStyle, width: '100%' }}>
+              <Search size={14} /> Find more at these companies
+            </button>
+            <p style={{ fontSize: 11, color: '#9ca3af', margin: '6px 0 0' }}>
+              Takes about a minute — CLIFF searches public sources for more {school} alumni.
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -221,10 +237,10 @@ export default function JessePeopleCard({ user, jobs, jobsLoading }) {
     <div style={{ ...cardStyle, border: '1px solid #e9d5ff' }}>
       <Header label="People from your school" />
       <p style={{ fontSize: 14, fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
-        Nobody from {school} at these companies yet.
+        Find people from {school} at these companies
       </p>
       <p style={{ ...bodyStyle, margin: '0 0 14px' }}>
-        CLIFF checked your school's alumni network and the employers in your job matches — no warm connections surfaced.
+        Takes about a minute. CLIFF searches public sources for real {school} alumni in {chipText}{location ? ` in ${location}` : ''}.
       </p>
       {/* Explicit ask — not hidden in a tiny link */}
       <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 12, padding: '14px 14px' }}>
