@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { canRunGated, SOFT_WALL_MESSAGE } from '../../shared/entitlements.ts';
-import { normCompany, makeCompanyMatcher, rankAndDedupe, runPublicAlumniSearch, stampAlumniShown } from '../../shared/peopleSearch.ts';
+import { normCompany, makeCompanyMatcher, rankAndDedupe, runPublicAlumniSearch, stampAlumniShown, shuffle } from '../../shared/peopleSearch.ts';
 
 // CLIFF People Finder — the two-layer people search that powers the free Magic
 // Moment "Wow". Layer 1 is the opt-in CLIFF graph (parents/alumni who joined
