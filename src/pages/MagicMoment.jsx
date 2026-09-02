@@ -206,7 +206,9 @@ export default function MagicMoment() {
           city={searchLoc}
         />
 
-        {/* Screen 2 — Their real jobs (free taste) */}
+        {/* Screen 2 — Their real jobs (free taste).
+            Only the first 2–3 render here; the people-lock card interrupts,
+            then the remaining jobs continue below it. */}
         {jobsLoading ? (
           <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
             <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Jobs for you" />
@@ -223,7 +225,7 @@ export default function MagicMoment() {
                 {shortMessage}
               </p>
             )}
-            <JobsList jobs={jobsList} onApply={handleRowApply} />
+            <JobsList jobs={jobsList.slice(0, 3)} onApply={handleRowApply} />
           </div>
         ) : (
           <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
@@ -232,7 +234,10 @@ export default function MagicMoment() {
           </div>
         )}
 
-        {/* People — locked for free (no findCliffPeople during onboarding) */}
+        {/* People — locked for free (no findCliffPeople during onboarding).
+            Sits ABOVE the long jobs list so the pay module interrupts right
+            after the first 2–3 jobs, not after all of them. Ask a parent is
+            primary; Unlock with Pro is secondary. */}
         <LockedPeopleCard
           school={user?.school}
           chipText={heroMeta.chipText}
@@ -242,7 +247,15 @@ export default function MagicMoment() {
           onAskParent={handleAskParent}
         />
 
-        {/* Continue your plan — secondary, below the pay module */}
+        {/* Remaining jobs — the long list continues below the people lock */}
+        {!jobsLoading && jobsList.length > 3 && (
+          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
+            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="More jobs for you" />
+            <JobsList jobs={jobsList.slice(3)} onApply={handleRowApply} />
+          </div>
+        )}
+
+        {/* Continue your plan — stays last */}
         {!jobsLoading && (
           <div style={{ textAlign: 'center', marginTop: 4, marginBottom: 8 }}>
             <button onClick={handleContinueFree} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>

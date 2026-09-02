@@ -34,6 +34,13 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
   useEffect(() => {
     trackUpgradeModalViewed({ source });
     trackConversionEvent('upgrade_modal_viewed', { trigger: source });
+    // Mirror the live screen into the admin funnel: opening this modal IS the
+    // pro offer being viewed, in either the parent or student view. Fires once
+    // per open ([]) and only for Magic Moment sources, so it never double-charges
+    // or re-opens the modal — it's an additional analytics event, not a charge.
+    if (source && source.startsWith('magic_moment')) {
+      trackConversionEvent('pro_offer_viewed', { trigger: source });
+    }
   }, []);
 
   const startPro = async () => {
