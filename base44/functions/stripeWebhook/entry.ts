@@ -47,7 +47,55 @@ async function revokeGiftedStudentAccess(subscriptionId) {
     fastiq_gift_subscription_id: null,
     pro_gift_subscription_id: null,
   });
+  await downgradeAccessPlanToFree(student);
   console.log('[stripeWebhook] Gifted FastIQ revoked for student:', student.id, 'sub:', subscriptionId);
+}
+
+// ── UserAccessPlan upsert — the canonical record admin reports and
+// useAccessPlan.js read. The webhook used to only update User fields, so a
+// paid student still showed "zero Pro" in access plans and hit free locks.
+// Best-effort by design: a plan-write failure must never fail the webhook
+// after the User fields were already updated.
+async function upsertProAccessPlan(user, { source = 'billing_provider', periodEnd = null } = {}) {
+  if (!user?.id) return;
+  try {
+    const fields = {
+      plan: 'pro',
+      access_state: 'pro_active',
+      access_source: source,
+      ...(periodEnd ? { paid_period_ends_at: new Date(periodEnd * 1000).toISOString() } : {}),
+    };
+    const existing = await base44.asServiceRole.entities.UserAccessPlan.filter({ user_id: user.id });
+    if (existing?.length > 0) {
+      await base44.asServiceRole.entities.UserAccessPlan.update(existing[0].id, fields);
+    } else {
+      await base44.asServiceRole.entities.UserAccessPlan.create({
+        user_id: user.id,
+        user_email: user.email,
+        ...fields,
+      });
+    }
+    console.log('[stripeWebhook] UserAccessPlan set to pro_active:', user.email, 'source:', source);
+  } catch (e) {
+    console.error('[stripeWebhook] UserAccessPlan upsert failed for', user.email, e.message);
+  }
+}
+
+// Drop a user's UserAccessPlan back to free (cancel) / past_due. Never throws.
+async function downgradeAccessPlanToFree(user, accessState = 'free') {
+  if (!user?.id) return;
+  try {
+    const existing = await base44.asServiceRole.entities.UserAccessPlan.filter({ user_id: user.id });
+    if (!existing?.length) return;
+    await base44.asServiceRole.entities.UserAccessPlan.update(existing[0].id, {
+      plan: 'free',
+      access_state: accessState,
+      access_source: 'billing_provider',
+    });
+    console.log('[stripeWebhook] UserAccessPlan downgraded:', user.email, '→', accessState);
+  } catch (e) {
+    console.error('[stripeWebhook] UserAccessPlan downgrade failed for', user.email, e.message);
+  }
 }
 
 async function findBillingUser(customerId, userId, userEmail) {
@@ -185,14 +233,20 @@ Deno.serve(async (req) => {
 
         const billingUser = await findBillingUser(customerId, billingUserId, billingUserEmail);
         if (billingUser) {
+          // Any completed paid checkout = premium access. checkIsFastIQ /
+          // entitlements read these User fields, so keep them consistent for
+          // CLIFF Pro too (old code left membership_tier untouched for cff).
+          const isFoundingTier = billingUser.membership_tier === 'founding_gator' || isFoundingMember;
           const userUpdates = {
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             subscription_tier: subscriptionTier,
             subscription_status: 'active',
-            fastiq_active: subscriptionTier === 'fastiq',
-            is_fastiq: subscriptionTier === 'fastiq',
-            membership_tier: subscriptionTier === 'fastiq' ? 'fastiq' : billingUser.membership_tier,
+            fastiq_active: true,
+            is_fastiq: true,
+            membership_tier: subscriptionTier === 'fastiq'
+              ? 'fastiq'
+              : (isFoundingTier ? billingUser.membership_tier : 'cff'),
           };
 
           if (isFoundingMember) {
@@ -203,6 +257,13 @@ Deno.serve(async (req) => {
 
           await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
           console.log('Updated billing user:', billingUser.id, 'tier:', subscriptionTier, 'founding:', isFoundingMember);
+
+          // Self-pay: the paying student's access plan flips to Pro here.
+          // Parent gifts upsert the STUDENT's plan in the gift branch below,
+          // never the parent's.
+          if (!giftStudentEmail) {
+            await upsertProAccessPlan(billingUser, { source: 'billing_provider' });
+          }
 
           base44.asServiceRole.entities.AnalyticsEvent.create({
             event_name: 'subscription_activated',
@@ -394,6 +455,7 @@ Deno.serve(async (req) => {
                 linked_parent_name: parentFirst,
                 pro_gift_subscription_id: subscriptionId,
               });
+              await upsertProAccessPlan(giftStudent, { source: 'parent_gift', periodEnd: session.current_period_end });
               console.log('[stripeWebhook] CLIFF Pro gifted to student:', giftStudentEmail);
               // Canonical conversion events — parent paid + student upgraded.
               base44.asServiceRole.entities.AnalyticsEvent.create({
@@ -556,14 +618,34 @@ Deno.serve(async (req) => {
             userUpdates.membership_tier = 'free';
           }
           // Revoke gifted student access if this is a parent-gifted subscription
-          if (subscription.metadata?.gifted_by_parent_id) {
+          // (sendParentProInvite sets gifted_by_parent_invite / gift_student_email)
+          const subGiftEmail = subscription.metadata?.gift_student_email?.trim().toLowerCase() || null;
+          if (subscription.metadata?.gifted_by_parent_id || subscription.metadata?.gifted_by_parent_invite || subGiftEmail) {
             await revokeGiftedStudentAccess(subscription.id);
+          }
+          if (billingUser) {
+            await downgradeAccessPlanToFree(billingUser, status === 'canceled' ? 'free' : 'payment_past_due');
           }
         }
 
         if (billingUser) {
           await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
           console.log('Updated billing user subscription:', billingUser.id, status);
+        }
+
+        // Active/trialing subscription → keep UserAccessPlan pro_active in sync
+        if (billingUser && isActiveSub) {
+          if (subGiftEmail && subGiftEmail !== billingUser.email?.toLowerCase()) {
+            // Gifted subscription — the STUDENT holds the access, not the parent
+            try {
+              const giftMatches = await base44.asServiceRole.entities.User.filter({ email: subGiftEmail });
+              if (giftMatches?.length > 0) {
+                await upsertProAccessPlan(giftMatches[0], { source: 'parent_gift', periodEnd: subscription.current_period_end });
+              }
+            } catch (e) {}
+          } else {
+            await upsertProAccessPlan(billingUser, { source: 'billing_provider', periodEnd: subscription.current_period_end });
+          }
         }
 
         const family = await findFamily(familyId, customerId);
@@ -596,7 +678,8 @@ Deno.serve(async (req) => {
         const familyId = deletedSub.metadata?.family_id;
 
         // Handle gifted subscription cancellation — revoke student access
-        if (deletedSub.metadata?.gifted_by_parent_id) {
+        // (sendParentProInvite sets gifted_by_parent_invite / gift_student_email — check all)
+        if (deletedSub.metadata?.gifted_by_parent_id || deletedSub.metadata?.gifted_by_parent_invite || deletedSub.metadata?.gift_student_email) {
           await revokeGiftedStudentAccess(deletedSub.id);
         }
 
@@ -612,6 +695,7 @@ Deno.serve(async (req) => {
             subscription_status: 'canceled',
             fastiq_active: false,
           });
+          await downgradeAccessPlanToFree(billingUser);
           console.log('Subscription canceled for billing user:', billingUser.id);
 
           try {
