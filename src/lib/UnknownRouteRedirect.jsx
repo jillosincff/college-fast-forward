@@ -43,6 +43,13 @@ export default function UnknownRouteRedirect() {
     return <PageNotFound />;
   }
 
+  // Signed-in users without a persona must go to GatorAuth → QuickOnboarding,
+  // never the marketing landing. A stale deep link (old bookmark, dead page)
+  // used to bounce them to "/" and restart the GatorAuth/landing loop.
+  if (isFetched && authData?.isAuthenticated && authData?.user && !authData.user.persona?.trim()) {
+    return <Navigate to="/GatorAuth" replace />;
+  }
+
   // Everyone else: send to the landing page instead of a dead end.
   return <Navigate to="/" replace />;
 }

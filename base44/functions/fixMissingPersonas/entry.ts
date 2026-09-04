@@ -34,14 +34,15 @@ Deno.serve(async (req) => {
         };
 
         for (const u of usersWithoutPersona) {
-            const email = u.email?.toLowerCase() || '';
-            // Only a school email is confident evidence of a student. Everyone else
-            // is left untouched — guessing "parent" mislabels students at schools
-            // we don't recognize. They pick their own persona when they finish onboarding.
-            const isSchoolEmail = email.endsWith('.edu');
+            // Only auto-tag when the user already left CLEAR student signals:
+            // a school AND career goals, or a completed onboarding. An .edu email
+            // alone is not evidence (staff, alumni, parents can have one). If
+            // unsure, leave persona blank — QuickOnboarding asks them directly.
+            const hasGoals = !!u.career_goals && Object.keys(u.career_goals).length > 0;
+            const hasClearStudentSignals = (!!u.school?.trim() && hasGoals) || u.onboarding_completed === true;
 
-            if (!isSchoolEmail) {
-                results.skipped.push({ id: u.id, email: u.email, name: u.full_name, reason: 'no_reliable_signal' });
+            if (!hasClearStudentSignals) {
+                results.skipped.push({ id: u.id, email: u.email, name: u.full_name, reason: 'no_clear_student_signal' });
                 continue;
             }
 
@@ -51,10 +52,11 @@ Deno.serve(async (req) => {
             }
 
             try {
+                // Keep onboarding_completed exactly as it is — users who never
+                // onboarded resume QuickOnboarding next sign-in.
                 await base44.asServiceRole.entities.User.update(u.id, {
                     persona: 'student',
-                    roles: ['student'],
-                    onboarding_completed: false // They still need to complete onboarding
+                    roles: ['student']
                 });
                 results.students.push({ id: u.id, email: u.email, name: u.full_name, status: 'updated' });
             } catch (err) {
