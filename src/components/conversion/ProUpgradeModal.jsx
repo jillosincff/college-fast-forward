@@ -41,11 +41,19 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
     if (source && source.startsWith('magic_moment')) {
       trackConversionEvent('pro_offer_viewed', { trigger: source });
     }
+    // Ask-a-parent opened directly from the Magic Moment — record the parent
+    // path so it isn't invisible in the funnel (openParent covers the
+    // in-modal switch to the parent view).
+    if (initialView === 'parent') {
+      trackParentSendInitiated({ source });
+    }
   }, []);
 
   const startPro = async () => {
     setBusy(true); setError('');
     trackUpgradeClicked({ plan: selectedPlan, source });
+    // Fill the funnel hole between pro_offer_viewed and checkout_started
+    trackConversionEvent('pro_cta_clicked', { plan: selectedPlan, trigger: source });
     try {
       // createCheckoutSession defaults success/cancel to the production URLs,
       // which avoids the sandboxed `window.location.origin === null` bug.
@@ -58,8 +66,9 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
       });
       const url = res?.data?.url || res?.url;
       if (url) { window.location.href = url; return; }
-      setError('Could not start checkout. Try again.');
-    } catch (e) { setError('Could not start checkout. Try again.'); }
+      // Surface the backend/Stripe error (unknown plan, Stripe message, etc.)
+      setError(res?.data?.error || res?.error || 'Could not start checkout. Try again.');
+    } catch (e) { setError(e?.response?.data?.error || e?.data?.error || 'Could not start checkout. Try again.'); }
     setBusy(false);
   };
 
@@ -77,7 +86,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
       } else {
         setError(res?.data?.error || res?.error || 'Could not send. Try again.');
       }
-    } catch (err) { setError('Could not send. Try again.'); }
+    } catch (err) { setError(err?.response?.data?.error || err?.data?.error || 'Could not send. Try again.'); }
     setBusy(false);
   };
 

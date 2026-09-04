@@ -103,14 +103,14 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
             <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 500, margin: '0 0 16px' }}>⏱ {daysLeft} days left — expires April 30th</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <button
-                onClick={() => handleSelectPlan('fastiq_founding_monthly')}
+                onClick={() => handleSelectPlan('pro_monthly')}
                 disabled={!!loading}
                 style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', minHeight: 'auto', opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
                 {loading === 'fastiq_founding_monthly' ? <><Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> Processing...</> : 'Monthly — $14.50/month →'}
               </button>
               <button
-                onClick={() => handleSelectPlan('fastiq_founding_annual')}
+                onClick={() => handleSelectPlan('pro_annual')}
                 disabled={!!loading}
                 style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 10, padding: '12px', fontSize: 13, color: '#E85D20', cursor: loading ? 'not-allowed' : 'pointer', minHeight: 'auto', opacity: loading ? 0.7 : 1 }}
               >
@@ -129,7 +129,7 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
                 <p style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', margin: 0 }}>$29<span style={{ fontSize: 13, fontWeight: 500, color: '#64748B' }}>/mo</span></p>
               </div>
               <button
-                onClick={() => handleSelectPlan('fastiq_monthly')}
+                onClick={() => handleSelectPlan('pro_monthly')}
                 disabled={!!loading}
                 style={{ width: '100%', background: '#E85D20', border: 'none', borderRadius: 8, padding: '11px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', minHeight: 'auto', opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
               >
@@ -146,7 +146,7 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
                 <p style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', margin: 0 }}>$249<span style={{ fontSize: 13, fontWeight: 500, color: '#64748B' }}>/yr</span></p>
               </div>
               <button
-                onClick={() => handleSelectPlan('fastiq_annual')}
+                onClick={() => handleSelectPlan('pro_annual')}
                 disabled={!!loading}
                 style={{ width: '100%', background: 'none', border: '1.5px solid #E85D20', borderRadius: 8, padding: '11px', fontSize: 14, fontWeight: 600, color: '#E85D20', cursor: loading ? 'not-allowed' : 'pointer', minHeight: 'auto', opacity: loading ? 0.7 : 1 }}
               >

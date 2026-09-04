@@ -63,8 +63,10 @@ export default async function (req) {
     const checkoutUrl = session.url;
 
     // Email the parent (likely not a registered app user) the payment link.
+    // If the email fails, NEVER return success — the student would see a false
+    // "Sent!" screen. Return an error the paywall displays instead.
     try {
-      await fetch('https://api.sendgrid.com/v3/mail/send', {
+      const sendRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: { Authorization: `Bearer ${secrets.get('SENDGRID_API_KEY')}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,7 +84,15 @@ export default async function (req) {
 </div>` }],
         }),
       });
-    } catch (e) { console.error('[sendParentProInvite] parent email failed:', e.message); }
+      if (!sendRes.ok) {
+        const sendErr = await sendRes.text().catch(() => '');
+        console.error('[sendParentProInvite] parent email failed:', sendRes.status, sendErr);
+        return Response.json({ success: false, error: "We couldn't send that email right now — please try again in a moment." }, { status: 502 });
+      }
+    } catch (e) {
+      console.error('[sendParentProInvite] parent email failed:', e.message);
+      return Response.json({ success: false, error: "We couldn't send that email right now — please try again in a moment." }, { status: 502 });
+    }
 
     return Response.json({ success: true, url: checkoutUrl });
   } catch (e) {

@@ -28,9 +28,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
     
-    // Default to monthly for backward compatibility; annual is selectable on the paywall.
+    // Only current Pro plan ids are accepted — never silently map legacy or
+    // unknown ids onto pro_monthly (that charged the wrong price invisibly).
     if (!plan || !PRICES[plan]) {
-      plan = 'pro_monthly';
+      console.error('[createCheckoutSession] Unknown or missing plan id:', plan);
+      return Response.json({ success: false, error: `Unknown plan "${plan}". Please contact support.` }, { status: 400 });
     }
 
     const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
