@@ -1,9 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14.21.0';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
-  apiVersion: '2024-11-20.acacia',
-});
+import { secrets } from 'base44:runtime';
 
 // HTML escape utility
 const escapeHtml = (str) => {
@@ -16,7 +14,13 @@ const escapeHtml = (str) => {
     .replace(/'/g, '&#039;');
 };
 
-let base44;
+export default async function(req) {
+  try {
+    // Helpers close over this request's client, never a shared mutable client.
+    const base44 = createClientFromRequest(req);
+    const stripe = new Stripe(secrets.get('STRIPE_SECRET_KEY'), {
+      apiVersion: '2024-11-20.acacia',
+    });
 
 async function findUserByCustomerId(customerId) {
   const users = await base44.asServiceRole.entities.User.filter({ stripe_customer_id: customerId });
@@ -62,7 +66,7 @@ async function upsertProAccessPlan(user, { source = 'billing_provider', periodEn
     const fields = {
       plan: 'pro',
       access_state: 'pro_active',
-      access_source: source,
+      access_source: source === 'parent_gift' ? 'billing_provider' : source,
       ...(periodEnd ? { paid_period_ends_at: new Date(periodEnd * 1000).toISOString() } : {}),
     };
     const existing = await base44.asServiceRole.entities.UserAccessPlan.filter({ user_id: user.id });
@@ -198,13 +202,9 @@ async function sendStudentActivationEmails(billingUser, family) {
   }
 }
 
-Deno.serve(async (req) => {
-  base44 = createClientFromRequest(req);
-  const signature = req.headers.get('stripe-signature');
-  const body = await req.text();
-
-  try {
-    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')?.trim();
+    const signature = req.headers.get('stripe-signature');
+    const body = await req.text();
+    const webhookSecret = secrets.get('STRIPE_WEBHOOK_SECRET')?.trim();
     const event = await stripe.webhooks.constructEventAsync(
       body,
       signature,
@@ -283,7 +283,7 @@ Deno.serve(async (req) => {
             }).catch(() => {});
             // ConversionEvent (admin funnel source of truth)
             const evtKey = `${billingUser.id}:pro_activated`;
-            base44.asServiceRole.entities.ConversionEvent.create({
+            await base44.asServiceRole.entities.ConversionEvent.create({
               user_id: billingUser.id,
               user_email: billingUser.email,
               event_name: 'pro_activated',
@@ -466,7 +466,7 @@ Deno.serve(async (req) => {
               }).catch(() => {});
               // ConversionEvent (admin funnel source of truth)
               const parentPayEvtKey = `${giftStudent.id}:parent_payment_completed`;
-              base44.asServiceRole.entities.ConversionEvent.create({
+              await base44.asServiceRole.entities.ConversionEvent.create({
                 user_id: giftStudent.id,
                 user_email: giftStudent.email,
                 event_name: 'parent_payment_completed',
@@ -483,7 +483,7 @@ Deno.serve(async (req) => {
               }).catch(() => {});
               // ConversionEvent (admin funnel source of truth)
               const giftEvtKey = `${giftStudent.id}:pro_activated`;
-              base44.asServiceRole.entities.ConversionEvent.create({
+              await base44.asServiceRole.entities.ConversionEvent.create({
                 user_id: giftStudent.id,
                 user_email: giftStudent.email,
                 event_name: 'pro_activated',
@@ -586,6 +586,7 @@ Deno.serve(async (req) => {
         const subscriptionTier = subscription.metadata?.subscription_tier;
         const familyId = subscription.metadata?.family_id;
         const status = subscription.status;
+        const subGiftEmail = subscription.metadata?.gift_student_email?.trim().toLowerCase() || null;
 
         console.log('Subscription event:', event.type, { status, subscriptionTier, familyId });
 
@@ -619,7 +620,6 @@ Deno.serve(async (req) => {
           }
           // Revoke gifted student access if this is a parent-gifted subscription
           // (sendParentProInvite sets gifted_by_parent_invite / gift_student_email)
-          const subGiftEmail = subscription.metadata?.gift_student_email?.trim().toLowerCase() || null;
           if (subscription.metadata?.gifted_by_parent_id || subscription.metadata?.gifted_by_parent_invite || subGiftEmail) {
             await revokeGiftedStudentAccess(subscription.id);
           }
@@ -634,8 +634,8 @@ Deno.serve(async (req) => {
         }
 
         // Active/trialing subscription → keep UserAccessPlan pro_active in sync
-        if (billingUser && isActiveSub) {
-          if (subGiftEmail && subGiftEmail !== billingUser.email?.toLowerCase()) {
+        if (isActiveSub && (billingUser || subGiftEmail)) {
+          if (subGiftEmail) {
             // Gifted subscription — the STUDENT holds the access, not the parent
             try {
               const giftMatches = await base44.asServiceRole.entities.User.filter({ email: subGiftEmail });
@@ -807,4 +807,4 @@ Deno.serve(async (req) => {
     console.error('Webhook error:', err);
     return new Response(`Webhook Error: ${err.message}`, { status: 400 });
   }
-});
+}

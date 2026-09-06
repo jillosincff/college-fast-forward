@@ -1,11 +1,12 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { secrets } from 'base44:runtime';
 
 const PRICES = {
   pro_monthly: 'price_1TZyJ8873TV7WMcTiMisnPsg',  // $19.96/month ($4.99/week × 4)
   pro_annual: 'price_1U5EEH873TV7WMcTOOnQNksc',   // $149/year (~$12.42/mo) — best value
 };
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const currentUser = await base44.auth.me();
@@ -35,7 +36,7 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: `Unknown plan "${plan}". Please contact support.` }, { status: 400 });
     }
 
-    const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
+    const STRIPE_SECRET = secrets.get('STRIPE_SECRET_KEY');
     if (!STRIPE_SECRET) {
       console.error('[createCheckoutSession] STRIPE_SECRET_KEY is not set — cannot create Stripe session');
       return Response.json({ success: false, error: 'Payment is not configured. Please contact support.' }, { status: 500 });
@@ -43,7 +44,7 @@ Deno.serve(async (req) => {
 
     // Post-pay landing: use the configured app URL (APP_BASE_URL) so the redirect
     // always works regardless of which domain the user started on.
-    const APP_URL = Deno.env.get('APP_BASE_URL') || 'https://college-fast-forward-fce23588.base44.app';
+    const APP_URL = secrets.get('APP_BASE_URL') || 'https://college-fast-forward-fce23588.base44.app';
     let successUrlFinal = successUrl || `${APP_URL}/#/ProActivated?upgrade=success`;
     if (!successUrl) {
       if (returnTo) successUrlFinal += `&return_to=${encodeURIComponent(returnTo)}`;
@@ -89,9 +90,10 @@ Deno.serve(async (req) => {
 
     const session = await stripeRes.json();
 
-    if (session.error) {
-      console.error('[createCheckoutSession] Stripe error:', session.error.message, session.error.code || '', session.error.type || '');
-      return Response.json({ success: false, error: session.error.message }, { status: 500 });
+    if (!stripeRes.ok || session.error || !session.id || !session.url) {
+      const message = session.error?.message || 'Checkout could not be created. Please try again.';
+      console.error('[createCheckoutSession] Stripe error:', message, session.error?.code || '', session.error?.type || '');
+      return Response.json({ success: false, error: message }, { status: 502 });
     }
 
     // Log checkout_started to ConversionEvent (idempotent — one per user)
@@ -115,4 +117,4 @@ Deno.serve(async (req) => {
     console.error('Checkout error:', e.message);
     return Response.json({ success: false, error: e.message }, { status: 500 });
   }
-});
+}

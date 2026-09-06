@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import {
   FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO, R,
@@ -6,7 +6,7 @@ import {
 import {
   trackUpgradeModalViewed, trackUpgradeClicked,
   trackParentSendInitiated, trackParentSendCompleted,
-  trackConversionEvent,
+  trackConversionEvent, track,
 } from '@/lib/tracking';
 import { X, Loader2, Check, Gift, Sparkles, Lock } from 'lucide-react';
 
@@ -23,7 +23,7 @@ const UNLOCKS = [
   'Resume tailored to specific roles',
 ];
 
-export default function ProUpgradeModal({ user, onClose, source = 'magic_moment', initialView = 'main' }) {
+export default function ProUpgradeModal({ user, onClose, source = 'magic_moment', initialView = 'main', onIntent }) {
   const [view, setView] = useState(initialView); // main | parent | sent
   const [parentEmail, setParentEmail] = useState('');
   const [note, setNote] = useState('');
@@ -31,29 +31,27 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
   const [error, setError] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('monthly'); // 'annual' | 'monthly'
 
+  const viewed = useRef(false);
   useEffect(() => {
+    if (!user?.id || viewed.current) return;
+    viewed.current = true;
     trackUpgradeModalViewed({ source });
     trackConversionEvent('upgrade_modal_viewed', { trigger: source });
-    // Mirror the live screen into the admin funnel: opening this modal IS the
-    // pro offer being viewed, in either the parent or student view. Fires once
-    // per open ([]) and only for Magic Moment sources, so it never double-charges
-    // or re-opens the modal — it's an additional analytics event, not a charge.
-    if (source && source.startsWith('magic_moment')) {
-      trackConversionEvent('pro_offer_viewed', { trigger: source });
-    }
-    // Ask-a-parent opened directly from the Magic Moment — record the parent
-    // path so it isn't invisible in the funnel (openParent covers the
-    // in-modal switch to the parent view).
-    if (initialView === 'parent') {
-      trackParentSendInitiated({ source });
-    }
-  }, []);
+    trackConversionEvent('pro_offer_viewed', { trigger: source });
+    if (initialView === 'parent') trackParentSendInitiated({ source });
+  }, [user?.id, source, initialView]);
+
+  const closeModal = () => {
+    track('upgrade_modal_closed', { source, view, plan: selectedPlan });
+    onClose();
+  };
 
   const startPro = async () => {
     setBusy(true); setError('');
     trackUpgradeClicked({ plan: selectedPlan, source });
     // Fill the funnel hole between pro_offer_viewed and checkout_started
-    trackConversionEvent('pro_cta_clicked', { plan: selectedPlan, trigger: source });
+    trackConversionEvent('pro_cta_clicked', { trigger: source, metadata: { plan: selectedPlan } });
+    onIntent?.('upgrade');
     try {
       // createCheckoutSession defaults success/cancel to the production URLs,
       // which avoids the sandboxed `window.location.origin === null` bug.
@@ -68,11 +66,15 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
       if (url) { window.location.href = url; return; }
       // Surface the backend/Stripe error (unknown plan, Stripe message, etc.)
       setError(res?.data?.error || res?.error || 'Could not start checkout. Try again.');
-    } catch (e) { setError(e?.response?.data?.error || e?.data?.error || 'Could not start checkout. Try again.'); }
+      track('checkout_failed', { source, plan: selectedPlan, reason: 'missing_checkout_url' });
+    } catch (e) {
+      setError(e?.response?.data?.error || e?.data?.error || 'Could not start checkout. Try again.');
+      track('checkout_failed', { source, plan: selectedPlan, status: e?.response?.status || 0 });
+    }
     setBusy(false);
   };
 
-  const openParent = () => { setView('parent'); setError(''); trackParentSendInitiated({ source }); };
+  const openParent = () => { setView('parent'); setError(''); trackParentSendInitiated({ source }); onIntent?.('parent'); };
 
   const sendParent = async () => {
     const e = parentEmail.trim();
@@ -81,12 +83,16 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
     try {
       const res = await base44.functions.invoke('sendParentProInvite', { parentEmail: e, note: note.trim(), plan: selectedPlan === 'annual' ? 'pro_annual' : 'pro_monthly' });
       if (res?.data?.success || res?.success) {
-        trackParentSendCompleted({ parent_email_domain: e.split('@')[1] });
+        trackParentSendCompleted({ source, plan: selectedPlan });
         setView('sent');
       } else {
         setError(res?.data?.error || res?.error || 'Could not send. Try again.');
+        track('parent_send_failed', { source, plan: selectedPlan });
       }
-    } catch (err) { setError(err?.response?.data?.error || err?.data?.error || 'Could not send. Try again.'); }
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.data?.error || 'Could not send. Try again.');
+      track('parent_send_failed', { source, plan: selectedPlan, status: err?.response?.status || 0 });
+    }
     setBusy(false);
   };
 
@@ -94,10 +100,10 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
   const sheet = { width: '100%', maxWidth: 440, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 22px calc(28px + env(safe-area-inset-bottom))', maxHeight: '92vh', overflowY: 'auto' };
 
   return (
-    <div style={overlay} onClick={onClose}>
+    <div style={overlay} onClick={closeModal}>
       <div style={sheet} onClick={(ev) => ev.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', color: TEXT3, padding: 0 }}><X size={20} /></button>
+          <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', color: TEXT3, padding: 0 }}><X size={20} /></button>
         </div>
 
         {view === 'main' && (
@@ -105,9 +111,9 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             <div style={{ textAlign: 'center', marginBottom: 18 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '5px 12px', marginBottom: 12 }}>
                 <Lock size={12} color={INDIGO} />
-                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>You used your free cycle</span>
+                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your next step with CLIFF</span>
               </div>
-              <h1 style={{ fontFamily: FONT, fontSize: 22, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.2 }}>Unlock more paths like the one you just saw</h1>
+              <h1 style={{ fontFamily: FONT, fontSize: 22, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.2 }}>Prepare your next application with CLIFF Pro</h1>
               <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.5 }}>More roles in your field and more people from your school — with drafts and tracking.</p>
             </div>
 
@@ -153,7 +159,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
               <Gift size={15} color={INDIGO} /> Ask a parent to unlock
             </button>
 
-            <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.5 }}>Cancel anytime.</p>
+            <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.5 }}>{selectedPlan === 'annual' ? '$149 billed yearly.' : '$19.96 billed monthly.'} Starts today; no free trial. Cancel future renewals anytime.</p>
           </>
         )}
 
@@ -194,7 +200,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, margin: '0 0 8px' }}>Sent!</h1>
             <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 20px', lineHeight: 1.5 }}>We emailed your parent a link to pay. The moment they pay, CLIFF Pro unlocks on your account — we'll let you know.</p>
-            <button onClick={onClose} style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '13px 28px', cursor: 'pointer', minHeight: 'auto' }}>Back to my plan</button>
+            <button onClick={closeModal} style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '13px 28px', cursor: 'pointer', minHeight: 'auto' }}>Back to my plan</button>
           </div>
         )}
       </div>
