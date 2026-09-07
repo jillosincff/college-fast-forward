@@ -17,6 +17,9 @@ export const EVENTS = {
   MAGIC_MOMENT_COMPLETED: 'magic_moment_completed',    // Full free cycle shown to user
   SOFT_WALL_VIEWED: 'soft_wall_viewed',                 // Soft wall shown after free cycle exhausted
   SOFT_WALL_UPGRADE_CLICKED: 'soft_wall_upgrade_clicked', // User clicked upgrade from a soft wall
+  ASK_PARENT_SHOWN: 'ask_parent_shown',                 // Ask-a-parent paywall shown on Magic Moment
+  MM_COMPLETE_BEAT_SHOWN: 'mm_complete_beat_shown',     // Soft completion beat shown after MM
+  MM_COMPLETE_BEAT_DISMISSED: 'mm_complete_beat_dismissed', // Student dismissed the soft completion beat
 };
 
 // localStorage marker for the moment the free Magic Moment finished — lets every
@@ -60,6 +63,9 @@ export const trackMagicMomentStarted      = (p = {}) => track(EVENTS.MAGIC_MOMEN
 export const trackMagicMomentCompleted    = (p = {}) => track(EVENTS.MAGIC_MOMENT_COMPLETED, p);
 export const trackSoftWallViewed          = (p = {}) => track(EVENTS.SOFT_WALL_VIEWED, withMm(p));
 export const trackSoftWallUpgradeClicked  = (p = {}) => track(EVENTS.SOFT_WALL_UPGRADE_CLICKED, withMm(p));
+export const trackAskParentShown           = (p = {}) => track(EVENTS.ASK_PARENT_SHOWN, withMm(p));
+export const trackMmCompleteBeatShown      = (p = {}) => track(EVENTS.MM_COMPLETE_BEAT_SHOWN, withMm(p));
+export const trackMmCompleteBeatDismissed  = (p = {}) => track(EVENTS.MM_COMPLETE_BEAT_DISMISSED, withMm(p));
 
 // ── ConversionEvent logger (admin funnel source of truth) ───────────────────
 // Idempotent: one event per user per event_name. Use for the canonical funnel:

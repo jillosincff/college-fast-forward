@@ -39,6 +39,7 @@ import PreparedWorkProPrompt from '@/components/conversion/PreparedWorkProPrompt
 import LocationPrefPrompt from '@/components/free-tier/LocationPrefPrompt';
 import useAccessPlan from '@/hooks/useAccessPlan';
 import FreeHomeFeed from '@/components/free-tier/FreeHomeFeed';
+import FinishMagicMomentBanner from '@/components/free-tier/FinishMagicMomentBanner';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -300,6 +301,12 @@ export default function FreeTierDashboard() {
               onReactivate={() => triggerUpgrade('Premium Reactivation')}
             />
           )}
+          {/* P0 — one primary CTA if the free Magic Moment isn't finished yet.
+              Demotes everything else until MM is done or they tap Continue with
+              free on the Magic Moment screen. Recent students only (≤7 days). */}
+          <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 16px 0' }}>
+            <FinishMagicMomentBanner user={user} />
+          </div>
           <FreeHomeFeed user={user} onUpgrade={triggerUpgrade} />
         </div>
       )}

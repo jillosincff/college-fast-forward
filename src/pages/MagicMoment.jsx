@@ -14,6 +14,7 @@ import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import ExampleBestPathCard from '@/components/magic-moment/ExampleBestPathCard';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
 import JobsList from '@/components/magic-moment/JobsList';
+import MagicMomentCompleteBeat from '@/components/magic-moment/MagicMomentCompleteBeat';
 
 // REBUILT first session — SELLS the play immediately.
 // Screen 1: instant Example Best Path (no search, no hang).
@@ -39,7 +40,15 @@ export default function MagicMoment() {
   const [error, setError] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
   const [proModalConfig, setProModalConfig] = useState(null); // { initialView, source }
+  const [showCompleteBeat, setShowCompleteBeat] = useState(false);
   const completedRef = useRef(false);
+  // Session-level guard: once the student opens Ask a parent or Unlock Pro,
+  // the post-completion beat is skipped so we don't double-prompt.
+  const paywallOpenedRef = useRef(false);
+  // Tracks whether the current Pro modal was opened from the soft completion
+  // beat (vs. the inline LockedPeopleCard). Only beat-originated closes
+  // continue to the dashboard — inline closes keep the student on MM.
+  const modalFromBeatRef = useRef(false);
 
   const cg0 = authUser?.career_goals || {};
   const fallbackRole = (cg0.target_industries || [])[0] || '';
@@ -142,12 +151,42 @@ export default function MagicMoment() {
 
   const handleRowApply = (job) => { logJobApplied({ user, job }); };
 
-  const handleAskParent = () => setProModalConfig({ initialView: 'parent', source: 'magic_moment_parent' });
-  const handleUpgrade = () => setProModalConfig({ initialView: 'main', source: 'magic_moment' });
+  const handleAskParent = () => {
+    paywallOpenedRef.current = true;
+    setProModalConfig({ initialView: 'parent', source: 'magic_moment_parent' });
+  };
+  const handleUpgrade = () => {
+    paywallOpenedRef.current = true;
+    setProModalConfig({ initialView: 'main', source: 'magic_moment' });
+  };
 
-  // Tapping "Continue with free" marks the cycle complete.
+  // Tapping "Continue with free" marks the cycle complete. If the student has
+  // NOT opened Ask a parent / Pro yet this session, intercept the exit and
+  // show the soft completion beat first. Dismiss from the beat proceeds to
+  // the dashboard; choosing a path opens the same Pro modal.
   const handleContinueFree = () => {
     markComplete({ result_type: 'continue_free' });
+    if (!paywallOpenedRef.current) {
+      setShowCompleteBeat(true);
+      return;
+    }
+    navigate('/FreeTierDashboard');
+  };
+
+  const handleBeatAskParent = () => {
+    setShowCompleteBeat(false);
+    paywallOpenedRef.current = true;
+    modalFromBeatRef.current = true;
+    setProModalConfig({ initialView: 'parent', source: 'magic_moment_parent' });
+  };
+  const handleBeatUnlockPro = () => {
+    setShowCompleteBeat(false);
+    paywallOpenedRef.current = true;
+    modalFromBeatRef.current = true;
+    setProModalConfig({ initialView: 'main', source: 'magic_moment' });
+  };
+  const handleBeatDismiss = () => {
+    setShowCompleteBeat(false);
     navigate('/FreeTierDashboard');
   };
 
@@ -264,7 +303,30 @@ export default function MagicMoment() {
           </div>
         )}
       </div>
-      {proModalConfig && <ProUpgradeModal user={user} onClose={() => setProModalConfig(null)} source={proModalConfig.source} initialView={proModalConfig.initialView} />}
+      {showCompleteBeat && (
+        <MagicMomentCompleteBeat
+          onAskParent={handleBeatAskParent}
+          onUnlockPro={handleBeatUnlockPro}
+          onDismiss={handleBeatDismiss}
+        />
+      )}
+      {proModalConfig && (
+        <ProUpgradeModal
+          user={user}
+          onClose={() => {
+            setProModalConfig(null);
+            // Only continue to the dashboard if this modal was opened from the
+            // soft completion beat (the student already said "continue with
+            // free"). Inline closes from the LockedPeopleCard stay on MM.
+            if (modalFromBeatRef.current) {
+              modalFromBeatRef.current = false;
+              navigate('/FreeTierDashboard');
+            }
+          }}
+          source={proModalConfig.source}
+          initialView={proModalConfig.initialView}
+        />
+      )}
     </div>
   );
 }

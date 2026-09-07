@@ -1,11 +1,21 @@
+import { useEffect, useRef } from 'react';
 import { Users, ExternalLink, Sparkles } from 'lucide-react';
 import { FONT, TEXT, TEXT2, INDIGO, INDIGO_DIM, INDIGO_BORDER, R, SHADOW_MD, GRAD_INDIGO } from '@/components/onboarding-flow/onboardingShared';
+import { trackAskParentShown, trackConversionEvent } from '@/lib/tracking';
 
 // Replaces the live people section for FREE users in the Magic Moment.
 // No findCliffPeople call during onboarding — people unlock after pay or on
 // the dashboard. Free users get: one line + pre-filled LinkedIn (school +
 // chip + city) + Upgrade / Ask a parent.
 export default function LockedPeopleCard({ school, chipText, chipLabel, city, onUpgrade, onAskParent }) {
+  const fired = useRef(false);
+  useEffect(() => {
+    if (fired.current) return;
+    fired.current = true;
+    trackAskParentShown({ source: 'magic_moment_locked_card' });
+    trackConversionEvent('ask_parent_shown', { trigger: 'magic_moment_locked_card' });
+  }, []);
+
   const linkedInUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${school || ''} ${chipText || chipLabel || ''} ${city || ''}`.trim())}`;
 
   return (
