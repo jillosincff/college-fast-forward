@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import SeoLandingLayout from '@/components/seo-landing/SeoLandingLayout';
 import { Section, CrossLinks } from '@/components/seo-landing/SeoSections';
+import ParentGiftCard from '@/components/seo-landing/ParentGiftCard';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
+import { VERIFIED_STUDENT_LABEL } from '@/lib/canonicalCounts';
 
 // Brand tokens (matched to SeoSections)
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -17,10 +19,15 @@ const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 const CARD = '#ffffff';
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
 
+const CHECK = '\u2713'; // ✓
+const DASH = '\u2014';  // —
+const DOT = '\u00b7';   // ·
+const ARROW = '\u2192'; // →
+
 const FREE_FEATURES = [
   'AI resume tailoring for your first application (Magic Moment)',
-  "Today's Best Moves — CLIFF picks the 3 jobs worth your time",
-  'CLIFF\u2019s verdict on every job (pursue / consider / skip)',
+  "Today's Best Moves \u2014 CLIFF picks the 3 jobs worth your time",
+  "CLIFF's verdict on every job (pursue / consider / skip)",
   'Job application tracker',
   'Career trajectory & next-step guidance',
 ];
@@ -36,20 +43,21 @@ const PRO_FEATURES = [
 
 const COMPARISON = [
   { feature: 'AI resume tailoring', free: '1 free application', pro: 'Unlimited' },
-  { feature: 'Mock interviews', free: '\u2014', pro: 'Unlimited' },
-  { feature: 'LinkedIn review', free: '\u2014', pro: 'Included' },
+  { feature: 'Mock interviews', free: DASH, pro: 'Unlimited' },
+  { feature: 'LinkedIn review', free: DASH, pro: 'Included' },
   { feature: 'Warm networking (parents & alumni)', free: 'Limited', pro: 'Full access' },
   { feature: 'AI outreach drafts', free: 'Limited', pro: 'Unlimited' },
-  { feature: "Today\u2019s Best Moves & job verdicts", free: 'Included', pro: 'Included' },
+  { feature: "Today's Best Moves & job verdicts", free: 'Included', pro: 'Included' },
   { feature: 'Application tracker', free: 'Included', pro: 'Included' },
-  { feature: 'Priority CLIFF agent', free: '\u2014', pro: 'Included' },
+  { feature: 'Priority CLIFF agent', free: DASH, pro: 'Included' },
 ];
 
 const FAQS = [
-  { q: 'Is CLIFF really free for college students?', a: 'Yes. The free plan is free for college students and recent grads \u2014 no credit card required. You get CLIFF\u2019s job verdicts, Today\u2019s Best Moves, the application tracker, and one free CLIFF-powered application (your Magic Moment).' },
-  { q: 'How much is CLIFF Pro?', a: 'CLIFF Pro is $19.96 per month (billed as $4.99/week). You can cancel anytime \u2014 no lock-in.' },
+  { q: 'Is CLIFF really free for college students?', a: `Yes. The free plan is free for college students and recent grads ${DASH} no credit card required. You get CLIFF's job verdicts, Today's Best Moves, the application tracker, and one free CLIFF-powered application (your Magic Moment).` },
+  { q: 'How much is CLIFF Pro?', a: `CLIFF Pro is $19.96 per month (billed as $4.99/week). You can cancel anytime ${DASH} no lock-in.` },
   { q: 'Who is CLIFF for?', a: 'CLIFF is built for US college students and recent graduates searching for internships and entry-level jobs.' },
   { q: 'Can I cancel anytime?', a: 'Yes. Cancel from your account at any time and keep access until the end of your billing period.' },
+  { q: "What can't I do on Free that blocks getting hired?", a: 'Free includes one Magic Moment resume tailor plus limited networking. Getting hired usually takes many tailored apps and repeated warm outreach. Pro unlocks unlimited tailoring, mock interviews, LinkedIn rewrites, and full parent/alumni warm intros.' },
 ];
 
 export default function Pricing() {
@@ -60,7 +68,6 @@ export default function Pricing() {
   const handlePro = async () => {
     setError('');
     if (!user) {
-      // Anonymous visitors sign up first; checkout happens after onboarding.
       window.location.hash = '#/GetStarted';
       return;
     }
@@ -96,12 +103,19 @@ export default function Pricing() {
           <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Go Pro for $19.96/mo.</span>
         </h1>
         <p style={{ fontFamily: INTER, fontSize: 'clamp(17px,3.5vw,20px)', color: TEXT2, lineHeight: 1.6, margin: '0 auto', maxWidth: 680 }}>
-          CLIFF is the AI career agent that finds jobs worth applying to, tailors your resume, and lands interviews. Start free \u2014 upgrade when you want CLIFF working on every application.
+          CLIFF is the AI career agent that finds jobs worth applying to, tailors your resume, and lands interviews. Start free {DASH} upgrade when you want CLIFF working on every application.
         </p>
       </section>
 
-      {/* Pricing cards */}
+      {/* Free-ceiling helper — above the cards */}
       <Section>
+        <p style={{ fontFamily: INTER, fontSize: 'clamp(16px,3.5vw,19px)', color: TEXT2, lineHeight: 1.6, textAlign: 'center', maxWidth: 680, margin: '0 auto 8px' }}>
+          Free helps you start. Pro removes the ceiling that keeps students applying into the void after the first try.
+        </p>
+      </Section>
+
+      {/* Pricing cards */}
+      <Section style={{ paddingTop: 0 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20, alignItems: 'stretch' }}>
           {/* Free */}
           <div style={{ background: CARD, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: '32px 28px', boxShadow: SHADOW, display: 'flex', flexDirection: 'column' }}>
@@ -110,11 +124,11 @@ export default function Pricing() {
               <span style={{ fontFamily: SF, fontSize: 44, fontWeight: 900, color: TEXT, letterSpacing: '-0.03em' }}>$0</span>
               <span style={{ fontFamily: INTER, fontSize: 15, color: TEXT3 }}>/ forever</span>
             </div>
-            <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: '0 0 22px' }}>Everything you need to find the right jobs and land your first application \u2014 free.</p>
+            <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: '0 0 22px' }}>Everything you need to find the right jobs and land your first application {DASH} free.</p>
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
               {FREE_FEATURES.map((f, i) => (
                 <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: INTER, fontSize: 14.5, color: TEXT, lineHeight: 1.5 }}>
-                  <span style={{ color: INDIGO, fontWeight: 800, flexShrink: 0 }}>\u2713</span>
+                  <span style={{ color: INDIGO, fontWeight: 800, flexShrink: 0 }}>{CHECK}</span>
                   <span>{f}</span>
                 </li>
               ))}
@@ -132,12 +146,12 @@ export default function Pricing() {
               <span style={{ fontFamily: SF, fontSize: 44, fontWeight: 900, color: TEXT, letterSpacing: '-0.03em' }}>$19.96</span>
               <span style={{ fontFamily: INTER, fontSize: 15, color: TEXT3 }}>/ month</span>
             </div>
-            <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT3, margin: '0 0 22px' }}>$4.99/week, billed monthly \u00b7 Cancel anytime</p>
-            <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: '0 0 22px' }}>CLIFF does the work on every job \u2014 unlimited tailoring, prep, and warm networking.</p>
+            <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT3, margin: '0 0 22px' }}>$4.99/week, billed monthly {DOT} Cancel anytime</p>
+            <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: '0 0 22px' }}>CLIFF does the work on every job {DASH} unlimited tailoring, prep, and warm networking.</p>
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
               {PRO_FEATURES.map((f, i) => (
                 <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: INTER, fontSize: 14.5, color: TEXT, lineHeight: 1.5 }}>
-                  <span style={{ color: INDIGO, fontWeight: 800, flexShrink: 0 }}>\u2713</span>
+                  <span style={{ color: INDIGO, fontWeight: 800, flexShrink: 0 }}>{CHECK}</span>
                   <span>{f}</span>
                 </li>
               ))}
@@ -147,15 +161,23 @@ export default function Pricing() {
               disabled={loading}
               style={{ display: 'block', width: '100%', fontFamily: SF, fontSize: 16, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: '15px 24px', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 10px 30px rgba(109,40,217,0.32)', opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? 'Launching\u2026' : user ? 'Go CLIFF Pro \u2192' : 'Sign up to go Pro \u2192'}
+              {loading ? `Launching${'\u2026'}` : `Get unlimited warm intros ${ARROW} $19.96/mo`}
             </button>
             {error && <p style={{ fontFamily: INTER, fontSize: 13, color: '#dc2626', textAlign: 'center', margin: '12px 0 0', fontWeight: 600 }}>{error}</p>}
+            <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT2, lineHeight: 1.55, margin: '14px 0 0' }}>
+              Free gets you one tailored application and a taste of the network. Pro is how you keep going {DASH} unlimited tailoring, mock interviews, and warm intros through parents & alumni at your target companies {DASH} until someone actually replies.
+            </p>
           </div>
         </div>
       </Section>
 
+      {/* Parent-pay beat — /pricing only */}
+      <Section style={{ paddingTop: 0 }}>
+        <ParentGiftCard />
+      </Section>
+
       {/* Comparison table */}
-      <Section>
+      <Section id="compare">
         <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px,5vw,34px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 22px' }}>Compare plans</h2>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: INTER, fontSize: 15, minWidth: 480 }}>

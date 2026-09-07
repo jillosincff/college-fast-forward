@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getUniversityBrand } from '@/lib/universityBrand';
+import { VERIFIED_STUDENT_LABEL } from '@/lib/canonicalCounts';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 
 // Campus-keyed gradient themes (Tailwind literal classes for scanner)
@@ -135,7 +136,7 @@ export default function JoinPage() {
         {/* Trust signals */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { stat: '2,400+', label: 'Students' },
+            { stat: VERIFIED_STUDENT_LABEL, label: 'Students' },
             { stat: '18%', label: 'Reply rate' },
             { stat: '60s', label: 'To start' },
           ].map(({ stat, label }) => (

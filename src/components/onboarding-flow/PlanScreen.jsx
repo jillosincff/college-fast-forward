@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { VERIFIED_STUDENT_LABEL } from '@/lib/canonicalCounts';
 import BackdoorOpportunityCard from './BackdoorOpportunityCard';
 import ATSScoreRing from './ATSScoreRing';
 import FunnelProgress from './FunnelProgress';
@@ -424,7 +425,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
         {/* Trust signals */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>Join 5,000+ students building their future with CLIFF</p>
+          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>Join {VERIFIED_STUDENT_LABEL} students building their future with CLIFF</p>
           <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>Cancel anytime</p>
         </div>
       </div>

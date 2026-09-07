@@ -3,6 +3,7 @@ import {
   GRAD_INDIGO, BLUE, BLUE_LIGHT, BLUE_BORDER,
   GREEN_LIGHT, GREEN_BORDER, SEEKING_OPTIONS, Nav,
 } from './onboardingShared';
+import { VERIFIED_STUDENT_LABEL } from '@/lib/canonicalCounts';
 
 /**
  * Onboarding screens 1–2 of the agent-hiring flow:
@@ -51,7 +52,7 @@ export default function OnboardingSteps1to4({
           >Let's Build My Plan →</button>
 
           <p style={{ fontFamily: FONT, fontSize: 12, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-            Join <strong style={{ color: TEXT }}>2,400+ students</strong> who stopped guessing and started landing opportunities.
+            Join <strong style={{ color: TEXT }}>{VERIFIED_STUDENT_LABEL} students</strong> who stopped guessing and started landing opportunities.
           </p>
         </div>
       )}

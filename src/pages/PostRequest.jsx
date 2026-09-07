@@ -8,6 +8,7 @@ import AlumniCareerRequestForm from '@/components/jobs/AlumniCareerRequestForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Zap, TrendingUp, Heart, Lightbulb } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { VERIFIED_STUDENT_LABEL } from '@/lib/canonicalCounts';
 
 export default function PostRequestPage() { // Renamed from PostRequest
   const { user } = useAuth();
@@ -629,7 +630,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
               </>
             ) : (
               <>
-                <div className="hero-badge">🚀 Join 2,847+ students who found help</div>
+                <div className="hero-badge">🚀 Join {VERIFIED_STUDENT_LABEL} students who found help</div>
                 <h1 className="hero-title">Get Help From Your Gator Network</h1>
                 <p className="hero-subtitle">
                   Tell us what you're looking for and let our community of parents, alumni, and fellow students connect you with the right opportunities.

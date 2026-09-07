@@ -12,6 +12,8 @@ const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
 const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 const CARD = '#ffffff';
 const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+import { VERIFIED_STUDENT_LABEL } from '@/lib/canonicalCounts';
+
 const CTA_HREF = '#/GetStarted';
 
 const ctaStyle = {
@@ -21,9 +23,9 @@ const ctaStyle = {
   boxShadow: '0 10px 30px rgba(109,40,217,0.32)',
 };
 
-export function Section({ children, narrow }) {
+export function Section({ children, narrow, id, style: extraStyle }) {
   return (
-    <section style={{ maxWidth: narrow ? 820 : 1120, margin: '0 auto', padding: 'clamp(36px,7vw,72px) clamp(20px,5vw,32px)' }}>
+    <section id={id} style={{ maxWidth: narrow ? 820 : 1120, margin: '0 auto', padding: 'clamp(36px,7vw,72px) clamp(20px,5vw,32px)', ...extraStyle }}>
       {children}
     </section>
   );
@@ -94,7 +96,7 @@ export function SocialProof() {
     <Section narrow>
       <div style={{ background: GRAD_INDIGO, borderRadius: 20, padding: 'clamp(28px,6vw,40px)', textAlign: 'center', boxShadow: '0 14px 40px rgba(109,40,217,0.28)' }}>
         <p style={{ fontFamily: SF, fontSize: 'clamp(22px,5vw,30px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 8px' }}>
-          Join 5,000+ students using CLIFF
+          Join {VERIFIED_STUDENT_LABEL} students using CLIFF
         </p>
         <p style={{ fontFamily: INTER, fontSize: 16, color: 'rgba(255,255,255,0.85)', margin: 0 }}>
           From freshmen exploring to seniors closing offers — CLIFF is their career copilot.

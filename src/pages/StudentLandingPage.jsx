@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import Reveal from '@/components/landing/Reveal';
 import MagicMomentVisual from '@/components/landing/MagicMomentVisual';
 import FreeVsProSection from '@/components/landing/FreeVsProSection';
+import { VERIFIED_STUDENT_LABEL } from '@/lib/canonicalCounts';
 
 // ── Design Tokens ───────────────────────────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -263,7 +264,7 @@ export default function StudentLandingPage({ onParentClick }) {
                     Free to start · No credit card required
                   </p>
                   <p style={{ fontFamily: SF, fontSize: 13.5, color: TEXT3, margin: 'clamp(6px, 1.5vw, 8px) 0 0', fontWeight: 600 }}>
-                    Join 5,000+ students from colleges across the U.S.
+                    Join {VERIFIED_STUDENT_LABEL} students from colleges across the U.S.
                   </p>
                 </div>
               </>
