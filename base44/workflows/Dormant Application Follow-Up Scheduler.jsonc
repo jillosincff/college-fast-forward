@@ -1,0 +1,44 @@
+{
+  "name": "Dormant Application Follow-Up Scheduler",
+  "description": "Daily scan for applications stuck at \"applied\" for 7+ days. Drafts a follow-up message, surfaces it on the student's dashboard, sets the pursuit's next action, and emails the student that their follow-up is ready to send.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 13 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "dormant_application_follow_up_scheduler",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "dormantApplicationScheduler",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "dormantApplicationScheduler"
+  }
+}

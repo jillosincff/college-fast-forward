@@ -1,0 +1,48 @@
+{
+  "name": "Weekly Career Events Scrape",
+  "description": "Scrapes career event pages for all active schools via Firecrawl every Monday at 6am ET. School-agnostic \u2014 add new schools by updating school_codes in function_args and SCHOOL_CAREER_URLS in firecrawlService.js.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 11 * * 1",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "weekly_career_events_scrape",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "scrapeUFCareerEvents",
+            "args": {
+              "school_codes": [
+                "UF"
+              ]
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "scrapeUFCareerEvents"
+  }
+}

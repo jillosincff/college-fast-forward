@@ -1,0 +1,44 @@
+{
+  "name": "CliFF Re-Engagement \u2014 Daily (10 AM ET)",
+  "description": "Re-engages users inactive 4\u201330 days with a persona-aware CliFF email. Max 1 per user per 14 days, skips anyone emailed in the last 3 days, respects unsubscribes, capped at 50 sends/day.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 14 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "cliff_re_engagement_daily_10_am_et",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendInactivityReengagement",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "sendInactivityReengagement"
+  }
+}

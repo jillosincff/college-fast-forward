@@ -1,0 +1,44 @@
+{
+  "name": "Trial \u2014 checkTrialExpiry (6 AM ET)",
+  "description": "Expires stale trial flags daily at 6 AM ET. Runs BEFORE trialEmailScheduler so email day-math is computed against clean data. DO NOT ENABLE until recovery emails are sent to the 14 silently-expired users and their trial flags are manually extended by 3 days.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 10 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "trial_checktrialexpiry_6_am_et",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "checkTrialExpiry",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "checkTrialExpiry"
+  }
+}

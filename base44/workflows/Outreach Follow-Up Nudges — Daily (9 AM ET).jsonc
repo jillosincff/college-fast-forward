@@ -1,0 +1,44 @@
+{
+  "name": "Outreach Follow-Up Nudges \u2014 Daily (9 AM ET)",
+  "description": "Emails students a follow-up nudge when an outreach contact has been in 'Reached Out' for 4+ days with no reply. Max 1 nudge per contact, 1 email per student per day, respects EmailPreference opt-outs.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 13 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "outreach_follow_up_nudges_daily_9_am_et",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "outreachFollowUpScheduler",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "outreachFollowUpScheduler"
+  }
+}

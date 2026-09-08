@@ -1,0 +1,44 @@
+{
+  "name": "CFF Engagement Agent \u2014 Daily Queue Builder (69f10700692073ef5883fbfb)",
+  "description": "Runs runEngagementAgent daily at 9:30am ET (13:30 UTC after +4 offset). Skips legacy students (signed up before 2026-04-26). Only processes new signups for Workflow 1 onboarding sequence. Queues emails for Jill's approval \u2014 nothing sends automatically.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 13 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "cff_engagement_agent_daily_queue_builder_69f10700692073ef5883fbfb",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runEngagementAgent",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "runEngagementAgent"
+  }
+}

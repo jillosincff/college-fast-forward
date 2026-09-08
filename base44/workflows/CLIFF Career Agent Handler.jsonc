@@ -1,0 +1,37 @@
+{
+  "name": "CLIFF Career Agent Handler",
+  "description": "Handles CLIFF career agent conversations and processes network queries",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "in_app_agent",
+      "events": [
+        "conversation_started"
+      ],
+      "agent_name": "fast_track_scout"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "cliff_career_agent_handler",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "cliffCareerAgent",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "cliffCareerAgent"
+  }
+}

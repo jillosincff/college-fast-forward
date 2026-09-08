@@ -1,0 +1,38 @@
+{
+  "name": "TTFMP: Pipeline Progress Events",
+  "description": "Logs application_submitted / outreach_sent meaningful-progress events whenever a pipeline row's status changes, regardless of which feature triggered it.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update"
+      ],
+      "entity_name": "NetworkingPipeline"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "ttfmp_pipeline_progress_events",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "onPipelineProgressEvent",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "onPipelineProgressEvent"
+  }
+}

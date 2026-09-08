@@ -1,0 +1,44 @@
+{
+  "name": "Long-Dormant Win-Back \u2014 Weekly (Tue 10 AM ET)",
+  "description": "Weekly clean-slate win-back email for students dormant 60+ days \u2014 the segment the lifecycle engine (caps at 60d) and inactivity sweep (caps at 30d) never reach. One email per student ever, respects opt-outs, skips anyone emailed in the last 7 days, 40 per run.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 14 * * 2",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "long_dormant_win_back_weekly_tue_10_am_et",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "longDormantWinBack",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "longDormantWinBack"
+  }
+}

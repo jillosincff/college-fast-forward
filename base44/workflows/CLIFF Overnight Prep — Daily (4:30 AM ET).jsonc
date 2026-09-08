@@ -1,0 +1,44 @@
+{
+  "name": "CLIFF Overnight Prep \u2014 Daily (4:30 AM ET)",
+  "description": "Prepares one complete application package per Pro student before they wake up: pre-tailors the resume against their best untouched opportunity, finds a warm network contact at that company, and writes the NightlyBrief the dashboard reads back as \"here's what I did while you slept.\"",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 8 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "cliff_overnight_prep_daily_4_30_am_et",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runOvernightPrep",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "runOvernightPrep"
+  }
+}
