@@ -136,7 +136,7 @@ export default function QuickOnboarding({ onDone }) {
               <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Step 1 of 3</span>
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 24, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>Where do you go to school?</h1>
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 20px' }}>CLIFF uses your school to find alumni connections at the companies you want.</p>
+            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 20px' }}>CLIFF uses your school to match roles and build your guided search — so you're not winging it.</p>
             <label style={labelStyle}>Your school</label>
             <input
               list="quick-schools" type="text" value={school} placeholder="Search your university…"

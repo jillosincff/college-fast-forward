@@ -47,7 +47,10 @@ export default function MagicMomentCompleteBeat({ onAskParent, onUnlockPro, onDi
             <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Free stops here</span>
           </div>
           <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.5 }}>
-            You just saw what CLIFF can do with real jobs. Free stops here. Pro keeps going — unlimited warm intros and tailoring until someone replies.
+            You just felt the shift from "I have no clue" to a real plan. Free stops after this cycle. Pro keeps your guided search going — unlimited tailor, prep, and tracking so you don't fall back into winging it.
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT3, margin: '10px 0 0', lineHeight: 1.4 }}>
+            Warm intros unlock with Pro when available.
           </p>
         </div>
 

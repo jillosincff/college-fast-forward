@@ -225,10 +225,10 @@ export default function MagicMoment() {
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '6px 14px', marginBottom: 14 }}>
             <Sparkles size={13} color={INDIGO} />
-            <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your free cycle</span>
+            <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your guided search</span>
           </div>
           <h1 style={{ fontFamily: FONT, fontSize: 26, fontWeight: 800, color: TEXT, margin: '0 0 8px', lineHeight: 1.2 }}>
-            Here's how CLIFF works.
+            Here's your first plan.
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: 0 }}>
             {heroMeta.chipLabel ? `${heroMeta.chipLabel} roles` : 'Matching roles'}{searchLoc ? ` in ${searchLoc}` : ''}
