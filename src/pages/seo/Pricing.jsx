@@ -53,6 +53,7 @@ const COMPARISON = [
 ];
 
 const FAQS = [
+  { q: 'How is this different from Handshake or easy-apply tools?', a: 'Handshake is a job board. Easy-apply tools help you spray more apps. CLIFF is a guided job search: fewer, better targets, tailored materials, and a next step you can trust — built for college students who feel overwhelmed and want to feel confident they\'re doing it right.' },
   { q: 'Is CLIFF really free for college students?', a: `Yes. The free plan is free for college students and recent grads ${DASH} no credit card required. You get CLIFF's job verdicts, Today's Best Moves, the application tracker, and one free CLIFF-powered application (your Magic Moment).` },
   { q: 'How much is CLIFF Pro?', a: `CLIFF Pro is $19.96 per month (billed as $4.99/week). You can cancel anytime ${DASH} no lock-in.` },
   { q: 'Who is CLIFF for?', a: 'CLIFF is built for US college students and recent graduates searching for internships and entry-level jobs.' },
@@ -103,14 +104,14 @@ export default function Pricing() {
           <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Go Pro for $19.96/mo.</span>
         </h1>
         <p style={{ fontFamily: INTER, fontSize: 'clamp(17px,3.5vw,20px)', color: TEXT2, lineHeight: 1.6, margin: '0 auto', maxWidth: 680 }}>
-          CLIFF is the AI career agent that finds jobs worth applying to, tailors your resume, and lands interviews. Start free {DASH} upgrade when you want CLIFF working on every application.
+          CLIFF is your guided job search for internships and first jobs. Start free {DASH} keep the confidence going with Pro.
         </p>
       </section>
 
       {/* Free-ceiling helper — above the cards */}
       <Section>
         <p style={{ fontFamily: INTER, fontSize: 'clamp(16px,3.5vw,19px)', color: TEXT2, lineHeight: 1.6, textAlign: 'center', maxWidth: 680, margin: '0 auto 8px' }}>
-          Free helps you start. Pro removes the ceiling that keeps students applying into the void after the first try.
+          Free gets you your first guided cycle. Pro keeps the confidence going — unlimited tailor, prep, and tracking until you're not winging it anymore.
         </p>
       </Section>
 
@@ -147,7 +148,7 @@ export default function Pricing() {
               <span style={{ fontFamily: INTER, fontSize: 15, color: TEXT3 }}>/ month</span>
             </div>
             <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT3, margin: '0 0 22px' }}>$4.99/week, billed monthly {DOT} Cancel anytime</p>
-            <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: '0 0 22px' }}>CLIFF does the work on every job {DASH} unlimited tailoring, prep, and warm networking.</p>
+            <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: '0 0 22px' }}>CLIFF does the work on every job {DASH} unlimited tailoring, prep, and tracking.</p>
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
               {PRO_FEATURES.map((f, i) => (
                 <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: INTER, fontSize: 14.5, color: TEXT, lineHeight: 1.5 }}>
@@ -161,11 +162,11 @@ export default function Pricing() {
               disabled={loading}
               style={{ display: 'block', width: '100%', fontFamily: SF, fontSize: 16, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: '15px 24px', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 10px 30px rgba(109,40,217,0.32)', opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? `Launching${'\u2026'}` : `Get unlimited warm intros ${ARROW} $19.96/mo`}
+              {loading ? `Launching${'\u2026'}` : `Keep my guided search going ${ARROW} $19.96/mo`}
             </button>
             {error && <p style={{ fontFamily: INTER, fontSize: 13, color: '#dc2626', textAlign: 'center', margin: '12px 0 0', fontWeight: 600 }}>{error}</p>}
             <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT2, lineHeight: 1.55, margin: '14px 0 0' }}>
-              Free gets you one tailored application and a taste of the network. Pro is how you keep going {DASH} unlimited tailoring, mock interviews, and warm intros through parents & alumni at your target companies {DASH} until someone actually replies.
+              Free = one clear plan so you feel the shift. Pro = every application after that {DASH} unlimited resume tailoring, mock interviews, LinkedIn review, and tracking {DASH} so you don't fall back into "I have no clue."
             </p>
           </div>
         </div>

@@ -17,9 +17,9 @@ const FREE_BULLETS = [
 ];
 
 const PRO_BULLETS = [
-  'People from your school + outreach drafts',
   'Up to 30 matching jobs a day',
-  'Ask a parent to unlock for you',
+  'Unlimited resume tailoring & prep',
+  'People from your school + outreach drafts',
 ];
 
 export default function FreeVsProSection({ onGetStarted }) {
@@ -81,7 +81,7 @@ export default function FreeVsProSection({ onGetStarted }) {
           }}
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.40)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 32px rgba(109,40,217,0.30)'; }}
-          >Get started</button>
+          >Start my guided job search →</button>
         </div>
       </Reveal>
     </section>

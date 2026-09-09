@@ -27,9 +27,7 @@ const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 const STEPS = [
   'Target the right job',
   'Get a tailored resume',
-  'See alumni at that company',
-  'Send the warm outreach',
-  'Track what happens next',
+  'Know exactly what to do next',
 ];
 
 const PROOF = [
@@ -129,18 +127,11 @@ export default function StudentLandingPage({ onParentClick }) {
   }, [isPreview]);
 
   const go = () => {
-    if (!isLoadingAuth && user) {
-      if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentAllSet');
-      else if (user.persona === 'alumni' || user.roles?.includes('alumni'))
-        navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
-      else navigate('FreeTierDashboard');
-    } else {
-      try {
-        localStorage.setItem('pending_invite_role', 'student');
-        sessionStorage.setItem('cff_onboarding_type', 'student');
-      } catch (e) {}
-      setShowFunnel(true);
-    }
+    try {
+      localStorage.setItem('pending_invite_role', 'student');
+      sessionStorage.setItem('cff_onboarding_type', 'student');
+    } catch (e) {}
+    navigate('GetStarted');
   };
 
   const parent = () => {
@@ -152,7 +143,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
   const login = () => navigate('GatorAuth');
 
-  const ctaLabel = (!isLoadingAuth && user) ? 'Dashboard →' : 'Build My Career Plan →';
+  const ctaLabel = 'Start my guided job search →';
 
   // While auth resolves or a logged-in user is about to redirect, don't paint
   // the marketing page — it would flash before the redirect fires.
@@ -231,20 +222,19 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <>
                 <h1 className="hero-1" style={{ fontFamily: SF, fontSize: 'clamp(32px, 6vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.06, color: '#030712', margin: '0 0 18px' }}>
-                  Getting your first job is brutal.
+                  From "I have no clue" to "I've got this"
                 </h1>
 
                 <p className="hero-2" style={{ fontFamily: SF, fontSize: 'clamp(17px, 3.5vw, 21px)', fontWeight: 500, color: TEXT2, lineHeight: 1.45, margin: '0 0 clamp(26px, 5vw, 32px)', maxWidth: 560 }}>
-                  Most students apply into the void.<br />
-                  <span style={{ color: TEXT, fontWeight: 700 }}>CLIFF gives you a real plan — and the warm intro most people never get.</span>
+                  CLIFF is your guided job search for internships and first jobs — the right roles, a tailored resume, and a clear next step so you stop winging it.
                 </p>
 
                 {/* Benefit lines */}
                 <div className="hero-3" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(10px, 2vw, 14px)', margin: '0 0 clamp(28px, 6vw, 40px)' }}>
                   {[
-                    'Finds jobs actually worth your time',
+                    'Cuts the noise — roles worth your time, not 200 random postings',
                     'Tailors your resume for that role',
-                    'Finds your warm intro — and writes the message',
+                    'Tells you exactly what to do next (no spreadsheet graveyard)',
                   ].map((b) => (
                     <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                       <span style={{ width: 28, height: 28, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -261,7 +251,7 @@ export default function StudentLandingPage({ onParentClick }) {
                     <PrimaryCTA label={ctaLabel} onClick={go} />
                   </div>
                   <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, margin: 0, fontWeight: 600 }}>
-                    Free to start · No credit card required
+                    Free to start · No credit card · Built for when you're overwhelmed
                   </p>
                   <p style={{ fontFamily: SF, fontSize: 13.5, color: TEXT3, margin: 'clamp(6px, 1.5vw, 8px) 0 0', fontWeight: 600 }}>
                     Join {VERIFIED_STUDENT_LABEL} students from colleges across the U.S.
@@ -306,15 +296,9 @@ export default function StudentLandingPage({ onParentClick }) {
         <Reveal>
           <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
             <span style={badgeStyle}>The real difference</span>
-            <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6.5vw, 40px)', fontWeight: 900, lineHeight: 1.12, letterSpacing: '-0.03em', margin: '0 0 clamp(20px, 5vw, 26px)' }}>
-              <span style={{ display: 'block', color: TEXT3 }}>Most tools help you apply.</span>
-              <span style={{ display: 'block', background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>CLIFF helps you get seen.</span>
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 480, margin: '0 auto' }}>
-              <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4vw, 19px)', color: TEXT2, lineHeight: 1.55, margin: 0 }}>Anyone can generate a resume.</p>
-              <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4vw, 19px)', color: TEXT2, lineHeight: 1.55, margin: 0 }}>Almost no one finds you the person on the inside and writes the message.</p>
-              <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4vw, 19px)', color: TEXT, fontWeight: 700, lineHeight: 1.55, margin: 0 }}>That’s the part that actually changes your odds.</p>
-            </div>
+            <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: 600, color: TEXT, lineHeight: 1.5, letterSpacing: '-0.01em', margin: '0 auto', maxWidth: 560 }}>
+              A job board dumps openings on you. Easy-apply tools help you spray. College Fast Forward is a guided job search — so you go from “I don’t know where to start” to feeling like you’re doing this right.
+            </p>
           </div>
         </Reveal>
       </section>
@@ -344,7 +328,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <Reveal>
           <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative', zIndex: 1 }}>
             <h2 style={{ fontFamily: SF, fontSize: 'clamp(30px, 8vw, 50px)', fontWeight: 900, color: '#fff', lineHeight: 1.08, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 32px)' }}>
-              Stop applying into the void.
+              Stop winging it.
             </h2>
             <PrimaryCTA label={ctaLabel} onClick={go} dark />
             <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 3.8vw, 16px)', fontWeight: 600, color: 'rgba(255,255,255,0.85)', margin: 'clamp(16px, 4vw, 22px) 0 0', lineHeight: 1.5 }}>
@@ -375,7 +359,7 @@ export default function StudentLandingPage({ onParentClick }) {
       }}>
         <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <span style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            Your first warm intro is free.
+            Stop winging your job search.
           </span>
           <span style={{ fontFamily: SF, fontSize: 11.5, fontWeight: 600, color: TEXT3, whiteSpace: 'nowrap' }}>
             2 min · no credit card
