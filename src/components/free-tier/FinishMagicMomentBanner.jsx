@@ -4,16 +4,12 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // Shows when a student lands on the dashboard without completing their free
 // Magic Moment. ONE primary CTA — demotes everything else until MM is done or
-// they explicitly Continue with free on the Magic Moment screen.
-// "Recent" = onboarded within the last 7 days (same window OnboardingGuard uses).
+// they explicitly Continue with free on the Magic Moment screen. Shown for ANY
+// student with an incomplete Magic Moment (OnboardingGuard also redirects them,
+// but this catches deep-links that bypass the guard).
 export default function FinishMagicMomentBanner({ user }) {
   if (!user) return null;
   if (user.magic_moment_completed === true) return null;
-
-  const onboardingAt = user.onboarding_completed_at || user.created_date;
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const isRecent = !onboardingAt || new Date(onboardingAt).getTime() > sevenDaysAgo;
-  if (!isRecent) return null;
 
   const go = () => { window.location.hash = '#/MagicMoment'; };
 

@@ -10,6 +10,7 @@ import { deriveSchoolCode } from '@/lib/schoolNames';
 import { buildLocationMemories } from '@/lib/locationPrefs';
 import { saveParsedResume } from '@/lib/resumeText';
 import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
+import { trackConversionEvent } from '@/lib/tracking';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -401,6 +402,7 @@ export default function GatorAuth() {
             // (with career_goals) before MagicMoment mounts. Without this,
             // MagicMoment reads a stale user (pre-updateMe) and its ranRef
             // guard prevents the effect from re-running when the user updates.
+            trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' });
             window.location.hash = '#/MagicMoment';
             window.location.reload();
             return;
@@ -410,6 +412,7 @@ export default function GatorAuth() {
           // flag was set THIS session). Route to Magic Moment so they see
           // their updated matches, not the dashboard.
           try { localStorage.removeItem('cff_funnel_completed'); sessionStorage.removeItem('cff_funnel_completed'); } catch (e) {}
+          trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' });
           window.location.hash = '#/MagicMoment';
           window.location.reload();
           return;
@@ -559,6 +562,7 @@ export default function GatorAuth() {
       // Full reload so the auth context re-fetches the now-onboarded user —
       // otherwise OnboardingGuard sees the stale (no persona) user and loops
       // the student back to onboarding screen 1.
+      trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' });
       window.location.hash = '#/MagicMoment';
       window.location.reload();
     };
@@ -568,6 +572,7 @@ export default function GatorAuth() {
     // localStorage — which would wipe what QuickOnboarding just saved.)
     const handleQuickOnboardingDone = async () => {
       try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); localStorage.removeItem('cff_onboarding_screen'); localStorage.removeItem('cff_funnel_completed'); } catch (e) {}
+      trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' });
       window.location.hash = '#/MagicMoment';
       window.location.reload();
     };

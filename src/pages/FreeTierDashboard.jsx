@@ -303,7 +303,8 @@ export default function FreeTierDashboard() {
           )}
           {/* P0 — one primary CTA if the free Magic Moment isn't finished yet.
               Demotes everything else until MM is done or they tap Continue with
-              free on the Magic Moment screen. Recent students only (≤7 days). */}
+              free on the Magic Moment screen. Shown for any student with an
+              incomplete Magic Moment (catches deep-links past OnboardingGuard). */}
           <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 16px 0' }}>
             <FinishMagicMomentBanner user={user} />
           </div>

@@ -442,6 +442,7 @@ CRITICAL RULES:
         // user (no persona), so a plain hash change gets bounced by
         // OnboardingGuard back to GatorAuth → onboarding screen 1 (the
         // "Meet CLIFF" loop). Reloading re-fetches the updated user.
+        trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' });
         window.location.hash = '#/MagicMoment';
         window.location.reload();
       } else {
@@ -453,6 +454,7 @@ CRITICAL RULES:
       // Flag that the funnel is DONE — after OAuth, GatorAuth finalizes the
       // profile from the saved answers instead of restarting onboarding.
       try { localStorage.setItem('cff_funnel_completed', 'true'); sessionStorage.setItem('cff_funnel_completed', 'true'); } catch {}
+      if (planType === 'free') trackConversionEvent('magic_moment_offered', { trigger: 'post_onboarding' });
       const redirectPath = planType === 'free' ? '/#/MagicMoment' : '/#/GatorAuth';
       base44.auth.loginWithProvider('google', window.location.origin + redirectPath);
     }

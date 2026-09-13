@@ -99,7 +99,7 @@ export default async function(req) {
     // Log checkout_started to ConversionEvent (idempotent — one per user)
     const event_key = `${clientUser.id}:checkout_started`;
     const existingEvt = await base44.asServiceRole.entities.ConversionEvent
-      .filter({ event_key }).catch(() => []);
+      .filter({ event_key }).catch((e) => { console.error('[createCheckoutSession] checkout_started lookup failed:', e?.message || e); return []; });
     if (existingEvt?.length === 0) {
       await base44.asServiceRole.entities.ConversionEvent.create({
         user_id: clientUser.id,
@@ -108,7 +108,7 @@ export default async function(req) {
         event_key,
         trigger: source || null,
         plan_at_event: 'free',
-      }).catch(() => {});
+      }).catch((e) => console.error('[createCheckoutSession] checkout_started write failed:', e?.message || e));
     }
 
     return Response.json({ success: true, url: session.url });

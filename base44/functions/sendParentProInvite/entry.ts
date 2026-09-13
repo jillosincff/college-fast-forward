@@ -59,8 +59,31 @@ export default async function (req) {
       body: body.toString(),
     });
     const session = await stripeRes.json();
-    if (session.error) return Response.json({ success: false, error: session.error.message }, { status: 500 });
+    if (session.error || !session.url) {
+      const message = session.error?.message || 'Checkout could not be created. Please try again.';
+      console.error('[sendParentProInvite] Stripe error:', message);
+      return Response.json({ success: false, error: message }, { status: 502 });
+    }
     const checkoutUrl = session.url;
+
+    // Log checkout_started (idempotent) — student-initiated parent gift. The
+    // conversion subject is THIS student; the parent email is in metadata.
+    const event_key = `${user.id}:checkout_started`;
+    try {
+      const existing = await base44.asServiceRole.entities.ConversionEvent
+        .filter({ event_key }).catch((e) => { console.error('[sendParentProInvite] checkout_started lookup failed:', e?.message || e); return []; });
+      if (!existing?.length) {
+        await base44.asServiceRole.entities.ConversionEvent.create({
+          user_id: user.id,
+          user_email: user.email,
+          event_name: 'checkout_started',
+          event_key,
+          trigger: 'parent_gift',
+          plan_at_event: 'free',
+          metadata: { student_email: user.email, parent_email: parentEmail, student_name: user.full_name || '' },
+        }).catch((e) => console.error('[sendParentProInvite] checkout_started write failed:', e?.message || e));
+      }
+    } catch (e) { console.error('[sendParentProInvite] checkout_started block failed:', e?.message || e); }
 
     // Email the parent (likely not a registered app user) the payment link.
     // If the email fails, NEVER return success — the student would see a false

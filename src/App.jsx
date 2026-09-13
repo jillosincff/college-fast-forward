@@ -112,15 +112,10 @@ function OnboardingGuard({ children }) {
         // the student finished the cycle but the account flag hasn't propagated yet.
         let deviceDone = false;
         try { deviceDone = !!localStorage.getItem('cff_magic_moment_completed_at'); } catch {}
-
-        if (!deviceDone) {
-          // Only force the first-run Magic Moment screen for students who finished
-          // onboarding in the last 7 days. Older students go straight to the dashboard.
-          const onboardingAt = user.onboarding_completed_at || user.created_date;
-          const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-          const isRecent = !onboardingAt || new Date(onboardingAt).getTime() > sevenDaysAgo;
-          if (isRecent) return <Navigate to="/MagicMoment" replace />;
-        }
+        // Every onboarded student who hasn't completed their free Magic Moment is
+        // sent there on guarded navigation — no time window. The only escapes are
+        // completing MM (magic_moment_completed) or the per-device loop guard.
+        if (!deviceDone) return <Navigate to="/MagicMoment" replace />;
       }
     }
     return children;

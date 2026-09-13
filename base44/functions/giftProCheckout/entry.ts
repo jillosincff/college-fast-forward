@@ -65,9 +65,33 @@ export default async function(req) {
     });
 
     const session = await stripeRes.json();
-    if (session.error) {
-      return Response.json({ success: false, error: session.error.message }, { status: 500 });
+    if (session.error || !session.url) {
+      const message = session.error?.message || 'Checkout could not be created. Please try again.';
+      console.error('[giftProCheckout] Stripe error:', message);
+      return Response.json({ success: false, error: message }, { status: 502 });
     }
+
+    // Log checkout_started (idempotent) — the gift conversion subject is the
+    // student; fall back to the paying parent if the student has no account yet.
+    const giftStudent = student || null;
+    const evtUserId = giftStudent?.id || user.id;
+    const evtUserEmail = giftStudent?.email || studentEmail;
+    const event_key = `${evtUserId}:checkout_started`;
+    try {
+      const existing = await base44.asServiceRole.entities.ConversionEvent
+        .filter({ event_key }).catch((e) => { console.error('[giftProCheckout] checkout_started lookup failed:', e?.message || e); return []; });
+      if (!existing?.length) {
+        await base44.asServiceRole.entities.ConversionEvent.create({
+          user_id: evtUserId,
+          user_email: evtUserEmail,
+          event_name: 'checkout_started',
+          event_key,
+          trigger: 'parent_gift',
+          plan_at_event: 'free',
+          metadata: { student_email: studentEmail, gifted_by_parent_id: user.id, gifted_by_parent_email: user.email },
+        }).catch((e) => console.error('[giftProCheckout] checkout_started write failed:', e?.message || e));
+      }
+    } catch (e) { console.error('[giftProCheckout] checkout_started block failed:', e?.message || e); }
 
     return Response.json({ success: true, url: session.url });
   } catch (e) {
