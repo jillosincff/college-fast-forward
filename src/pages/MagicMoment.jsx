@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -6,21 +6,28 @@ import {
   FONT, CARD, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
   GRAD_INDIGO, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { Briefcase, Sparkles, Search, MapPin } from 'lucide-react';
+import { Briefcase, Sparkles, Search, MapPin, ChevronDown, Users } from 'lucide-react';
 import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted, trackConversionEvent } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import { logJobApplied } from '@/lib/magicMomentLog';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
+import { applyUrlOf } from '@/lib/jobFreshness';
+import { rankMoves, jobKeyOf } from '@/lib/magicMomentMoves';
 import ExampleBestPathCard from '@/components/magic-moment/ExampleBestPathCard';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
-import JobsList from '@/components/magic-moment/JobsList';
+import BestMoveCard from '@/components/magic-moment/BestMoveCard';
+import CompanyInsiderBeat from '@/components/magic-moment/CompanyInsiderBeat';
 import MagicMomentCompleteBeat from '@/components/magic-moment/MagicMomentCompleteBeat';
 
-// REBUILT first session — SELLS the play immediately.
-// Screen 1: instant Example Best Path (no search, no hang).
-// Screen 2: real jobs pipeline (metro → state → remote, chip gate, no NYC leak).
-// People / Best Path are PAID — no findCliffPeople during onboarding.
-// Free users see a locked people card + pre-filled LinkedIn + Upgrade/Ask parent.
+// REBUILT — guided recruiter loop (not a job board, not tailor-as-aha).
+// Free MM wow = "I've got this": CLIFF picks ≤3 roles to pursue, each with a
+// one-line honest why from real signals. Primary CTA (pressure-test) on #1
+// opens Mock Interview for that role. Tailor / Apply / Add to Applied are
+// demoted secondary actions that work unpaid on this free cycle.
+// People / insiders are the unlock layer — shown per-company ONLY after the
+// student taps "Interested", never auto, never via findCliffPeople on free.
+// The always-on LockedPeopleCard stays collapsed at the very bottom as a
+// fallback. MM is not auto-completed just because jobs loaded.
 
 const pill = (extra) => ({
   fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: GRAD_INDIGO,
@@ -39,16 +46,16 @@ export default function MagicMoment() {
   const [shortMessage, setShortMessage] = useState('');
   const [error, setError] = useState('');
   const [heroMeta, setHeroMeta] = useState({ chipLabel: '', chipText: '' });
-  const [proModalConfig, setProModalConfig] = useState(null); // { initialView, source }
+  const [proModalConfig, setProModalConfig] = useState(null);
   const [showCompleteBeat, setShowCompleteBeat] = useState(false);
   const completedRef = useRef(false);
-  // Session-level guard: once the student opens Ask a parent or Unlock Pro,
-  // the post-completion beat is skipped so we don't double-prompt.
   const paywallOpenedRef = useRef(false);
-  // Tracks whether the current Pro modal was opened from the soft completion
-  // beat (vs. the inline LockedPeopleCard). Only beat-originated closes
-  // continue to the dashboard — inline closes keep the student on MM.
   const modalFromBeatRef = useRef(false);
+
+  // Recruiter-loop state
+  const [dismissedKeys, setDismissedKeys] = useState(() => new Set());
+  const [interestedKey, setInterestedKey] = useState(null);
+  const [showPeople, setShowPeople] = useState(false);
 
   const cg0 = authUser?.career_goals || {};
   const fallbackRole = (cg0.target_industries || [])[0] || '';
@@ -56,10 +63,7 @@ export default function MagicMoment() {
   const [searchLoc, setSearchLoc] = useState(cg0.location_preference || authUser?.location || '');
   const [user, setUser] = useState(authUser);
 
-  // Keep local user in sync with auth — don't freeze the first null while auth loads.
-  useEffect(() => {
-    if (authUser) setUser(authUser);
-  }, [authUser]);
+  useEffect(() => { if (authUser) setUser(authUser); }, [authUser]);
 
   const handleSearch = async (e) => {
     e?.preventDefault();
@@ -80,6 +84,8 @@ export default function MagicMoment() {
     setJobsLoading(true);
     setShortMessage('');
     setError('');
+    setDismissedKeys(new Set());
+    setInterestedKey(null);
     setRunKey(k => k + 1);
   };
 
@@ -120,7 +126,7 @@ export default function MagicMoment() {
     const chipLabel = industries[0] || role || '';
     setHeroMeta({ chipLabel, chipText });
 
-    // ── Jobs fetch (does NOT wait on people) ─────────────────────────────
+    // ── Jobs fetch (does NOT wait on people, does NOT call findCliffPeople) ─
     (async () => {
       try {
         setJobsLoading(true);
@@ -130,18 +136,9 @@ export default function MagicMoment() {
         setJobsList(jobs);
         setShortMessage(sm);
         setJobsLoading(false);
-        if (jobs.length > 0) {
-          markComplete({
-            jobs_count: jobs.length,
-            people_count: 0,
-            best_path: false,
-            people_source: 'locked_free',
-            result_type: 'jobs_only',
-            hero_job_title: jobs[0]?.job_title || '',
-            hero_company: jobs[0]?.name || '',
-            has_tailored_resume: false,
-          });
-        }
+        // Do NOT auto-complete MM just because jobs loaded. Completion fires
+        // on a meaningful step (pressure-test / tailor / apply / add-applied)
+        // or on Continue with free.
       } catch (e) {
         setError('CLIFF hit a snag building your plan. Please try again in a moment.');
         setJobsLoading(false);
@@ -149,7 +146,49 @@ export default function MagicMoment() {
     })();
   }, [user, runKey]);
 
-  const handleRowApply = (job) => { logJobApplied({ user, job }); };
+  // Ranked pool — Pursue first, Stretch to fill. Off-screen / skip-tier jobs
+  // never render. Top 3 shown; "Not for me" dismisses one and backfills.
+  const rankedPool = useMemo(
+    () => rankMoves(jobsList, { chipText: heroMeta.chipText, chipLabel: heroMeta.chipLabel }),
+    [jobsList, heroMeta.chipText, heroMeta.chipLabel]
+  );
+  const visibleMoves = useMemo(() => {
+    const kept = rankedPool.filter(m => !dismissedKeys.has(jobKeyOf(m.job)));
+    return kept.slice(0, 3);
+  }, [rankedPool, dismissedKeys]);
+
+  const handlePressureTest = (job) => {
+    markComplete({ result_type: 'pressure_test' });
+    const company = encodeURIComponent(job.name || '');
+    const role = encodeURIComponent(job.job_title || '');
+    navigate(`/MockInterview?company=${company}&role=${role}`);
+  };
+  const handleTailor = (job) => {
+    markComplete({ result_type: 'tailor' });
+    const params = new URLSearchParams({
+      from: 'apply_modal',
+      company: job.name || '',
+      role: job.job_title || '',
+      jd: job.hiring_description || '',
+      job_url: applyUrlOf(job) || '',
+      location: job.location || '',
+    });
+    navigate(`/ResumeTailoring?${params.toString()}`);
+  };
+  const handleApply = (job) => {
+    markComplete({ result_type: 'apply' });
+    logJobApplied({ user, job });
+  };
+  const handleAddApplied = (job) => {
+    markComplete({ result_type: 'add_applied' });
+    logJobApplied({ user, job });
+  };
+  const handleNotForMe = (job) => {
+    const k = jobKeyOf(job);
+    setDismissedKeys(prev => { const n = new Set(prev); n.add(k); return n; });
+    if (interestedKey === k) setInterestedKey(null);
+  };
+  const handleInterested = (job) => { setInterestedKey(jobKeyOf(job)); };
 
   const handleAskParent = () => {
     paywallOpenedRef.current = true;
@@ -160,35 +199,21 @@ export default function MagicMoment() {
     setProModalConfig({ initialView: 'main', source: 'magic_moment' });
   };
 
-  // Tapping "Continue with free" marks the cycle complete. If the student has
-  // NOT opened Ask a parent / Pro yet this session, intercept the exit and
-  // show the soft completion beat first. Dismiss from the beat proceeds to
-  // the dashboard; choosing a path opens the same Pro modal.
   const handleContinueFree = () => {
     markComplete({ result_type: 'continue_free' });
-    if (!paywallOpenedRef.current) {
-      setShowCompleteBeat(true);
-      return;
-    }
+    if (!paywallOpenedRef.current) { setShowCompleteBeat(true); return; }
     navigate('/FreeTierDashboard');
   };
 
   const handleBeatAskParent = () => {
-    setShowCompleteBeat(false);
-    paywallOpenedRef.current = true;
-    modalFromBeatRef.current = true;
+    setShowCompleteBeat(false); paywallOpenedRef.current = true; modalFromBeatRef.current = true;
     setProModalConfig({ initialView: 'parent', source: 'magic_moment_parent' });
   };
   const handleBeatUnlockPro = () => {
-    setShowCompleteBeat(false);
-    paywallOpenedRef.current = true;
-    modalFromBeatRef.current = true;
+    setShowCompleteBeat(false); paywallOpenedRef.current = true; modalFromBeatRef.current = true;
     setProModalConfig({ initialView: 'main', source: 'magic_moment' });
   };
-  const handleBeatDismiss = () => {
-    setShowCompleteBeat(false);
-    navigate('/FreeTierDashboard');
-  };
+  const handleBeatDismiss = () => { setShowCompleteBeat(false); navigate('/FreeTierDashboard'); };
 
   const SearchBar = (
     <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
@@ -216,12 +241,15 @@ export default function MagicMoment() {
     </form>
   );
 
-  const jobsVisible = !jobsLoading && jobsList.length > 0;
+  const allPursue = visibleMoves.length > 0 && visibleMoves.every(m => m.verdict === 'pursue');
+  const agentLine = visibleMoves.length > 0
+    ? `Most of what's out there isn't worth your time. I picked ${visibleMoves.length} ${allPursue ? "I'd actually pursue" : 'worth a look'}${heroMeta.chipLabel ? ` for ${heroMeta.chipLabel}` : ''}${searchLoc ? ` in ${searchLoc}` : ''} — start with #1.`
+    : '';
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #faf5ff 0%, #fff 30%)', paddingBottom: 48 }}>
       <div style={{ maxWidth: 620, margin: '0 auto', padding: '28px 16px' }}>
-        {/* Header */}
+        {/* 1. Header — guided search */}
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '6px 14px', marginBottom: 14 }}>
             <Sparkles size={13} color={INDIGO} />
@@ -237,7 +265,7 @@ export default function MagicMoment() {
 
         {SearchBar}
 
-        {/* Screen 1 — Example Best Path (instant, no search) */}
+        {/* 2. EXAMPLE — job + Pursue + why + pressure-test next step (no alumni) */}
         <ExampleBestPathCard
           school={user?.school}
           chipText={heroMeta.chipText}
@@ -245,61 +273,95 @@ export default function MagicMoment() {
           city={searchLoc}
         />
 
-        {/* Screen 2 — Their real jobs (free taste).
-            Only the first 2–3 render here; the people-lock card interrupts,
-            then the remaining jobs continue below it. */}
+        {/* 3. Today's Best Moves (≤3) + agent line — the free recruiter wow */}
         {jobsLoading ? (
           <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Jobs for you" />
+            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Today's Best Moves" />
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 16, height: 16, border: '2px solid #e9d5ff', borderTop: `2px solid ${INDIGO}`, borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
-              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Finding jobs for you…</p>
+              <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>CLIFF is ranking roles worth your time…</p>
             </div>
           </div>
-        ) : jobsList.length > 0 ? (
-          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Jobs for you" />
+        ) : error ? (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: R, padding: '16px 18px', marginBottom: 16 }}>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: '#b91c1c', margin: 0, lineHeight: 1.5 }}>{error}</p>
+          </div>
+        ) : visibleMoves.length > 0 ? (
+          <div style={{ marginBottom: 16 }}>
+            {/* Agent line */}
+            {agentLine && (
+              <div style={{ background: '#faf5ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, margin: 0, lineHeight: 1.5 }}>
+                  {agentLine}
+                </p>
+              </div>
+            )}
+            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Today's Best Moves" />
             {shortMessage && (
               <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '0 0 10px', lineHeight: 1.4 }}>
                 {shortMessage}
               </p>
             )}
-            <JobsList jobs={jobsList.slice(0, 3)} onApply={handleRowApply} />
+            {visibleMoves.map((move, i) => {
+              const k = jobKeyOf(move.job);
+              return (
+                <BestMoveCard
+                  key={k}
+                  move={move}
+                  index={i}
+                  onPressureTest={handlePressureTest}
+                  onInterested={handleInterested}
+                  onTailor={handleTailor}
+                  onApply={handleApply}
+                  onAddApplied={handleAddApplied}
+                  onNotForMe={handleNotForMe}
+                  insiderBeat={interestedKey === k ? (
+                    <CompanyInsiderBeat company={move.job.name} onAskParent={handleAskParent} onUpgrade={handleUpgrade} />
+                  ) : null}
+                />
+              );
+            })}
           </div>
         ) : (
           <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
-            <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>No jobs found for this search.</p>
+            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Today's Best Moves" />
+            <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>No moves yet for this search.</p>
             <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>Try a different role or location above.</p>
           </div>
         )}
 
-        {/* Remaining jobs — continues below "Jobs for you" */}
-        {!jobsLoading && jobsList.length > 3 && (
-          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="More jobs for you" />
-            <JobsList jobs={jobsList.slice(3)} onApply={handleRowApply} />
-          </div>
-        )}
-
-        {/* People — locked for free (no findCliffPeople during onboarding).
-            Sits BELOW both job sections so the free wow (jobs + next step)
-            comes first; people are the unlock / pay layer. Ask a parent is
-            primary; Unlock with Pro is secondary. */}
-        <LockedPeopleCard
-          school={user?.school}
-          chipText={heroMeta.chipText}
-          chipLabel={heroMeta.chipLabel}
-          city={searchLoc}
-          onUpgrade={handleUpgrade}
-          onAskParent={handleAskParent}
-        />
-
-        {/* Continue your plan — stays last */}
+        {/* 5. Continue with free — stays last (above the collapsed people fallback) */}
         {!jobsLoading && (
           <div style={{ textAlign: 'center', marginTop: 4, marginBottom: 8 }}>
             <button onClick={handleContinueFree} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
               Continue with free →
             </button>
+          </div>
+        )}
+
+        {/* 4. People unlock — collapsed fallback at the very bottom. Only expands
+            on tap; the primary insider path is the per-company beat after Interested. */}
+        {!jobsLoading && (
+          <div style={{ marginTop: 12 }}>
+            <button
+              onClick={() => setShowPeople(s => !s)}
+              style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT3, background: '#fff', border: `1px solid #e2e8f0`, borderRadius: 999, padding: '10px 14px', cursor: 'pointer', minHeight: 'auto' }}
+            >
+              <Users size={13} /> People from your school — unlock
+              <ChevronDown size={13} style={{ transform: showPeople ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+            {showPeople && (
+              <div style={{ marginTop: 10 }}>
+                <LockedPeopleCard
+                  school={user?.school}
+                  chipText={heroMeta.chipText}
+                  chipLabel={heroMeta.chipLabel}
+                  city={searchLoc}
+                  onUpgrade={handleUpgrade}
+                  onAskParent={handleAskParent}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -315,9 +377,6 @@ export default function MagicMoment() {
           user={user}
           onClose={() => {
             setProModalConfig(null);
-            // Only continue to the dashboard if this modal was opened from the
-            // soft completion beat (the student already said "continue with
-            // free"). Inline closes from the LockedPeopleCard stay on MM.
             if (modalFromBeatRef.current) {
               modalFromBeatRef.current = false;
               navigate('/FreeTierDashboard');
