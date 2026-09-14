@@ -159,6 +159,17 @@ export default function MagicMoment() {
     return kept.slice(0, 3);
   }, [rankedPool, dismissedKeys]);
 
+  // Distinct why-lines — no two visible cards lead with the same reason.
+  const displayMoves = useMemo(() => {
+    const used = new Set();
+    return visibleMoves.map(move => {
+      const reasons = move.reasons?.length ? move.reasons : [move.why];
+      const why = reasons.find(r => !used.has(r)) || reasons[0];
+      used.add(why);
+      return { ...move, why };
+    });
+  }, [visibleMoves]);
+
   useEffect(() => {
     if (!jobsLoading && visibleMoves.length > 0) {
       base44.analytics.track({ eventName: 'best_move_shown', properties: { count: visibleMoves.length } });
@@ -207,18 +218,15 @@ export default function MagicMoment() {
     base44.analytics.track({ eventName: 'move_interested', properties: { company: job.name, role: job.job_title } });
     base44.analytics.track({ eventName: 'insider_ask_shown', properties: { company: job.name } });
   };
-  // Bad-three recovery — dismiss all visible moves at once.
-  const handleNoneOfThese = () => {
+  // Recovery CTA — "Show me 3 different moves": dismiss the current batch so
+  // the refetch excludes them, then re-fetch live. Still max 3; never a wall.
+  const handleShowDifferentMoves = async () => {
     setDismissedKeys(prev => {
       const n = new Set(prev);
       visibleMoves.forEach(m => n.add(jobKeyOf(m.job)));
       return n;
     });
     setInterestedKey(null);
-  };
-  // Escape hatch: refetch live (new jobs may have appeared); dismissed stay
-  // excluded via visibleMoves filter. Never expands into a job wall.
-  const handleShowDifferentMoves = async () => {
     setJobsLoading(true);
     setError('');
     try {
@@ -356,7 +364,7 @@ export default function MagicMoment() {
                 {shortMessage}
               </p>
             )}
-            {visibleMoves.map((move, i) => {
+            {displayMoves.map((move, i) => {
               const k = jobKeyOf(move.job);
               return (
                 <BestMoveCard
@@ -375,8 +383,8 @@ export default function MagicMoment() {
                 />
               );
             })}
-            <button onClick={handleNoneOfThese} style={{ width: '100%', fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', marginTop: 8, textDecoration: 'underline' }}>
-              None of these
+            <button onClick={handleShowDifferentMoves} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginTop: 10 }}>
+              Show me 3 different moves →
             </button>
           </div>
         ) : allDismissed ? (
