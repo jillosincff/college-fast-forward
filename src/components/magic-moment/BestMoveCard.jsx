@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Briefcase, MapPin, Zap, Mic, FileText, ExternalLink, Check, X } from 'lucide-react';
+import { Briefcase, MapPin, Zap, FileText, ExternalLink, Check, X } from 'lucide-react';
 import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER, R, SHADOW_MD, GRAD_INDIGO } from '@/components/onboarding-flow/onboardingShared';
 import { applyUrlOf } from '@/lib/jobFreshness';
 
@@ -8,13 +8,12 @@ const BADGE = {
   stretch: { label: 'Stretch', bg: '#fef3c7', border: '#fcd34d', text: '#a16207' },
 };
 
-// One ranked move in the recruiter loop. Primary CTA (pressure-test) only on #1.
-// Interested reveals the company-specific insider beat (passed in via prop).
-// Tailor / Apply / Add to Applied are demoted secondary actions that work unpaid.
-// "Not for me" dismisses so the next ranked candidate backfills (still max 3).
+// One ranked move in the recruiter loop. Day-0 primary path on every card is
+// Interested → Tailor → Apply → Add to Applied (all unpaid). Mock-interview
+// (pressure-test) stays wired in the page for later (interview invite / day-3);
+// it's just not the day-0 CTA. "Not for me" dismisses → next ranked backfills.
 export default function BestMoveCard({ move, index, onPressureTest, onInterested, onTailor, onApply, onAddApplied, onNotForMe, insiderBeat }) {
   const { job, verdict, why } = move;
-  const isPrimary = index === 0;
   const badge = BADGE[verdict] || BADGE.stretch;
   const [applied, setApplied] = useState(false);
   const applyUrl = applyUrlOf(job);
@@ -44,13 +43,6 @@ export default function BestMoveCard({ move, index, onPressureTest, onInterested
         {why}
       </p>
 
-      {/* Primary CTA — pressure-test, only on #1 */}
-      {isPrimary && (
-        <button onClick={() => onPressureTest(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '13px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>
-          <Mic size={15} /> Pressure-test me for this role →
-        </button>
-      )}
-
       {/* Interested — reveals the company-specific insider beat */}
       <button onClick={() => onInterested(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10 }}>
         I'm interested in this company
@@ -59,20 +51,22 @@ export default function BestMoveCard({ move, index, onPressureTest, onInterested
       {/* Insider beat (company-specific, only after Interested) */}
       {insiderBeat}
 
-      {/* Secondary actions — demoted, all work unpaid on this free cycle */}
+      {/* Day-0 primary path — Tailor → Apply (obvious next steps, all unpaid) */}
+      <button onClick={() => onTailor(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>
+        <FileText size={15} /> Tailor resume for this role
+      </button>
+      {applied ? (
+        <div style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 999, padding: '11px 16px', marginBottom: 8 }}>
+          <Check size={15} /> Applied — nice work
+        </div>
+      ) : applyUrl ? (
+        <a href={applyUrl} target="_blank" rel="noopener noreferrer" onClick={() => { onApply(job); setApplied(true); }} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, textDecoration: 'none' }}>
+          <ExternalLink size={15} /> Apply on {job.name || 'site'} →
+        </a>
+      ) : null}
+
+      {/* Track + dismiss — small actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', borderTop: '1px solid #f1f5f9', paddingTop: 10 }}>
-        <button onClick={() => onTailor(job)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 6px' }}>
-          <FileText size={13} /> Tailor resume
-        </button>
-        {applied ? (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT, fontSize: 12, fontWeight: 800, color: '#15803d', padding: '4px 6px' }}>
-            <Check size={13} /> Applied
-          </span>
-        ) : applyUrl ? (
-          <a href={applyUrl} target="_blank" rel="noopener noreferrer" onClick={() => { onApply(job); setApplied(true); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: INDIGO, textDecoration: 'none', padding: '4px 6px' }}>
-            <ExternalLink size={13} /> Apply
-          </a>
-        ) : null}
         <button onClick={() => onAddApplied(job)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 6px' }}>
           <Check size={13} /> Add to Applied
         </button>

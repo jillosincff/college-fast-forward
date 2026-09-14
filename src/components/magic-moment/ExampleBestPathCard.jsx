@@ -3,8 +3,8 @@ import { Check, Briefcase, Sparkles, MapPin, ArrowRight, Zap } from 'lucide-reac
 import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER, R, SHADOW_MD } from '@/components/onboarding-flow/onboardingShared';
 
 // EXAMPLE — clearly labeled, fixed sample. Shows the guided-search recruiter
-// loop: a job CLIFF picked (Pursue) + a one-line honest why + a next step
-// (pressure-test). NO alumni, NO outreach draft, NO live person.
+// loop: a job CLIFF picked (Pursue) + a one-line honest why + the day-0 path
+// (Interested → Tailor → Apply). NO alumni, NO outreach draft, NO live person.
 // People stay behind the pay layer (insider beat / LockedPeopleCard).
 
 const SAMPLE_BY_CHIP = {
@@ -77,11 +77,11 @@ export default function ExampleBestPathCard({ school, chipText, chipLabel, city 
         </p>
       </div>
 
-      {/* Next step — pressure-test */}
+      {/* Next step — day-0 path */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#faf5ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 8, padding: '10px 12px', marginBottom: 14 }}>
         <ArrowRight size={14} color={INDIGO} style={{ flexShrink: 0 }} />
         <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1.4 }}>
-          Next step: Pressure-test me for this role
+          Next step: I'm interested → Tailor resume → Apply
         </span>
       </div>
 
