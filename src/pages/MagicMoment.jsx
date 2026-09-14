@@ -167,9 +167,14 @@ export default function MagicMoment() {
   const handlePressureTest = (job) => {
     markComplete({ result_type: 'pressure_test' });
     base44.analytics.track({ eventName: 'pressure_test_started', properties: { company: job.name, role: job.job_title } });
-    const company = encodeURIComponent(job.name || '');
-    const role = encodeURIComponent(job.job_title || '');
-    navigate(`/MockInterview?company=${company}&role=${role}&mm_free=1`);
+    const params = new URLSearchParams({
+      company: job.name || '',
+      role: job.job_title || '',
+      mm_free: '1',
+    });
+    const jd = (job.hiring_description || '').slice(0, 1000);
+    if (jd) params.set('jd', jd);
+    navigate(`/MockInterview?${params.toString()}`);
   };
   const handleTailor = (job) => {
     markComplete({ result_type: 'tailor' });

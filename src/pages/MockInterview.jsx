@@ -39,11 +39,12 @@ function SideNav() {
   );
 }
 
-const buildSystemPrompt = (user, prefillCompany, prefillRole) => {
+const buildSystemPrompt = (user, prefillCompany, prefillRole, prefillJd) => {
   const companyLine = prefillCompany ? `\nTarget Company: ${prefillCompany} — adopt the persona of a senior hiring manager at ${prefillCompany} and tailor ALL questions to this company's culture, values, and known interview style.` : '';
   const roleLine = prefillRole ? `\nTarget Role: ${prefillRole} — every question must be specifically relevant to this exact position.` : '';
+  const jdLine = prefillJd ? `\nJob description context — tailor questions to this role's actual requirements: ${prefillJd}` : '';
 
-  return `You are a professional interviewer${prefillCompany ? ` at ${prefillCompany}` : ''} conducting a realistic mock interview.${companyLine}${roleLine}
+  return `You are a professional interviewer${prefillCompany ? ` at ${prefillCompany}` : ''} conducting a realistic mock interview.${companyLine}${roleLine}${jdLine}
 
 Student profile:
 - Name: ${user?.full_name?.split(' ')[0] || 'the student'}
@@ -72,6 +73,7 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const urlCompany = hashParams.get('company') || '';
   const urlRole = hashParams.get('role') || '';
   const urlMmFree = hashParams.get('mm_free') === '1';
+  const urlJd = hashParams.get('jd') || '';
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -94,7 +96,7 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   }, [messages]);
 
   const buildPrompt = (history, newUserMessage) => {
-    const system = buildSystemPrompt(user, urlCompany, urlRole);
+    const system = buildSystemPrompt(user, urlCompany, urlRole, urlJd);
     const historyText = history.map(m =>
       `${m.role === 'user' ? 'Student' : 'Interviewer'}: ${m.content}`
     ).join('\n\n');
