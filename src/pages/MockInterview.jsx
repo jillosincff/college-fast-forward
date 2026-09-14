@@ -71,6 +71,7 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
   const urlCompany = hashParams.get('company') || '';
   const urlRole = hashParams.get('role') || '';
+  const urlMmFree = hashParams.get('mm_free') === '1';
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -82,6 +83,9 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
 
   const isFastIQ = checkIsFastIQ(user);
   const trialExpired = user?.trial_status === 'expired' && user?.subscription_status !== 'active';
+  // One free pressure-test tied to a Magic Moment Best Move (mm_free=1).
+  // Consumed once (mm_pressure_test_used); unlimited use still soft-walls.
+  const mmFreeAllowed = urlMmFree && !user?.mm_pressure_test_used;
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
 
@@ -100,16 +104,21 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
 
   // Auto-start when company+role are pre-loaded from CliFF's proactive button
   useEffect(() => {
-    if (urlCompany && urlRole && user && isFastIQ && !started && !loading) {
+    if (urlCompany && urlRole && user && (isFastIQ || mmFreeAllowed) && !started && !loading) {
       startInterview();
     }
   }, [user, isFastIQ]);
 
   const startInterview = async () => {
-    // Try to activate trial if not yet a FastIQ member
-    if (!isFastIQ) {
+    // Try to activate trial if not yet a FastIQ member — UNLESS this is the
+    // one free Magic Moment pressure-test (mm_free), which runs directly.
+    if (!isFastIQ && !mmFreeAllowed) {
       const activated = await maybeActivateTrial(user, refreshUser);
       if (!activated) { onOpenUpgrade(); return; }
+    }
+    if (mmFreeAllowed) {
+      base44.auth.updateMe({ mm_pressure_test_used: true }).catch(() => {});
+      base44.analytics.track({ eventName: 'pressure_test_started', properties: { company: urlCompany, role: urlRole, source: 'magic_moment_free' } });
     }
     setStarted(true);
     setLoading(true);
@@ -161,8 +170,10 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
     setLoading(false);
   };
 
-  // Soft wall: mock interviews are a Pro feature (free only during the Magic Moment).
-  if (!isFastIQ || trialExpired) {
+  // Soft wall: mock interviews are a Pro feature. Free pass only for the one
+  // Magic Moment pressure-test (mm_free=1, not yet consumed); unlimited use
+  // after that still soft-walls.
+  if ((!isFastIQ || trialExpired) && !mmFreeAllowed) {
     return <SoftWallModal user={user} onClose={() => navigate('FreeTierDashboard')} source="mock_interview" />;
   }
 

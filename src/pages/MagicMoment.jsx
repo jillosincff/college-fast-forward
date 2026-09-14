@@ -148,20 +148,28 @@ export default function MagicMoment() {
 
   // Ranked pool — Pursue first, Stretch to fill. Off-screen / skip-tier jobs
   // never render. Top 3 shown; "Not for me" dismisses one and backfills.
+  const seeking = user?.career_goals?.seeking;
   const rankedPool = useMemo(
-    () => rankMoves(jobsList, { chipText: heroMeta.chipText, chipLabel: heroMeta.chipLabel }),
-    [jobsList, heroMeta.chipText, heroMeta.chipLabel]
+    () => rankMoves(jobsList, { chipText: heroMeta.chipText, chipLabel: heroMeta.chipLabel, seeking }),
+    [jobsList, heroMeta.chipText, heroMeta.chipLabel, seeking]
   );
   const visibleMoves = useMemo(() => {
     const kept = rankedPool.filter(m => !dismissedKeys.has(jobKeyOf(m.job)));
     return kept.slice(0, 3);
   }, [rankedPool, dismissedKeys]);
 
+  useEffect(() => {
+    if (!jobsLoading && visibleMoves.length > 0) {
+      base44.analytics.track({ eventName: 'best_move_shown', properties: { count: visibleMoves.length } });
+    }
+  }, [jobsLoading, visibleMoves.length]);
+
   const handlePressureTest = (job) => {
     markComplete({ result_type: 'pressure_test' });
+    base44.analytics.track({ eventName: 'pressure_test_started', properties: { company: job.name, role: job.job_title } });
     const company = encodeURIComponent(job.name || '');
     const role = encodeURIComponent(job.job_title || '');
-    navigate(`/MockInterview?company=${company}&role=${role}`);
+    navigate(`/MockInterview?company=${company}&role=${role}&mm_free=1`);
   };
   const handleTailor = (job) => {
     markComplete({ result_type: 'tailor' });
@@ -188,7 +196,11 @@ export default function MagicMoment() {
     setDismissedKeys(prev => { const n = new Set(prev); n.add(k); return n; });
     if (interestedKey === k) setInterestedKey(null);
   };
-  const handleInterested = (job) => { setInterestedKey(jobKeyOf(job)); };
+  const handleInterested = (job) => {
+    setInterestedKey(jobKeyOf(job));
+    base44.analytics.track({ eventName: 'move_interested', properties: { company: job.name, role: job.job_title } });
+    base44.analytics.track({ eventName: 'insider_ask_shown', properties: { company: job.name } });
+  };
 
   const handleAskParent = () => {
     paywallOpenedRef.current = true;
