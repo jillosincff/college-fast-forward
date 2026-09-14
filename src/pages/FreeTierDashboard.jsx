@@ -40,6 +40,7 @@ import LocationPrefPrompt from '@/components/free-tier/LocationPrefPrompt';
 import useAccessPlan from '@/hooks/useAccessPlan';
 import FreeHomeFeed from '@/components/free-tier/FreeHomeFeed';
 import FinishMagicMomentBanner from '@/components/free-tier/FinishMagicMomentBanner';
+import Day3FollowUpBeat from '@/components/free-tier/Day3FollowUpBeat';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -308,6 +309,7 @@ export default function FreeTierDashboard() {
           <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 16px 0' }}>
             <FinishMagicMomentBanner user={user} />
           </div>
+          <Day3FollowUpBeat user={user} />
           <FreeHomeFeed user={user} onUpgrade={triggerUpgrade} />
         </div>
       )}
