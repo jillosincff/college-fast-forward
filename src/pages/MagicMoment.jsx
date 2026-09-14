@@ -40,6 +40,7 @@ export default function MagicMoment() {
   const { user: authUser } = useAuth();
   const navigate = useNavigate();
   const ranRef = useRef(false);
+  const searchInputRef = useRef(null);
 
   const [jobsList, setJobsList] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
@@ -206,6 +207,40 @@ export default function MagicMoment() {
     base44.analytics.track({ eventName: 'move_interested', properties: { company: job.name, role: job.job_title } });
     base44.analytics.track({ eventName: 'insider_ask_shown', properties: { company: job.name } });
   };
+  // Bad-three recovery — dismiss all visible moves at once.
+  const handleNoneOfThese = () => {
+    setDismissedKeys(prev => {
+      const n = new Set(prev);
+      visibleMoves.forEach(m => n.add(jobKeyOf(m.job)));
+      return n;
+    });
+    setInterestedKey(null);
+  };
+  // Escape hatch: refetch live (new jobs may have appeared); dismissed stay
+  // excluded via visibleMoves filter. Never expands into a job wall.
+  const handleShowDifferentMoves = async () => {
+    setJobsLoading(true);
+    setError('');
+    try {
+      const cg = user?.career_goals || {};
+      const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
+      const industries = cg.target_industries || [];
+      const location = cg.location_preference || '';
+      const { jobs, shortMessage: sm } = await buildLiveJobsList({
+        role, industries, location, seeking: cg.seeking, chipText: heroMeta.chipText,
+      });
+      setJobsList(jobs);
+      setShortMessage(sm);
+      setJobsLoading(false);
+    } catch (e) {
+      setError('CLIFF hit a snag building your plan. Please try again in a moment.');
+      setJobsLoading(false);
+    }
+  };
+  const handleRefineSearch = () => {
+    searchInputRef.current?.focus();
+    searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   const handleAskParent = () => {
     paywallOpenedRef.current = true;
@@ -237,6 +272,7 @@ export default function MagicMoment() {
       <div style={{ flex: '1 1 180px', position: 'relative' }}>
         <Search size={14} color={INDIGO_DIM} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
         <input
+          ref={searchInputRef}
           value={searchRole}
           onChange={e => setSearchRole(e.target.value)}
           placeholder="Role (e.g. HR, Marketing, Finance)"
@@ -258,6 +294,7 @@ export default function MagicMoment() {
     </form>
   );
 
+  const allDismissed = visibleMoves.length === 0 && dismissedKeys.size > 0;
   const allPursue = visibleMoves.length > 0 && visibleMoves.every(m => m.verdict === 'pursue');
   const agentLine = visibleMoves.length > 0
     ? `Most of what's out there isn't worth your time. I picked ${visibleMoves.length} ${allPursue ? "I'd actually pursue" : 'worth a look'}${heroMeta.chipLabel ? ` for ${heroMeta.chipLabel}` : ''}${searchLoc ? ` in ${searchLoc}` : ''} — start with #1.`
@@ -338,6 +375,23 @@ export default function MagicMoment() {
                 />
               );
             })}
+            <button onClick={handleNoneOfThese} style={{ width: '100%', fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', marginTop: 8, textDecoration: 'underline' }}>
+              None of these
+            </button>
+          </div>
+        ) : allDismissed ? (
+          <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
+            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="Today's Best Moves" />
+            <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>None of those fit?</p>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '0 0 14px', lineHeight: 1.5 }}>Let me look again — or tweak your search.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+              <button onClick={handleShowDifferentMoves} style={pill({ width: '100%', maxWidth: 320, justifyContent: 'center' })}>
+                Show me 3 different moves →
+              </button>
+              <button onClick={handleRefineSearch} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: INDIGO_DIM, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
+                Refine my search
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
