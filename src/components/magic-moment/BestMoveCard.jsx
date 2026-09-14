@@ -34,31 +34,33 @@ export default function BestMoveCard({ move, index, interested, onPressureTest, 
         <h3 style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.3 }}>{job.job_title}</h3>
       </div>
       <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, margin: '2px 0 2px' }}>{job.name}</p>
-      <p style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 8px' }}>
-        <MapPin size={11} color={TEXT3} /> {job.location || 'Location not listed'}
-      </p>
+      {job.location ? (
+        <p style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 8px' }}>
+          <MapPin size={11} color={TEXT3} /> {job.location}
+        </p>
+      ) : null}
 
       {/* Why — one honest line from real signals */}
       <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 12px', lineHeight: 1.5, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px' }}>
         {why}
       </p>
 
-      {/* Interested — commits the card to the tailor/apply path (no insider/people) */}
-      <button onClick={() => onInterested(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 800, color: interested ? '#fff' : INDIGO_DIM, background: interested ? INDIGO : '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10 }}>
+      {/* Interested — the purple primary; commits the card to the tailor/apply path */}
+      <button onClick={() => onInterested(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '13px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>
         {interested ? '✓ Interested — next: tailor your resume' : "I'm interested in this company"}
       </button>
 
-      {/* Day-0 primary path — Tailor → Apply (obvious next steps, all unpaid) */}
-      <button onClick={() => onTailor(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>
-        <FileText size={15} /> Tailor resume for this role
+      {/* Tailor — secondary outline (quieter than Interested) */}
+      <button onClick={() => onTailor(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8 }}>
+        <FileText size={14} /> Tailor resume for this role
       </button>
       {applied ? (
         <div style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 999, padding: '11px 16px', marginBottom: 8 }}>
           <Check size={15} /> Applied — nice work
         </div>
       ) : applyUrl ? (
-        <a href={applyUrl} target="_blank" rel="noopener noreferrer" onClick={() => { onApply(job); setApplied(true); }} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, textDecoration: 'none' }}>
-          <ExternalLink size={15} /> Apply on {job.name || 'site'} →
+        <a href={applyUrl} target="_blank" rel="noopener noreferrer" onClick={() => { onApply(job); setApplied(true); }} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, textDecoration: 'none' }}>
+          <ExternalLink size={14} /> Apply on {job.name || 'site'} →
         </a>
       ) : null}
 

@@ -53,6 +53,9 @@ export function rankMoves(jobs, { chipText, chipLabel, seeking } = {}) {
       const loc = job.location || '';
       const isRemote = /\bremote\b|work\s*from\s*home/i.test(loc);
       const inMarket = tier === 'same_location' || tier === 'nearby';
+      // Real geo signal = a city / remote / metro string. Empty / "unknown" /
+      // "not listed" locations are NOT a real signal — demoted on geo searches.
+      const hasLoc = !!loc && !/unspecified|unknown|not\s*(listed|specified)|n\/a/i.test(loc);
       const onChip = checkOnChip(job.job_title, chipKeywords).ok;
 
       const isIntern = /\bintern(ship)?\b/i.test(job.job_title || '');
@@ -66,6 +69,7 @@ export function rankMoves(jobs, { chipText, chipLabel, seeking } = {}) {
       if (inMarket) score += 2;
       else if (isRemote) score += 1;
       if (levelOk) score += 1; else score -= 2;
+      if (!hasLoc) score -= 2;   // empty/unknown location demoted vs real city/remote/metro
 
       const verdict = (job.live && onChip && levelOk && (inMarket || isRemote)) ? 'pursue' : 'stretch';
 
@@ -89,16 +93,19 @@ export function rankMoves(jobs, { chipText, chipLabel, seeking } = {}) {
       else if (onChip) reasons.push(`On-track for ${label}.`);
       if (inMarket) reasons.push(`Hiring in ${loc || 'your area'}.`);
       else if (isRemote) reasons.push('Remote — apply from anywhere.');
-      else reasons.push('Outside your metro.');
+      else if (hasLoc) reasons.push('Outside your metro.');
       if (isDateFresh(job)) reasons.push('Just posted.');
 
-      return { job, verdict, why: reasons[0] || 'Worth a look.', reasons, score, tier, inMarket, isRemote, onChip, levelOk };
+      return { job, verdict, why: reasons[0] || 'Worth a look.', reasons, score, tier, inMarket, isRemote, onChip, levelOk, hasLoc };
     });
 
   scored.sort((a, b) => {
     if (a.verdict !== b.verdict) return a.verdict === 'pursue' ? -1 : 1;
     if (b.score !== a.score) return b.score - a.score;
-    return TIER_RANK[a.tier] - TIER_RANK[b.tier];
+    if (TIER_RANK[a.tier] !== TIER_RANK[b.tier]) return TIER_RANK[a.tier] - TIER_RANK[b.tier];
+    // Real city / remote / metro signal ranks above empty-location on geo searches
+    if (a.hasLoc !== b.hasLoc) return a.hasLoc ? -1 : 1;
+    return 0;
   });
 
   return scored;
