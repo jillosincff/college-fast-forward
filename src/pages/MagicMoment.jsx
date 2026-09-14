@@ -273,9 +273,17 @@ export default function MagicMoment() {
           </div>
         )}
 
+        {/* Remaining jobs — continues below "Jobs for you" */}
+        {!jobsLoading && jobsList.length > 3 && (
+          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
+            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="More jobs for you" />
+            <JobsList jobs={jobsList.slice(3)} onApply={handleRowApply} />
+          </div>
+        )}
+
         {/* People — locked for free (no findCliffPeople during onboarding).
-            Sits ABOVE the long jobs list so the pay module interrupts right
-            after the first 2–3 jobs, not after all of them. Ask a parent is
+            Sits BELOW both job sections so the free wow (jobs + next step)
+            comes first; people are the unlock / pay layer. Ask a parent is
             primary; Unlock with Pro is secondary. */}
         <LockedPeopleCard
           school={user?.school}
@@ -285,14 +293,6 @@ export default function MagicMoment() {
           onUpgrade={handleUpgrade}
           onAskParent={handleAskParent}
         />
-
-        {/* Remaining jobs — the long list continues below the people lock */}
-        {!jobsLoading && jobsList.length > 3 && (
-          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW_MD, padding: '20px 18px', marginBottom: 16, border: `1.5px solid ${INDIGO_BORDER}` }}>
-            <SectionLabel icon={<Briefcase size={14} color={INDIGO_DIM} />} label="More jobs for you" />
-            <JobsList jobs={jobsList.slice(3)} onApply={handleRowApply} />
-          </div>
-        )}
 
         {/* Continue your plan — stays last */}
         {!jobsLoading && (
