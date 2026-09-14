@@ -12,7 +12,7 @@ const BADGE = {
 // Interested → Tailor → Apply → Add to Applied (all unpaid). Mock-interview
 // (pressure-test) stays wired in the page for later (interview invite / day-3);
 // it's just not the day-0 CTA. "Not for me" dismisses → next ranked backfills.
-export default function BestMoveCard({ move, index, onPressureTest, onInterested, onTailor, onApply, onAddApplied, onNotForMe, insiderBeat }) {
+export default function BestMoveCard({ move, index, interested, onPressureTest, onInterested, onTailor, onApply, onAddApplied, onNotForMe, warmBeat }) {
   const { job, verdict, why } = move;
   const badge = BADGE[verdict] || BADGE.stretch;
   const [applied, setApplied] = useState(false);
@@ -43,13 +43,10 @@ export default function BestMoveCard({ move, index, onPressureTest, onInterested
         {why}
       </p>
 
-      {/* Interested — reveals the company-specific insider beat */}
-      <button onClick={() => onInterested(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10 }}>
-        I'm interested in this company
+      {/* Interested — commits the card to the tailor/apply path (no insider/people) */}
+      <button onClick={() => onInterested(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 800, color: interested ? '#fff' : INDIGO_DIM, background: interested ? INDIGO : '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10 }}>
+        {interested ? '✓ Interested — next: tailor your resume' : "I'm interested in this company"}
       </button>
-
-      {/* Insider beat (company-specific, only after Interested) */}
-      {insiderBeat}
 
       {/* Day-0 primary path — Tailor → Apply (obvious next steps, all unpaid) */}
       <button onClick={() => onTailor(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '12px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>
@@ -74,6 +71,9 @@ export default function BestMoveCard({ move, index, onPressureTest, onInterested
           <X size={13} /> Not for me
         </button>
       </div>
+
+      {/* Warm connections (people unlock) — only after Apply / Add to Applied */}
+      {warmBeat}
     </div>
   );
 }

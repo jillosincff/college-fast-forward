@@ -16,18 +16,19 @@ import { rankMoves, jobKeyOf } from '@/lib/magicMomentMoves';
 import ExampleBestPathCard from '@/components/magic-moment/ExampleBestPathCard';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
 import BestMoveCard from '@/components/magic-moment/BestMoveCard';
-import CompanyInsiderBeat from '@/components/magic-moment/CompanyInsiderBeat';
+import WarmConnectionsBeat from '@/components/magic-moment/WarmConnectionsBeat';
 import MagicMomentCompleteBeat from '@/components/magic-moment/MagicMomentCompleteBeat';
 
 // REBUILT — guided recruiter loop (not a job board, not tailor-as-aha).
 // Free MM wow = "I've got this": CLIFF picks ≤3 roles to pursue, each with a
-// one-line honest why from real signals. Primary CTA (pressure-test) on #1
-// opens Mock Interview for that role. Tailor / Apply / Add to Applied are
-// demoted secondary actions that work unpaid on this free cycle.
-// People / insiders are the unlock layer — shown per-company ONLY after the
-// student taps "Interested", never auto, never via findCliffPeople on free.
-// The always-on LockedPeopleCard stays collapsed at the very bottom as a
-// fallback. MM is not auto-completed just because jobs loaded.
+// one-line honest why from real signals. Day-0 primary path on every card is
+// Interested → Tailor → Apply → Add to Applied (all unpaid). Mock-interview
+// (pressure-test) stays wired for later (interview invite / day-3) — it's not
+// the day-0 CTA. Interested commits the card to the tailor/apply path ONLY; it
+// does NOT open an insider/people ask. Warm connections (people unlock) show
+// per-company ONLY after the student applies or adds to their tracker — never
+// before. The always-on LockedPeopleCard stays collapsed at the very bottom as
+// a fallback. MM is not auto-completed just because jobs loaded.
 
 const pill = (extra) => ({
   fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: GRAD_INDIGO,
@@ -56,6 +57,7 @@ export default function MagicMoment() {
   // Recruiter-loop state
   const [dismissedKeys, setDismissedKeys] = useState(() => new Set());
   const [interestedKey, setInterestedKey] = useState(null);
+  const [actionedKeys, setActionedKeys] = useState(() => new Set());
   const [showPeople, setShowPeople] = useState(false);
 
   const cg0 = authUser?.career_goals || {};
@@ -203,10 +205,12 @@ export default function MagicMoment() {
   const handleApply = (job) => {
     markComplete({ result_type: 'apply' });
     logJobApplied({ user, job });
+    setActionedKeys(prev => { const n = new Set(prev); n.add(jobKeyOf(job)); return n; });
   };
   const handleAddApplied = (job) => {
     markComplete({ result_type: 'add_applied' });
     logJobApplied({ user, job });
+    setActionedKeys(prev => { const n = new Set(prev); n.add(jobKeyOf(job)); return n; });
   };
   const handleNotForMe = (job) => {
     const k = jobKeyOf(job);
@@ -216,7 +220,7 @@ export default function MagicMoment() {
   const handleInterested = (job) => {
     setInterestedKey(jobKeyOf(job));
     base44.analytics.track({ eventName: 'move_interested', properties: { company: job.name, role: job.job_title } });
-    base44.analytics.track({ eventName: 'insider_ask_shown', properties: { company: job.name } });
+    // Interested commits the card to the tailor/apply path ONLY — no insider/people ask here.
   };
   // Recovery CTA — "Show me 3 different moves": dismiss the current batch so
   // the refetch excludes them, then re-fetch live. Still max 3; never a wall.
@@ -371,14 +375,15 @@ export default function MagicMoment() {
                   key={k}
                   move={move}
                   index={i}
+                  interested={interestedKey === k}
                   onPressureTest={handlePressureTest}
                   onInterested={handleInterested}
                   onTailor={handleTailor}
                   onApply={handleApply}
                   onAddApplied={handleAddApplied}
                   onNotForMe={handleNotForMe}
-                  insiderBeat={interestedKey === k ? (
-                    <CompanyInsiderBeat company={move.job.name} onAskParent={handleAskParent} onUpgrade={handleUpgrade} />
+                  warmBeat={actionedKeys.has(k) ? (
+                    <WarmConnectionsBeat company={move.job.name} onAskParent={handleAskParent} onUpgrade={handleUpgrade} />
                   ) : null}
                 />
               );
@@ -419,7 +424,7 @@ export default function MagicMoment() {
         )}
 
         {/* 4. People unlock — collapsed fallback at the very bottom. Only expands
-            on tap; the primary insider path is the per-company beat after Interested. */}
+            on tap; the warm-connections beat (per-company) shows after Apply / Add to Applied. */}
         {!jobsLoading && (
           <div style={{ marginTop: 12 }}>
             <button

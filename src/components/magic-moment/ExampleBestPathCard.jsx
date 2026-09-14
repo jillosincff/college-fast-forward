@@ -78,12 +78,15 @@ export default function ExampleBestPathCard({ school, chipText, chipLabel, city 
       </div>
 
       {/* Next step — day-0 path */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#faf5ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 8, padding: '10px 12px', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#faf5ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 8, padding: '10px 12px', marginBottom: 10 }}>
         <ArrowRight size={14} color={INDIGO} style={{ flexShrink: 0 }} />
         <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1.4 }}>
           Next step: I'm interested → Tailor resume → Apply
         </span>
       </div>
+      <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 14px', lineHeight: 1.5 }}>
+        Then, once you've applied: <strong style={{ color: INDIGO_DIM }}>Want warm connections at {sample.company}?</strong> (Pro)
+      </p>
 
       <button onClick={() => setGotIt(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: FONT, fontSize: 12, fontWeight: 800, color: '#fff', background: INDIGO, border: 'none', borderRadius: 999, padding: '10px 16px', cursor: 'pointer', minHeight: 'auto', width: '100%', justifyContent: 'center' }}>
         {gotIt ? <><Check size={14} /> Got it</> : 'Got it'}
