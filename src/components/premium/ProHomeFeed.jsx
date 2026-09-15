@@ -4,23 +4,21 @@ import {
   FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
   SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { Briefcase, ArrowRight, Users, ChevronDown } from 'lucide-react';
+import { Briefcase, ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { logJobApplied } from '@/lib/magicMomentLog';
 import { useJobsFeed } from '@/hooks/useJobsFeed';
 import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 import JobsRefreshBar from '@/components/free-tier/JobsRefreshBar';
 import JobsList from '@/components/magic-moment/JobsList';
-import JessePeopleCard from '@/components/premium/JessePeopleCard';
 import ProNextMoveCard from '@/components/premium/ProNextMoveCard';
 import Day3FollowUpBeat from '@/components/free-tier/Day3FollowUpBeat';
 import WeeklyActivityStrip from '@/components/free-tier/WeeklyActivityStrip';
 
-// Pro home — same personal recruiter as the free Magic Moment, with people
-// unlocked. Above the fold: Day-3 follow-up beat (if eligible) → Your Next
-// Move (Tailor / Apply / Track — not Apply-only). People (Jesse) is demoted:
-// collapsed by default, below the Next Move, framed as warm connections after
-// apply — never the co-hero #2.
+// Pro home — personal recruiter loop. Above the fold: weekly activity strip →
+// Day-3 follow-up beat (if eligible) → Your Next Move (Tailor / Apply / Track).
+// Warm connections live ONLY on the job workspace after applying (post-apply
+// beat), never as their own section on home.
 export default function ProHomeFeed({ user, onOpenTools }) {
   const navigate = useNavigate();
   const {
@@ -102,55 +100,19 @@ export default function ProHomeFeed({ user, onOpenTools }) {
         </div>
       )}
 
-      {/* 4. Warm connections (people) — demoted, collapsed by default. Framed as
-             after-apply warm intros at your target companies, not the co-hero. */}
-      <CollapsiblePeopleCard user={user} jobs={jobsList} jobsLoading={jobsLoading} />
-
-      {/* 5. Application history — quiet link */}
+      {/* 4. Application history — quiet link */}
       <div style={{ textAlign: 'center', marginTop: 4 }}>
         <button onClick={() => navigate('/ApplicationTracker')} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>
           Application history <ArrowRight size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
         </button>
       </div>
 
-      {/* 6. Quiet toolbox link — paste a job link / Ask CLIFF */}
+      {/* 5. Quiet toolbox link — paste a job link / Ask CLIFF */}
       <div style={{ textAlign: 'center', marginTop: 12 }}>
         <button onClick={onOpenTools} style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: INDIGO_DIM, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>
           Got a job in mind? <ArrowRight size={11} style={{ display: 'inline', verticalAlign: 'middle' }} />
         </button>
       </div>
-    </div>
-  );
-}
-
-// Collapsed-by-default wrapper around JessePeopleCard. The Pro people search
-// (findCliffPeople / Jesse on demand) is NOT removed — it's just no longer the
-// #2 hero. Expanding mounts JessePeopleCard (so the fast search only runs on
-// demand, not on home load).
-function CollapsiblePeopleCard({ user, jobs, jobsLoading }) {
-  const [expanded, setExpanded] = useState(false);
-  return (
-    <div style={{ background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: R, marginBottom: 16, boxShadow: SHADOW_MD, overflow: 'hidden' }}>
-      <button
-        onClick={() => setExpanded(e => !e)}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: '16px 18px', minHeight: 'auto', textAlign: 'left' }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Users size={16} color={INDIGO} />
-          <div>
-            <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 800, color: TEXT, margin: 0 }}>Warm connections</p>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0', lineHeight: 1.4 }}>
-              Alumni at your target companies — find a warm intro after you apply.
-            </p>
-          </div>
-        </div>
-        <ChevronDown size={18} color={INDIGO_DIM} style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
-      </button>
-      {expanded && (
-        <div style={{ padding: '0 18px 18px' }}>
-          <JessePeopleCard user={user} jobs={jobs} jobsLoading={jobsLoading} />
-        </div>
-      )}
     </div>
   );
 }
