@@ -1,4 +1,4 @@
-import { ExternalLink, MapPin, FileText, Check, Mic, ArrowRight, Calendar } from 'lucide-react';
+import { ExternalLink, MapPin, FileText, Check, Mic, ArrowRight, Calendar, X } from 'lucide-react';
 import { FONT, R, SHADOW_MD } from '@/components/onboarding-flow/onboardingShared';
 import { navigate } from '@/components/utils/navigation';
 import { postedLabel } from '@/lib/jobFreshness';
@@ -14,12 +14,12 @@ import { postedLabel } from '@/lib/jobFreshness';
 // Interview mode (a tracked application whose status is 'interview'):
 //   Primary   → Pressure-test → MockInterview preloaded with company/role
 //   Tertiary  → Track
-export default function ProNextMoveCard({ job, interviewMove, city, onApply, onPrepare, onAddApplied }) {
+export default function ProNextMoveCard({ job, interviewMove, city, onApply, onPrepare, onAddApplied, onDismiss }) {
   if (interviewMove) return <InterviewCard move={interviewMove} />;
-  return <Day0Card job={job} city={city} onApply={onApply} onPrepare={onPrepare} onAddApplied={onAddApplied} />;
+  return <Day0Card job={job} city={city} onApply={onApply} onPrepare={onPrepare} onAddApplied={onAddApplied} onDismiss={onDismiss} />;
 }
 
-function Day0Card({ job, city, onApply, onPrepare, onAddApplied }) {
+function Day0Card({ job, city, onApply, onPrepare, onAddApplied, onDismiss }) {
   const jobUrl = job.job_url || job.apply_url || job.url || '#';
   const tierLabel = job._tier === 'same_location' || job._tier === 'nearby'
     ? `Matches your ${city || 'location'} preference`
@@ -28,7 +28,10 @@ function Day0Card({ job, city, onApply, onPrepare, onAddApplied }) {
       : '';
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%)', borderRadius: R, padding: '22px 18px', marginBottom: 16, boxShadow: SHADOW_MD, color: '#fff' }}>
+    <div style={{ position: 'relative', background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%)', borderRadius: R, padding: '22px 18px', marginBottom: 16, boxShadow: SHADOW_MD, color: '#fff' }}>
+      <button onClick={onDismiss} aria-label="Dismiss" style={{ position: 'absolute', top: 10, right: 10, width: 28, height: 28, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.16)', border: 'none', borderRadius: '50%', cursor: 'pointer', minHeight: 'auto', padding: 0, color: '#fff' }}>
+        <X size={15} />
+      </button>
       <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.7)', margin: '0 0 8px' }}>Your next move</p>
       <h2 style={{ fontFamily: FONT, fontSize: 21, fontWeight: 800, color: '#fff', margin: '0 0 8px', lineHeight: 1.2 }}>
         {job.job_title} at {job.name}

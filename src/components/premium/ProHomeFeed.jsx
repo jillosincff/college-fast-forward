@@ -25,7 +25,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
   const {
     jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, mostlyFallback, refresh,
   } = useJobsFeed({ user, maxJobs: 30 });
-  const [nextIdx] = useState(0);
+  const [nextIdx, setNextIdx] = useState(0);
   const [interviewMove, setInterviewMove] = useState(null);
 
   const nextJob = jobsList[nextIdx] || null;
@@ -78,6 +78,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
           onApply={() => logJobApplied({ user, job: nextJob })}
           onPrepare={() => openCliffWorkspace({ company: nextJob.name, role: nextJob.job_title, jobUrl: nextJob.job_url || nextJob.apply_url, ...nextJob })}
           onAddApplied={() => logJobApplied({ user, job: nextJob })}
+          onDismiss={() => setNextIdx(i => Math.min(i + 1, jobsList.length))}
         />
       ) : jobsList.length > 0 ? (
         <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>

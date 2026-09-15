@@ -4,7 +4,7 @@ import {
   FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER,
   GRAD_INDIGO, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { Briefcase, ExternalLink, ArrowRight, MapPin } from 'lucide-react';
+import { Briefcase, ExternalLink, ArrowRight, MapPin, X } from 'lucide-react';
 import { logJobApplied } from '@/lib/magicMomentLog';
 import { useJobsFeed } from '@/hooks/useJobsFeed';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
@@ -51,6 +51,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
           city={city}
           onApply={() => logJobApplied({ user, job: nextJob })}
           onDidIt={() => { logJobApplied({ user, job: nextJob }); setNextIdx(i => Math.min(i + 1, jobsList.length)); }}
+          onDismiss={() => setNextIdx(i => Math.min(i + 1, jobsList.length))}
         />
       ) : jobsList.length > 0 ? (
         <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
@@ -101,7 +102,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
   );
 }
 
-function NextMoveCard({ job, city, onApply, onDidIt }) {
+function NextMoveCard({ job, city, onApply, onDidIt, onDismiss }) {
   const jobUrl = job.job_url || job.apply_url || job.url || '#';
   const tierLabel = job._tier === 'same_location' || job._tier === 'nearby'
     ? `Matches your ${city || 'location'} preference`
@@ -109,7 +110,10 @@ function NextMoveCard({ job, city, onApply, onDidIt }) {
       ? 'Remote role in your field'
       : '';
   return (
-    <div style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%)', borderRadius: R, padding: '22px 18px', marginBottom: 16, boxShadow: SHADOW_MD, color: '#fff' }}>
+    <div style={{ position: 'relative', background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%)', borderRadius: R, padding: '22px 18px', marginBottom: 16, boxShadow: SHADOW_MD, color: '#fff' }}>
+      <button onClick={onDismiss} aria-label="Dismiss" style={{ position: 'absolute', top: 10, right: 10, width: 28, height: 28, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.16)', border: 'none', borderRadius: '50%', cursor: 'pointer', minHeight: 'auto', padding: 0, color: '#fff' }}>
+        <X size={15} />
+      </button>
       <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.7)', margin: '0 0 8px' }}>Your next move</p>
       <h2 style={{ fontFamily: FONT, fontSize: 22, fontWeight: 800, color: '#fff', margin: '0 0 10px', lineHeight: 1.2 }}>
         Apply to {job.job_title} at {job.name}
