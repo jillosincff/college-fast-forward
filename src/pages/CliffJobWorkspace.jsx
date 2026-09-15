@@ -135,12 +135,6 @@ export default function CliffJobWorkspace() {
     : step.interested ? 'tailor'
     : 'interested';
 
-  const nextLine = isSkip
-    ? 'Probably not this one — I’d focus elsewhere.'
-    : verdict.key === 'stretch'
-      ? 'Stretch role — worth a look. Take the next step below if you want.'
-      : 'Strong fit — take the next step below.';
-
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '20px 16px 80px' }}>
@@ -215,14 +209,17 @@ export default function CliffJobWorkspace() {
                   </a>
                 )}
                 {currentStep === 'track' && (
-                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#7c3aed', margin: 0 }}>Next: mark this one as applied ↓</p>
+                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#7c3aed', margin: 0 }}>Next: mark as applied so we can track it.</p>
                 )}
                 {currentStep === 'warm' && (
-                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#15803d', margin: 0 }}>✓ Applied — warm connections unlocked below.</p>
+                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#15803d', margin: 0 }}>✓ Applied — warm connections unlocked.</p>
                 )}
               </div>
               {currentStep === 'tailor' && (
                 <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#7c3aed', margin: '10px 0 0' }}>Next: tailor your resume for this role.</p>
+              )}
+              {currentStep === 'apply' && (
+                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#7c3aed', margin: '10px 0 0' }}>Next: apply to this role.</p>
               )}
               <StepProgress step={step} applied={applied} current={currentStep} />
             </div>
@@ -235,9 +232,6 @@ export default function CliffJobWorkspace() {
             </div>
           )}
 
-          {!fitLoading && (
-            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#4b5563', margin: '14px 0 0', lineHeight: 1.5 }}>{nextLine}</p>
-          )}
         </div>
 
         {/* 2) MARK AS APPLIED (Track step) — tucked until you've clicked Apply. */}
