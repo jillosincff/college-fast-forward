@@ -51,7 +51,7 @@ export default function PostApplyPeopleBeat({ user, company }) {
           Got it — we'll track this in Application History.
         </p>
         <p style={{ fontFamily: dm, fontSize: 13, color: '#4c1d95', margin: '0 0 12px', lineHeight: 1.5 }}>
-          Most roles get filled through people. Want CLIFF to look for alumni or parents at {company}?
+          You have a better chance of getting hired through someone you know. Want CLIFF to look for alumni or parents at {company}?
         </p>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={startSearch} style={yesBtn}>Yes — look for people</button>
