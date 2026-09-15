@@ -8,8 +8,8 @@ const BADGE = {
   stretch: { label: 'Stretch', bg: '#fef3c7', border: '#fcd34d', text: '#a16207' },
 };
 
-// One ranked move in the recruiter loop. Day-0 primary path on every card is
-// Interested → Tailor → Apply → Add to Applied (all unpaid). Mock-interview
+// One ranked move in the recruiter loop. Day-0 path on every card is
+// Read → Interested → Tailor → Apply → Add to Applied (all unpaid). Mock-interview
 // (pressure-test) stays wired in the page for later (interview invite / day-3);
 // it's just not the day-0 CTA. "Not for me" dismisses → next ranked backfills.
 export default function BestMoveCard({ move, index, interested, onPressureTest, onInterested, onTailor, onApply, onAddApplied, onNotForMe, warmBeat }) {
@@ -44,6 +44,13 @@ export default function BestMoveCard({ move, index, interested, onPressureTest, 
       <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 12px', lineHeight: 1.5, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px' }}>
         {why}
       </p>
+
+      {/* Read job posting — first, before committing interest. */}
+      {applyUrl && (
+        <a href={applyUrl} target="_blank" rel="noopener noreferrer" style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10, textDecoration: 'none' }}>
+          <ExternalLink size={14} /> Read job posting
+        </a>
+      )}
 
       {/* Interested — the purple primary; commits the card to the tailor/apply path */}
       <button onClick={() => onInterested(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '13px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>

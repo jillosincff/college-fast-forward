@@ -14,8 +14,8 @@ import decodeEntities from '@/utils/decodeEntities';
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // Job-specific workspace: the prep room for ONE job.
-// Order: (1) title + company + verdict, with Tailor resume (purple primary) → Apply (outline),
-// (2) people at this company in THIS function, (3) mark as applied.
+// Locked order: Read (JD visible) → Interested (purple; Tailor once interested) → Apply (outline)
+// → Mark as applied (track) → warm connections (only after applied).
 // Job Fit stays short (one verdict line in the hero; detailed block under "More").
 export default function CliffJobWorkspace() {
   const [job] = useState(() => readWorkspaceJob());
@@ -24,6 +24,8 @@ export default function CliffJobWorkspace() {
   const [fitLoading, setFitLoading] = useState(true);
   const [fitError, setFitError] = useState(false);
   const [pursuit, setPursuit] = useState(null);
+  const [interested, setInterested] = useState(false);
+  const [applied, setApplied] = useState(false);
 
   // Keep the unified JobPursuit record in sync with what CLIFF has prepared
   const syncPursuit = (extra = {}) => {
@@ -78,6 +80,17 @@ export default function CliffJobWorkspace() {
     });
   }, [fitLoading]);
 
+  // Warm connections gate: only after the student has applied to THIS role.
+  useEffect(() => {
+    if (!user || !job) return;
+    let cancelled = false;
+    base44.entities.NetworkingPipeline.filter(
+      { user_email: user.email, company: job.company, job_title: job.role || job.job_title, status: 'applied' },
+      '-status_date', 1
+    ).then(rows => { if (!cancelled && rows?.length) setApplied(true); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [user, job]);
+
   const goBack = () => { window.location.hash = '#/FreeTierDashboard'; };
 
   if (!job) {
@@ -110,8 +123,8 @@ export default function CliffJobWorkspace() {
   const nextLine = isSkip
     ? 'Probably not this one — I’d focus elsewhere.'
     : verdict.key === 'stretch'
-      ? 'Stretch role — tailor your resume if you want, then apply.'
-      : 'Next: tailor your resume, then apply.';
+      ? 'Stretch role — read it, then tailor & apply if you want.'
+      : 'Next: read the role, then tailor & apply.';
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
@@ -141,13 +154,27 @@ export default function CliffJobWorkspace() {
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}
           </div>
 
-          {/* Tailor = the purple primary (they landed here to prepare). Apply = quieter outline secondary. */}
+          {/* JD / description visible above the fold (Read). Falls back to the posting link below. */}
+          {(job.jobDescription || job.job_description) && (
+            <div style={{ marginTop: 14, background: '#f8f9fc', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
+              <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>Job description</p>
+              <div style={{ fontFamily: dm, fontSize: 13, color: '#374151', lineHeight: 1.6, whiteSpace: 'pre-wrap', maxHeight: 320, overflowY: 'auto' }}>
+                {decodeEntities(job.jobDescription || job.job_description)}
+              </div>
+            </div>
+          )}
+
+          {/* JD is visible above (Read). Interested = purple primary; once interested, Tailor becomes primary. Apply = outline. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 16, flexWrap: 'wrap' }}>
-            {!isSkip && (
+            {!isSkip && (interested ? (
               <button onClick={goTailor} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
                 <FileText size={15} /> Tailor resume <ArrowRight size={14} />
               </button>
-            )}
+            ) : (
+              <button onClick={() => setInterested(true)} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
+                I'm interested in this role
+              </button>
+            ))}
             {!isSkip && jobUrl && (
               <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#7c3aed', background: '#fff', border: '1.5px solid #ddd6fe', borderRadius: 999, padding: '12px 22px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
                 Apply to job <ExternalLink size={15} />
@@ -170,11 +197,20 @@ export default function CliffJobWorkspace() {
           )}
         </div>
 
-        {/* 2) PEOPLE at this company — in THIS function (role-scoped). */}
-        {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
+        {/* 2) MARK AS APPLIED — tracks the application + schedules follow-ups. */}
+        {user && <WorkspacePrepActions job={job} user={user} applied={applied} onApplied={() => setApplied(true)} />}
 
-        {/* 3) MARK AS APPLIED — tracks the application + schedules follow-ups. */}
-        {user && <WorkspacePrepActions job={job} user={user} />}
+        {/* 3) WARM CONNECTIONS — only after you apply. Quiet, never the hero. */}
+        {user && (applied ? (
+          <BestAdvantageCard job={job} pursuit={pursuit} />
+        ) : (
+          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 24px', marginBottom: 16 }}>
+            <h3 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>Warm connections</h3>
+            <p style={{ fontFamily: dm, fontSize: 13, color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
+              After you apply, CLIFF can surface warm connections at {company} here.
+            </p>
+          </div>
+        ))}
 
         {/* Job Fit (short) + company prep — available but non-prominent. */}
         <MoreDisclosure label="Job Fit & company research">

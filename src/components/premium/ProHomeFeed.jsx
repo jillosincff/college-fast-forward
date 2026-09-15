@@ -96,7 +96,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
               {shortMessage}
             </p>
           )}
-          <JobsList variant="pro_loop" jobs={moreJobs} excludeJobKey={featuredFeedJob ? `${featuredFeedJob.name}|${featuredFeedJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} onPrepare={(job) => openCliffWorkspace({ company: job.name, role: job.job_title, jobUrl: job.job_url || job.apply_url, ...job })} />
+          <JobsList variant="pro_loop" jobs={moreJobs} excludeJobKey={featuredFeedJob ? `${featuredFeedJob.name}|${featuredFeedJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} onPrepare={(job) => openCliffWorkspace({ company: job.name, role: job.job_title, jobUrl: job.job_url || job.apply_url, ...job })} onTailor={(job) => { const p = new URLSearchParams({ company: job.name, role: job.job_title, job_url: job.job_url || job.apply_url || '', from: 'prohome' }); navigate(`/ResumeTailoring?${p.toString()}`); }} />
         </div>
       )}
 

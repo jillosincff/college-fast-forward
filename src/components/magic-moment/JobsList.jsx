@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Zap, ExternalLink, MapPin, Check, FileText, ArrowRight } from 'lucide-react';
-import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_BORDER } from '@/components/onboarding-flow/onboardingShared';
+import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER } from '@/components/onboarding-flow/onboardingShared';
 import { applyUrlOf } from '@/lib/jobFreshness';
 import { navigate } from '@/components/utils/navigation';
 
@@ -16,7 +16,7 @@ const TIER_LABELS = {
 // Secondary: "Prepare in CLIFF" text link → Job Workspace for THIS job (Pro only)
 // No Tailor, no standalone "Did it". After Apply is clicked the row flips to
 // a quiet "✓ Applied" state; the explicit "Mark as applied" lives in the workspace.
-export default function JobsList({ jobs, excludeJobKey, onApply, onPrepare, variant }) {
+export default function JobsList({ jobs, excludeJobKey, onApply, onPrepare, onTailor, variant }) {
   if (!jobs?.length) return null;
   const exclude = (excludeJobKey || '').toLowerCase().trim();
   // Safety net: only render jobs with a verified live apply link.
@@ -28,7 +28,7 @@ export default function JobsList({ jobs, excludeJobKey, onApply, onPrepare, vari
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {filtered.map((job, i) => (
-        <Row key={job.job_id || job.id || i} job={job} onApply={onApply} onPrepare={onPrepare} />
+        <Row key={job.job_id || job.id || i} job={job} onApply={onApply} onPrepare={onPrepare} onTailor={onTailor} />
       ))}
     </div>
   );
@@ -115,10 +115,10 @@ function JobRow({ job, onApply, onPrepare }) {
   );
 }
 
-// Pro-loop row — same personal-recruiter loop as the Next Move, quieter on a list.
-// Tailor (primary) → Apply on {company} → (secondary, logs Applied) → Track (tertiary).
-// No "Prepare in CLIFF →" copy; Apply is never the lone purple story.
-function ProLoopJobRow({ job, onApply, onPrepare }) {
+// Pro-loop row — locked order: Read → Interested (purple) → Tailor → Apply → Track.
+// Read opens the posting; Interested opens the CLIFF workspace (full loop there).
+// Tailor/Apply are quieter outline; Track is tertiary. Never lead with Tailor/Apply.
+function ProLoopJobRow({ job, onApply, onPrepare, onTailor }) {
   const tierLabel = TIER_LABELS[job._tier] || '';
   const applyUrl = job.live ? applyUrlOf(job) : '';
   const [applied, setApplied] = useState(false);
@@ -152,8 +152,23 @@ function ProLoopJobRow({ job, onApply, onPrepare }) {
         </p>
       </div>
 
-      {/* Compact recruiter action bar — Tailor → Apply → Track, not Handshake Apply-primary */}
+      {/* Read first, then Interested (purple primary). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+        {applyUrl && (
+          <a
+            href={applyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: FONT,
+              fontSize: 12, fontWeight: 700, color: INDIGO_DIM, background: '#fff',
+              border: `1px solid ${INDIGO_BORDER}`, padding: '9px 14px', borderRadius: 999,
+              textDecoration: 'none', whiteSpace: 'nowrap', minHeight: 'auto',
+            }}
+          >
+            <ExternalLink size={12} /> Read job
+          </a>
+        )}
         <button
           onClick={() => onPrepare?.(job)}
           style={{
@@ -162,16 +177,32 @@ function ProLoopJobRow({ job, onApply, onPrepare }) {
             padding: '9px 14px', borderRadius: 999, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
           }}
         >
-          <FileText size={13} /> Tailor resume
+          I'm interested
         </button>
+      </div>
 
+      {/* Tailor → Apply → Track — quieter, after Read + Interested. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+        {onTailor && (
+          <button
+            onClick={() => onTailor(job)}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
+              fontSize: 11, fontWeight: 700, color: INDIGO_DIM, background: '#fff',
+              border: `1px solid ${INDIGO_BORDER}`, padding: '7px 11px', borderRadius: 999,
+              cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+            }}
+          >
+            <FileText size={11} /> Tailor
+          </button>
+        )}
         {applied ? (
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
-            fontSize: 12, fontWeight: 800, color: '#15803d', background: '#dcfce7',
-            border: '1px solid #86efac', padding: '9px 14px', borderRadius: 999, whiteSpace: 'nowrap', minHeight: 'auto',
+            fontSize: 11, fontWeight: 800, color: '#15803d', background: '#dcfce7',
+            border: '1px solid #86efac', padding: '7px 11px', borderRadius: 999, whiteSpace: 'nowrap', minHeight: 'auto',
           }}>
-            <Check size={12} /> Applied
+            <Check size={11} /> Applied
           </span>
         ) : applyUrl ? (
           <a
@@ -180,28 +211,27 @@ function ProLoopJobRow({ job, onApply, onPrepare }) {
             rel="noopener noreferrer"
             onClick={handleAddApplied}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: FONT,
-              fontSize: 12, fontWeight: 700, color: INDIGO, background: '#fff',
-              border: `1px solid ${INDIGO_BORDER}`, padding: '9px 14px', borderRadius: 999,
+              display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
+              fontSize: 11, fontWeight: 700, color: INDIGO_DIM, background: '#fff',
+              border: `1px solid ${INDIGO_BORDER}`, padding: '7px 11px', borderRadius: 999,
               textDecoration: 'none', whiteSpace: 'nowrap', minHeight: 'auto',
             }}
           >
-            Apply on {job.name} → <ExternalLink size={12} />
+            Apply on {job.name} → <ExternalLink size={11} />
           </a>
         ) : (
           <button
             onClick={handleAddApplied}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: FONT,
-              fontSize: 12, fontWeight: 700, color: INDIGO, background: '#fff',
-              border: `1px solid ${INDIGO_BORDER}`, padding: '9px 14px', borderRadius: 999,
+              display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT,
+              fontSize: 11, fontWeight: 700, color: INDIGO_DIM, background: '#fff',
+              border: `1px solid ${INDIGO_BORDER}`, padding: '7px 11px', borderRadius: 999,
               cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
             }}
           >
-            <Check size={12} /> Add to Applied
+            <Check size={11} /> Add to Applied
           </button>
         )}
-
         <button
           onClick={() => navigate('/ApplicationTracker')}
           style={{

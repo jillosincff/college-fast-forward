@@ -5,8 +5,8 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // One job, one follow-through action: mark the application as sent so CLIFF
 // tracks it and schedules follow-ups. Preparation is led by WorkspaceNextStep.
-export default function WorkspacePrepActions({ job, user }) {
-  const [tracked, setTracked] = useState(false);
+export default function WorkspacePrepActions({ job, user, applied, onApplied }) {
+  const [tracked, setTracked] = useState(!!applied);
   const [tracking, setTracking] = useState(false);
 
   const company = job.company || '';
@@ -29,6 +29,7 @@ export default function WorkspacePrepActions({ job, user }) {
         location: job.location || '',
       });
       setTracked(true);
+      onApplied?.();
       window.dispatchEvent(new Event('cff:pipeline-changed'));
       // Learning engine: mark this recommendation pursued + applied.
       base44.functions.invoke('recordRecommendation', { company, role, event: 'pursued' }).catch(() => {});
