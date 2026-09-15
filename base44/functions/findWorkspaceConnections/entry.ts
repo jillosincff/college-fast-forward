@@ -69,8 +69,11 @@ Deno.serve(async (req) => {
           linkedin_url: a.linkedin_url || null,
           persona: 'alumni',
           school_code: schoolCode,
-          why: `${schoolCode} alum found via public search — works in a relevant area at ${a.company}`,
-          label: 'Worth contacting',
+          verified: !!a.verified,
+          why: a.verified
+            ? `${schoolCode} alum verified by a student — works in a relevant area at ${a.company}`
+            : `Possible ${schoolCode} alum found via public search (not verified) — works at ${a.company}`,
+          label: a.verified ? 'Verified alum' : 'Possible alum',
         });
       }
     }

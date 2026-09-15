@@ -152,8 +152,9 @@ export async function runPublicAlumniSearch(
         linkedin_url: isLinkedIn ? p.source_url : null,
         persona: 'alumni',
         school_code: schoolCode,
-        why: p.summary || `${school} alum found via public source`,
-        label: 'Found publicly',
+        verified: false,
+        why: p.summary || `Possible ${school} alum found via public source (not verified)`,
+        label: 'Found publicly (unverified)',
         source_url: p.source_url,
       });
     }

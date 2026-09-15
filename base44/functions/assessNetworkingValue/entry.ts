@@ -48,10 +48,13 @@ Deno.serve(async (req) => {
       if (roleWords.length && roleWords.some((w) => t.includes(w))) return true;
       return false;
     };
-    // Never surface an off-function contact as the "best path" — fall to null
-    // (which renders as "no one found yet" / cold apply) rather than hand the
-    // student a contact from a different function.
-    const best = connections.find(isOnFunction) || null;
+    // Only a VERIFIED contact may be the "best path". Public-web finds (tier 4)
+    // and unverified cached alumni (tier 2, verified=false) are NOT confirmed
+    // alumni — surfacing them as "a strong warm path" is how a non-alum (e.g.
+    // "Val Davis") got presented as a UF alum. They remain in `connections` for
+    // the learning engine but never become the recommended best_contact.
+    const isVerified = (c: any) => c.tier === 1 || c.tier === 3 || (c.tier === 2 && !!c.verified);
+    const best = connections.find((c: any) => isOnFunction(c) && isVerified(c)) || null;
 
     // 2. Existing student progress on this opportunity
     const pursuits = await base44.entities.JobPursuit.filter(
