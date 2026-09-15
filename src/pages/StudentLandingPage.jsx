@@ -226,7 +226,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 </h1>
 
                 <p className="hero-2" style={{ fontFamily: SF, fontSize: 'clamp(17px, 3.5vw, 21px)', fontWeight: 500, color: TEXT2, lineHeight: 1.45, margin: '0 0 clamp(26px, 5vw, 32px)', maxWidth: 560 }}>
-                  CLIFF is your guided job search for internships and first jobs — the right roles, a tailored resume, and a clear next step so you stop winging it.
+                  CLIFF is your personal recruiter for internships and first jobs — the right roles, a tailored resume, and a clear next step so you stop winging it.
                 </p>
 
                 {/* Benefit lines */}
@@ -234,7 +234,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   {[
                     'Cuts the noise — roles worth your time, not 200 random postings',
                     'Tailors your resume for that role',
-                    'Tells you exactly what to do next (no spreadsheet graveyard)',
+                    'Tracks applications and reminds you to follow up — so nothing dies in a spreadsheet',
                   ].map((b) => (
                     <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                       <span style={{ width: 28, height: 28, borderRadius: '50%', background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

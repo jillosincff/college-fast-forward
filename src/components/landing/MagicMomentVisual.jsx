@@ -20,7 +20,7 @@ const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08
 const PLAN = [
   { label: 'Target job', done: true },
   { label: 'Tailor resume', done: true },
-  { label: 'Next step', done: false },
+  { label: 'Apply / follow up', done: false },
 ];
 
 export default function MagicMomentVisual() {
