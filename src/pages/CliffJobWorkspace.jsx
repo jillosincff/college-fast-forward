@@ -14,8 +14,8 @@ import decodeEntities from '@/utils/decodeEntities';
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // Job-specific workspace: the prep room for ONE job.
-// Order: (1) title + company + Apply (live URL), (2) prepare resume for this role,
-// (3) people at this company in THIS function, (4) mark as applied.
+// Order: (1) title + company + verdict, with Tailor resume (purple primary) → Apply (outline),
+// (2) people at this company in THIS function, (3) mark as applied.
 // Job Fit stays short (one verdict line in the hero; detailed block under "More").
 export default function CliffJobWorkspace() {
   const [job] = useState(() => readWorkspaceJob());
@@ -111,7 +111,7 @@ export default function CliffJobWorkspace() {
     ? 'Probably not this one — I’d focus elsewhere.'
     : verdict.key === 'stretch'
       ? 'Stretch role — tailor your resume if you want, then apply.'
-      : 'Strong fit — apply today.';
+      : 'Next: tailor your resume, then apply.';
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
@@ -141,21 +141,27 @@ export default function CliffJobWorkspace() {
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}
           </div>
 
-          {/* Apply = the live external URL. Does NOT open a workspace or modal. */}
+          {/* Tailor = the purple primary (they landed here to prepare). Apply = quieter outline secondary. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 16, flexWrap: 'wrap' }}>
-            {isSkip ? (
-              <button onClick={goBack} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: '#6b7280', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6 }}>
-                Back to dashboard
+            {!isSkip && (
+              <button onClick={goTailor} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
+                <FileText size={15} /> Tailor resume <ArrowRight size={14} />
               </button>
-            ) : jobUrl ? (
-              <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none', boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
+            )}
+            {!isSkip && jobUrl && (
+              <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#7c3aed', background: '#fff', border: '1.5px solid #ddd6fe', borderRadius: 999, padding: '12px 22px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
                 Apply to job <ExternalLink size={15} />
               </a>
-            ) : null}
+            )}
             {jobUrl && !isSkip && (
               <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', textDecoration: 'none' }}>
                 View original posting ↗
               </a>
+            )}
+            {isSkip && (
+              <button onClick={goBack} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: '#6b7280', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6 }}>
+                Back to dashboard
+              </button>
             )}
           </div>
 
@@ -164,24 +170,10 @@ export default function CliffJobWorkspace() {
           )}
         </div>
 
-        {/* 2) PREPARE RESUME FOR THIS ROLE — one entry. */}
-        {!isSkip && (
-          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 24px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 20, flexShrink: 0 }}>📄</span>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: 0 }}>Prepare resume for this role</p>
-              <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '2px 0 0', lineHeight: 1.5 }}>CLIFF tailors your resume to this job's keywords so you clear ATS filters.</p>
-            </div>
-            <button onClick={goTailor} style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '11px 22px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <FileText size={15} /> Tailor resume <ArrowRight size={14} />
-            </button>
-          </div>
-        )}
-
-        {/* 3) PEOPLE at this company — in THIS function (role-scoped). */}
+        {/* 2) PEOPLE at this company — in THIS function (role-scoped). */}
         {user && <BestAdvantageCard job={job} pursuit={pursuit} />}
 
-        {/* 4) MARK AS APPLIED — tracks the application + schedules follow-ups. */}
+        {/* 3) MARK AS APPLIED — tracks the application + schedules follow-ups. */}
         {user && <WorkspacePrepActions job={job} user={user} />}
 
         {/* Job Fit (short) + company prep — available but non-prominent. */}
