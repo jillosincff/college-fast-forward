@@ -8,7 +8,7 @@ import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
 import CompanyPrepCard from '@/components/workspace/CompanyPrepCard';
 import TrustPanel from '@/components/workspace/TrustPanel';
-import { ArrowRight, ExternalLink, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, FileText } from 'lucide-react';
 import decodeEntities from '@/utils/decodeEntities';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -144,8 +144,9 @@ export default function CliffJobWorkspace() {
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '20px 16px 80px' }}>
-        <button onClick={goBack} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', marginBottom: 12, minHeight: 44 }}>
-          ← Back to dashboard
+        <button onClick={goBack} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#374151', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 999, padding: '8px 14px 8px 10px', cursor: 'pointer', marginBottom: 12, minHeight: 44, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <ArrowLeft size={16} color="#6d28d9" />
+          Back to dashboard
         </button>
 
         {/* 1) JOB HERO — title, company, one verdict line, Apply (live URL). */}
