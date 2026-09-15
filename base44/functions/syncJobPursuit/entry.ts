@@ -40,8 +40,10 @@ Deno.serve(async (req) => {
       else if (resume.status === 'completed') resumeStatus = resume.downloaded_at ? 'complete' : 'ready_for_review';
     }
 
-    // Outreach status from the networking pipeline
-    const pipe = (pipeline || []).find((r) => norm(r.company) === norm(company));
+    // Outreach / application status from the networking pipeline — match on
+    // company AND role so a different role at the same company can't pollute.
+    const pipe = (pipeline || []).find((r) => norm(r.company) === norm(company) && norm(r.job_title) === norm(role))
+      || (pipeline || []).find((r) => norm(r.company) === norm(company));
     let outreachStatus = existing?.outreach_status || 'not_started';
     if (pipe?.alumni_name) {
       if (pipe.status === 'replied' || pipe.status === 'coffee_chat' || pipe.status === 'intro_made') outreachStatus = 'replied';
@@ -52,10 +54,22 @@ Deno.serve(async (req) => {
     const connectionStatus = p.connectionsSearched ? 'complete' : (existing?.connection_search_status || 'not_started');
     const researchStatus = p.companyResearched ? 'complete' : (existing?.company_research_status || 'not_started');
 
-    // Never downgrade an application the student already moved forward
+    // Never downgrade an application the student already moved forward.
+    // The workspace "Mark as applied" writes NetworkingPipeline status='applied'
+    // — mirror that onto the pursuit so the outcome timeline checks off
+    // "Application submitted" (and upgrades to interviewing/offer as the pipeline
+    // advances). Terminal states and later stages are never overwritten by an
+    // earlier pipeline status.
     const advanced = ['applied', 'follow_up_due', 'interviewing', 'offer', 'rejected', 'withdrawn', 'archived'];
+    const pipeToApp = pipe?.status === 'applied' ? 'applied'
+      : pipe?.status === 'interview' ? 'interviewing'
+      : pipe?.status === 'offer' ? 'offer'
+      : null;
+    const laterOrTerminal = ['interviewing', 'offer', 'rejected', 'withdrawn', 'archived'];
     let applicationStatus = existing?.application_status;
-    if (!applicationStatus || !advanced.includes(applicationStatus)) {
+    if (pipeToApp && (!applicationStatus || !laterOrTerminal.includes(applicationStatus))) {
+      applicationStatus = pipeToApp;
+    } else if (!applicationStatus || !advanced.includes(applicationStatus)) {
       applicationStatus = (resumeStatus === 'ready_for_review' || resumeStatus === 'approved' || resumeStatus === 'complete')
         ? 'ready_to_apply' : 'preparing';
     }

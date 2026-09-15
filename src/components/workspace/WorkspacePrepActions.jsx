@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { syncJobPursuit } from '@/functions/syncJobPursuit';
 import PostApplyPeopleBeat from '@/components/workspace/PostApplyPeopleBeat';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -32,6 +33,9 @@ export default function WorkspacePrepActions({ job, user, applied, onApplied, on
       setTracked(true);
       onApplied?.();
       window.dispatchEvent(new Event('cff:pipeline-changed'));
+      // Mirror the applied state onto the unified JobPursuit so the outcome
+      // timeline ("Application submitted") checks off.
+      syncJobPursuit({ company, role, jobId: job.id || '', jobUrl, location: job.location || '', connectionsSearched: true }).catch(() => {});
       // Learning engine: mark this recommendation pursued + applied.
       base44.functions.invoke('recordRecommendation', { company, role, event: 'pursued' }).catch(() => {});
       base44.functions.invoke('recordRecommendation', { company, role, event: 'applied' }).catch(() => {});
