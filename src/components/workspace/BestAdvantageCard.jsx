@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { assessNetworkingValue } from '@/functions/assessNetworkingValue';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -14,6 +15,11 @@ function ContactRow({ c }) {
         <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>{c.name}</p>
         {c.role_title && <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '2px 0 0' }}>{c.role_title}</p>}
         <p style={{ fontFamily: dm, fontSize: 11, color: '#7c3aed', margin: '3px 0 0', lineHeight: 1.45 }}>{c.why}</p>
+        {(c.linkedin_url || c.linkedin) && (
+          <a href={c.linkedin_url || c.linkedin} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#0A66C2', textDecoration: 'none', marginTop: 4 }}>
+            <ExternalLink size={11} /> View LinkedIn profile
+          </a>
+        )}
       </div>
     </div>
   );

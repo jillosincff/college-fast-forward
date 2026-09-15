@@ -6,7 +6,7 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // One job, one follow-through action: mark the application as sent so CLIFF
 // tracks it and schedules follow-ups. Preparation is led by WorkspaceNextStep.
-export default function WorkspacePrepActions({ job, user, applied, onApplied }) {
+export default function WorkspacePrepActions({ job, user, applied, onApplied, onOptIn }) {
   const [tracked, setTracked] = useState(!!applied);
   const [tracking, setTracking] = useState(false);
 
@@ -74,7 +74,7 @@ export default function WorkspacePrepActions({ job, user, applied, onApplied }) 
         </button>
       </div>
 
-      {tracked && <PostApplyPeopleBeat user={user} company={company} />}
+      {tracked && <PostApplyPeopleBeat user={user} company={company} onOptIn={onOptIn} />}
 
       {jobUrl && (
         <a href={jobUrl} target="_blank" rel="noopener noreferrer"

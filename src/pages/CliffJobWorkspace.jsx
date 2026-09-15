@@ -27,6 +27,7 @@ export default function CliffJobWorkspace() {
   const [pursuit, setPursuit] = useState(null);
   const [step, setStep] = useState(() => readWorkspaceStep(jobKey));
   const [applied, setApplied] = useState(false);
+  const [peopleOptIn, setPeopleOptIn] = useState(false);
 
   // Keep the unified JobPursuit record in sync with what CLIFF has prepared
   const syncPursuit = (extra = {}) => {
@@ -235,19 +236,20 @@ export default function CliffJobWorkspace() {
         </div>
 
         {/* 2) MARK AS APPLIED (Track step) — tucked until you've clicked Apply. */}
-        {user && step.applyClicked && <WorkspacePrepActions job={job} user={user} applied={applied} onApplied={() => setApplied(true)} />}
+        {user && step.applyClicked && <WorkspacePrepActions job={job} user={user} applied={applied} onApplied={() => setApplied(true)} onOptIn={() => setPeopleOptIn(true)} />}
 
         {/* 3) WARM CONNECTIONS — only after you apply. Quiet, never the hero. */}
-        {user && (applied ? (
-          <BestAdvantageCard job={job} pursuit={pursuit} />
-        ) : (
+        {user && !applied && (
           <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 24px', marginBottom: 16 }}>
             <h3 style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>Warm connections</h3>
             <p style={{ fontFamily: dm, fontSize: 13, color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
               After you apply, CLIFF can surface warm connections at {company} here.
             </p>
           </div>
-        ))}
+        )}
+        {user && applied && peopleOptIn && (
+          <BestAdvantageCard job={job} pursuit={pursuit} />
+        )}
 
         {/* Job Fit (short) + company prep — available but non-prominent. */}
         <MoreDisclosure label="Job Fit & company research">

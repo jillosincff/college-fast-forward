@@ -10,7 +10,7 @@ const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 // NetworkingPipeline status 'applied'), offer to search people at THAT company
 // only — never auto-search, never a job board. People-only rows: name / title /
 // company / LinkedIn / outreach draft. No fallthrough to JobsList.
-export default function PostApplyPeopleBeat({ user, company }) {
+export default function PostApplyPeopleBeat({ user, company, onOptIn }) {
   const [choice, setChoice] = useState('ask'); // 'ask' | 'searching' | 'done' | 'dismissed'
   const [people, setPeople] = useState([]);
   const [copied, setCopied] = useState(null);
@@ -29,6 +29,7 @@ export default function PostApplyPeopleBeat({ user, company }) {
   };
 
   const startSearch = async () => {
+    onOptIn?.();
     setChoice('searching');
     try {
       const r = await base44.functions.invoke('findCliffPeople', {
