@@ -67,13 +67,32 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
         if (attempt < 2) await new Promise(r => setTimeout(r, 1200));
       }
 
+      // Exclusion (Refresh) can empty the pool when the live supply is thin or
+      // JSearch is down — the only available jobs were the ones we just excluded.
+      // Fall back to a non-excluded fetch so the feed isn't blank; diversity only
+      // wins when there's genuine supply.
+      if (result && excludeKeys && result.jobs.length === 0) {
+        try {
+          result = await buildLiveJobsList({
+            role, industries, location, seeking: cg.seeking, chipText, maxJobs,
+          });
+        } catch (e) { /* keep prior (empty) result */ }
+      }
+
       if (result) {
         setJobsList(result.jobs);
         setShortMessage(result.shortMessage);
         setIsStale(!!result.stale || !!result.fromCache);
         setMostlyFallback(!!result.mostlyFallback);
         setLastUpdated(Date.now());
-        setCachedJobs(cacheKey, { jobs: result.jobs, shortMessage: result.shortMessage });
+        // Only a genuine live load gets a sticky navigation cache. Curated /
+        // BuiltIn-majority fallbacks are NOT cached — so leaving Home and
+        // returning re-scours for live jobs instead of sticky-serving the same
+        // prestige pack every time. The fallback jobs still render (behind the
+        // "Limited fresh results" banner).
+        if (!result.mostlyFallback) {
+          setCachedJobs(cacheKey, { jobs: result.jobs, shortMessage: result.shortMessage });
+        }
       } else {
         // Keep whatever jobs we already have so the feed isn't blank — but flag
         // the failure so the UI can show "couldn't refresh" + a retry.

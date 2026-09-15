@@ -1,14 +1,14 @@
-// Module-level + sessionStorage cache for the dashboard job feed.
+// Sticky navigation cache for the dashboard job feed — ONLY for genuine live
+// loads. Curated / BuiltIn-majority fallbacks are never written here, so
+// leaving Home and returning re-scours for live jobs instead of sticky-serving
+// the same prestige pack every time.
 //
-// Serves the last result instantly on remount (no spinner) while a silent
-// background re-fetch updates the list. Has a TTL so stale data expires and a
-// real re-fetch happens — without it, a backend timeout left students looking
-// at the same jobs indefinitely with no indication anything was wrong.
-//
-// The cache is mirrored to sessionStorage so leaving Home and returning in the
-// SAME browser session hydrates immediately — no "scouring…" spinner. Only a
-// fresh session, a manual Refresh, or a goals/prefs change (different cacheKey)
-// re-scours. See useJobsFeed for the loading-gating that consumes this.
+// Serves the last LIVE result instantly on remount (no spinner). Has a TTL so
+// stale data expires and a real re-fetch happens. Mirrored to sessionStorage so
+// leaving Home and returning in the SAME browser session hydrates immediately —
+// but only if the last load was live. A fresh session, a manual Refresh, a
+// goals/prefs change (different cacheKey), or a prior fallback load re-scours.
+// See useJobsFeed for the loading-gating that consumes this.
 
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const SESSION_PREFIX = 'cff_jobs_cache_';
