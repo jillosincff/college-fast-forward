@@ -10,6 +10,7 @@ import { useJobsFeed } from '@/hooks/useJobsFeed';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
 import JobsRefreshBar from '@/components/free-tier/JobsRefreshBar';
 import JobsList from '@/components/magic-moment/JobsList';
+import WeeklyActivityStrip from '@/components/free-tier/WeeklyActivityStrip';
 
 // Free home — continues the Magic Moment cycle. Four sections, no demo data:
 // 1) Next move (one real job), 2) Unlock people banner, 3) Jobs list, 4) History link.
@@ -28,6 +29,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px', fontFamily: FONT }}>
+      <WeeklyActivityStrip user={user} />
       {/* 1. Next move — one real job */}
       {jobsLoading ? (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '24px 18px', marginBottom: 16, boxShadow: SHADOW_MD, textAlign: 'center' }}>

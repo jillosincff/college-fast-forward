@@ -14,6 +14,7 @@ import JobsList from '@/components/magic-moment/JobsList';
 import JessePeopleCard from '@/components/premium/JessePeopleCard';
 import ProNextMoveCard from '@/components/premium/ProNextMoveCard';
 import Day3FollowUpBeat from '@/components/free-tier/Day3FollowUpBeat';
+import WeeklyActivityStrip from '@/components/free-tier/WeeklyActivityStrip';
 
 // Pro home — same personal recruiter as the free Magic Moment, with people
 // unlocked. Above the fold: Day-3 follow-up beat (if eligible) → Your Next
@@ -52,6 +53,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px', fontFamily: FONT }}>
+      <WeeklyActivityStrip user={user} />
       {/* 1. Day-3 follow-up beat — reusable recruiter nudge (Applied ≥3 days, no update) */}
       <Day3FollowUpBeat user={user} />
 

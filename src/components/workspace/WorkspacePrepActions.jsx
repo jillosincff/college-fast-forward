@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import PostApplyPeopleBeat from '@/components/workspace/PostApplyPeopleBeat';
 
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
@@ -72,6 +73,8 @@ export default function WorkspacePrepActions({ job, user, applied, onApplied }) 
           {tracked ? 'Tracked ✓' : tracking ? 'Adding…' : 'Mark as applied'}
         </button>
       </div>
+
+      {tracked && <PostApplyPeopleBeat user={user} company={company} />}
 
       {jobUrl && (
         <a href={jobUrl} target="_blank" rel="noopener noreferrer"
