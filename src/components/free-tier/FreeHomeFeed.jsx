@@ -12,6 +12,7 @@ import JobsRefreshBar from '@/components/free-tier/JobsRefreshBar';
 import JobsList from '@/components/magic-moment/JobsList';
 import { postedLabel } from '@/lib/jobFreshness';
 import WeeklyActivityStrip from '@/components/free-tier/WeeklyActivityStrip';
+import LimitedFreshResultsCard from '@/components/free-tier/LimitedFreshResultsCard';
 
 // Free home — continues the Magic Moment cycle. Four sections, no demo data:
 // 1) Next move (one real job), 2) Unlock people banner, 3) Jobs list, 4) History link.
@@ -37,6 +38,13 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
           <div style={{ width: 20, height: 20, border: '2.5px solid #e9d5ff', borderTop: `2.5px solid ${INDIGO}`, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 10px' }} />
           <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Finding your next move…</p>
         </div>
+      ) : mostlyFallback && jobsList.length > 0 ? (
+        <LimitedFreshResultsCard
+          jobs={jobsList}
+          onRefresh={refresh}
+          refreshing={jobsLoading}
+          onApply={(job) => logJobApplied({ user, job })}
+        />
       ) : nextJob ? (
         <NextMoveCard
           job={nextJob}
@@ -67,7 +75,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
       />
 
       {/* 3. Jobs for you — same list logic as Magic Moment */}
-      {!jobsLoading && jobsList.length > 1 && (
+      {!jobsLoading && !mostlyFallback && jobsList.length > 1 && (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, boxShadow: SHADOW_MD }}>
           <JobsRefreshBar lastUpdated={lastUpdated} isStale={isStale} error={error} mostlyFallback={mostlyFallback} onRefresh={refresh} loading={jobsLoading} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
