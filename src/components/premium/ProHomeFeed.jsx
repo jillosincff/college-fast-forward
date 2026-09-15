@@ -58,9 +58,12 @@ export default function ProHomeFeed({ user, onOpenTools }) {
       <Day3FollowUpBeat user={user} />
 
       {/* 2. Your Next Move — interview (if any) else next feed job. Tailor-primary loop. */}
-      {interviewMove ? (
-        <ProNextMoveCard interviewMove={interviewMove} />
-      ) : dismissed ? null : jobsLoading ? (
+      {dismissed ? null : interviewMove ? (
+        <ProNextMoveCard
+          interviewMove={interviewMove}
+          onDismiss={() => { setDismissed(true); try { sessionStorage.setItem('cff_next_move_dismissed', '1'); } catch {} }}
+        />
+      ) : jobsLoading ? (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '24px 18px', marginBottom: 16, boxShadow: SHADOW_MD, textAlign: 'center' }}>
           <div style={{ width: 20, height: 20, border: `2.5px solid #e9d5ff`, borderTop: `2.5px solid ${INDIGO}`, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 10px' }} />
           <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Finding your next move…</p>

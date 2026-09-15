@@ -15,7 +15,7 @@ import { postedLabel } from '@/lib/jobFreshness';
 //   Primary   → Pressure-test → MockInterview preloaded with company/role
 //   Tertiary  → Track
 export default function ProNextMoveCard({ job, interviewMove, city, onApply, onPrepare, onAddApplied, onDismiss }) {
-  if (interviewMove) return <InterviewCard move={interviewMove} />;
+  if (interviewMove) return <InterviewCard move={interviewMove} onDismiss={onDismiss} />;
   return <Day0Card job={job} city={city} onApply={onApply} onPrepare={onPrepare} onAddApplied={onAddApplied} onDismiss={onDismiss} />;
 }
 
@@ -73,7 +73,7 @@ function Day0Card({ job, city, onApply, onPrepare, onAddApplied, onDismiss }) {
   );
 }
 
-function InterviewCard({ move }) {
+function InterviewCard({ move, onDismiss }) {
   const company = move.company || move.company_name || 'the company';
   const role = move.job_title || move.role || 'the role';
   const jd = (move.job_description || '').slice(0, 1000);
@@ -83,7 +83,10 @@ function InterviewCard({ move }) {
   });
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%)', borderRadius: R, padding: '22px 18px', marginBottom: 16, boxShadow: SHADOW_MD, color: '#fff' }}>
+    <div style={{ position: 'relative', background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%)', borderRadius: R, padding: '22px 18px', marginBottom: 16, boxShadow: SHADOW_MD, color: '#fff' }}>
+      <button onClick={onDismiss} aria-label="Dismiss" style={{ position: 'absolute', top: 10, right: 10, width: 28, height: 28, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.16)', border: 'none', borderRadius: '50%', cursor: 'pointer', minHeight: 'auto', padding: 0, color: '#fff' }}>
+        <X size={15} />
+      </button>
       <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.7)', margin: '0 0 8px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
         <Calendar size={12} /> Your next move
       </p>
