@@ -25,6 +25,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
     chipLabel, chipText,
   } = useJobsFeed({ user });
   const [nextIdx, setNextIdx] = useState(0);
+  const [dismissed, setDismissed] = useState(() => { try { return sessionStorage.getItem('cff_next_move_dismissed') === '1'; } catch { return false; } });
 
   const nextJob = jobsList[nextIdx] || null;
   const city = user?.career_goals?.location_preference || user?.location || '';
@@ -33,7 +34,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '20px 16px 100px', fontFamily: FONT }}>
       <WeeklyActivityStrip user={user} />
       {/* 1. Next move — one real job */}
-      {jobsLoading ? (
+      {!dismissed && (jobsLoading ? (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '24px 18px', marginBottom: 16, boxShadow: SHADOW_MD, textAlign: 'center' }}>
           <div style={{ width: 20, height: 20, border: '2.5px solid #e9d5ff', borderTop: `2.5px solid ${INDIGO}`, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 10px' }} />
           <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Finding your next move…</p>
@@ -51,7 +52,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
           city={city}
           onApply={() => logJobApplied({ user, job: nextJob })}
           onDidIt={() => { logJobApplied({ user, job: nextJob }); setNextIdx(i => Math.min(i + 1, jobsList.length)); }}
-          onDismiss={() => setNextIdx(i => Math.min(i + 1, jobsList.length))}
+          onDismiss={() => { setDismissed(true); try { sessionStorage.setItem('cff_next_move_dismissed', '1'); } catch {} }}
         />
       ) : jobsList.length > 0 ? (
         <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
@@ -63,7 +64,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
           <p style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>No jobs matched right now.</p>
           <p style={{ fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>CLIFF refreshes matches daily. Try editing your goals to widen the search.</p>
         </div>
-      )}
+      ))}
 
       {/* 2. Unlock people banner (locked on free, same Stripe checkout) */}
       <LockedPeopleCard

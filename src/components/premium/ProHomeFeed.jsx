@@ -26,6 +26,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
     jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, mostlyFallback, refresh,
   } = useJobsFeed({ user, maxJobs: 30 });
   const [nextIdx, setNextIdx] = useState(0);
+  const [dismissed, setDismissed] = useState(() => { try { return sessionStorage.getItem('cff_next_move_dismissed') === '1'; } catch { return false; } });
   const [interviewMove, setInterviewMove] = useState(null);
 
   const nextJob = jobsList[nextIdx] || null;
@@ -59,7 +60,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
       {/* 2. Your Next Move — interview (if any) else next feed job. Tailor-primary loop. */}
       {interviewMove ? (
         <ProNextMoveCard interviewMove={interviewMove} />
-      ) : jobsLoading ? (
+      ) : dismissed ? null : jobsLoading ? (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '24px 18px', marginBottom: 16, boxShadow: SHADOW_MD, textAlign: 'center' }}>
           <div style={{ width: 20, height: 20, border: `2.5px solid #e9d5ff`, borderTop: `2.5px solid ${INDIGO}`, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 10px' }} />
           <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Finding your next move…</p>
@@ -78,7 +79,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
           onApply={() => logJobApplied({ user, job: nextJob })}
           onPrepare={() => openCliffWorkspace({ company: nextJob.name, role: nextJob.job_title, jobUrl: nextJob.job_url || nextJob.apply_url, ...nextJob })}
           onAddApplied={() => logJobApplied({ user, job: nextJob })}
-          onDismiss={() => setNextIdx(i => Math.min(i + 1, jobsList.length))}
+          onDismiss={() => { setDismissed(true); try { sessionStorage.setItem('cff_next_move_dismissed', '1'); } catch {} }}
         />
       ) : jobsList.length > 0 ? (
         <div style={{ background: '#f5f3ff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, textAlign: 'center' }}>
