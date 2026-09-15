@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Users, ExternalLink, Copy, Check, Zap, Briefcase, Search, Loader2, Mail } from 'lucide-react';
-import { logJobApplied } from '@/lib/magicMomentLog';
+import { Users, ExternalLink, Copy, Check, Search, Loader2, Mail } from 'lucide-react';
 import { gatePersonReal } from '@/lib/personGate';
 import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
 
@@ -305,7 +304,6 @@ function PersonRow({ person, matchedJob, user, chipText, location, copied, onCop
   const draft = buildDraft(person, user, matchedJob, chipText, location);
   const linkedinUrl = person.linkedin_url || person.source_url || '';
   const [emailCopied, setEmailCopied] = useState(false);
-  const jobUrl = matchedJob ? (matchedJob.job_url || matchedJob.apply_url || matchedJob.url) : '';
 
   const copyEmail = () => {
     if (!person.email) return;
@@ -323,11 +321,6 @@ function PersonRow({ person, matchedJob, user, chipText, location, copied, onCop
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>{person.name}</p>
-            {matchedJob && (
-              <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', background: '#059669', borderRadius: 999, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                <Zap size={9} /> Open role at {person.company}
-              </span>
-            )}
           </div>
           {person.role_title && <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '1px 0 0' }}>{person.role_title}{person.company ? ` · ${person.company}` : ''}{person.school ? ` · ${person.school}` : ''}</p>}
         </div>
@@ -336,32 +329,13 @@ function PersonRow({ person, matchedJob, user, chipText, location, copied, onCop
         )}
       </div>
 
-      {/* Matched live job title */}
-      {matchedJob && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-          <Briefcase size={12} color="#7c3aed" />
-          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#4c1d95', margin: 0 }}>{matchedJob.job_title}</p>
-        </div>
-      )}
-
       {/* Draft message */}
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
         <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{draft}</p>
       </div>
 
-      {/* Action buttons — Apply (live URL) + Copy message when matched; Copy + LinkedIn otherwise */}
+      {/* Action buttons — people only: Copy message + LinkedIn. No job Apply / Open in CLIFF inside the Warm panel. */}
       <div style={{ display: 'flex', gap: 8 }}>
-        {matchedJob && jobUrl && (
-          <a
-            href={jobUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => logJobApplied({ user, job: matchedJob })}
-            style={{ flex: 1, fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#fff', background: '#7c3aed', border: 'none', borderRadius: 999, padding: '8px 12px', textDecoration: 'none', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
-          >
-            <ExternalLink size={13} /> Apply
-          </a>
-        )}
         <button onClick={onCopy} style={{ flex: 1, fontFamily: dm, fontSize: 12, fontWeight: 700, color: copied ? '#059669' : '#7c3aed', background: copied ? '#d1fae5' : '#fff', border: '1px solid ' + (copied ? '#a7f3d0' : '#ddd6fe'), borderRadius: 999, padding: '8px 12px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
           {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy message</>}
         </button>
