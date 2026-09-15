@@ -222,11 +222,11 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <>
                 <h1 className="hero-1" style={{ fontFamily: SF, fontSize: 'clamp(32px, 6vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.06, color: '#030712', margin: '0 0 18px' }}>
-                  From "I have no clue" to "I've got this"
+                  Your personal recruiter for internships and first jobs
                 </h1>
 
                 <p className="hero-2" style={{ fontFamily: SF, fontSize: 'clamp(17px, 3.5vw, 21px)', fontWeight: 500, color: TEXT2, lineHeight: 1.45, margin: '0 0 clamp(26px, 5vw, 32px)', maxWidth: 560 }}>
-                  CLIFF is your personal recruiter for internships and first jobs — the right roles, a tailored resume, and a clear next step so you stop winging it.
+                  The right roles, a tailored resume, and a clear next step — so you stop winging it.
                 </p>
 
                 {/* Benefit lines */}
