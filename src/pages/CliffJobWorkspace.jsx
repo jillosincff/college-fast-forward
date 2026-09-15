@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { analyzeJobFit } from '@/functions/analyzeJobFit';
 import { syncJobPursuit } from '@/functions/syncJobPursuit';
-import { readWorkspaceJob } from '@/lib/cliffWorkspace';
+import { readWorkspaceJob, readWorkspaceStep, saveWorkspaceStep } from '@/lib/cliffWorkspace';
 import { computeVerdict } from '@/components/workspace/workspaceNextStep';
 import WorkspacePrepActions from '@/components/workspace/WorkspacePrepActions';
 import BestAdvantageCard from '@/components/workspace/BestAdvantageCard';
@@ -14,17 +14,18 @@ import decodeEntities from '@/utils/decodeEntities';
 const dm = "'Satoshi', 'Inter', system-ui, sans-serif";
 
 // Job-specific workspace: the prep room for ONE job.
-// Locked order: Read (JD visible) → Interested (purple; Tailor once interested) → Apply (outline)
-// → Mark as applied (track) → warm connections (only after applied).
-// Job Fit stays short (one verdict line in the hero; detailed block under "More").
+// Progressive guide — one solid purple next step at a time:
+// Interested → Tailor → Apply → Mark as applied (Track) → warm connections (after apply).
+// JD is visible above the fold (that's the Read). Later steps tucked until their turn.
 export default function CliffJobWorkspace() {
   const [job] = useState(() => readWorkspaceJob());
+  const jobKey = job ? `${(job.company || '')}|${(job.role || job.job_title || '')}` : '';
   const [user, setUser] = useState(null);
   const [fit, setFit] = useState(null);
   const [fitLoading, setFitLoading] = useState(true);
   const [fitError, setFitError] = useState(false);
   const [pursuit, setPursuit] = useState(null);
-  const [interested, setInterested] = useState(false);
+  const [step, setStep] = useState(() => readWorkspaceStep(jobKey));
   const [applied, setApplied] = useState(false);
 
   // Keep the unified JobPursuit record in sync with what CLIFF has prepared
@@ -120,11 +121,25 @@ export default function CliffJobWorkspace() {
     window.location.hash = `#/ResumeTailoring?${params.toString()}`;
   };
 
+  // Progressive guide (Interested → Tailor → Apply → Track). `step` persists in
+  // sessionStorage per job (survives the Tailor navigation); `applied` is real
+  // (NetworkingPipeline) so warm connections only unlock after a real apply.
+  const advance = (patch) => { setStep(s => ({ ...s, ...patch })); saveWorkspaceStep(jobKey, patch); };
+  const onInterested = () => advance({ interested: true });
+  const onTailor = () => { advance({ tailored: true }); goTailor(); };
+  const onApplyClick = () => advance({ applyClicked: true });
+  const currentStep = isSkip ? 'skip'
+    : applied ? 'warm'
+    : step.applyClicked ? 'track'
+    : step.tailored ? (jobUrl ? 'apply' : 'track')
+    : step.interested ? 'tailor'
+    : 'interested';
+
   const nextLine = isSkip
     ? 'Probably not this one — I’d focus elsewhere.'
     : verdict.key === 'stretch'
-      ? 'Stretch role — read it, then tailor & apply if you want.'
-      : 'Next: read the role, then tailor & apply.';
+      ? 'Stretch role — worth a look. Take the next step below if you want.'
+      : 'Strong fit — take the next step below.';
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
@@ -164,41 +179,53 @@ export default function CliffJobWorkspace() {
             </div>
           )}
 
-          {/* JD is visible above (Read). Interested = purple primary; once interested, Tailor becomes primary. Apply = outline. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 16, flexWrap: 'wrap' }}>
-            {!isSkip && (interested ? (
-              <button onClick={goTailor} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
-                <FileText size={15} /> Tailor resume <ArrowRight size={14} />
-              </button>
-            ) : (
-              <button onClick={() => setInterested(true)} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
-                I'm interested in this role
-              </button>
-            ))}
-            {!isSkip && jobUrl && (
-              <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#7c3aed', background: '#fff', border: '1.5px solid #ddd6fe', borderRadius: 999, padding: '12px 22px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
-                Apply to job <ExternalLink size={15} />
-              </a>
-            )}
-            {jobUrl && !isSkip && (
-              <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', textDecoration: 'none' }}>
-                View original posting ↗
-              </a>
-            )}
-            {isSkip && (
-              <button onClick={goBack} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: '#6b7280', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* Progressive guide — one solid purple next step at a time. Later steps tucked. */}
+          {!isSkip && (
+            <div style={{ marginTop: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                {currentStep === 'interested' && (
+                  <button onClick={onInterested} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
+                    I'm interested in this role
+                  </button>
+                )}
+                {currentStep === 'tailor' && (
+                  <button onClick={onTailor} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
+                    <FileText size={15} /> Tailor resume <ArrowRight size={14} />
+                  </button>
+                )}
+                {currentStep === 'apply' && jobUrl && (
+                  <a href={jobUrl} target="_blank" rel="noopener noreferrer" onClick={onApplyClick} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none', boxShadow: '0 6px 20px rgba(124,58,237,0.3)' }}>
+                    Apply to job <ExternalLink size={15} />
+                  </a>
+                )}
+                {currentStep === 'track' && (
+                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#7c3aed', margin: 0 }}>Next: mark this one as applied ↓</p>
+                )}
+                {currentStep === 'warm' && (
+                  <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#15803d', margin: 0 }}>✓ Applied — warm connections unlocked below.</p>
+                )}
+                {jobUrl && currentStep !== 'apply' && (
+                  <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', textDecoration: 'none' }}>View original posting ↗</a>
+                )}
+              </div>
+              <StepProgress step={step} applied={applied} current={currentStep} />
+            </div>
+          )}
+          {isSkip && (
+            <div style={{ marginTop: 16 }}>
+              <button onClick={goBack} style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', background: '#6b7280', border: 'none', borderRadius: 999, padding: '12px 26px', cursor: 'pointer', minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 Back to dashboard
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           {!fitLoading && (
             <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#4b5563', margin: '14px 0 0', lineHeight: 1.5 }}>{nextLine}</p>
           )}
         </div>
 
-        {/* 2) MARK AS APPLIED — tracks the application + schedules follow-ups. */}
-        {user && <WorkspacePrepActions job={job} user={user} applied={applied} onApplied={() => setApplied(true)} />}
+        {/* 2) MARK AS APPLIED (Track step) — tucked until you've clicked Apply. */}
+        {user && step.applyClicked && <WorkspacePrepActions job={job} user={user} applied={applied} onApplied={() => setApplied(true)} />}
 
         {/* 3) WARM CONNECTIONS — only after you apply. Quiet, never the hero. */}
         {user && (applied ? (
@@ -230,6 +257,35 @@ function MoreDisclosure({ children, label = 'More' }) {
         {open ? `▾ Hide ${label}` : `▸ ${label}`}
       </button>
       {open && <div style={{ marginTop: 8 }}>{children}</div>}
+    </div>
+  );
+}
+
+// Quiet progress strip: Interested → Tailor → Apply → Track. Done steps check
+// green, the current step is bold indigo, future steps stay gray. "Warm" only
+// appears once Track (applied) is done.
+function StepProgress({ step, applied, current }) {
+  const steps = [
+    { key: 'interested', label: 'Interested', done: !!step.interested },
+    { key: 'tailor', label: 'Tailor', done: !!step.tailored },
+    { key: 'apply', label: 'Apply', done: !!step.applyClicked },
+    { key: 'track', label: 'Track', done: !!applied },
+  ];
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 14, flexWrap: 'wrap' }}>
+      {steps.map((s, i) => (
+        <span key={s.key} style={{ display: 'inline-flex', alignItems: 'center' }}>
+          <span style={{
+            fontFamily: dm, fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 999, whiteSpace: 'nowrap',
+            color: s.done ? '#15803d' : current === s.key ? '#7c3aed' : '#9ca3af',
+            background: s.done ? '#f0fdf4' : current === s.key ? '#faf5ff' : 'transparent',
+            border: `1px solid ${s.done ? '#bbf7d0' : current === s.key ? '#ddd6fe' : '#e5e7eb'}`,
+          }}>
+            {s.done ? '✓ ' : ''}{s.label}
+          </span>
+          {i < steps.length - 1 && <span style={{ color: '#cbd5e1', fontSize: 11, margin: '0 4px' }}>›</span>}
+        </span>
+      ))}
     </div>
   );
 }

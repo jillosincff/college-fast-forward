@@ -81,7 +81,7 @@ export default function ExampleBestPathCard({ school, chipText, chipLabel, city 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#faf5ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 8, padding: '10px 12px', marginBottom: 10 }}>
         <ArrowRight size={14} color={INDIGO} style={{ flexShrink: 0 }} />
         <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, lineHeight: 1.4 }}>
-          Next step: Read job → I'm interested → Tailor resume → Apply
+          Open in CLIFF → I'm interested → Tailor resume → Apply → Track
         </span>
       </div>
       <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 14px', lineHeight: 1.5 }}>

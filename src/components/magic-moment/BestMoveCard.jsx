@@ -1,22 +1,18 @@
-import { useState } from 'react';
-import { Briefcase, MapPin, Zap, FileText, ExternalLink, Check, X } from 'lucide-react';
-import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER, R, SHADOW_MD, GRAD_INDIGO } from '@/components/onboarding-flow/onboardingShared';
-import { applyUrlOf } from '@/lib/jobFreshness';
+import { Briefcase, MapPin, Zap, ArrowRight, X } from 'lucide-react';
+import { FONT, TEXT, TEXT2, TEXT3, INDIGO_DIM, INDIGO_BORDER, R, SHADOW_MD, GRAD_INDIGO } from '@/components/onboarding-flow/onboardingShared';
 
 const BADGE = {
   pursue: { label: 'Pursue', bg: '#dcfce7', border: '#86efac', text: '#15803d' },
   stretch: { label: 'Stretch', bg: '#fef3c7', border: '#fcd34d', text: '#a16207' },
 };
 
-// One ranked move in the recruiter loop. Day-0 path on every card is
-// Read → Interested → Tailor → Apply → Add to Applied (all unpaid). Mock-interview
-// (pressure-test) stays wired in the page for later (interview invite / day-3);
-// it's just not the day-0 CTA. "Not for me" dismisses → next ranked backfills.
-export default function BestMoveCard({ move, index, interested, onPressureTest, onInterested, onTailor, onApply, onAddApplied, onNotForMe, warmBeat }) {
+// One ranked move. The card points to the CLIFF job page (workspace with the JD
+// + the progressive Interested → Tailor → Apply → Track → warm-connections
+// loop). The list itself doesn't force Tailor/Apply as primaries. "Not for me"
+// stays on the card to dismiss + backfill.
+export default function BestMoveCard({ move, index, onOpen, onNotForMe }) {
   const { job, verdict, why } = move;
   const badge = BADGE[verdict] || BADGE.stretch;
-  const [applied, setApplied] = useState(false);
-  const applyUrl = applyUrlOf(job);
 
   return (
     <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '16px 16px 12px', marginBottom: 12, boxShadow: SHADOW_MD }}>
@@ -45,44 +41,15 @@ export default function BestMoveCard({ move, index, interested, onPressureTest, 
         {why}
       </p>
 
-      {/* Read job posting — first, before committing interest. */}
-      {applyUrl && (
-        <a href={applyUrl} target="_blank" rel="noopener noreferrer" style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10, textDecoration: 'none' }}>
-          <ExternalLink size={14} /> Read job posting
-        </a>
-      )}
-
-      {/* Interested — the purple primary; commits the card to the tailor/apply path */}
-      <button onClick={() => onInterested(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '13px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>
-        {interested ? '✓ Interested — next: tailor your resume' : "I'm interested in this company"}
+      {/* Open in CLIFF — primary → job page (progressive loop there) */}
+      <button onClick={() => onOpen(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '13px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, boxShadow: '0 4px 14px rgba(109,40,217,0.25)' }}>
+        Open in CLIFF <ArrowRight size={15} />
       </button>
 
-      {/* Tailor — secondary outline (quieter than Interested) */}
-      <button onClick={() => onTailor(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8 }}>
-        <FileText size={14} /> Tailor resume for this role
+      {/* Not for me — quiet dismiss */}
+      <button onClick={() => onNotForMe(job)} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '6px 6px' }}>
+        <X size={13} /> Not for me
       </button>
-      {applied ? (
-        <div style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 999, padding: '11px 16px', marginBottom: 8 }}>
-          <Check size={15} /> Applied — nice work
-        </div>
-      ) : applyUrl ? (
-        <a href={applyUrl} target="_blank" rel="noopener noreferrer" onClick={() => { onApply(job); setApplied(true); }} style={{ width: '100%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 999, padding: '11px 16px', cursor: 'pointer', minHeight: 'auto', marginBottom: 8, textDecoration: 'none' }}>
-          <ExternalLink size={14} /> Apply on {job.name || 'site'} →
-        </a>
-      ) : null}
-
-      {/* Track + dismiss — small actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', borderTop: '1px solid #f1f5f9', paddingTop: 10 }}>
-        <button onClick={() => onAddApplied(job)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 6px' }}>
-          <Check size={13} /> Add to Applied
-        </button>
-        <button onClick={() => onNotForMe(job)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 6px', marginLeft: 'auto' }}>
-          <X size={13} /> Not for me
-        </button>
-      </div>
-
-      {/* Warm connections (people unlock) — only after Apply / Add to Applied */}
-      {warmBeat}
     </div>
   );
 }

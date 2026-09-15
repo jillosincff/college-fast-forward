@@ -9,26 +9,23 @@ import {
 import { Briefcase, Sparkles, Search, MapPin, ChevronDown, Users } from 'lucide-react';
 import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted, trackConversionEvent } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
-import { logJobApplied } from '@/lib/magicMomentLog';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import { applyUrlOf } from '@/lib/jobFreshness';
 import { rankMoves, jobKeyOf } from '@/lib/magicMomentMoves';
 import ExampleBestPathCard from '@/components/magic-moment/ExampleBestPathCard';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
 import BestMoveCard from '@/components/magic-moment/BestMoveCard';
-import WarmConnectionsBeat from '@/components/magic-moment/WarmConnectionsBeat';
+import { openCliffWorkspace } from '@/lib/cliffWorkspace';
 import MagicMomentCompleteBeat from '@/components/magic-moment/MagicMomentCompleteBeat';
 
-// REBUILT — guided recruiter loop (not a job board, not tailor-as-aha).
-// Free MM wow = "I've got this": CLIFF picks ≤3 roles to pursue, each with a
-// one-line honest why from real signals. Day-0 primary path on every card is
-// Interested → Tailor → Apply → Add to Applied (all unpaid). Mock-interview
-// (pressure-test) stays wired for later (interview invite / day-3) — it's not
-// the day-0 CTA. Interested commits the card to the tailor/apply path ONLY; it
-// does NOT open an insider/people ask. Warm connections (people unlock) show
-// per-company ONLY after the student applies or adds to their tracker — never
-// before. The always-on LockedPeopleCard stays collapsed at the very bottom as
-// a fallback. MM is not auto-completed just because jobs loaded.
+// Guided recruiter loop. CLIFF picks ≤3 roles to pursue, each with a one-line
+// honest why. Each card opens the CLIFF job page (workspace with JD + the
+// progressive Interested → Tailor → Apply → Track → warm-connections loop);
+// the list itself doesn't stack Tailor/Apply as equal primaries. "Not for me"
+// dismisses a card and backfills. Opening a pick completes the Magic Moment
+// (engagement) so the guarded workspace page admits the student. Warm
+// connections (people unlock) live on the job page, only after applied — never
+// before. The collapsed LockedPeopleCard stays as a bottom fallback.
 
 const pill = (extra) => ({
   fontFamily: FONT, fontSize: 13, fontWeight: 800, color: '#fff', background: GRAD_INDIGO,
@@ -56,8 +53,6 @@ export default function MagicMoment() {
 
   // Recruiter-loop state
   const [dismissedKeys, setDismissedKeys] = useState(() => new Set());
-  const [interestedKey, setInterestedKey] = useState(null);
-  const [actionedKeys, setActionedKeys] = useState(() => new Set());
   const [showPeople, setShowPeople] = useState(false);
 
   const cg0 = authUser?.career_goals || {};
@@ -88,7 +83,6 @@ export default function MagicMoment() {
     setShortMessage('');
     setError('');
     setDismissedKeys(new Set());
-    setInterestedKey(null);
     setRunKey(k => k + 1);
   };
 
@@ -178,49 +172,24 @@ export default function MagicMoment() {
     }
   }, [jobsLoading, visibleMoves.length]);
 
-  const handlePressureTest = (job) => {
-    markComplete({ result_type: 'pressure_test' });
-    base44.analytics.track({ eventName: 'pressure_test_started', properties: { company: job.name, role: job.job_title } });
-    const params = new URLSearchParams({
-      company: job.name || '',
-      role: job.job_title || '',
-      mm_free: '1',
-    });
-    const jd = (job.hiring_description || '').slice(0, 1000);
-    if (jd) params.set('jd', jd);
-    navigate(`/MockInterview?${params.toString()}`);
-  };
-  const handleTailor = (job) => {
-    markComplete({ result_type: 'tailor' });
-    const params = new URLSearchParams({
-      from: 'apply_modal',
-      company: job.name || '',
-      role: job.job_title || '',
-      jd: job.hiring_description || '',
-      job_url: applyUrlOf(job) || '',
+  // Open a best move → CLIFF job page (workspace with JD + progressive loop).
+  // Opening a pick is the Magic Moment's engagement step, so it completes MM
+  // (the OnboardingGuard admits the student to the guarded workspace page).
+  const handleOpen = (job) => {
+    markComplete({ result_type: 'open' });
+    base44.analytics.track({ eventName: 'best_move_opened', properties: { company: job.name, role: job.job_title } });
+    openCliffWorkspace({
+      company: job.name,
+      role: job.job_title,
+      jobUrl: applyUrlOf(job) || '',
+      jobDescription: job.hiring_description || job.job_description || '',
       location: job.location || '',
+      ...job,
     });
-    navigate(`/ResumeTailoring?${params.toString()}`);
-  };
-  const handleApply = (job) => {
-    markComplete({ result_type: 'apply' });
-    logJobApplied({ user, job });
-    setActionedKeys(prev => { const n = new Set(prev); n.add(jobKeyOf(job)); return n; });
-  };
-  const handleAddApplied = (job) => {
-    markComplete({ result_type: 'add_applied' });
-    logJobApplied({ user, job });
-    setActionedKeys(prev => { const n = new Set(prev); n.add(jobKeyOf(job)); return n; });
   };
   const handleNotForMe = (job) => {
     const k = jobKeyOf(job);
     setDismissedKeys(prev => { const n = new Set(prev); n.add(k); return n; });
-    if (interestedKey === k) setInterestedKey(null);
-  };
-  const handleInterested = (job) => {
-    setInterestedKey(jobKeyOf(job));
-    base44.analytics.track({ eventName: 'move_interested', properties: { company: job.name, role: job.job_title } });
-    // Interested commits the card to the tailor/apply path ONLY — no insider/people ask here.
   };
   // Recovery CTA — "Show me 3 different moves": dismiss the current batch so
   // the refetch excludes them, then re-fetch live. Still max 3; never a wall.
@@ -230,7 +199,6 @@ export default function MagicMoment() {
       visibleMoves.forEach(m => n.add(jobKeyOf(m.job)));
       return n;
     });
-    setInterestedKey(null);
     setJobsLoading(true);
     setError('');
     try {
@@ -375,16 +343,8 @@ export default function MagicMoment() {
                   key={k}
                   move={move}
                   index={i}
-                  interested={interestedKey === k}
-                  onPressureTest={handlePressureTest}
-                  onInterested={handleInterested}
-                  onTailor={handleTailor}
-                  onApply={handleApply}
-                  onAddApplied={handleAddApplied}
+                  onOpen={handleOpen}
                   onNotForMe={handleNotForMe}
-                  warmBeat={actionedKeys.has(k) ? (
-                    <WarmConnectionsBeat company={move.job.name} onAskParent={handleAskParent} onUpgrade={handleUpgrade} />
-                  ) : null}
                 />
               );
             })}
