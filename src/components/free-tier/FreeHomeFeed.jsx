@@ -10,6 +10,7 @@ import { useJobsFeed } from '@/hooks/useJobsFeed';
 import LockedPeopleCard from '@/components/magic-moment/LockedPeopleCard';
 import JobsRefreshBar from '@/components/free-tier/JobsRefreshBar';
 import JobsList from '@/components/magic-moment/JobsList';
+import { postedLabel } from '@/lib/jobFreshness';
 import WeeklyActivityStrip from '@/components/free-tier/WeeklyActivityStrip';
 
 // Free home — continues the Magic Moment cycle. Four sections, no demo data:
@@ -19,7 +20,7 @@ import WeeklyActivityStrip from '@/components/free-tier/WeeklyActivityStrip';
 export default function FreeHomeFeed({ user, onUpgrade }) {
   const navigate = useNavigate();
   const {
-    jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, refresh,
+    jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, mostlyFallback, refresh,
     chipLabel, chipText,
   } = useJobsFeed({ user });
   const [nextIdx, setNextIdx] = useState(0);
@@ -68,7 +69,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
       {/* 3. Jobs for you — same list logic as Magic Moment */}
       {!jobsLoading && jobsList.length > 1 && (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, boxShadow: SHADOW_MD }}>
-          <JobsRefreshBar lastUpdated={lastUpdated} isStale={isStale} error={error} onRefresh={refresh} loading={jobsLoading} />
+          <JobsRefreshBar lastUpdated={lastUpdated} isStale={isStale} error={error} mostlyFallback={mostlyFallback} onRefresh={refresh} loading={jobsLoading} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
             <Briefcase size={14} color={INDIGO_DIM} />
             <span style={{ fontSize: 12, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em' }}>More jobs for you</span>
@@ -109,6 +110,9 @@ function NextMoveCard({ job, city, onApply, onDidIt }) {
         <p style={{ fontFamily: FONT, fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 6 }}>
           <MapPin size={13} /> {tierLabel}
         </p>
+      )}
+      {postedLabel(job) && (
+        <p style={{ fontFamily: FONT, fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: '0 0 16px' }}>{postedLabel(job)}</p>
       )}
       <div style={{ display: 'flex', gap: 8 }}>
         {jobUrl !== '#' && (

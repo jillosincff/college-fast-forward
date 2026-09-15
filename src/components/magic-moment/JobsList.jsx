@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Zap, ExternalLink, MapPin, Check, FileText, ArrowRight } from 'lucide-react';
 import { FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER } from '@/components/onboarding-flow/onboardingShared';
-import { applyUrlOf } from '@/lib/jobFreshness';
+import { applyUrlOf, postedLabel } from '@/lib/jobFreshness';
 import { navigate } from '@/components/utils/navigation';
 
 const TIER_LABELS = {
@@ -51,7 +51,7 @@ function JobRow({ job, onApply, onPrepare }) {
     }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
-          {job.live && (
+          {job.live && !job.curated && (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 3, background: '#dcfce7', color: '#15803d',
               fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 999,
@@ -73,6 +73,9 @@ function JobRow({ job, onApply, onPrepare }) {
         <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.3, display: 'flex', alignItems: 'center', gap: 3 }}>
           <MapPin size={10} /> {job.location}{tierLabel ? ` · ${tierLabel}` : ''}
         </p>
+        {postedLabel(job) && (
+          <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>{postedLabel(job)}</p>
+        )}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
         {applied ? (
@@ -131,7 +134,7 @@ function ProLoopJobRow({ job, onPrepare }) {
       onMouseLeave={e => { e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.boxShadow = 'none'; }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
-        {job.live && (
+        {job.live && !job.curated && (
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 3, background: '#dcfce7', color: '#15803d',
             fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 999,
@@ -153,6 +156,9 @@ function ProLoopJobRow({ job, onPrepare }) {
       <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.3, display: 'flex', alignItems: 'center', gap: 3 }}>
         <MapPin size={10} /> {job.location}{tierLabel ? ` · ${tierLabel}` : ''}
       </p>
+      {postedLabel(job) && (
+        <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>{postedLabel(job)}</p>
+      )}
       <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: INDIGO, margin: '10px 0 0', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
         Open in CLIFF <ArrowRight size={12} />
       </p>

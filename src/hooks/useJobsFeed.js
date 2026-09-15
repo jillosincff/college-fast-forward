@@ -1,14 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import { getCachedJobs, setCachedJobs, clearCachedJobs } from '@/lib/jobsCache';
 
-// Shared job-feed loader for the Free + Pro home feeds.
+// Shared job-feed loader for the Free + Pro home feeds. Two clocks:
 //
-// - Serves cached results instantly on remount (no spinner), then re-fetches.
-// - Cache has a TTL (see jobsCache) so stale data expires and a real re-fetch
-//   happens instead of showing the same jobs forever.
-// - Surfaces isStale (backend served cached/timed-out results) and error
-//   (fetch failed entirely) so the UI can tell the student + offer a refresh.
+// 1) Navigation (leave Home → return, same session): serves the fresh session
+//    cache instantly — SAME roles, NO spinner, NO silent re-fetch that swaps them.
+// 2) Refresh / new day / prefs change: clears the goals-key cache and runs a
+//    real live fetch (spinner + scouring copy OK), excluding the jobs already
+//    on screen so the set is genuinely different.
+// - Cache has a TTL (see jobsCache) so stale data expires → a real re-fetch.
+// - Surfaces isStale / mostlyFallback (stale or mostly BuiltIn fallback) and
+//   error so the UI can tell the student + offer a refresh.
 // - Re-runs when the user's goal cacheKey changes.
 export function useJobsFeed({ user, maxJobs = 10 }) {
   const cg = user?.career_goals || {};
@@ -33,10 +36,17 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
   const [lastUpdated, setLastUpdated] = useState(cached?.fetchedAt || null);
   const [isStale, setIsStale] = useState(false);
   const [error, setError] = useState(false);
+  const [mostlyFallback, setMostlyFallback] = useState(false);
+  const jobsRef = useRef([]);
+  jobsRef.current = jobsList;
 
-  const runFetch = useCallback(() => {
+  const runFetch = useCallback((excludeKeys) => {
     if (!user) return Promise.resolve();
     return (async () => {
+      // Navigation remount with a fresh session cache: serve the SAME roles —
+      // no silent re-fetch that could swap them. Only a manual Refresh
+      // (excludeKeys), an expired cache, or a goals change triggers a real fetch.
+      if (!excludeKeys && getCachedJobs(cacheKey)) { setJobsLoading(false); return; }
       if (!getCachedJobs(cacheKey)) setJobsLoading(true);
       setError(false);
 
@@ -48,7 +58,7 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           result = await buildLiveJobsList({
-            role, industries, location, seeking: cg.seeking, chipText, maxJobs,
+            role, industries, location, seeking: cg.seeking, chipText, maxJobs, excludeKeys,
           });
           if (!result.stale && !result.fromCache) break; // genuinely fresh — done
         } catch (e) {
@@ -61,6 +71,7 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
         setJobsList(result.jobs);
         setShortMessage(result.shortMessage);
         setIsStale(!!result.stale || !!result.fromCache);
+        setMostlyFallback(!!result.mostlyFallback);
         setLastUpdated(Date.now());
         setCachedJobs(cacheKey, { jobs: result.jobs, shortMessage: result.shortMessage });
       } else {
@@ -75,12 +86,17 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
   useEffect(() => { runFetch(); }, [runFetch]);
 
   const refresh = useCallback(() => {
-    clearCachedJobs();
-    return runFetch();
-  }, [runFetch]);
+    clearCachedJobs(cacheKey);
+    // Exclude the jobs already on screen so a manual refresh returns a
+    // genuinely different set instead of reshuffling the same roles.
+    const excludeKeys = jobsRef.current
+      .map(j => ((j.name || '') + '|' + (j.job_title || '')).toLowerCase())
+      .filter(Boolean);
+    return runFetch(excludeKeys);
+  }, [runFetch, cacheKey]);
 
   return {
-    jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, refresh,
+    jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, mostlyFallback, refresh,
     chipLabel: industries[0] || role || '', chipText, role, industries, location,
   };
 }

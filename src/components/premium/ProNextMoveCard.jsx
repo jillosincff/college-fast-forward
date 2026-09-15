@@ -1,6 +1,7 @@
 import { ExternalLink, MapPin, FileText, Check, Mic, ArrowRight, Calendar } from 'lucide-react';
 import { FONT, R, SHADOW_MD } from '@/components/onboarding-flow/onboardingShared';
 import { navigate } from '@/components/utils/navigation';
+import { postedLabel } from '@/lib/jobFreshness';
 
 // Pro Next Move — same personal-recruiter loop as the free Magic Moment, with
 // people unlocked. The hero names the NEXT STEP, not just "Apply to…".
@@ -39,6 +40,9 @@ function Day0Card({ job, city, onApply, onPrepare, onAddApplied }) {
         <p style={{ fontFamily: FONT, fontSize: 12, color: 'rgba(255,255,255,0.8)', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
           <MapPin size={12} /> {tierLabel}
         </p>
+      )}
+      {postedLabel(job) && (
+        <p style={{ fontFamily: FONT, fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: '0 0 14px' }}>{postedLabel(job)}</p>
       )}
 
       {/* Primary — Tailor resume (opens the workspace tailored to this job) */}

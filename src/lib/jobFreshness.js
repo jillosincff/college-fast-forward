@@ -40,6 +40,37 @@ export function isDateFresh(job) {
   return Number.isFinite(t) && (Date.now() - t) <= FRESH_WINDOW_MS;
 }
 
+// The raw timestamp we trust for "Posted / Updated", or null when unknown.
+// posted_* is the listing date; last_seen is when we last re-verified the post
+// was still live (an "Updated" signal). Never invents a date.
+export function jobPostedDate(job) {
+  const d = job?.posted_date || job?.date_posted || job?.posted_at
+    || job?.last_seen || job?.last_seen_at;
+  if (!d) return null;
+  const t = Date.parse(d);
+  return Number.isFinite(t) ? new Date(t) : null;
+}
+
+// Honest "Posted X ago" / "Updated X ago" line, or '' when no date is known —
+// the UI hides the line entirely rather than inventing "Just posted."
+export function postedLabel(job) {
+  const date = jobPostedDate(job);
+  if (!date) return '';
+  const hasPosted = !!(job?.posted_date || job?.date_posted || job?.posted_at);
+  const verb = hasPosted ? 'Posted' : 'Updated';
+  return `${verb} ${freshnessAgo(date)}`;
+}
+
+function freshnessAgo(date) {
+  const s = Math.round((Date.now() - date.getTime()) / 1000);
+  if (s < 60) return 'just now';
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.round(h / 24)}d ago`;
+}
+
 /**
  * Full freshness check for a hero candidate.
  * Returns { ok, why } — why is one of: fresh | validated | missing_url | stale-http reasons (http_fail | closed).

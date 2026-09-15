@@ -4,9 +4,9 @@ import { FONT, TEXT3, INDIGO_DIM } from '@/components/onboarding-flow/onboarding
 // Small status + refresh row above the jobs feed.
 // Shows "Updated X ago" normally, a soft "couldn't refresh — retry" banner when
 // the last fetch failed or served stale cached results, and a Refresh button.
-export default function JobsRefreshBar({ lastUpdated, isStale, error, onRefresh, loading }) {
+export default function JobsRefreshBar({ lastUpdated, isStale, error, mostlyFallback, onRefresh, loading }) {
   const ago = lastUpdated ? timeAgo(lastUpdated) : '';
-  const showRetry = error || isStale;
+  const showRetry = error || isStale || mostlyFallback;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10, minHeight: 20 }}>
@@ -14,7 +14,7 @@ export default function JobsRefreshBar({ lastUpdated, isStale, error, onRefresh,
         {showRetry ? (
           <>
             <AlertCircle size={11} />
-            {error ? 'Couldn’t refresh — showing earlier results' : 'Showing cached results'}
+            {error ? 'Couldn’t refresh — showing earlier results' : 'Limited fresh results right now — tap Refresh'}
           </>
         ) : ago ? (
           <>Updated {ago}</>

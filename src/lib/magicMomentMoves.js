@@ -94,7 +94,7 @@ export function rankMoves(jobs, { chipText, chipLabel, seeking } = {}) {
       if (inMarket) reasons.push(`Hiring in ${loc || 'your area'}.`);
       else if (isRemote) reasons.push('Remote — apply from anywhere.');
       else if (hasLoc) reasons.push('Outside your metro.');
-      if (isDateFresh(job)) reasons.push('Just posted.');
+      if (isDateFresh(job)) reasons.push('Posted recently.');
 
       return { job, verdict, why: reasons[0] || 'Worth a look.', reasons, score, tier, inMarket, isRemote, onChip, levelOk, hasLoc };
     });

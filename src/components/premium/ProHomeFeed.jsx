@@ -22,7 +22,7 @@ import WeeklyActivityStrip from '@/components/free-tier/WeeklyActivityStrip';
 export default function ProHomeFeed({ user, onOpenTools }) {
   const navigate = useNavigate();
   const {
-    jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, refresh,
+    jobsList, jobsLoading, shortMessage, lastUpdated, isStale, error, mostlyFallback, refresh,
   } = useJobsFeed({ user, maxJobs: 30 });
   const [nextIdx] = useState(0);
   const [interviewMove, setInterviewMove] = useState(null);
@@ -92,7 +92,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
         </div>
       ) : showMoreJobs ? (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, boxShadow: SHADOW_MD }}>
-          <JobsRefreshBar lastUpdated={lastUpdated} isStale={isStale} error={error} onRefresh={refresh} loading={jobsLoading} />
+          <JobsRefreshBar lastUpdated={lastUpdated} isStale={isStale} error={error} mostlyFallback={mostlyFallback} onRefresh={refresh} loading={jobsLoading} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
             <Briefcase size={14} color={INDIGO_DIM} />
             <span style={{ fontSize: 12, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em' }}>More jobs for you</span>

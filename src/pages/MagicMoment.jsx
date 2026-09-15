@@ -206,8 +206,10 @@ export default function MagicMoment() {
       const role = (cg.target_roles || [])[0] || (cg.target_industries || [])[0] || '';
       const industries = cg.target_industries || [];
       const location = cg.location_preference || '';
+      const excludeKeys = [...dismissedKeys];
+      visibleMoves.forEach(m => excludeKeys.push(jobKeyOf(m.job)));
       const { jobs, shortMessage: sm } = await buildLiveJobsList({
-        role, industries, location, seeking: cg.seeking, chipText: heroMeta.chipText,
+        role, industries, location, seeking: cg.seeking, chipText: heroMeta.chipText, excludeKeys,
       });
       setJobsList(jobs);
       setShortMessage(sm);

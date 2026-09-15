@@ -1,5 +1,6 @@
 import { Briefcase, MapPin, Zap, ArrowRight, X } from 'lucide-react';
 import { FONT, TEXT, TEXT2, TEXT3, INDIGO_DIM, INDIGO_BORDER, R, SHADOW_MD, GRAD_INDIGO } from '@/components/onboarding-flow/onboardingShared';
+import { postedLabel } from '@/lib/jobFreshness';
 
 const BADGE = {
   pursue: { label: 'Pursue', bg: '#dcfce7', border: '#86efac', text: '#15803d' },
@@ -35,6 +36,9 @@ export default function BestMoveCard({ move, index, onOpen, onNotForMe }) {
           <MapPin size={11} color={TEXT3} /> {job.location}
         </p>
       ) : null}
+      {postedLabel(job) && (
+        <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '0 0 8px' }}>{postedLabel(job)}</p>
+      )}
 
       {/* Why — one honest line from real signals */}
       <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 12px', lineHeight: 1.5, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px' }}>

@@ -79,9 +79,15 @@ export function setCachedJobs(key, data) {
   sessionWrite(key, { data, fetchedAt: _cacheAt });
 }
 
-export function clearCachedJobs() {
-  _cache = null;
-  _cacheKey = null;
-  _cacheAt = 0;
-  sessionClear();
+export function clearCachedJobs(key) {
+  if (key) {
+    // Clear just this goals key (manual Refresh) — leave other keys intact.
+    if (_cacheKey === key) { _cache = null; _cacheKey = null; _cacheAt = 0; }
+    sessionClear(key);
+  } else {
+    _cache = null;
+    _cacheKey = null;
+    _cacheAt = 0;
+    sessionClear();
+  }
 }

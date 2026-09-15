@@ -4,7 +4,7 @@
 // fills with live remote roles and surfaces an honest short-pool message.
 import { base44 } from '@/api/base44Client';
 import { chipKeywordsFor, checkOnChip } from '@/lib/chipGate';
-import { checkJobLive, hasApplyUrl, cleanJobDisplay } from '@/lib/jobFreshness';
+import { checkJobLive, hasApplyUrl, cleanJobDisplay, jobPostedDate, isDateFresh } from '@/lib/jobFreshness';
 
 const TIER_ORDER = { same_location: 0, nearby: 1, remote: 2, other: 3 };
 
@@ -36,11 +36,15 @@ function makeTierOf(userCity, userState) {
  *   jobs         — only live-verified roles with apply URLs, sorted by tier
  *   shortMessage — set when the in-market pool was short and remote fill was used
  */
-export async function buildLiveJobsList({ role, industries, location, seeking, chipText, maxJobs = 10 }) {
+export async function buildLiveJobsList({ role, industries, location, seeking, chipText, maxJobs = 10, excludeKeys = [] }) {
   const chipKeywords = chipKeywordsFor(chipText);
   const isOnChip = (j) => checkOnChip(j.job_title, chipKeywords).ok;
   const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j));
   const onChip = (arr) => arr.filter(j => isOnChip(j));
+  // Exclude jobs already shown/dismissed this session so a refresh or
+  // "Show me 3 different moves" returns a genuinely different set.
+  const excludeSet = new Set((excludeKeys || []).map(k => (k || '').toLowerCase().trim()));
+  const isExcluded = (j) => excludeSet.has(((j.name || '') + '|' + (j.job_title || '')).toLowerCase());
 
   const locParts = (location || '').split(',').map(p => p.trim()).filter(Boolean);
   const userCity = locParts[0] || '';
@@ -105,7 +109,7 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
   if (pool.length < 5 && userState) {
     pool = [...pool, ...onChip(legit(await fetchJobs(userState)))];
   }
-  pool = dedupe(pool);
+  pool = dedupe(pool).filter(j => !isExcluded(j));
 
   // 2. Exclude cross-metro jobs when user has a market
   const hasMarket = !!(userCity || userState);
@@ -122,6 +126,7 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
     shortMessage = `Few live roles in ${userCity || userState || 'your area'} right now — showing remote roles you can apply to.`;
     const remoteRaw = onChip(legit(await fetchJobs('Remote', false)));
     const remoteNew = remoteRaw.filter(j => {
+      if (isExcluded(j)) return false;
       const k = ((j.name || '') + '|' + (j.job_title || '')).toLowerCase();
       return !liveJobs.some(lj => ((lj.name || '') + '|' + (lj.job_title || '')).toLowerCase() === k);
     });
@@ -130,9 +135,18 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
     liveJobs = [...liveJobs, ...remoteLive];
   }
 
-  // 5. Sort by tier (metro → state → remote), cap at maxJobs
+  // 5. Sort by tier (metro → state → remote), then by date freshness — jobs with
+  //    a known posted/updated date rank above unknown-date roles in the same tier.
   const tierRank = (j) => TIER_ORDER[j._tier] ?? 3;
-  liveJobs.sort((a, b) => tierRank(a) - tierRank(b));
+  const dateRank = (j) => {
+    if (!jobPostedDate(j)) return 2;          // unknown date — last
+    return isDateFresh(j) ? 0 : 1;            // fresh first, then dated-but-stale
+  };
+  liveJobs.sort((a, b) => tierRank(a) - tierRank(b) || dateRank(a) - dateRank(b));
 
-  return { jobs: liveJobs.slice(0, maxJobs), shortMessage, stale: anyStale, fromCache: anyFromCache };
+  // Mostly BuiltIn/curated fallback? Honest source signal for the UI banner.
+  const fallbackCount = liveJobs.filter(j => j.curated || j.source === 'builtin').length;
+  const mostlyFallback = liveJobs.length > 0 && fallbackCount >= Math.ceil(liveJobs.length / 2);
+
+  return { jobs: liveJobs.slice(0, maxJobs), shortMessage, stale: anyStale, fromCache: anyFromCache, mostlyFallback };
 }
