@@ -169,15 +169,30 @@ export default function CliffJobWorkspace() {
             {job.salary && <span style={{ fontFamily: dm, fontSize: 12, color: '#6b7280' }}>💰 {job.salary}</span>}
           </div>
 
-          {/* JD / description visible above the fold (Read). Falls back to the posting link below. */}
-          {(job.jobDescription || job.job_description) && (
-            <div style={{ marginTop: 14, background: '#f8f9fc', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
-              <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>Job description</p>
-              <div style={{ fontFamily: dm, fontSize: 13, color: '#374151', lineHeight: 1.6, whiteSpace: 'pre-wrap', maxHeight: 320, overflowY: 'auto' }}>
-                {decodeEntities(job.jobDescription || job.job_description)}
+          {/* JD / description visible above the fold (the "Read"). Prefer hiring_description,
+              then job_description/description. Posting link is secondary/backup — never the
+              only way to read the role. Don't invent JD text. */}
+          {(() => {
+            const jdText = job.hiring_description || job.jobDescription || job.job_description || job.description || '';
+            if (!jdText && !jobUrl) return null;
+            return (
+              <div style={{ marginTop: 14, background: '#f8f9fc', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>Job description</p>
+                {jdText ? (
+                  <div style={{ fontFamily: dm, fontSize: 13, color: '#374151', lineHeight: 1.6, whiteSpace: 'pre-wrap', maxHeight: 320, overflowY: 'auto' }}>
+                    {decodeEntities(jdText)}
+                  </div>
+                ) : (
+                  <p style={{ fontFamily: dm, fontSize: 12, color: '#9ca3af', margin: '0 0 10px', lineHeight: 1.5 }}>We don't have the full description text for this one — open the original posting to read it.</p>
+                )}
+                {jobUrl && (
+                  <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', textDecoration: 'none', marginTop: jdText ? 10 : 0 }}>
+                    View original posting <ExternalLink size={12} />
+                  </a>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Progressive guide — one solid purple next step at a time. Later steps tucked. */}
           {!isSkip && (
@@ -204,10 +219,10 @@ export default function CliffJobWorkspace() {
                 {currentStep === 'warm' && (
                   <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#15803d', margin: 0 }}>✓ Applied — warm connections unlocked below.</p>
                 )}
-                {jobUrl && currentStep !== 'apply' && (
-                  <a href={jobUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', textDecoration: 'none' }}>View original posting ↗</a>
-                )}
               </div>
+              {currentStep === 'tailor' && (
+                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#7c3aed', margin: '10px 0 0' }}>Next: tailor your resume for this role.</p>
+              )}
               <StepProgress step={step} applied={applied} current={currentStep} />
             </div>
           )}
