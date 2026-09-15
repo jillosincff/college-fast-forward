@@ -84,7 +84,13 @@ export default function ProHomeFeed({ user, onOpenTools }) {
       )}
 
       {/* 3. More jobs for you — live Apply URLs only */}
-      {showMoreJobs && (
+      {jobsLoading ? (
+        <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '24px 18px', marginBottom: 16, boxShadow: SHADOW_MD, textAlign: 'center' }}>
+          <div style={{ width: 22, height: 22, border: `2.5px solid #e9d5ff`, borderTop: `2.5px solid ${INDIGO}`, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>We're scouring the internet for roles worth your time…</p>
+          <p style={{ fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>sit tight.</p>
+        </div>
+      ) : showMoreJobs ? (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, boxShadow: SHADOW_MD }}>
           <JobsRefreshBar lastUpdated={lastUpdated} isStale={isStale} error={error} onRefresh={refresh} loading={jobsLoading} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
@@ -98,7 +104,7 @@ export default function ProHomeFeed({ user, onOpenTools }) {
           )}
           <JobsList variant="pro_loop" jobs={moreJobs} excludeJobKey={featuredFeedJob ? `${featuredFeedJob.name}|${featuredFeedJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} onPrepare={(job) => openCliffWorkspace({ company: job.name, role: job.job_title, jobUrl: job.job_url || job.apply_url, ...job })} onTailor={(job) => { const p = new URLSearchParams({ company: job.name, role: job.job_title, job_url: job.job_url || job.apply_url || '', from: 'prohome' }); navigate(`/ResumeTailoring?${p.toString()}`); }} />
         </div>
-      )}
+      ) : null}
 
       {/* 4. Application history — quiet link */}
       <div style={{ textAlign: 'center', marginTop: 4 }}>
