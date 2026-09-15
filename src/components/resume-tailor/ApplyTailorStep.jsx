@@ -23,7 +23,9 @@ export default function ApplyTailorStep({
   onJobDescriptionChange,
   onTailor,
   onCancel,
+  onOpenLibrary,
 }) {
+  const origin = applyContext?.origin;
   return (
     // Own fixed scroll container — guarantees scrolling on iPad regardless of
     // any body-level scroll state left behind by the apply overlay.
@@ -35,7 +37,7 @@ export default function ApplyTailorStep({
         onClick={onCancel}
         style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: '#888', marginBottom: 28, padding: 0, minHeight: 'auto' }}
       >
-        ← Back to application
+        {origin === 'workspace' ? '← Back to apply' : '← Back to application'}
       </button>
 
       {/* Stepper */}
@@ -57,16 +59,20 @@ export default function ApplyTailorStep({
         ))}
       </div>
 
-      {/* Header */}
+      {/* Header — job-scoped when arriving from the workspace, generic otherwise */}
       <div style={{ marginBottom: 28 }}>
         <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 12px' }}>
-          Tailoring for your application
+          {origin === 'workspace' ? 'Job-scoped tailoring' : 'Tailoring for your application'}
         </p>
         <h1 style={{ fontFamily: playfair, fontSize: 30, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>
-          Tailor your resume{companyName ? ` for ${companyName}` : ''}
+          {origin === 'workspace' && (jobTitle || companyName)
+            ? `Tailoring for ${jobTitle || 'this role'}${companyName ? ` at ${companyName}` : ''}`
+            : `Tailor your resume${companyName ? ` for ${companyName}` : ''}`}
         </h1>
         <p style={{ fontFamily: dmSans, fontSize: 15, color: '#666', margin: 0, lineHeight: 1.6 }}>
-          We pre-filled this role from your application. Review the job description below, then press <strong>Tailor my resume</strong>. Once it's ready, you'll come right back to submit your application.
+          {origin === 'workspace'
+            ? <>We'll rewrite your resume for this role. Review the job description, then press <strong>Tailor my resume</strong>. After, you'll head right back to apply.</>
+            : <>We pre-filled this role from your application. Review the job description below, then press <strong>Tailor my resume</strong>. Once it's ready, you'll come right back to submit your application.</>}
         </p>
       </div>
 
@@ -105,6 +111,19 @@ export default function ApplyTailorStep({
         onJobDescriptionChange={onJobDescriptionChange}
         onTailor={onTailor}
       />
+
+      {/* Quiet library link — the full Resume Studio (Your Resumes, Build from
+          scratch, Upload) stays reachable without being the default landing. */}
+      {origin === 'workspace' && onOpenLibrary && (
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <button
+            onClick={onOpenLibrary}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 12, color: '#aaa', padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
+          >
+            Open full Resume Studio →
+          </button>
+        </div>
+      )}
     </div>
     </div>
   );

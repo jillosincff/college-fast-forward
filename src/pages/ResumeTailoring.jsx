@@ -170,7 +170,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         setTailoredResumes(tailoredList);
         // Did we arrive from the apply-modal handoff? If so, keep the focused
         // tailoring phase — never fall back to the resume hub.
-        const fromApply = new URLSearchParams(window.location.hash.split('?')[1] || window.location.search).get('from') === 'apply_modal';
+        const fromJobFlow = ['apply_modal', 'workspace'].includes(new URLSearchParams(window.location.hash.split('?')[1] || window.location.search).get('from'));
         if (resList.length > 0) {
           const active = resList.find(r => r.is_active) || resList[0];
           setResumeText(active.parsed_text || '');
@@ -187,9 +187,9 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           }
           // Only show the hub if we are NOT mid apply-handoff. The applyContext
           // effect owns the phase when arriving from the job-apply modal.
-          setPhase(prev => (fromApply || prev === 'applyTailor') ? 'applyTailor' : 'hub');
+          setPhase(prev => (fromJobFlow || prev === 'applyTailor') ? 'applyTailor' : 'hub');
         } else {
-          setPhase(prev => fromApply ? prev : 'entry');
+          setPhase(prev => fromJobFlow ? prev : 'entry');
         }
       } catch (e) {
         console.error('Failed to load resumes:', e);
@@ -211,11 +211,25 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       let ctx = null;
       if (params.get('from') === 'apply_modal') {
         ctx = {
+          origin: 'apply_modal',
           company: params.get('company') || '',
           role: params.get('role') || '',
           jd: params.get('jd') || '',
           jobUrl: params.get('job_url') || '',
           location: params.get('location') || '',
+        };
+      } else if (params.get('from') === 'workspace') {
+        // Job-scoped tailoring from the CLIFF Job Workspace (or its sub-cards).
+        // The workspace stashes the full job in sessionStorage — use it to recover
+        // the JD / location / apply URL when the URL params don't carry them.
+        const ws = readWorkspaceJob() || {};
+        ctx = {
+          origin: 'workspace',
+          company: params.get('company') || ws.company || '',
+          role: params.get('role') || ws.role || ws.job_title || '',
+          jd: params.get('jd') || ws.jobDescription || ws.hiring_description || '',
+          jobUrl: params.get('job_url') || ws.jobUrl || ws.job_url || ws.apply_url || '',
+          location: params.get('location') || ws.location || '',
         };
       }
       // Fallback: the apply modal also stashes the context in sessionStorage —
@@ -223,7 +237,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       if (!ctx || (!ctx.company && !ctx.role)) {
         try {
           const stored = sessionStorage.getItem('cff_apply_tailor_ctx');
-          if (stored) ctx = JSON.parse(stored);
+          if (stored) ctx = { origin: 'apply_modal', ...JSON.parse(stored) };
         } catch {}
       }
       if (!ctx) return;
@@ -532,6 +546,18 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     setResumes(prev => prev.filter(r => r.id !== resumeId));
   };
 
+  // Cancel the focused tailoring screen. For a workspace-origin handoff, return
+  // to that job's workspace (so the student re-enters the Interested → Apply loop
+  // for the same role); otherwise return to the dashboard as before.
+  const handleApplyTailorCancel = () => {
+    try { sessionStorage.removeItem('cff_apply_tailor_ctx'); } catch {}
+    if (applyContext?.origin === 'workspace') {
+      window.location.hash = '#/CliffJobWorkspace';
+    } else {
+      navigate('FreeTierDashboard');
+    }
+  };
+
   if (!user || phase === 'loading') return null;
 
   // Show success toast if just upgraded
@@ -671,7 +697,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           company={companyName || applyContext?.company || ''}
           role={jobTitle || applyContext?.role || ''}
           onFile={uploadResumeForApply}
-          onCancel={() => { try { sessionStorage.removeItem('cff_apply_tailor_ctx'); } catch {} navigate('FreeTierDashboard'); }}
+          onCancel={handleApplyTailorCancel}
         />
       );
     }
@@ -691,7 +717,8 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         onJobTitleChange={setJobTitle}
         onJobDescriptionChange={setJobDescription}
         onTailor={handleDoTailor}
-        onCancel={() => { try { sessionStorage.removeItem('cff_apply_tailor_ctx'); } catch {} navigate('FreeTierDashboard'); }}
+        onCancel={handleApplyTailorCancel}
+        onOpenLibrary={() => { setApplyContext(null); setPhase('hub'); }}
       />
     );
   }

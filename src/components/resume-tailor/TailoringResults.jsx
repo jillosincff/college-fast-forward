@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
+import { saveWorkspaceStep } from '@/lib/cliffWorkspace';
 import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { toast } from 'sonner';
 import ApplicationReadyHero from './ApplicationReadyHero';
@@ -14,6 +15,15 @@ const playfair = "'Playfair Display', Georgia, serif";
 
 export default function TailoringResults({ result, companyName, jobTitle, originalResumeText, onStartOver, applyContext, userEmail }) {
   const tr = result.tailoredResume || {};
+  // Workspace-origin tailoring returns to that job's workspace (Interested → Apply
+  // loop) with the Tailor step marked done — not to the application tracker.
+  const isWorkspace = applyContext?.origin === 'workspace';
+  const handleBackToApply = () => {
+    const company = applyContext?.company || companyName || '';
+    const role = applyContext?.role || jobTitle || '';
+    if (company || role) saveWorkspaceStep(`${company}|${role}`, { tailored: true });
+    window.location.hash = '#/CliffJobWorkspace';
+  };
   // Opinionated default: CLIFF's changes are pre-accepted — students undo, not approve.
   const [changes, setChanges] = useState(() =>
     (tr.changes || []).map(c => (c.accepted === null || c.accepted === undefined) ? { ...c, accepted: true } : c)
@@ -70,7 +80,8 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
   // Primary apply action: submit + track when in the apply flow; otherwise take
   // the student to the download bar so they can grab the resume and apply.
   const handleApplyNow = () => {
-    if (applyContext) handleSubmitApplication();
+    if (isWorkspace) handleBackToApply();
+    else if (applyContext) handleSubmitApplication();
     else document.getElementById('rt-download')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
@@ -177,16 +188,20 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
           }}>
             <div style={{ minWidth: 0 }}>
               <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#1a1a1a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                Applying to {applyContext.role || jobTitle || 'this role'} · {applyContext.company || companyName}
+                {isWorkspace
+                  ? `Tailored for ${applyContext.role || jobTitle || 'this role'}${applyContext.company ? ` · ${applyContext.company}` : companyName ? ` · ${companyName}` : ''}`
+                  : `Applying to ${applyContext.role || jobTitle || 'this role'} · ${applyContext.company || companyName}`}
               </p>
               <p style={{ fontFamily: dmSans, fontSize: 11.5, color: '#888', margin: 0 }}>
-                {applyContext.jobUrl
-                  ? "We'll track it and open the official application — have your tailored resume downloaded."
-                  : "We'll save this application to your tracker."}
+                {isWorkspace
+                  ? "Your tailored resume is ready — download it, then head back to apply to this job."
+                  : (applyContext.jobUrl
+                    ? "We'll track it and open the official application — have your tailored resume downloaded."
+                    : "We'll save this application to your tracker.")}
               </p>
             </div>
             <button
-              onClick={handleSubmitApplication}
+              onClick={isWorkspace ? handleBackToApply : handleSubmitApplication}
               disabled={submitting}
               style={{
                 background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none',
@@ -196,7 +211,7 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
                 boxShadow: '0 4px 12px rgba(124,58,237,0.35)', flexShrink: 0,
               }}
             >
-              {submitting ? 'Saving…' : (applyContext.jobUrl ? '⚡ Finish Applying →' : '⚡ Add to Tracker →')}
+              {submitting ? 'Saving…' : (isWorkspace ? '← Back to apply →' : (applyContext.jobUrl ? '⚡ Finish Applying →' : '⚡ Add to Tracker →'))}
             </button>
           </div>
         </div>
