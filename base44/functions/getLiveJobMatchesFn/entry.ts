@@ -328,8 +328,11 @@ Deno.serve(async (req) => {
         || (job.job_is_remote ? 'Remote' : (job.job_country || ''));
       // Retail floor and seasonal holiday roles aren't the career-track
       // internships / first jobs CLIFF is built for — drop them here so
-      // they never enter the strict/relaxed/permissive pool.
-      if (/\b(retail\s+sales|retail\s+associate|retail\s+merchandiser|seasonal\s+sales|seasonal\s+associate|seasonal\s+retail|seasonal\s+merchandiser|holiday\s+seasonal)\b/i.test(title)) return null;
+      // they never enter the strict/relaxed/permissive pool. "seasonal" as
+      // a whole word catches standalone "Seasonal" titles (Nestlé Nespresso
+      // posts titled just "Seasonal"). "retails?" tolerates the "Retails
+      // Sales" typo seen in some aggregator titles.
+      if (/\b(seasonal)\b|\b(retails?)\s+(sales|associate|associates|merchandiser|clerk|cashier|stocker|team\s+member)\b/i.test(title)) return null;
       if (!jobMatchesLocation(locText, prefCity, prefState)) return null;
       const postedDate = job.job_posted_at_datetime_utc || null;
       const salary = (job.job_min_salary || job.job_max_salary)
