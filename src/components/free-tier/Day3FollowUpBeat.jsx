@@ -98,6 +98,11 @@ function NudgeCard({ app, onUpdate, onDismiss }) {
   };
 
   const pressureTest = () => {
+    // "Yes — interview" flips the tracked application into interview status so
+    // the Pro home Next Move picks it up as a Pressure-test, and stamps
+    // interview_date so the card can age out after the interview passes.
+    const now = new Date().toISOString();
+    onUpdate({ status: 'interview', status_date: now, interview_date: now });
     base44.analytics.track({ eventName: 'followup_pressure_test', properties: { company, role } });
     const jd = (app.job_description || '').slice(0, 1000);
     navigate('/MockInterview', {

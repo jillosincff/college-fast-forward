@@ -74,12 +74,15 @@ function Day0Card({ job, city, onApply, onPrepare, onAddApplied, onDismiss }) {
 }
 
 function InterviewCard({ move, onDismiss }) {
-  const company = move.company || move.company_name || 'the company';
   const role = move.job_title || move.role || 'the role';
+  // Never show "{title} at {title}". If the company is missing or equals the
+  // role (the "Graduate Trainee at Graduate Trainee" leak), show the role only.
+  const rawCompany = (move.company || move.company_name || '').trim();
+  const company = rawCompany && rawCompany.toLowerCase() !== String(role).toLowerCase() ? rawCompany : null;
   const jd = (move.job_description || '').slice(0, 1000);
 
   const goPressureTest = () => navigate('/MockInterview', {
-    company, role, ...(jd ? { jd } : {}),
+    company: company || '', role, ...(jd ? { jd } : {}),
   });
 
   return (
@@ -91,7 +94,7 @@ function InterviewCard({ move, onDismiss }) {
         <Calendar size={12} /> Your next move
       </p>
       <h2 style={{ fontFamily: FONT, fontSize: 21, fontWeight: 800, color: '#fff', margin: '0 0 8px', lineHeight: 1.2 }}>
-        Interview coming up: {role} at {company}
+        {company ? `Interview coming up: ${role} at ${company}` : `Interview coming up: ${role}`}
       </h2>
       <p style={{ fontFamily: FONT, fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: '0 0 16px' }}>
         Next step: pressure-test your answers before you go.

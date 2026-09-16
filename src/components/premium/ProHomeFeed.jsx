@@ -34,14 +34,28 @@ export default function ProHomeFeed({ user, onOpenTools }) {
 
   // If the student has a tracked application in 'interview' status, the Next
   // Move becomes a pressure-test for that role — more urgent than a new apply.
+  // Prefer the earliest UPCOMING interview_date. Rows whose interview_date is
+  // >1 day past are skipped (the interview already happened; the student just
+  // hasn't updated the status) so the card never lingers as "coming up".
   useEffect(() => {
     if (!user?.email) return;
     let mounted = true;
-    base44.entities.NetworkingPipeline.filter({ user_email: user.email, status: 'interview' }, '-status_date', 10)
+    base44.entities.NetworkingPipeline.filter({ user_email: user.email, status: 'interview' }, '-status_date', 20)
       .then(rows => {
         if (!mounted) return;
-        const r = (rows || [])[0];
-        if (r) setInterviewMove({ company: r.company, company_name: r.company, job_title: r.job_title, role: r.job_title, job_description: r.job_description });
+        const now = Date.now();
+        const ONE_DAY = 24 * 60 * 60 * 1000;
+        const eligible = (rows || [])
+          .map(r => ({ r, ts: r.interview_date ? new Date(r.interview_date).getTime() : null }))
+          .filter(x => x.ts === null || (now - x.ts) <= ONE_DAY) // skip >1 day past
+          .sort((a, b) => {
+            if (a.ts === null && b.ts === null) return 0;
+            if (a.ts === null) return 1;  // undated rows sink to the bottom
+            if (b.ts === null) return -1;
+            return a.ts - b.ts;            // earliest upcoming first
+          });
+        const r = eligible[0]?.r;
+        if (r) setInterviewMove({ company: r.company, company_name: r.company, job_title: r.job_title, role: r.job_title, job_description: r.job_description, interview_date: r.interview_date });
       })
       .catch(() => {});
     return () => { mounted = false; };
