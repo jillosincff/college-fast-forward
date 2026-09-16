@@ -196,7 +196,10 @@ export default function StudentLandingPage({ onParentClick }) {
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {!(!isLoadingAuth && user) && (
-            <button onClick={login} style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 10px', whiteSpace: 'nowrap' }}>Log In</button>
+            <button onClick={login} style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, cursor: 'pointer', minHeight: 36, padding: '7px 14px', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+              onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.96)'; }}
+              onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >Log In</button>
           )}
           <button onClick={go} className="nav-cta" style={{
             fontFamily: SF, fontSize: 14, fontWeight: 800, color: '#fff',
