@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
       // then empties the pool. Lead with the actual role titles a student qualifies
       // for so the on-chip pool is dense and fresh.
       finance: '"Investment Banking" OR "Financial Analyst" OR "Summer Analyst" OR "Investment Banking Analyst" OR "FP&A" OR "FP and A" OR "Credit Analyst" OR "Markets Analyst" OR "Wealth Management" OR "Risk Analyst" OR "Audit Associate" OR "Finance Associate"',
-      sales: '"Sales" OR "Sales Development Representative" OR "Account Executive" OR "Business Development" OR "Sales Associate"',
+      sales: '"Sales" OR "Sales Development Representative" OR "Account Executive" OR "Business Development"',
       software: '"Software Engineer" OR "Software Developer" OR "Frontend Developer" OR "Backend Developer" OR "Full Stack Developer" OR "Associate Engineer"',
     };
     const searchTerm = rawTerm
@@ -326,6 +326,10 @@ Deno.serve(async (req) => {
       const title = cleanJobTitle(rawTitle, job);
       const locText = [job.job_city, job.job_state].filter(Boolean).join(', ')
         || (job.job_is_remote ? 'Remote' : (job.job_country || ''));
+      // Retail floor and seasonal holiday roles aren't the career-track
+      // internships / first jobs CLIFF is built for — drop them here so
+      // they never enter the strict/relaxed/permissive pool.
+      if (/\b(retail\s+sales|retail\s+associate|retail\s+merchandiser|seasonal\s+sales|seasonal\s+associate|seasonal\s+retail|seasonal\s+merchandiser|holiday\s+seasonal)\b/i.test(title)) return null;
       if (!jobMatchesLocation(locText, prefCity, prefState)) return null;
       const postedDate = job.job_posted_at_datetime_utc || null;
       const salary = (job.job_min_salary || job.job_max_salary)

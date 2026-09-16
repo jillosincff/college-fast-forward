@@ -14,6 +14,11 @@ const isJunk = (j) => /\b(independent|1099|own business|own biz|build your own|b
 const isNonStudentLevel = (j) => /\b(charge nurse|director of nursing|nurse manager|nursing supervisor|clinical director|VP of|vice president|chief .+ officer|head of|department head|senior director|principal engineer)\b/i
   .test(j.job_title || '');
 
+// Retail floor and seasonal holiday roles aren't the career-track
+// internships / first jobs CLIFF is built for — drop them from the feed.
+const isRetailOrSeasonal = (j) => /\b(retail\s+sales|retail\s+associate|retail\s+merchandiser|seasonal\s+sales|seasonal\s+associate|seasonal\s+retail|seasonal\s+merchandiser|holiday\s+seasonal)\b/i
+  .test(j.job_title || '');
+
 function makeTierOf(userCity, userState) {
   return (j) => {
     const loc = (j.location || '').toLowerCase();
@@ -39,7 +44,7 @@ function makeTierOf(userCity, userState) {
 export async function buildLiveJobsList({ role, industries, location, seeking, chipText, maxJobs = 10, excludeKeys = [] }) {
   const chipKeywords = chipKeywordsFor(chipText);
   const isOnChip = (j) => checkOnChip(j.job_title, chipKeywords).ok;
-  const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j));
+  const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j) && !isRetailOrSeasonal(j));
   const onChip = (arr) => arr.filter(j => isOnChip(j));
   // Exclude jobs already shown/dismissed this session so a refresh or
   // "Show me 3 different moves" returns a genuinely different set.
