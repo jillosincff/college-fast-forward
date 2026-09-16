@@ -13,17 +13,6 @@
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const SESSION_PREFIX = 'cff_jobs_cache_';
 
-// Retail floor / seasonal holiday roles never belong in the feed. Applied at
-// cache-read so jobs cached before the pipeline filter was added are still
-// stripped — without this, a stale session cache re-serves retail/seasonal
-// roles until it expires or the student manually refreshes.
-const RETAIL_OR_SEASONAL_RE = /\b(seasonal)\b|\b(retails?)\s+(sales|associate|associates|merchandiser|clerk|cashier|stocker|team\s+member)\b/i;
-function stripRetailSeasonal(data) {
-  if (!data || !Array.isArray(data.jobs)) return data;
-  const cleaned = data.jobs.filter(j => !RETAIL_OR_SEASONAL_RE.test(j.job_title || ''));
-  return cleaned.length === data.jobs.length ? data : { ...data, jobs: cleaned };
-}
-
 let _cache = null;
 let _cacheKey = null;
 let _cacheAt = 0;
@@ -63,7 +52,7 @@ function sessionClear(key) {
 export function getCachedJobs(key) {
   // 1) Module memory first — fastest, survives in-app navigation without remount.
   if (_cacheKey === key && _cache && (Date.now() - _cacheAt) < CACHE_TTL_MS) {
-    return stripRetailSeasonal({ ..._cache, fetchedAt: _cacheAt });
+    return { ..._cache, fetchedAt: _cacheAt };
   }
   // 2) sessionStorage — survives full remount/reload within the same tab session.
   // This is what stops the "scouring…" spinner from reappearing when the student
@@ -75,7 +64,7 @@ export function getCachedJobs(key) {
       _cacheKey = key;
       _cache = s.data;
       _cacheAt = s.fetchedAt;
-      return stripRetailSeasonal({ ...s.data, fetchedAt: s.fetchedAt });
+      return { ...s.data, fetchedAt: s.fetchedAt };
     }
   }
   // Expired or mismatched — drop it so the next read is an honest miss.
