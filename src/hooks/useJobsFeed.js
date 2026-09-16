@@ -48,9 +48,12 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
 
   const runFetch = useCallback((excludeKeys) => {
     if (!user) return Promise.resolve();
-    // Navigation with a fresh LIVE cache: serve it, no fetch, no swap. (Curated
-    // fallbacks are never cached, so this only short-circuits genuine live sets.)
-    if (!excludeKeys && getCachedJobs(cacheKey)) { setJobsLoading(false); return Promise.resolve(); }
+    // Navigation with a fresh, NON-EMPTY live cache: serve it, no fetch, no
+    // swap. (Curated fallbacks are never cached, so this only short-circuits
+    // genuine live sets.) An empty cache is treated as a miss so a stuck-blank
+    // feed always re-scours for the backup instead of staying empty.
+    const navCached = !excludeKeys && getCachedJobs(cacheKey);
+    if (navCached && (navCached.jobs || []).length > 0) { setJobsLoading(false); return Promise.resolve(); }
     // A navigation fetch that arrives while another fetch is already running is
     // skipped — the in-flight fetch will populate the cache and the next render
     // serves it. A manual Refresh (excludeKeys) always proceeds and supersedes.
@@ -101,12 +104,14 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
           setIsStale(!!result.stale || !!result.fromCache);
           setMostlyFallback(!!result.mostlyFallback);
           setLastUpdated(Date.now());
-          // Only a genuine live load gets a sticky navigation cache. Curated /
-          // BuiltIn-majority fallbacks are NOT cached — so leaving Home and
-          // returning re-scours for live jobs instead of sticky-serving the same
-          // prestige pack every time. The fallback jobs still render (behind the
-          // "Limited fresh results" banner).
-          if (!result.mostlyFallback) {
+          // Only a genuine, NON-EMPTY live load gets a sticky navigation cache.
+          // Curated / BuiltIn-majority fallbacks are NOT cached (so leaving Home
+          // and returning re-scours for live jobs). An EMPTY result must NEVER be
+          // cached — otherwise the empty set becomes the sticky cache, the next
+          // navigation short-circuits on it, and the dashboard stays blank for
+          // the whole TTL even though the backup (curated / BuiltIn) would have
+          // populated on a fresh fetch.
+          if (!result.mostlyFallback && result.jobs.length > 0) {
             setCachedJobs(cacheKey, { jobs: result.jobs, shortMessage: result.shortMessage });
           }
         } else {
