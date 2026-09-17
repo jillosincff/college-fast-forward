@@ -62,7 +62,14 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
     inFlightRef.current = true;
     return (async () => {
       try {
-        if (!getCachedJobs(cacheKey)) setJobsLoading(true);
+        // We're past the short-circuit, so a real fetch is running. Show the
+        // spinner whenever there's nothing to render yet — including a STUCK
+        // EMPTY cache from a prior failed load. (The old `!getCachedJobs`
+        // guard skipped the spinner when an empty cache existed, so the feed
+        // sat blank with no spinner for ~15s while JSearch timed out and the
+        // curated backup loaded — read by users as "no jobs".)
+        const haveJobs = (jobsRef.current || []).length > 0;
+        if (!haveJobs) setJobsLoading(true);
         setError(false);
 
         // JSearch (the upstream job provider) has intermittent ~6s timeouts. When
