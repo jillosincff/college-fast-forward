@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MagicMomentCompleteBeat from '@/components/magic-moment/MagicMomentCompleteBeat';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import { hasProOfferBeenViewed } from '@/lib/tracking';
@@ -9,15 +9,23 @@ import { hasProOfferBeenViewed } from '@/lib/tracking';
 // the client flag, so this never re-shows after the offer has been seen once —
 // it is not a forever-nag. Catches the "open a job → workspace → back to
 // dashboard" exit path and any deep-link that bypassed the post-MM beat.
+//
+// The show decision latches on (not computed per-render) so the beat stays
+// mounted until the student acts, even though the beat's own mount sets the
+// localStorage flag that would otherwise hide it on the next render.
 export default function PostMagicMomentOfferNet({ user }) {
-  const [show, setShow] = useState(() => {
-    if (!user) return false;
-    if (user.magic_moment_completed !== true) return false;
-    // Pro students / admins don't need the free→Pro offer
-    if (user.subscription_status === 'active' || user.membership_tier === 'pro' || user.role === 'admin') return false;
-    return !hasProOfferBeenViewed();
-  });
+  const [show, setShow] = useState(false);
   const [modal, setModal] = useState(null);
+
+  useEffect(() => {
+    if (show) return; // already latched on — never auto-dismiss
+    if (!user) return;
+    if (user.magic_moment_completed !== true) return;
+    if (user.subscription_status === 'active' || user.membership_tier === 'pro' || user.role === 'admin') return;
+    if (hasProOfferBeenViewed()) return;
+    setShow(true);
+  }, [user, show]);
+
   if (!show) return null;
 
   return (
