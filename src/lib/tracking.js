@@ -67,6 +67,23 @@ export const trackAskParentShown           = (p = {}) => track(EVENTS.ASK_PARENT
 export const trackMmCompleteBeatShown      = (p = {}) => track(EVENTS.MM_COMPLETE_BEAT_SHOWN, withMm(p));
 export const trackMmCompleteBeatDismissed  = (p = {}) => track(EVENTS.MM_COMPLETE_BEAT_DISMISSED, withMm(p));
 
+// ── pro_offer_viewed: durable "the student saw the Ask-parent / Unlock-Pro
+//    offer at least once after completing their Magic Moment". Idempotent per
+//    user server-side (logConversionEvent dedupes on event_key). The localStorage
+//    flag is a client-side gate so the safety-net beat never re-shows after the
+//    offer has been seen/logged on this device.
+const PRO_OFFER_VIEWED_KEY = 'cff_pro_offer_viewed';
+export function markProOfferViewed() {
+  try { localStorage.setItem(PRO_OFFER_VIEWED_KEY, '1'); } catch (e) {}
+}
+export function hasProOfferBeenViewed() {
+  try { return localStorage.getItem(PRO_OFFER_VIEWED_KEY) === '1'; } catch (e) { return false; }
+}
+export const trackProOfferViewed = (props = {}) => {
+  markProOfferViewed();
+  return trackConversionEvent('pro_offer_viewed', withMm(props));
+};
+
 // ── ConversionEvent logger (admin funnel source of truth) ───────────────────
 // Idempotent: one event per user per event_name. Use for the canonical funnel:
 // onboarding_completed → magic_moment_offered → started → completed →

@@ -3,7 +3,7 @@ import { Gift, Sparkles, X, ArrowRight } from 'lucide-react';
 import {
   FONT, TEXT, TEXT2, TEXT3, INDIGO, INDIGO_DIM, INDIGO_BORDER, GRAD_INDIGO, R,
 } from '@/components/onboarding-flow/onboardingShared';
-import { trackMmCompleteBeatShown, trackMmCompleteBeatDismissed, trackConversionEvent } from '@/lib/tracking';
+import { trackMmCompleteBeatShown, trackMmCompleteBeatDismissed, trackConversionEvent, trackProOfferViewed } from '@/lib/tracking';
 
 // Soft completion beat — shown after Magic Moment completes, BEFORE the
 // dashboard, if the student hasn't opened Ask a parent / Pro yet this session.
@@ -26,6 +26,11 @@ export default function MagicMomentCompleteBeat({ onAskParent, onUnlockPro, onDi
     fired.current = true;
     trackMmCompleteBeatShown({ source: 'post_magic_moment' });
     trackConversionEvent('mm_complete_beat_shown', { trigger: 'post_magic_moment' });
+    // Durable "the post-MM Pro/parent offer was shown" event — idempotent per
+    // user. This is the funnel step that was silently missing: without it,
+    // completers who dismissed reached the dashboard with no offer-viewed
+    // signal, so the leak looked like 7 completes → 1 offer view.
+    trackProOfferViewed({ trigger: 'post_magic_moment' });
   }, []);
 
   const dismiss = () => {

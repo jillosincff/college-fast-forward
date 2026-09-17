@@ -7,7 +7,7 @@ import {
   GRAD_INDIGO, SHADOW_MD, R,
 } from '@/components/onboarding-flow/onboardingShared';
 import { Briefcase, Sparkles, Search, MapPin, ChevronDown, Users } from 'lucide-react';
-import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted, trackConversionEvent } from '@/lib/tracking';
+import { trackMagicMomentStarted, trackMagicMomentCompleted, markMagicMomentCompleted, trackConversionEvent, trackProOfferViewed } from '@/lib/tracking';
 import ProUpgradeModal from '@/components/conversion/ProUpgradeModal';
 import { buildLiveJobsList } from '@/lib/jobsPipeline';
 import { applyUrlOf } from '@/lib/jobFreshness';
@@ -226,10 +226,16 @@ export default function MagicMoment() {
 
   const handleAskParent = () => {
     paywallOpenedRef.current = true;
+    // They opened the parent ask directly from the MM page (beat is skipped on
+    // Continue-free because paywallOpenedRef is now true). Log the durable
+    // offer-viewed event here so the dashboard safety-net doesn't re-fire and
+    // the funnel records the offer impression.
+    trackProOfferViewed({ trigger: 'magic_moment_parent' });
     setProModalConfig({ initialView: 'parent', source: 'magic_moment_parent' });
   };
   const handleUpgrade = () => {
     paywallOpenedRef.current = true;
+    trackProOfferViewed({ trigger: 'magic_moment' });
     setProModalConfig({ initialView: 'main', source: 'magic_moment' });
   };
 
