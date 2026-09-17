@@ -76,8 +76,18 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
         onAskParent={onUpgrade}
       />
 
-      {/* 3. Jobs for you — same list logic as Magic Moment */}
-      {!jobsLoading && !mostlyFallback && jobsList.length > 1 && (
+      {/* 3. Jobs for you — same list logic as Magic Moment. The scouring spinner
+          shows during ANY load so the feed is never a blank gap — even when the
+          Next-Move box above was dismissed (its own spinner is gated on
+          !dismissed, so without this the dismissed state would render nothing
+          for ~15s while JSearch times out and curated loads). */}
+      {jobsLoading ? (
+        <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '24px 18px', marginBottom: 16, boxShadow: SHADOW_MD, textAlign: 'center' }}>
+          <div style={{ width: 22, height: 22, border: `2.5px solid #e9d5ff`, borderTop: `2.5px solid ${INDIGO}`, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>We're scouring the internet for roles worth your time…</p>
+          <p style={{ fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>sit tight.</p>
+        </div>
+      ) : !mostlyFallback && jobsList.length > 1 ? (
         <div style={{ background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: R, padding: '20px 18px', marginBottom: 16, boxShadow: SHADOW_MD }}>
           <JobsRefreshBar lastUpdated={lastUpdated} isStale={isStale} error={error} mostlyFallback={mostlyFallback} onRefresh={refresh} loading={jobsLoading} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
@@ -91,7 +101,7 @@ export default function FreeHomeFeed({ user, onUpgrade }) {
           )}
           <JobsList jobs={jobsList.filter((_, i) => i !== nextIdx)} excludeJobKey={nextJob ? `${nextJob.name}|${nextJob.job_title}` : ''} onApply={(job) => logJobApplied({ user, job })} />
         </div>
-      )}
+      ) : null}
 
       {/* 4. Application history — quiet link, only real applied jobs */}
       <div style={{ textAlign: 'center', marginTop: 4 }}>
