@@ -51,11 +51,11 @@ export default function MagicMomentCompleteBeat({ onAskParent, onUnlockPro, onDi
             <Sparkles size={12} color={INDIGO} />
             <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Free stops here</span>
           </div>
-          <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.5 }}>
-            You just felt the shift from "I have no clue" to a real plan. Free stops after this cycle. Pro keeps your guided search going — unlimited tailor, prep, and tracking so you don't fall back into winging it.
-          </p>
-          <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT3, margin: '10px 0 0', lineHeight: 1.4 }}>
-            Warm intros unlock with Pro when available.
+          <h2 style={{ fontFamily: FONT, fontSize: 19, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.25 }}>
+            Keep CLIFF working on every application
+          </h2>
+          <p style={{ fontFamily: FONT, fontSize: 13.5, fontWeight: 500, color: TEXT2, margin: '10px 0 0', lineHeight: 1.5 }}>
+            Free got you the first cycle + follow-ups. Pro is unlimited tailor, fresh Best Moves, and warm intros at companies you apply to — until someone replies.
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export default function MagicMomentCompleteBeat({ onAskParent, onUnlockPro, onDi
           onClick={onAskParent}
           style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '15px', cursor: 'pointer', boxShadow: '0 6px 18px rgba(109,40,217,0.32)', marginBottom: 10 }}
         >
-          <Gift size={16} /> Ask a parent to unlock Pro
+          <Gift size={16} /> Ask a parent to unlock →
         </button>
 
         {/* Secondary — Unlock Pro myself */}
@@ -74,6 +74,11 @@ export default function MagicMomentCompleteBeat({ onAskParent, onUnlockPro, onDi
         >
           <Sparkles size={15} color={INDIGO} /> Unlock Pro myself — $19.96/mo
         </button>
+
+        {/* Micro — price hint */}
+        <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, textAlign: 'center', margin: '0 0 12px', lineHeight: 1.5 }}>
+          Cancel anytime · About $5/week
+        </p>
 
         {/* Dismiss — always allowed */}
         <button
