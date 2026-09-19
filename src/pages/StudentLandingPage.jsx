@@ -176,17 +176,24 @@ export default function StudentLandingPage({ onParentClick }) {
           .hero-visual { order: 2; }
         }
         @media (max-width: 640px) {
+          .slp-nav {
+            padding-top: calc(env(safe-area-inset-top) + 8px) !important;
+            padding-bottom: 8px !important;
+            min-height: calc(72px + env(safe-area-inset-top)) !important;
+          }
           .nav-cta { padding: 10px 14px !important; font-size: 13px !important; }
         }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{
+      <nav className="slp-nav" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        background: 'rgba(248,249,255,0.90)', backdropFilter: 'blur(20px)',
+        background: 'rgba(248,249,255,0.92)', backdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(79,70,229,0.10)',
-        padding: '0 clamp(16px,5vw,32px)', height: 64,
+        padding: 'env(safe-area-inset-top) clamp(16px,5vw,32px) 0',
+        minHeight: 'calc(64px + env(safe-area-inset-top))',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        boxSizing: 'border-box',
       }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: SF, fontSize: 'clamp(15px, 3vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', whiteSpace: 'nowrap' }}>
           <img src="https://media.base44.com/images/public/684474c5723dc90efce23588/5181e2c8e_generated_image.png" alt="College Fast Forward" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }} />
