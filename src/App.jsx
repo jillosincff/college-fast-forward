@@ -44,6 +44,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import Logout from '@/pages/Logout';
 import AdminV2 from '@/pages/AdminV2';
 import EngagementAgentDashboard from '@/pages/EngagementAgentDashboard';
+import AdminGuard from '@/components/adminv2/AdminGuard';
 
 import PaywallAnalyticsDashboard from '@/pages/PaywallAnalyticsDashboard';
 import CliffScout from '@/pages/CliffScout';
@@ -274,12 +275,12 @@ const AuthenticatedApp = () => {
       <Route path="/ProfileEdit" element={<LayoutWrapper currentPageName="ProfileEdit"><ProfileEdit /></LayoutWrapper>} />
       <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
       <Route path="/admin" element={<AdminV2 />} />
-      <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
-      <Route path="/paywall-analytics" element={<PaywallAnalyticsDashboard />} />
+      <Route path="/engagement-agent" element={<AdminGuard><EngagementAgentDashboard /></AdminGuard>} />
+      <Route path="/paywall-analytics" element={<AdminGuard><PaywallAnalyticsDashboard /></AdminGuard>} />
       <Route path="/cliff-scout" element={<CliffScout />} />
       <Route path="/action-plan-architect" element={<ActionPlanArchitect />} />
       <Route path="/join" element={<JoinPage />} />
-      <Route path="/jill-osinoff-dashboard" element={<JillOsinoffDashboard />} />
+      <Route path="/jill-osinoff-dashboard" element={<AdminGuard><JillOsinoffDashboard /></AdminGuard>} />
       <Route path="/company-intel" element={<OnboardingGuard><CompanyIntelDashboard /></OnboardingGuard>} />
       <Route path="/cliff-chat" element={<OnboardingGuard><CliffChat /></OnboardingGuard>} />
       <Route path="/CliffJobWorkspace" element={<OnboardingGuard><CliffJobWorkspace /></OnboardingGuard>} />
