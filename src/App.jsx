@@ -32,7 +32,6 @@ import ParentAllSet from '@/pages/ParentAllSet';
 import ParentLandingPage from '@/pages/ParentLandingPage';
 import StudentLandingPage from '@/pages/StudentLandingPage';
 import RegistrationSuccess from '@/pages/RegistrationSuccess';
-import VerifyEmail from '@/pages/VerifyEmail';
 import OnboardingQuestions from '@/pages/OnboardingQuestions';
 import MagicMoment from '@/pages/MagicMoment';
 import ProActivated from '@/pages/ProActivated';
@@ -241,9 +240,6 @@ const AuthenticatedApp = () => {
       <Route path="/ParentUpsell" element={<Navigate to="/ParentAllSet" replace />} />
       <Route path="/ParentAllSet" element={<ParentAllSet />} />
       <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
-      {/* Destination of the signup verification email link. Without this route the
-          link dead-ended on the platform's generic "Thank you for joining" screen. */}
-      <Route path="/VerifyEmail" element={<VerifyEmail />} />
       <Route path="/OnboardingQuestions" element={<OnboardingQuestions />} />
       <Route path="/MagicMoment" element={<MagicMoment />} />
       <Route path="/ProActivated" element={<ProActivated />} />
