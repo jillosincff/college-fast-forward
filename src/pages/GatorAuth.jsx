@@ -11,6 +11,7 @@ import { buildLocationMemories } from '@/lib/locationPrefs';
 import { saveParsedResume } from '@/lib/resumeText';
 import { buildCareerGoalsFromOnboarding } from '@/lib/onboardingGoals';
 import { trackConversionEvent } from '@/lib/tracking';
+import { getSignupAttribution } from '@/lib/utmAttribution';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -363,6 +364,7 @@ export default function GatorAuth() {
               is_new_signup: true,
               school: college,
               school_code: (deriveSchoolCode(college) || '').toUpperCase(),
+              ...getSignupAttribution(),
               career_blockers: blockers,
               resume_status: resumeStatus,
               resume_source: localStorage.getItem('cff_resume_source') || '',
@@ -550,6 +552,7 @@ export default function GatorAuth() {
           onboarding_completed: true,
           is_new_signup: true,
           ...(college ? { school: college, school_code: (deriveSchoolCode(college) || '').toUpperCase() } : {}),
+          ...getSignupAttribution(),
           career_goals: buildCareerGoalsFromOnboarding({
             seeking: goalSeeking,
             industries: goalIndustries,

@@ -10,6 +10,7 @@ import { HashRouter as Router, Route, Routes, Navigate, useLocation } from 'reac
 import PageNotFound from './lib/PageNotFound';
 import UnknownRouteRedirect from './lib/UnknownRouteRedirect';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { captureUtm } from '@/lib/utmAttribution';
 
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
 import JoinPage from '@/pages/JoinPage';
@@ -324,6 +325,7 @@ function App() {
       // Student referral code from the referral blast (?ref__=CODE)
       const refCode = searchParams.get('ref__') || hashParams.get('ref__');
       if (refCode) localStorage.setItem('pendingReferralCode', refCode);
+      captureUtm();
     } catch {}
   }, []);
 

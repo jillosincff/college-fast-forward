@@ -41,6 +41,34 @@
       "format": "date-time",
       "description": "When the referral code was attributed to this user"
     },
+    "utm_source": {
+      "type": "string",
+      "description": "First-touch UTM source captured at signup (e.g. tiktok, reddit, seo). First-touch wins \u2014 never overwritten."
+    },
+    "utm_medium": {
+      "type": "string",
+      "description": "First-touch UTM medium captured at signup (e.g. organic, paid)"
+    },
+    "utm_campaign": {
+      "type": "string",
+      "description": "First-touch UTM campaign captured at signup"
+    },
+    "utm_content": {
+      "type": "string",
+      "description": "First-touch UTM content captured at signup"
+    },
+    "utm_term": {
+      "type": "string",
+      "description": "First-touch UTM term captured at signup"
+    },
+    "signup_source": {
+      "type": "string",
+      "description": "Derived attribution at signup: utm_source if present, else 'referral' if a referral code exists, else 'direct'"
+    },
+    "referral_code": {
+      "type": "string",
+      "description": "Normalized referral code at signup \u2014 ambassador (?ref__=) or parent ref, whichever is present. First-touch, never overwritten."
+    },
     "linkedin_optimization": {
       "type": "object",
       "properties": {

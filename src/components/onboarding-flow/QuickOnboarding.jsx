@@ -12,6 +12,7 @@ import {
 import { ArrowRight, Upload, X, GraduationCap, Briefcase, MapPin, FileText, Loader2 } from 'lucide-react';
 import LocationAutocomplete from './LocationAutocomplete';
 import { trackOnboardingCompleted } from '@/lib/tracking';
+import { getSignupAttribution } from '@/lib/utmAttribution';
 
 const TARGET_CHIPS = ONBOARDING_TARGET_CHIPS;
 const LOC_CHIPS = ['Remote', 'Open to relocate'];
@@ -94,6 +95,7 @@ export default function QuickOnboarding({ onDone }) {
         roles: ['student'],
         onboarding_completed: true,
         is_new_signup: true,
+        ...getSignupAttribution(),
         school: schoolValue,
         ...(notEnrolled ? {} : { school_code: (deriveSchoolCode(school) || '').toUpperCase() }),
         career_goals,
