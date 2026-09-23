@@ -110,6 +110,11 @@
     "plan": {
       "type": "string",
       "description": "free or pro at recommendation time"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

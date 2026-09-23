@@ -32,6 +32,11 @@
       "type": "object",
       "description": "Flexible JSON \u2014 event-specific metadata",
       "default": {}
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

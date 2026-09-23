@@ -56,6 +56,11 @@
       "type": "string",
       "format": "date-time",
       "description": "When the first-morning brief email was sent (one per brief, never re-sent)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

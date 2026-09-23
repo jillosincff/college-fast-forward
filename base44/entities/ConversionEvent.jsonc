@@ -70,6 +70,11 @@
       "type": "object",
       "default": {},
       "description": "Event-specific context"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

@@ -53,6 +53,11 @@
       ],
       "default": "my_school_only",
       "description": "Who this member is willing to help: only students from their own school (default), students from any CFF school (explicit opt-in), or not currently available to help."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

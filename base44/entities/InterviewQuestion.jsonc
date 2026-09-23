@@ -88,6 +88,11 @@
       "type": "boolean",
       "default": true,
       "description": "Whether visible to users"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

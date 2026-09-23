@@ -45,6 +45,11 @@
     "user_agent": {
       "type": "string",
       "description": "User agent string from the event"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

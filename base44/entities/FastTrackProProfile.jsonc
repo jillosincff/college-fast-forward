@@ -129,6 +129,11 @@
     "flow_data": {
       "type": "string",
       "description": "JSON string of accumulated data collected during the active flow"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

@@ -127,6 +127,11 @@
     "disclaimer": {
       "type": "string",
       "description": "Illustrative-not-mandatory disclaimer shown with the path"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

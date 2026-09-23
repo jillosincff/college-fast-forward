@@ -85,6 +85,11 @@
       "type": "string",
       "format": "date-time",
       "description": "When FASTIQ last regenerated the plan"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

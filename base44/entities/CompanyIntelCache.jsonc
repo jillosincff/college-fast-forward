@@ -120,6 +120,11 @@
       "type": "string",
       "format": "date-time",
       "description": "Cache expiration (24h TTL)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

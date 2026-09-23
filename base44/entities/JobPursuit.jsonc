@@ -136,6 +136,11 @@
       "type": "string",
       "format": "date-time",
       "description": "When the next action is due, if time-sensitive"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

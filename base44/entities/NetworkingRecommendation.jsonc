@@ -83,6 +83,11 @@
     "industry": {
       "type": "string",
       "description": "Industry of the opportunity, if known"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

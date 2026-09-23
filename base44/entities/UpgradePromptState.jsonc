@@ -34,6 +34,11 @@
       "type": "string",
       "format": "date-time",
       "description": "Non-essential prompts hidden until this time (7 days after 'Continue with Free')"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

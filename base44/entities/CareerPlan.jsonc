@@ -91,6 +91,11 @@
       "type": "string",
       "format": "date-time",
       "description": "When the opportunities were last selected"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

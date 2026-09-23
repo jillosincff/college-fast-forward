@@ -35,6 +35,11 @@
     "note": {
       "type": "string",
       "description": "Internal note"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

@@ -89,6 +89,11 @@
     "membership_tier": {
       "type": "string",
       "description": "User's membership tier at time of scan (e.g. free, trial, premium)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

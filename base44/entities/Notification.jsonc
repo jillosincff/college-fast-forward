@@ -80,6 +80,11 @@
       "type": "object",
       "description": "Additional data related to the notification",
       "default": {}
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

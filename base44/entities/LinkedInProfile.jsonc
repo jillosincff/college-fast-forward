@@ -99,6 +99,11 @@
     "parsed_skills": {
       "type": "string",
       "description": "Parsed current Skills"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

@@ -154,6 +154,11 @@
       "type": "boolean",
       "default": true,
       "description": "Whether the 2-emails-per-7-days cap was checked and passed"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

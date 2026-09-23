@@ -60,6 +60,11 @@
       "type": "boolean",
       "default": false,
       "description": "True when reconstructed from trustworthy historical records rather than live tracking"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

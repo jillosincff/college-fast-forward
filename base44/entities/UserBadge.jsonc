@@ -50,6 +50,11 @@
       "type": "object",
       "description": "Additional badge data",
       "default": {}
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

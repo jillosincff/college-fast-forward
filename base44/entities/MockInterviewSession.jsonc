@@ -124,6 +124,11 @@
       "type": "string",
       "format": "date-time",
       "description": "When the interview was completed"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

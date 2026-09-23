@@ -100,6 +100,11 @@
     "error_message": {
       "type": "string",
       "description": "Error details if sending failed"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

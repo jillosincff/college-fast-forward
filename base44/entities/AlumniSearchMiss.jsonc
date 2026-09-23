@@ -28,6 +28,11 @@
       "type": "boolean",
       "default": false,
       "description": "True once alumni were eventually found for this company/school"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

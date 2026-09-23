@@ -27,6 +27,11 @@
       "type": "object",
       "default": {},
       "description": "Debug context: daysLeft, daysSinceTrial, etc."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

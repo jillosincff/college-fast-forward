@@ -74,6 +74,11 @@
       "type": "boolean",
       "default": false,
       "description": "Whether this answer needs moderation review"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

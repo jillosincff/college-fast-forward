@@ -120,6 +120,11 @@
     "resume_text_snapshot": {
       "type": "string",
       "description": "Snapshot of the original resume text used for tailoring (stored for batch processing)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [

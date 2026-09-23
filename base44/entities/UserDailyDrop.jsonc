@@ -34,6 +34,11 @@
       "type": "string",
       "format": "date-time",
       "description": "When this drop expires (4AM ET next day)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
     }
   },
   "required": [
