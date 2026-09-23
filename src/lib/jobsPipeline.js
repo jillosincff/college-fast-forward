@@ -44,7 +44,7 @@ function makeTierOf(userCity, userState) {
  *   jobs         — only live-verified roles with apply URLs, sorted by tier
  *   shortMessage — set when the in-market pool was short and remote fill was used
  */
-export async function buildLiveJobsList({ role, industries, location, seeking, chipText, maxJobs = 10, excludeKeys = [] }) {
+export async function buildLiveJobsList({ role, industries, location, seeking, chipText, maxJobs = 10, excludeKeys = [], forceRefresh = false }) {
   const chipKeywords = chipKeywordsFor(chipText);
   const isOnChip = (j) => checkOnChip(j.job_title, chipKeywords).ok;
   const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j) && !isRetailOrSeasonal(j));
@@ -71,7 +71,7 @@ export async function buildLiveJobsList({ role, industries, location, seeking, c
     try {
       const r = await base44.functions.invoke('getLiveJobMatchesFn', {
         career_goals: { role, industries, locations: [loc], seeking: seeking || 'both' },
-        force_refresh: true,
+        force_refresh: !!forceRefresh,
       });
       const d = r?.data || r;
       if (trackStale) {

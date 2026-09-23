@@ -46,7 +46,7 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
   const genRef = useRef(0);
   const inFlightRef = useRef(false);
 
-  const runFetch = useCallback((excludeKeys) => {
+  const runFetch = useCallback((excludeKeys, forceRefresh = !!excludeKeys) => {
     if (!user) return Promise.resolve();
     // Navigation with a fresh, NON-EMPTY live cache: serve it, no fetch, no
     // swap. (Curated fallbacks are never cached, so this only short-circuits
@@ -80,7 +80,7 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
         for (let attempt = 1; attempt <= 2; attempt++) {
           try {
             result = await buildLiveJobsList({
-              role, industries, location, seeking: cg.seeking, chipText, maxJobs, excludeKeys,
+              role, industries, location, seeking: cg.seeking, chipText, maxJobs, excludeKeys, forceRefresh,
             });
             if (!result.stale && !result.fromCache) break; // genuinely fresh — done
           } catch (e) {
@@ -96,7 +96,7 @@ export function useJobsFeed({ user, maxJobs = 10 }) {
         if (result && excludeKeys && result.jobs.length === 0) {
           try {
             result = await buildLiveJobsList({
-              role, industries, location, seeking: cg.seeking, chipText, maxJobs,
+              role, industries, location, seeking: cg.seeking, chipText, maxJobs, forceRefresh,
             });
           } catch (e) { /* keep prior (empty) result */ }
         }
