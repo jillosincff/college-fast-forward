@@ -11,6 +11,28 @@ const TIER_ORDER = { same_location: 0, nearby: 1, remote: 2, other: 3 };
 const isJunk = (j) => /\b(independent|1099|own business|own biz|build your own|be your own|partner program|independent partner|work[- ]from[- ]home opportunity|unlimited earning|franchise|mlm|multi[- ]level)\b/i
   .test(`${j.job_title || ''} ${j.hiring_description || ''}`);
 
+// Predatory / MLM employers that prey on students — never shown, regardless of
+// how the posting is titled. These are commission-only door-to-door or
+// multi-level-marketing schemes (Vector Marketing = Cutco knives, etc.) that
+// CLIFF's fit check would verdict "Skip" anyway. Blocking them at the source
+// keeps them out of the feed entirely instead of surfacing a Skip badge the
+// student has to open and dismiss.
+const PREDATORY_EMPLOYERS = [
+  'vector marketing', 'cutco', 'cutco cutlery',
+  'amway', 'herbalife', 'mary kay', 'avon', 'nu skin', 'primerica',
+  'melaleuca', 'monat', 'lularoe', 'beachbody', 'it works', 'advocare',
+  'usana', 'jeunesse', 'tupperware', 'pampered chef', 'kirby',
+  'southwestern advantage', 'vivint', 'aerus', 'electrolux',
+  'legal shield', 'legalshield',
+];
+const isPredatory = (j) => {
+  const name = (j.name || j.company || '').toLowerCase().trim();
+  if (!name) return false;
+  return PREDATORY_EMPLOYERS.some(bad =>
+    name === bad || name.startsWith(bad + ' ') || name.startsWith(bad + '-') || name.startsWith(bad + ',') || name.startsWith(bad + '.')
+  );
+};
+
 const isNonStudentLevel = (j) => /\b(charge nurse|director of nursing|nurse manager|nursing supervisor|clinical director|VP of|vice president|chief .+ officer|head of|department head|senior director|principal engineer)\b/i
   .test(j.job_title || '');
 
@@ -47,7 +69,7 @@ function makeTierOf(userCity, userState) {
 export async function buildLiveJobsList({ role, industries, location, seeking, chipText, maxJobs = 10, excludeKeys = [], forceRefresh = false }) {
   const chipKeywords = chipKeywordsFor(chipText);
   const isOnChip = (j) => checkOnChip(j.job_title, chipKeywords).ok;
-  const legit = (arr) => arr.filter(j => !isJunk(j) && !isNonStudentLevel(j) && !isRetailOrSeasonal(j));
+  const legit = (arr) => arr.filter(j => !isJunk(j) && !isPredatory(j) && !isNonStudentLevel(j) && !isRetailOrSeasonal(j));
   const onChip = (arr) => arr.filter(j => isOnChip(j));
   // Exclude jobs already shown/dismissed this session so a refresh or
   // "Show me 3 different moves" returns a genuinely different set.
