@@ -333,6 +333,10 @@ Deno.serve(async (req) => {
       // posts titled just "Seasonal"). "retails?" tolerates the "Retails
       // Sales" typo seen in some aggregator titles.
       if (/\b(seasonal)\b|\b(retails?)\s+(sales|associate|associates|merchandiser|clerk|cashier|stocker|team\s+member)\b/i.test(title)) return null;
+      // Co-op / cooperative-education roles are tied to specific university
+      // programs (e.g. Northeastern, Waterloo) and aren't broadly applicable
+      // to CFF students — drop them from the feed.
+      if (/\b(co[-\s]?op|co-operative|cooperative\s+education)\b/i.test(title)) return null;
       if (!jobMatchesLocation(locText, prefCity, prefState)) return null;
       const postedDate = job.job_posted_at_datetime_utc || null;
       const salary = (job.job_min_salary || job.job_max_salary)

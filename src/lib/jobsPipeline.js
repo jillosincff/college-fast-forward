@@ -44,6 +44,12 @@ const isNonStudentLevel = (j) => /\b(charge nurse|director of nursing|nurse mana
 const isRetailOrSeasonal = (j) => /\b(seasonal)\b|\b(retails?)\s+(sales|associate|associates|merchandiser|clerk|cashier|stocker|team\s+member)\b/i
   .test(j.job_title || '');
 
+// Co-op / cooperative-education roles are tied to specific university programs
+// (e.g. Northeastern, Waterloo) and aren't broadly applicable to CFF students —
+// never shown in the feed.
+const isCoop = (j) => /\b(co[-\s]?op|co-operative|cooperative\s+education)\b/i
+  .test(j.job_title || '');
+
 function makeTierOf(userCity, userState) {
   return (j) => {
     const loc = (j.location || '').toLowerCase();
@@ -69,7 +75,7 @@ function makeTierOf(userCity, userState) {
 export async function buildLiveJobsList({ role, industries, location, seeking, chipText, maxJobs = 10, excludeKeys = [], forceRefresh = false }) {
   const chipKeywords = chipKeywordsFor(chipText);
   const isOnChip = (j) => checkOnChip(j.job_title, chipKeywords).ok;
-  const legit = (arr) => arr.filter(j => !isJunk(j) && !isPredatory(j) && !isNonStudentLevel(j) && !isRetailOrSeasonal(j));
+  const legit = (arr) => arr.filter(j => !isJunk(j) && !isPredatory(j) && !isNonStudentLevel(j) && !isRetailOrSeasonal(j) && !isCoop(j));
   const onChip = (arr) => arr.filter(j => isOnChip(j));
   // Exclude jobs already shown/dismissed this session so a refresh or
   // "Show me 3 different moves" returns a genuinely different set.
