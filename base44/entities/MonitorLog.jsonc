@@ -1,0 +1,84 @@
+{
+  "name": "MonitorLog",
+  "type": "object",
+  "properties": {
+    "monitor_name": {
+      "type": "string",
+      "description": "Which monitor this check belongs to, e.g. jobs_api"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the check ran"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "degraded",
+        "fail"
+      ],
+      "description": "Outcome of this check"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "external_monitor",
+        "scheduled",
+        "manual"
+      ],
+      "default": "external_monitor",
+      "description": "What triggered the check"
+    },
+    "upstream": {
+      "type": "string",
+      "description": "Upstream provider name, e.g. openweb_ninja_jsearch"
+    },
+    "upstream_status": {
+      "type": "number",
+      "description": "HTTP status returned by the upstream provider, if any"
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if the check did not pass"
+    },
+    "elapsed_ms": {
+      "type": "number",
+      "description": "How long the upstream probe took in milliseconds"
+    },
+    "companies_count": {
+      "type": "number",
+      "description": "Number of live job postings returned by the probe"
+    },
+    "sample_companies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Up to 5 employer names returned, as a quick sample"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
+    }
+  },
+  "required": [
+    "monitor_name",
+    "checked_at",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

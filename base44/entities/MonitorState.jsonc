@@ -1,0 +1,74 @@
+{
+  "name": "MonitorState",
+  "type": "object",
+  "properties": {
+    "monitor_name": {
+      "type": "string",
+      "description": "Singleton key, e.g. jobs_api"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "degraded",
+        "fail"
+      ],
+      "default": "pass",
+      "description": "Current health status"
+    },
+    "last_check_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the last check ran"
+    },
+    "previous_status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "degraded",
+        "fail"
+      ],
+      "description": "Status before the current one"
+    },
+    "last_status_change_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the status last changed"
+    },
+    "consecutive_failures": {
+      "type": "number",
+      "default": 0,
+      "description": "How many consecutive non-pass checks"
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Error from the most recent non-pass check"
+    },
+    "last_alert_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a status-change alert was last emailed"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
+    }
+  },
+  "required": [
+    "monitor_name",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
