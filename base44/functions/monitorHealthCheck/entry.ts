@@ -8,6 +8,8 @@
 // and admins are emailed when the status transitions (pass <-> degraded/fail) —
 // so a failed check is never silently lost, even if the external monitor itself
 // hiccups on the way in.
+//
+// Exposed as a public/webhook endpoint (no user auth) — the shared secret gates it.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const JSEARCH_BASE = 'https://api.openwebninja.com/jsearch';
@@ -19,7 +21,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, x-monitor-secret, Authorization',
 };
 
-Deno.serve(async (req) => {
+export default async function(req: Request): Promise<Response> {
   try {
     // CORS preflight — answer before anything else so cross-origin monitors
     // don't get a 405 from the gateway.
@@ -136,7 +138,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     return Response.json({ status: 'fail', error: err.message }, { status: 500, headers: CORS_HEADERS });
   }
-});
+}
 
 // Append a MonitorLog row, upsert the singleton MonitorState, and email admins
 // when the status transitions (pass <-> degraded). A pass result resets the
