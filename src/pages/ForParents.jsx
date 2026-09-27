@@ -117,7 +117,7 @@ export default function ForParents() {
         <ul className="space-y-2 mb-5">
           {[
             'Best Moves — the openings worth their time',
-            'A resume tailored to each job in minutes',
+            'A resume tailored to every job, with no limit',
             'One clear next step at a time: pick, tailor, apply, track',
             'A day-3 follow-up reminder with the message drafted',
             'Mock interview practice when they land an interview',

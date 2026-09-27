@@ -50,7 +50,7 @@ export default async function (req) {
     const subject = 'Want your parents to cover CLIFF Pro this fall?';
     const buildBody = (first, askLink, unsubLink) => `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <p style="font-size:16px;line-height:1.65;color:#475569;margin:0 0 16px;">Hey ${escapeHtml(first)},</p>
-  <p style="font-size:16px;line-height:1.65;color:#475569;margin:0 0 16px;">Pro is where CLIFF does the heavy lifting: it picks the jobs worth your time, tailors your resume to each one, drafts your follow-ups, and runs interview practice. This fall, your parent can give you the whole semester for $99, one time, through December 31. Tap below and we'll send them a quick note with everything they need. You don't have to explain a thing.</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin:0 0 16px;">Pro is where CLIFF does the heavy lifting: it picks the jobs worth your time (Best Moves), tailors your resume to every job with no limit, and runs interview practice. This fall, your parent can give you the whole semester for $99, one time, through December 31. Tap below and we'll send them a quick note with everything they need. You don't have to explain a thing.</p>
   <div style="text-align:center;margin:28px 0;">
     <a href="${escapeHtml(askLink)}" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Ask a parent</a>
   </div>
