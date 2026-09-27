@@ -47,11 +47,23 @@ Deno.serve(async (req) => {
 
     // ── Revenue / trials ──────────────────────────────────────────────────
     const paidUsers = allUsers.filter(isPaid);
+    const foundingGatorUsers = allUsers.filter(u => u.membership_tier === 'founding_gator');
     const paidBreakdown = {
+      // Paying Pro = active Stripe subscription only. founding_gator is a pilot
+      // (free Pro) cohort — counted separately as pilotFreePro, never as revenue.
       stripeActive: allUsers.filter(u => u.subscription_status === 'active').length,
       stripeActiveWithCustomerId: allUsers.filter(u => u.subscription_status === 'active' && u.stripe_customer_id).length,
       fastiqTier: allUsers.filter(u => u.membership_tier === 'fastiq' && u.subscription_status !== 'active').length,
       foundingMembers: allUsers.filter(u => u.is_founding_member === true && u.subscription_status !== 'active' && u.membership_tier !== 'fastiq').length,
+      foundingGator: foundingGatorUsers.length,
+    };
+    // Pilot (free Pro) — the founding_gator parent-pilot cohort, never charged.
+    // Reported separately so dashboards don't mix granted access with revenue.
+    const pilotFreePro = {
+      total: foundingGatorUsers.length,
+      parents: foundingGatorUsers.filter(u => u.persona === 'parent').length,
+      students: foundingGatorUsers.filter(u => ['student', 'gator'].includes(u.persona)).length,
+      other: foundingGatorUsers.filter(u => !['student', 'gator', 'parent'].includes(u.persona)).length,
     };
     const activeTrials = allUsers.filter(isActiveTrial);
     const expiredTrials = allUsers.filter(u => u.trial_status === 'expired' && !isPaid(u));
@@ -167,6 +179,7 @@ Deno.serve(async (req) => {
     const schools = Object.values(schoolMap).sort((a, b) => b.total - a.total).slice(0, 12);
 
     return Response.json({
+      pilotFreePro,
       growth: {
         totalUsers: allUsers.length,
         students: students.length,
@@ -179,8 +192,10 @@ Deno.serve(async (req) => {
         parentsLastWeek,
       },
       revenue: {
+        payingPro: paidBreakdown.stripeActive,
         paidUsers: paidBreakdown.stripeActive,
         foundingMembers: paidBreakdown.foundingMembers,
+        pilotFreePro: pilotFreePro.total,
         paidBreakdown,
         activeTrials: activeTrials.length,
         activeTrialsEngaged,

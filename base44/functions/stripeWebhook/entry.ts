@@ -316,7 +316,7 @@ async function sendStudentActivationEmails(billingUser, family) {
             user_email: billingUser.email,
             school_code: billingUser.school_name || billingUser.school || '',
             properties: { plan: plan || subscriptionTier, is_founding: isFoundingMember, persona: billingUser.persona || '' },
-          }).catch(() => {});
+          }).catch(e => console.error('[stripeWebhook] event log failed:', e.message));
           // Canonical conversion event — student self-pay activation.
           if (!giftStudentEmail) {
             base44.asServiceRole.entities.AnalyticsEvent.create({
@@ -325,7 +325,7 @@ async function sendStudentActivationEmails(billingUser, family) {
               user_email: billingUser.email,
               school_code: billingUser.school_name || billingUser.school || '',
               properties: { plan: plan || subscriptionTier, source: 'self_pay' },
-            }).catch(() => {});
+            }).catch(e => console.error('[stripeWebhook] event log failed:', e.message));
             // ConversionEvent (admin funnel source of truth)
             const evtKey = `${billingUser.id}:pro_activated`;
             await base44.asServiceRole.entities.ConversionEvent.create({
@@ -336,12 +336,12 @@ async function sendStudentActivationEmails(billingUser, family) {
               trigger: 'self_pay',
               school_code: billingUser.school_name || billingUser.school || '',
               plan_at_event: plan || subscriptionTier,
-            }).catch(() => {});
+            }).catch(e => console.error('[stripeWebhook] event log failed:', e.message));
           }
 
           // Lifecycle: subscription_activated (checkout, mode=subscription) — idempotent on Stripe event id
           if (session.mode === 'subscription') {
-            await logConversionEvent(event.id, {
+            await logConversionEvent(`subscription_activated:${subscriptionId}`, {
               user: billingUser,
               email: billingUser?.email,
               eventName: 'subscription_activated',
@@ -522,7 +522,7 @@ async function sendStudentActivationEmails(billingUser, family) {
                 user_id: giftStudent.id,
                 user_email: giftStudent.email,
                 properties: { parent_email: billingUser?.email || '', source: 'parent_invite', plan: plan || 'pro_monthly' },
-              }).catch(() => {});
+              }).catch(e => console.error('[stripeWebhook] event log failed:', e.message));
               // ConversionEvent (admin funnel source of truth)
               const parentPayEvtKey = `${giftStudent.id}:parent_payment_completed`;
               await base44.asServiceRole.entities.ConversionEvent.create({
@@ -533,13 +533,13 @@ async function sendStudentActivationEmails(billingUser, family) {
                 trigger: 'parent_gift',
                 school_code: giftStudent.school_name || giftStudent.school || '',
                 plan_at_event: plan || 'pro_monthly',
-              }).catch(() => {});
+              }).catch(e => console.error('[stripeWebhook] event log failed:', e.message));
               base44.asServiceRole.entities.AnalyticsEvent.create({
                 event_name: 'pro_activated',
                 user_id: giftStudent.id,
                 user_email: giftStudent.email,
                 properties: { source: 'parent_gift', plan: plan || 'pro_monthly' },
-              }).catch(() => {});
+              }).catch(e => console.error('[stripeWebhook] event log failed:', e.message));
               // ConversionEvent (admin funnel source of truth)
               const giftEvtKey = `${giftStudent.id}:pro_activated`;
               await base44.asServiceRole.entities.ConversionEvent.create({
@@ -550,7 +550,7 @@ async function sendStudentActivationEmails(billingUser, family) {
                 trigger: 'parent_gift',
                 school_code: giftStudent.school_name || giftStudent.school || '',
                 plan_at_event: plan || 'pro_monthly',
-              }).catch(() => {});
+              }).catch(e => console.error('[stripeWebhook] event log failed:', e.message));
 
               try {
                 await base44.asServiceRole.integrations.Core.SendEmail({
@@ -628,7 +628,7 @@ async function sendStudentActivationEmails(billingUser, family) {
               user_id: billingUser?.id || '',
               user_email: billingUser?.email || '',
               properties: { student_email: giftStudentEmail, student_registered: !!giftStudent },
-            }).catch(() => {});
+            }).catch(e => console.error('[stripeWebhook] event log failed:', e.message));
           } catch (proGiftErr) {
             console.error('[stripeWebhook] CLIFF Pro gift error:', proGiftErr.message);
           }
@@ -730,7 +730,7 @@ async function sendStudentActivationEmails(billingUser, family) {
 
         // Lifecycle logging (idempotent on Stripe event id)
         if (event.type === 'customer.subscription.created') {
-          await logConversionEvent(event.id, {
+          await logConversionEvent(`subscription_activated:${subscription.id}`, {
             user: billingUser,
             email: billingUser?.email,
             eventName: 'subscription_activated',
