@@ -33,8 +33,11 @@
         "parent_payment_completed",
         "upgrade_modal_viewed",
         "ask_parent_shown",
+        "ask_parent_sent",
         "mm_complete_beat_shown",
-        "mm_complete_beat_dismissed"
+        "mm_complete_beat_dismissed",
+        "gift_semester_paid",
+        "gift_semester_refunded"
       ],
       "description": "Conversion funnel step this event records"
     },
@@ -44,7 +47,7 @@
     },
     "trigger": {
       "type": "string",
-      "description": "Attribution: which contextual trigger produced this event (e.g. post_magic_moment, second_application, connection_found, self, parent_invite, gift)"
+      "description": "Attribution: which contextual trigger produced this event (e.g. post_magic_moment, second_application, connection_found, self, parent_invite, gift, ask_parent, student_email, facebook, linkedin, refund)"
     },
     "company_name": {
       "type": "string",
@@ -73,7 +76,7 @@
     "metadata": {
       "type": "object",
       "default": {},
-      "description": "Event-specific context (amount_cents, stripe_customer_id, stripe_subscription_id, source, plan)"
+      "description": "Event-specific context (amount_cents, stripe_customer_id, stripe_subscription_id, stripe_payment_intent_id, source, plan, utm_source, parent_email, student_email)"
     },
     "description": {
       "type": "string",

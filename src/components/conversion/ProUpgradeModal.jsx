@@ -81,7 +81,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { setError('Enter a valid email.'); return; }
     setBusy(true); setError('');
     try {
-      const res = await base44.functions.invoke('sendParentProInvite', { parentEmail: e, note: note.trim(), plan: selectedPlan === 'annual' ? 'pro_annual' : 'pro_monthly' });
+      const res = await base44.functions.invoke('sendParentProInvite', { parentEmail: e, note: note.trim() });
       if (res?.data?.success || res?.success) {
         trackParentSendCompleted({ source, plan: selectedPlan });
         setView('sent');
@@ -171,13 +171,8 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
               <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Ask a parent to unlock</span>
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>Have a parent unlock it for you</h1>
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px', lineHeight: 1.5 }}>Enter your parent's email and we'll send them a link to pay. The moment they pay, your account upgrades.</p>
-
-            {/* Plan selector for the gift — default Annual (best value) */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-              <button type="button" onClick={() => setSelectedPlan('annual')} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: selectedPlan === 'annual' ? '#fff' : INDIGO_DIM, background: selectedPlan === 'annual' ? GRAD_INDIGO : '#fff', border: `1.5px solid ${selectedPlan === 'annual' ? 'transparent' : INDIGO_BORDER}`, borderRadius: 10, padding: '10px', cursor: 'pointer', minHeight: 'auto' }}>Annual · $149/yr <span style={{ fontSize: 10, opacity: 0.9 }}>· Best value</span></button>
-              <button type="button" onClick={() => setSelectedPlan('monthly')} style={{ flex: 1, fontFamily: FONT, fontSize: 12, fontWeight: 700, color: selectedPlan === 'monthly' ? '#fff' : INDIGO_DIM, background: selectedPlan === 'monthly' ? GRAD_INDIGO : '#fff', border: `1.5px solid ${selectedPlan === 'monthly' ? 'transparent' : INDIGO_BORDER}`, borderRadius: 10, padding: '10px', cursor: 'pointer', minHeight: 'auto' }}>Monthly · $19.96/mo</button>
-            </div>
+            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 6px', lineHeight: 1.5 }}>Enter your parent's email and we'll send them a link to give you the Fall semester of CLIFF Pro.</p>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: INDIGO_DIM, margin: '0 0 18px', lineHeight: 1.5, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '10px 12px' }}>Your parent gets a link to give you the Fall semester — $99 one time, through December 31. Not a subscription.</p>
 
             <label style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Parent's email</label>
             <input type="email" value={parentEmail} placeholder="parent@email.com" onChange={(e) => setParentEmail(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', fontFamily: FONT, fontSize: 15, color: TEXT, background: '#fafafa', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '13px 14px', outline: 'none', marginBottom: 12 }} />

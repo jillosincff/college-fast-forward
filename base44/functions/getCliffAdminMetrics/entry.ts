@@ -178,7 +178,39 @@ Deno.serve(async (req) => {
     }
     const schools = Object.values(schoolMap).sort((a, b) => b.total - a.total).slice(0, 12);
 
+    // ── Parent gift test (Fall Semester Gift) ────────────────────────────
+    let parentGiftTest = { asksSent: 0, parentPageOpens: 0, checkoutsStarted: 0, giftsPaid: 0, giftsRefunded: 0, revenue: 0, byUtm: {} };
+    try {
+      const [paid, sent, started, refunded, views] = await Promise.all([
+        base44.asServiceRole.entities.ConversionEvent.filter({ event_name: 'gift_semester_paid' }).catch(() => []),
+        base44.asServiceRole.entities.ConversionEvent.filter({ event_name: 'ask_parent_sent' }).catch(() => []),
+        base44.asServiceRole.entities.ConversionEvent.filter({ event_name: 'checkout_started' }).catch(() => []),
+        base44.asServiceRole.entities.ConversionEvent.filter({ event_name: 'gift_semester_refunded' }).catch(() => []),
+        base44.asServiceRole.entities.AnalyticsEvent.filter({ event_name: 'for_parents_viewed' }).catch(() => []),
+      ]);
+      const semStarted = (started || []).filter((e) => e.metadata?.offer === 'fall_semester_gift');
+      const byUtm = { asksSent: {}, parentPageOpens: {}, checkoutsStarted: {}, giftsPaid: {}, revenue: {} };
+      const bump = (obj, src, val = 1) => { const k = src || 'other'; obj[k] = (obj[k] || 0) + val; };
+      for (const e of (sent || [])) bump(byUtm.asksSent, e.metadata?.utm_source || e.trigger);
+      for (const e of (views || [])) bump(byUtm.parentPageOpens, e.properties?.utm_source);
+      for (const e of semStarted) bump(byUtm.checkoutsStarted, e.metadata?.utm_source || e.trigger);
+      for (const e of (paid || [])) {
+        bump(byUtm.giftsPaid, e.metadata?.utm_source || e.trigger);
+        bump(byUtm.revenue, e.metadata?.utm_source || e.trigger, (e.metadata?.amount_cents || 0) / 100);
+      }
+      parentGiftTest = {
+        asksSent: (sent || []).length,
+        parentPageOpens: (views || []).length,
+        checkoutsStarted: semStarted.length,
+        giftsPaid: (paid || []).length,
+        giftsRefunded: (refunded || []).length,
+        revenue: Math.round(((paid || []).reduce((s, e) => s + (e.metadata?.amount_cents || 0) / 100, 0)) * 100) / 100,
+        byUtm,
+      };
+    } catch (e) { console.error('parentGiftTest metrics failed:', e.message); }
+
     return Response.json({
+      parentGiftTest,
       pilotFreePro,
       growth: {
         totalUsers: allUsers.length,

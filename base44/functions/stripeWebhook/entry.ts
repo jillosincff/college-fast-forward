@@ -14,6 +14,9 @@ const escapeHtml = (str) => {
     .replace(/'/g, '&#039;');
 };
 
+// Fall Semester Gift: Pro through Dec 31 23:59 ET (America/New_York, EST).
+const FALL_SEMESTER_ENDS_AT = '2026-12-31T23:59:00-05:00';
+
 export default async function(req) {
   try {
     // Helpers close over this request's client, never a shared mutable client.
@@ -60,14 +63,15 @@ async function revokeGiftedStudentAccess(subscriptionId) {
 // paid student still showed "zero Pro" in access plans and hit free locks.
 // Best-effort by design: a plan-write failure must never fail the webhook
 // after the User fields were already updated.
-async function upsertProAccessPlan(user, { source = 'billing_provider', periodEnd = null } = {}) {
+async function upsertProAccessPlan(user, { source = 'billing_provider', periodEnd = null, periodEndIso = null } = {}) {
   if (!user?.id) return;
   try {
+    const endIso = periodEndIso || (periodEnd ? new Date(periodEnd * 1000).toISOString() : null);
     const fields = {
       plan: 'pro',
       access_state: 'pro_active',
       access_source: source === 'parent_gift' ? 'billing_provider' : source,
-      ...(periodEnd ? { paid_period_ends_at: new Date(periodEnd * 1000).toISOString() } : {}),
+      ...(endIso ? { paid_period_ends_at: endIso } : {}),
     };
     const existing = await base44.asServiceRole.entities.UserAccessPlan.filter({ user_id: user.id });
     if (existing?.length > 0) {
@@ -100,6 +104,222 @@ async function downgradeAccessPlanToFree(user, accessState = 'free') {
   } catch (e) {
     console.error('[stripeWebhook] UserAccessPlan downgrade failed for', user.email, e.message);
   }
+}
+
+// ── Fall Semester Gift: one-time $99 checkout → activate student Pro ─────
+// Runs inside checkout.session.completed for offer=fall_semester_gift. Never
+// touches the subscription/founding/family logic — the caller breaks after.
+async function handleFallSemesterGift(session, event) {
+  const studentEmail = session.metadata?.gift_student_email?.trim().toLowerCase() || '';
+  const studentName = session.metadata?.student_name || '';
+  const parentName = session.metadata?.parent_name || '';
+  const parentEmail = session.metadata?.parent_email || '';
+  const utm = {
+    utm_source: session.metadata?.utm_source || '',
+    utm_medium: session.metadata?.utm_medium || '',
+    utm_campaign: session.metadata?.utm_campaign || '',
+    utm_content: session.metadata?.utm_content || '',
+  };
+  const amountCents = session.amount_total ?? 9900;
+  const paymentIntentId = session.payment_intent || '';
+  const customerId = session.customer || '';
+  const evtKey = `gift_semester_paid:${event.id}`;
+
+  if (!studentEmail) {
+    console.error('[stripeWebhook] fall_semester_gift missing gift_student_email', event.id);
+    return;
+  }
+
+  const studentMatches = await base44.asServiceRole.entities.User.filter({ email: studentEmail });
+  const student = studentMatches?.[0] || null;
+
+  if (student) {
+    try {
+      await base44.asServiceRole.entities.User.update(student.id, {
+        subscription_status: 'active',
+        subscription_tier: 'cff',
+        membership_tier: 'cff',
+        fastiq_active: true,
+        is_fastiq: true,
+        gifted_by_parent_email: parentEmail,
+        linked_parent_name: parentName?.split(' ')[0] || 'Your parent',
+      });
+    } catch (e) { console.error('[stripeWebhook] semester gift user update failed:', studentEmail, e.message); }
+    await upsertProAccessPlan(student, { source: 'parent_gift_semester', periodEndIso: FALL_SEMESTER_ENDS_AT });
+
+    try {
+      const first = student.full_name?.split(' ')[0] || 'there';
+      const parentFirst = parentName?.split(' ')[0] || 'Your parent';
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: student.email,
+        subject: `${parentFirst} just got you CLIFF Pro for the fall 🎁`,
+        body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:40px 24px;">
+  <div style="background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);border-radius:20px;padding:32px;text-align:center;margin-bottom:32px;">
+    <p style="color:rgba(255,255,255,0.7);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">🎁 A GIFT FROM ${escapeHtml(parentFirst.toUpperCase())}</p>
+    <h1 style="color:#fff;font-size:28px;margin:0 0 8px;">CLIFF Pro is now yours, ${escapeHtml(first)}!</h1>
+    <p style="color:rgba(255,255,255,0.8);font-size:15px;margin:0;">Your parent got you the Fall semester. Pro is on through December 31.</p>
+  </div>
+  <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:20px;margin:16px 0;">
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ The openings worth your time (Best Moves)</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ A resume tailored to each job in minutes</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ Follow-up reminders with the message drafted</p>
+    <p style="font-size:14px;color:#4c1d95;margin:0;">✓ Mock interview practice + one tracker for every application</p>
+  </div>
+  <div style="text-align:center;margin:32px 0;">
+    <a href="https://collegefastforward.com/#/FreeTierDashboard" style="background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 32px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;">Open My Dashboard</a>
+  </div>
+</div>`,
+      });
+    } catch (e) { console.error('[stripeWebhook] semester gift student email failed:', e.message); }
+  } else {
+    // Student not registered yet — record the pending gift + send an invite.
+    try {
+      await base44.asServiceRole.entities.PendingSemesterGift.create({
+        student_email: studentEmail,
+        student_name: studentName,
+        parent_name: parentName,
+        parent_email: parentEmail,
+        stripe_payment_intent_id: paymentIntentId,
+        stripe_checkout_session_id: session.id,
+        stripe_customer_id: customerId,
+        amount_cents: amountCents,
+        expires_at: FALL_SEMESTER_ENDS_AT,
+        status: 'pending',
+        utm_source: utm.utm_source,
+        utm_medium: utm.utm_medium,
+        utm_campaign: utm.utm_campaign,
+        utm_content: utm.utm_content,
+        offer: 'fall_semester_gift',
+      });
+    } catch (e) { console.error('[stripeWebhook] PendingSemesterGift create failed:', studentEmail, e.message); }
+
+    try {
+      const parentFirst = parentName?.split(' ')[0] || 'Your parent';
+      const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
+      await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email: studentEmail }] }],
+          from: { email: 'team@collegefastforward.com', name: 'College Fast Forward' },
+          subject: `${parentFirst} got you CLIFF Pro for the fall — claim it 🎁`,
+          content: [{ type: 'text/html', value: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+  <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">${escapeHtml(parentFirst)} got you CLIFF Pro for the fall 🎁</h1>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Your parent got you CLIFF Pro for the Fall semester. Pro is paid for and waiting — just sign up with this email address and it activates instantly, through December 31.</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">CLIFF picks the jobs worth your time, tailors your resume to each one, drafts your follow-ups, and runs interview practice.</p>
+  <a href="https://collegefastforward.com/#/GatorAuth" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Claim My CLIFF Pro →</a>
+  <p style="font-size:13px;color:#94a3b8;margin-top:32px;">The College Fast Forward Team</p>
+</div>` }],
+        }),
+      });
+    } catch (e) { console.error('[stripeWebhook] semester gift invite email failed:', e.message); }
+  }
+
+  // Parent confirmation email.
+  if (parentEmail) {
+    try {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: parentEmail,
+        subject: `You just gave ${studentName || studentEmail} CLIFF Pro for the fall 💜`,
+        body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+  <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">Your gift is on its way</h1>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Hi ${escapeHtml(parentName?.split(' ')[0] || 'there')},</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">You gave <strong>${escapeHtml(studentName || studentEmail)}</strong> CLIFF Pro for the Fall semester. You paid $99 once — not a subscription. ${student ? "It's active on their account now, and we've emailed them the good news." : "The moment they sign up with that email, Pro activates — we've sent them an invite."}</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Pro is on through December 31, then it simply ends. No renewal, nothing to cancel.</p>
+  <p style="font-size:13px;color:#94a3b8;margin-top:24px;">Full refund within 14 days if they don't use it — just reply to this email.<br>The College Fast Forward Team</p>
+</div>`,
+      });
+    } catch (e) { console.error('[stripeWebhook] semester gift parent receipt failed:', e.message); }
+  }
+
+  // ConversionEvent gift_semester_paid (idempotent on Stripe event id).
+  try {
+    const prior = await base44.asServiceRole.entities.ConversionEvent.filter({ event_key: evtKey });
+    if (!prior?.length) {
+      await base44.asServiceRole.entities.ConversionEvent.create({
+        user_id: student?.id || '',
+        user_email: studentEmail,
+        event_name: 'gift_semester_paid',
+        event_key: evtKey,
+        trigger: utm.utm_source || 'parent_gift',
+        plan_at_event: 'fall_semester_gift',
+        metadata: { amount_cents: amountCents, parent_email: parentEmail, parent_name: parentName, student_name: studentName, stripe_customer_id: customerId, stripe_payment_intent_id: paymentIntentId, ...utm },
+      });
+    }
+  } catch (e) { console.error('[stripeWebhook] gift_semester_paid log failed:', e.message); }
+
+  base44.asServiceRole.entities.AnalyticsEvent.create({
+    event_name: 'gift_semester_paid',
+    user_id: student?.id || '',
+    user_email: studentEmail,
+    properties: { parent_email: parentEmail, student_registered: !!student, amount_cents: amountCents, ...utm },
+  }).catch((e) => console.error('[stripeWebhook] event log failed:', e.message));
+}
+
+// ── Fall Semester Gift refund → downgrade + mark pending + log ──────────
+async function handleFallSemesterRefund(charge, event) {
+  const studentEmail = charge.metadata?.gift_student_email?.trim().toLowerCase() || '';
+  if (!studentEmail) {
+    console.error('[stripeWebhook] fall_semester refund missing gift_student_email', event.id);
+    return;
+  }
+  const studentMatches = await base44.asServiceRole.entities.User.filter({ email: studentEmail });
+  const student = studentMatches?.[0] || null;
+
+  // Downgrade unless the student now has an active PAID subscription.
+  let hasActivePaidSub = false;
+  if (student) {
+    try {
+      const plans = await base44.asServiceRole.entities.UserAccessPlan.filter({ user_id: student.id });
+      hasActivePaidSub = (plans || []).some((p) => p.access_state === 'pro_active' && p.access_source === 'billing_provider');
+    } catch (e) { console.error('[stripeWebhook] refund access-plan lookup failed:', e.message); }
+  }
+  if (student && !hasActivePaidSub) {
+    try {
+      await base44.asServiceRole.entities.User.update(student.id, {
+        subscription_status: 'canceled',
+        membership_tier: 'free',
+        fastiq_active: false,
+        is_fastiq: false,
+      });
+    } catch (e) { console.error('[stripeWebhook] refund user downgrade failed:', e.message); }
+    await downgradeAccessPlanToFree(student, 'free');
+  }
+
+  // Mark any PendingSemesterGift for this student as refunded.
+  try {
+    const pendings = await base44.asServiceRole.entities.PendingSemesterGift.filter({ student_email: studentEmail });
+    for (const p of (pendings || [])) {
+      if (p.status === 'refunded') continue;
+      await base44.asServiceRole.entities.PendingSemesterGift.update(p.id, {
+        status: 'refunded', refunded_at: new Date().toISOString(),
+      });
+    }
+  } catch (e) { console.error('[stripeWebhook] refund pending mark failed:', e.message); }
+
+  // ConversionEvent gift_semester_refunded (idempotent on Stripe event id).
+  const evtKey = `gift_semester_refunded:${event.id}`;
+  try {
+    const prior = await base44.asServiceRole.entities.ConversionEvent.filter({ event_key: evtKey });
+    if (!prior?.length) {
+      await base44.asServiceRole.entities.ConversionEvent.create({
+        user_id: student?.id || '',
+        user_email: studentEmail,
+        event_name: 'gift_semester_refunded',
+        event_key: evtKey,
+        trigger: 'refund',
+        plan_at_event: 'fall_semester_gift',
+        metadata: { stripe_charge_id: charge.id, stripe_payment_intent_id: charge.payment_intent || '' },
+      });
+    }
+  } catch (e) { console.error('[stripeWebhook] gift_semester_refunded log failed:', e.message); }
+
+  base44.asServiceRole.entities.AnalyticsEvent.create({
+    event_name: 'gift_semester_refunded',
+    user_id: student?.id || '',
+    user_email: studentEmail,
+    properties: { stripe_charge_id: charge.id },
+  }).catch((e) => console.error('[stripeWebhook] event log failed:', e.message));
 }
 
 // ── Subscription lifecycle logging (idempotent ConversionEvents) ──
@@ -275,6 +495,12 @@ async function sendStudentActivationEmails(billingUser, family) {
         const giftStudentEmail = session.metadata?.gift_student_email?.trim().toLowerCase() || null;
 
         console.log('Checkout completed:', { subscriptionTier, customerId, familyId, billingUserEmail, isFoundingMember, plan });
+
+        // ── Fall Semester Gift (one-time, mode=payment) — handle & break ──
+        if (session.metadata?.offer === 'fall_semester_gift') {
+          await handleFallSemesterGift(session, event);
+          break;
+        }
 
         const billingUser = await findBillingUser(customerId, billingUserId, billingUserEmail);
         if (billingUser) {
@@ -929,6 +1155,15 @@ async function sendStudentActivationEmails(billingUser, family) {
             subscriptionId,
             source: detectSource(invoice.metadata, invoice.metadata?.gift_student_email),
           });
+        }
+        break;
+      }
+
+      // CHARGE REFUNDED — Fall Semester Gift refund
+      case 'charge.refunded': {
+        const charge = event.data.object;
+        if (charge.metadata?.offer === 'fall_semester_gift') {
+          await handleFallSemesterRefund(charge, event);
         }
         break;
       }

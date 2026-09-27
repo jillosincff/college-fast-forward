@@ -1,0 +1,98 @@
+{
+  "name": "PendingSemesterGift",
+  "type": "object",
+  "properties": {
+    "student_email": {
+      "type": "string",
+      "description": "Student email (lowercase, trimmed) this gift is for"
+    },
+    "student_name": {
+      "type": "string",
+      "description": "Student name as entered by the parent at checkout"
+    },
+    "parent_name": {
+      "type": "string",
+      "description": "Parent name as entered at checkout"
+    },
+    "parent_email": {
+      "type": "string",
+      "description": "Parent email (the buyer)"
+    },
+    "stripe_payment_intent_id": {
+      "type": "string",
+      "description": "Stripe PaymentIntent from the one-time checkout session"
+    },
+    "stripe_checkout_session_id": {
+      "type": "string",
+      "description": "Stripe Checkout Session id"
+    },
+    "stripe_customer_id": {
+      "type": "string"
+    },
+    "amount_cents": {
+      "type": "number",
+      "default": 9900,
+      "description": "Amount paid in cents ($99)"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Pro end date \u2014 2026-12-31 23:59 ET"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "activated",
+        "refunded"
+      ],
+      "default": "pending",
+      "description": "pending = student not registered yet; activated = Pro turned on; refunded = payment refunded"
+    },
+    "activated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "refunded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "utm_source": {
+      "type": "string"
+    },
+    "utm_medium": {
+      "type": "string"
+    },
+    "utm_campaign": {
+      "type": "string"
+    },
+    "utm_content": {
+      "type": "string"
+    },
+    "offer": {
+      "type": "string",
+      "default": "fall_semester_gift"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this record"
+    }
+  },
+  "required": [
+    "student_email",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

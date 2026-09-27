@@ -69,6 +69,9 @@ import Customers from '@/pages/seo/Customers';
 import VsJobright from '@/pages/seo/VsJobright';
 import VsSimplify from '@/pages/seo/VsSimplify';
 import Changelog from '@/pages/Changelog';
+import ForParents from '@/pages/ForParents';
+import ForParentsThanks from '@/pages/ForParentsThanks';
+import AskParent from '@/pages/AskParent';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -231,6 +234,12 @@ const AuthenticatedApp = () => {
       <Route path="/vs/jobright" element={<VsJobright />} />
       <Route path="/vs/simplify" element={<VsSimplify />} />
       <Route path="/changelog" element={<Changelog />} />
+
+      {/* Public parent gift routes — no auth, no app chrome */}
+      <Route path="/ForParents" element={<ForParents />} />
+      <Route path="/ForParents/thanks" element={<ForParentsThanks />} />
+      {/* Ask-a-parent deep link — auth handled inside the page */}
+      <Route path="/AskParent" element={<AskParent />} />
 
       {/* Onboarding routes — no guard */}
       <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />

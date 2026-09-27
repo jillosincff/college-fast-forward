@@ -81,6 +81,59 @@ export default function RevenueSection({ revenue }) {
           {exportingActivated ? 'Exporting…' : '⬇ Export activated students (CSV)'}
         </button>
       </div>
+
+      {revenue.parentGiftTest && (
+        <section className="mt-8">
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">🎁 Parent gift test (Fall Semester)</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <MetricTile label="Asks sent" value={revenue.parentGiftTest.asksSent} sub="sendParentProInvite emails" />
+            <MetricTile label="Parent page opens" value={revenue.parentGiftTest.parentPageOpens} sub="#/ForParents views" />
+            <MetricTile label="Checkouts started" value={revenue.parentGiftTest.checkoutsStarted} sub="fall_semester_gift" />
+            <MetricTile label="Gifts paid" value={revenue.parentGiftTest.giftsPaid} sub={`refunds: ${revenue.parentGiftTest.giftsRefunded}`} accent="text-green-400" />
+            <MetricTile label="Revenue" value={`$${revenue.parentGiftTest.revenue}`} sub="$99 one-time" accent="text-green-400" />
+          </div>
+          {(() => {
+            const u = revenue.parentGiftTest.byUtm || {};
+            const keys = Array.from(new Set([
+              'ask_parent', 'student_email', 'facebook', 'linkedin',
+              ...Object.keys(u.asksSent || {}),
+              ...Object.keys(u.parentPageOpens || {}),
+              ...Object.keys(u.checkoutsStarted || {}),
+              ...Object.keys(u.giftsPaid || {}),
+              ...Object.keys(u.revenue || {}),
+            ]));
+            if (!keys.length) return null;
+            return (
+              <div className="mt-3 overflow-x-auto">
+                <table className="text-xs text-slate-300">
+                  <thead>
+                    <tr className="text-slate-500">
+                      <th className="text-left pr-4 py-1 font-medium">utm_source</th>
+                      <th className="text-right pr-4 py-1 font-medium">asks</th>
+                      <th className="text-right pr-4 py-1 font-medium">page</th>
+                      <th className="text-right pr-4 py-1 font-medium">checkouts</th>
+                      <th className="text-right pr-4 py-1 font-medium">paid</th>
+                      <th className="text-right pr-4 py-1 font-medium">rev</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {keys.map((k) => (
+                      <tr key={k} className="border-t border-slate-800">
+                        <td className="pr-4 py-1">{k}</td>
+                        <td className="pr-4 py-1 text-right">{u.asksSent?.[k] || 0}</td>
+                        <td className="pr-4 py-1 text-right">{u.parentPageOpens?.[k] || 0}</td>
+                        <td className="pr-4 py-1 text-right">{u.checkoutsStarted?.[k] || 0}</td>
+                        <td className="pr-4 py-1 text-right">{u.giftsPaid?.[k] || 0}</td>
+                        <td className="pr-4 py-1 text-right">${u.revenue?.[k] || 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
+        </section>
+      )}
     </section>
   );
 }

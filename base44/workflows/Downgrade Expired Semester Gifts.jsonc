@@ -1,0 +1,41 @@
+{
+  "description": "Daily. Downgrades Fall Semester gifts past Dec 31 23:59 ET back to free, unless the student now has an active paid subscription. Mirrors the webhook's refund/downgrade logic so gift access ends on Dec 31 as promised.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 12 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Downgrade Expired Semester Gifts",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "downgrade_expired_semester_gifts",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "downgradeExpiredSemesterGifts",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}
