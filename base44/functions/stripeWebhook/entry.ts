@@ -102,6 +102,51 @@ async function downgradeAccessPlanToFree(user, accessState = 'free') {
   }
 }
 
+// ── Subscription lifecycle logging (idempotent ConversionEvents) ──
+// Each lifecycle event is keyed on the Stripe event id (retry-safe), except
+// subscription_cancel_scheduled which is keyed per-subscription so it logs
+// once when cancel_at_period_end flips true (not on every subsequent update).
+function detectPlan(meta, sub) {
+  if (meta?.plan) return meta.plan;
+  try {
+    const interval = sub?.items?.[0]?.price?.recurring?.interval;
+    if (interval === 'year') return 'pro_annual';
+  } catch {}
+  return 'pro_monthly';
+}
+function detectSource(meta, giftEmail) {
+  if (giftEmail || meta?.gift_student_email) return 'gift';
+  if (meta?.gifted_by_parent_invite || meta?.gifted_by_parent_id) return 'parent_invite';
+  return 'self';
+}
+async function logConversionEvent(eventKey, { user, email, eventName, plan, amountCents, customerId, subscriptionId, source }) {
+  try {
+    const existing = await base44.asServiceRole.entities.ConversionEvent.filter({ event_key: eventKey });
+    if (existing && existing.length > 0) {
+      console.log('[stripeWebhook] ConversionEvent already logged:', eventName, eventKey);
+      return;
+    }
+    await base44.asServiceRole.entities.ConversionEvent.create({
+      user_id: user?.id || '',
+      user_email: email || user?.email || '',
+      event_name: eventName,
+      event_key: eventKey,
+      trigger: source,
+      plan_at_event: plan || '',
+      metadata: {
+        amount_cents: amountCents ?? null,
+        stripe_customer_id: customerId || '',
+        stripe_subscription_id: subscriptionId || '',
+        source,
+        plan: plan || '',
+      },
+    });
+    console.log('[stripeWebhook] ConversionEvent logged:', eventName, eventKey);
+  } catch (e) {
+    console.error('[stripeWebhook] ConversionEvent log failed:', eventName, e.message);
+  }
+}
+
 async function findBillingUser(customerId, userId, userEmail) {
   if (customerId) {
     const user = await findUserByCustomerId(customerId);
@@ -292,6 +337,20 @@ async function sendStudentActivationEmails(billingUser, family) {
               school_code: billingUser.school_name || billingUser.school || '',
               plan_at_event: plan || subscriptionTier,
             }).catch(() => {});
+          }
+
+          // Lifecycle: subscription_activated (checkout, mode=subscription) — idempotent on Stripe event id
+          if (session.mode === 'subscription') {
+            await logConversionEvent(event.id, {
+              user: billingUser,
+              email: billingUser?.email,
+              eventName: 'subscription_activated',
+              plan: plan || detectPlan(session.metadata, null),
+              amountCents: session.amount_total ?? null,
+              customerId,
+              subscriptionId,
+              source: detectSource(session.metadata, giftStudentEmail),
+            });
           }
 
           if (isFoundingMember) {
@@ -668,6 +727,33 @@ async function sendStudentActivationEmails(billingUser, family) {
           }
           await updateAllFamilyMembers(family, memberUpdates);
         }
+
+        // Lifecycle logging (idempotent on Stripe event id)
+        if (event.type === 'customer.subscription.created') {
+          await logConversionEvent(event.id, {
+            user: billingUser,
+            email: billingUser?.email,
+            eventName: 'subscription_activated',
+            plan: detectPlan(subscription.metadata, subscription),
+            amountCents: subscription.items?.[0]?.price?.unit_amount ?? null,
+            customerId,
+            subscriptionId: subscription.id,
+            source: detectSource(subscription.metadata, subGiftEmail),
+          });
+        }
+        if (event.type === 'customer.subscription.updated' && subscription.cancel_at_period_end === true && subscription.status !== 'canceled') {
+          // Stable per-subscription key so this logs once when cancel is scheduled, not on every later update
+          await logConversionEvent(`subscription_cancel_scheduled:${subscription.id}`, {
+            user: billingUser,
+            email: billingUser?.email,
+            eventName: 'subscription_cancel_scheduled',
+            plan: detectPlan(subscription.metadata, subscription),
+            amountCents: subscription.items?.[0]?.price?.unit_amount ?? null,
+            customerId,
+            subscriptionId: subscription.id,
+            source: detectSource(subscription.metadata, subGiftEmail),
+          });
+        }
         break;
       }
 
@@ -676,6 +762,21 @@ async function sendStudentActivationEmails(billingUser, family) {
         const deletedSub = event.data.object;
         const customerId = deletedSub.customer;
         const familyId = deletedSub.metadata?.family_id;
+
+        // Lifecycle: subscription_canceled — idempotent on Stripe event id
+        {
+          const canceledUser = await findUserByCustomerId(customerId);
+          await logConversionEvent(event.id, {
+            user: canceledUser,
+            email: canceledUser?.email,
+            eventName: 'subscription_canceled',
+            plan: detectPlan(deletedSub.metadata, deletedSub),
+            amountCents: deletedSub.items?.[0]?.price?.unit_amount ?? null,
+            customerId,
+            subscriptionId: deletedSub.id,
+            source: detectSource(deletedSub.metadata, deletedSub.metadata?.gift_student_email),
+          });
+        }
 
         // Handle gifted subscription cancellation — revoke student access
         // (sendParentProInvite sets gifted_by_parent_invite / gift_student_email — check all)
@@ -767,6 +868,18 @@ async function sendStudentActivationEmails(billingUser, family) {
           });
           console.log('Marked billing user as past_due:', billingUser.id, 'attempt:', attemptCount);
 
+          // Lifecycle: payment_failed — idempotent on Stripe event id
+          await logConversionEvent(event.id, {
+            user: billingUser,
+            email: billingUser?.email,
+            eventName: 'payment_failed',
+            plan: detectPlan(invoice.metadata, null),
+            amountCents: invoice.amount_due ?? null,
+            customerId,
+            subscriptionId,
+            source: detectSource(invoice.metadata, invoice.metadata?.gift_student_email),
+          });
+
           const isDay3 = attemptCount >= 2;
           const urgency = isDay3 ? 'Your access will be deactivated soon' : 'Please update your payment method';
 
@@ -794,6 +907,28 @@ async function sendStudentActivationEmails(billingUser, family) {
           await base44.asServiceRole.entities.Family.update(family.id, { subscription_status: 'past_due' });
           await updateAllFamilyMembers(family, { subscription_status: 'past_due' });
           console.log('Family marked past_due:', family.id);
+        }
+        break;
+      }
+
+      // INVOICE PAID — renewal
+      case 'invoice.paid': {
+        const invoice = event.data.object;
+        const customerId = invoice.customer;
+        const subscriptionId = invoice.subscription;
+        if (invoice.billing_reason === 'subscription_cycle') {
+          const billingUser = await findUserByCustomerId(customerId);
+          // Lifecycle: subscription_renewed — idempotent on Stripe event id
+          await logConversionEvent(event.id, {
+            user: billingUser,
+            email: billingUser?.email,
+            eventName: 'subscription_renewed',
+            plan: detectPlan(invoice.metadata, null),
+            amountCents: invoice.amount_paid ?? invoice.total ?? null,
+            customerId,
+            subscriptionId,
+            source: detectSource(invoice.metadata, invoice.metadata?.gift_student_email),
+          });
         }
         break;
       }

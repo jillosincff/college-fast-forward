@@ -81,6 +81,7 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [started, setStarted] = useState(false);
   const [questionCount, setQuestionCount] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
   const messagesEndRef = useRef(null);
 
   const isFastIQ = checkIsFastIQ(user);
@@ -131,6 +132,25 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
       });
       setMessages([{ role: 'assistant', content: aiMessage }]);
       setQuestionCount(1);
+      // Persist the session row so mock interviews stop saving zero records.
+      try {
+        const session = await base44.entities.MockInterviewSession.create({
+          user_id: user.id,
+          user_email: user.email,
+          company_name: urlCompany || '',
+          job_title: urlRole || '',
+          interview_type: 'mixed',
+          difficulty: 'entry',
+          status: 'in_progress',
+          question_count: 0,
+          current_question_index: 0,
+          questions: [],
+          started_at: new Date().toISOString(),
+        });
+        setSessionId(session.id);
+      } catch (e) {
+        console.error('MockInterviewSession create failed:', e);
+      }
     } catch (e) {
       console.error('Interview start failed:', e);
     }
@@ -160,6 +180,22 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
         setIsComplete(true);
         if (!user?.has_done_mock_interview) {
           base44.auth.updateMe({ has_done_mock_interview: true }).catch(() => {});
+        }
+        if (sessionId) {
+          const scoreMatch = aiMessage.match(/(\d{1,2})\s*(?:\/|out of)\s*10/i);
+          const overallScore = scoreMatch ? Math.min(100, parseInt(scoreMatch[1], 10) * 10) : null;
+          try {
+            await base44.entities.MockInterviewSession.update(sessionId, {
+              status: 'complete',
+              question_count: newCount,
+              current_question_index: newCount,
+              overall_score: overallScore,
+              overall_feedback: aiMessage,
+              completed_at: new Date().toISOString(),
+            });
+          } catch (e) {
+            console.error('MockInterviewSession finalize failed:', e);
+          }
         }
       }
     } catch (e) {

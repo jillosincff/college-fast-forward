@@ -25,6 +25,10 @@
         "prompt_dismissed",
         "continue_free",
         "subscription_activated",
+        "subscription_renewed",
+        "subscription_canceled",
+        "subscription_cancel_scheduled",
+        "payment_failed",
         "pro_activated",
         "parent_payment_completed",
         "upgrade_modal_viewed",
@@ -40,7 +44,7 @@
     },
     "trigger": {
       "type": "string",
-      "description": "Attribution: which contextual trigger produced this event (e.g. post_magic_moment, second_application, connection_found)"
+      "description": "Attribution: which contextual trigger produced this event (e.g. post_magic_moment, second_application, connection_found, self, parent_invite, gift)"
     },
     "company_name": {
       "type": "string",
@@ -69,7 +73,7 @@
     "metadata": {
       "type": "object",
       "default": {},
-      "description": "Event-specific context"
+      "description": "Event-specific context (amount_cents, stripe_customer_id, stripe_subscription_id, source, plan)"
     },
     "description": {
       "type": "string",
