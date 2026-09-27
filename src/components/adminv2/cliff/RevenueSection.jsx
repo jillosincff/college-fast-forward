@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 
 export default function RevenueSection({ revenue }) {
   const [exporting, setExporting] = useState(false);
+  const [exportingActivated, setExportingActivated] = useState(false);
   if (!revenue) return null;
   const exportCsv = async () => {
     setExporting(true);
@@ -22,6 +23,25 @@ export default function RevenueSection({ revenue }) {
       console.error('CSV export failed:', e);
     } finally {
       setExporting(false);
+    }
+  };
+  const exportActivatedCsv = async () => {
+    setExportingActivated(true);
+    try {
+      const res = await base44.functions.invoke('exportActivatedStudentsCsv', {});
+      const blob = new Blob([res.csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `activated_students_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Activated students export failed:', e);
+    } finally {
+      setExportingActivated(false);
     }
   };
   return (
@@ -45,13 +65,22 @@ export default function RevenueSection({ revenue }) {
         />
         <MetricTile label="Expired Trials" value={revenue.expiredTrials} sub="win-back pool" />
       </div>
-      <button
-        onClick={exportCsv}
-        disabled={exporting}
-        className="mt-3 text-xs font-medium text-slate-300 hover:text-white disabled:opacity-50 transition-colors"
-      >
-        {exporting ? 'Exporting…' : '⬇ Export pilot list (CSV)'}
-      </button>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <button
+          onClick={exportCsv}
+          disabled={exporting}
+          className="text-xs font-medium text-slate-300 hover:text-white disabled:opacity-50 transition-colors"
+        >
+          {exporting ? 'Exporting…' : '⬇ Export pilot list (CSV)'}
+        </button>
+        <button
+          onClick={exportActivatedCsv}
+          disabled={exportingActivated}
+          className="text-xs font-medium text-slate-300 hover:text-white disabled:opacity-50 transition-colors"
+        >
+          {exportingActivated ? 'Exporting…' : '⬇ Export activated students (CSV)'}
+        </button>
+      </div>
     </section>
   );
 }
