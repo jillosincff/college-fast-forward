@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import MagicMomentVisual from '@/components/landing/MagicMomentVisual';
 
 // Public, mobile-first parent gift page. A parent (not logged in) gives a
-// student the Fall semester of CLIFF Pro for $99, one time, through Dec 31.
+// student the school year of CLIFF Pro for $99, one time, through May 31, 2027.
 // UTMs are captured from the URL (search + hash) and sessionStorage, and passed
 // to checkout. Student name/email pre-fill from URL params (e.g. an Ask-a-parent
 // email link). No Jill name or photo.
@@ -104,7 +104,7 @@ export default function ForParents() {
           A step-by-step job search coach for your college student.
         </h1>
         <p className="text-[15px] text-slate-600 leading-relaxed mb-5">
-          CLIFF helps your student pick the internships and jobs worth applying to, tailor their resume for each one, and prep for interviews when they land one. Give them the Fall semester for $99.
+          CLIFF helps your student pick the internships and jobs worth applying to, tailor their resume for each one, and prep for interviews when they land one. Give them the rest of the school year for $99.
         </p>
 
         <div className="mb-5">
@@ -125,7 +125,7 @@ export default function ForParents() {
           </p>
         </div>
 
-        <p className="text-[14px] font-semibold text-slate-900 mb-2">What your student gets through Dec 31:</p>
+        <p className="text-[14px] font-semibold text-slate-900 mb-2">What your student gets through May 31:</p>
         <ul className="space-y-2 mb-5">
           {[
             'Best Moves — the openings worth their time',
@@ -146,7 +146,7 @@ export default function ForParents() {
           <ol className="space-y-1.5 text-[14px] text-slate-600 list-decimal pl-5">
             <li>You pay $99 once — not a subscription.</li>
             <li>Your student gets an email and signs up.</li>
-            <li>Pro is on through December 31, then it simply ends.</li>
+            <li>Pro is on through May 31, 2027, then it simply ends.</li>
           </ol>
         </div>
 
@@ -175,7 +175,7 @@ export default function ForParents() {
         </div>
 
         <p className="text-[11px] text-slate-400 text-center">
-          By continuing you agree to CLIFF's terms. One-time payment of $99. Pro access ends December 31, 2026.
+          By continuing you agree to CLIFF's terms. One-time payment of $99. Pro access ends May 31, 2027.
         </p>
       </div>
     </div>

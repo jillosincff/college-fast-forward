@@ -14,8 +14,8 @@ const escapeHtml = (str) => {
     .replace(/'/g, '&#039;');
 };
 
-// Fall Semester Gift: Pro through Dec 31 23:59 ET (America/New_York, EST).
-const FALL_SEMESTER_ENDS_AT = '2026-12-31T23:59:00-05:00';
+// School Year Gift: Pro through May 31 23:59 ET (America/New_York, EDT).
+const FALL_SEMESTER_ENDS_AT = '2027-05-31T23:59:00-04:00';
 
 export default async function(req) {
   try {
@@ -106,7 +106,7 @@ async function downgradeAccessPlanToFree(user, accessState = 'free') {
   }
 }
 
-// ── Fall Semester Gift: one-time $99 checkout → activate student Pro ─────
+// ── School Year Gift: one-time $99 checkout → activate student Pro ─────
 // Runs inside checkout.session.completed for offer=fall_semester_gift. Never
 // touches the subscription/founding/family logic — the caller breaks after.
 async function handleFallSemesterGift(session, event) {
@@ -152,12 +152,12 @@ async function handleFallSemesterGift(session, event) {
       const parentFirst = parentName?.split(' ')[0] || 'Your parent';
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: student.email,
-        subject: `${parentFirst} just got you CLIFF Pro for the fall 🎁`,
+        subject: `${parentFirst} just got you CLIFF Pro for the school year 🎁`,
         body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:40px 24px;">
   <div style="background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);border-radius:20px;padding:32px;text-align:center;margin-bottom:32px;">
     <p style="color:rgba(255,255,255,0.7);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">🎁 A GIFT FROM ${escapeHtml(parentFirst.toUpperCase())}</p>
     <h1 style="color:#fff;font-size:28px;margin:0 0 8px;">CLIFF Pro is now yours, ${escapeHtml(first)}!</h1>
-    <p style="color:rgba(255,255,255,0.8);font-size:15px;margin:0;">Your parent got you the Fall semester. Pro is on through December 31.</p>
+    <p style="color:rgba(255,255,255,0.8);font-size:15px;margin:0;">Your parent got you the school year of CLIFF Pro. Pro is on through May 31, 2027.</p>
   </div>
   <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:20px;margin:16px 0;">
     <p style="font-size:14px;color:#4c1d95;margin:0 0 8px;">✓ The openings worth your time (Best Moves)</p>
@@ -202,10 +202,10 @@ async function handleFallSemesterGift(session, event) {
         body: JSON.stringify({
           personalizations: [{ to: [{ email: studentEmail }] }],
           from: { email: 'team@collegefastforward.com', name: 'College Fast Forward' },
-          subject: `${parentFirst} got you CLIFF Pro for the fall — claim it 🎁`,
+          subject: `${parentFirst} got you CLIFF Pro for the school year — claim it 🎁`,
           content: [{ type: 'text/html', value: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
-  <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">${escapeHtml(parentFirst)} got you CLIFF Pro for the fall 🎁</h1>
-  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Your parent got you CLIFF Pro for the Fall semester. Pro is paid for and waiting — just sign up with this email address and it activates instantly, through December 31.</p>
+  <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">${escapeHtml(parentFirst)} got you CLIFF Pro for the school year 🎁</h1>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Your parent got you CLIFF Pro for the school year. Pro is paid for and waiting — just sign up with this email address and it activates instantly, through May 31, 2027.</p>
   <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">CLIFF picks the jobs worth your time, tailors your resume to each one, drafts your follow-ups, and runs interview practice.</p>
   <a href="https://collegefastforward.com/#/GatorAuth" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Claim My CLIFF Pro →</a>
   <p style="font-size:13px;color:#94a3b8;margin-top:32px;">The College Fast Forward Team</p>
@@ -220,12 +220,12 @@ async function handleFallSemesterGift(session, event) {
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: parentEmail,
-        subject: `You just gave ${studentName || studentEmail} CLIFF Pro for the fall 💜`,
+        subject: `You just gave ${studentName || studentEmail} CLIFF Pro for the school year 💜`,
         body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <h1 style="font-size:24px;font-weight:800;margin-bottom:16px;color:#0f172a;">Your gift is on its way</h1>
   <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Hi ${escapeHtml(parentName?.split(' ')[0] || 'there')},</p>
-  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">You gave <strong>${escapeHtml(studentName || studentEmail)}</strong> CLIFF Pro for the Fall semester. You paid $99 once — not a subscription. ${student ? "It's active on their account now, and we've emailed them the good news." : "The moment they sign up with that email, Pro activates — we've sent them an invite."}</p>
-  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Pro is on through December 31, then it simply ends. No renewal, nothing to cancel.</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">You gave <strong>${escapeHtml(studentName || studentEmail)}</strong> CLIFF Pro for the school year. You paid $99 once — not a subscription. ${student ? "It's active on their account now, and we've emailed them the good news." : "The moment they sign up with that email, Pro activates — we've sent them an invite."}</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Pro is on through May 31, 2027, then it simply ends. No renewal, nothing to cancel.</p>
   <p style="font-size:13px;color:#94a3b8;margin-top:24px;">Full refund within 14 days if they don't use it — just reply to this email.<br>The College Fast Forward Team</p>
 </div>`,
       });
@@ -256,7 +256,7 @@ async function handleFallSemesterGift(session, event) {
   }).catch((e) => console.error('[stripeWebhook] event log failed:', e.message));
 }
 
-// ── Fall Semester Gift refund → downgrade + mark pending + log ──────────
+// ── School Year Gift refund → downgrade + mark pending + log ──────────
 async function handleFallSemesterRefund(charge, event) {
   const studentEmail = charge.metadata?.gift_student_email?.trim().toLowerCase() || '';
   if (!studentEmail) {
@@ -496,7 +496,7 @@ async function sendStudentActivationEmails(billingUser, family) {
 
         console.log('Checkout completed:', { subscriptionTier, customerId, familyId, billingUserEmail, isFoundingMember, plan });
 
-        // ── Fall Semester Gift (one-time, mode=payment) — handle & break ──
+        // ── School Year Gift (one-time, mode=payment) — handle & break ──
         if (session.metadata?.offer === 'fall_semester_gift') {
           await handleFallSemesterGift(session, event);
           break;
@@ -1159,7 +1159,7 @@ async function sendStudentActivationEmails(billingUser, family) {
         break;
       }
 
-      // CHARGE REFUNDED — Fall Semester Gift refund
+      // CHARGE REFUNDED — School Year Gift refund
       case 'charge.refunded': {
         const charge = event.data.object;
         if (charge.metadata?.offer === 'fall_semester_gift') {

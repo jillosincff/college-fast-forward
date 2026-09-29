@@ -1,11 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
-// Signup check: a parent may have paid the Fall Semester gift before the
+// Signup check: a parent may have paid the School Year gift before the
 // student had an account. The webhook wrote a PendingSemesterGift row. On the
 // student's first authenticated load (wired from AuthContext), this activates
-// their Pro through Dec 31. Idempotent — safe to call every login.
+// their Pro through May 31, 2027. Idempotent — safe to call every login.
 
-const FALL_SEMESTER_ENDS_AT = '2026-12-31T23:59:00-05:00'; // America/New_York (EST)
+const FALL_SEMESTER_ENDS_AT = '2027-05-31T23:59:00-04:00'; // America/New_York (EDT)
 
 export default async function (req) {
   try {
@@ -48,7 +48,7 @@ export default async function (req) {
     }
 
     // UserAccessPlan upsert — source marks it as a semester gift so the daily
-    // downgrade can expire it on Dec 31.
+    // downgrade can expire it on May 31, 2027.
     try {
       const existing = await base44.asServiceRole.entities.UserAccessPlan.filter({ user_id: user.id });
       const fields = {

@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
     }
     const schools = Object.values(schoolMap).sort((a, b) => b.total - a.total).slice(0, 12);
 
-    // ── Parent gift test (Fall Semester Gift) ────────────────────────────
+    // ── Parent gift test (School Year Gift) ────────────────────────────
     let parentGiftTest = { asksSent: 0, parentPageOpens: 0, checkoutsStarted: 0, giftsPaid: 0, giftsRefunded: 0, revenue: 0, byUtm: {} };
     try {
       const [paid, sent, started, refunded, views] = await Promise.all([

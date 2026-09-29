@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Public success page after a Fall Semester gift checkout. No Jill name/photo.
+// Public success page after a School Year gift checkout. No Jill name/photo.
 export default function ForParentsThanks() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-5">
@@ -10,7 +10,7 @@ export default function ForParentsThanks() {
         </div>
         <h1 className="text-[22px] font-extrabold text-slate-900 mb-2">Your gift is on its way</h1>
         <p className="text-[15px] text-slate-600 leading-relaxed mb-5">
-          You just gave your student CLIFF Pro for the Fall semester. We've emailed them with everything they need. Pro is on through December 31, then it simply ends — no subscription to cancel.
+          You just gave your student CLIFF Pro for the school year. We've emailed them with everything they need. Pro is on through May 31, 2027, then it simply ends — no subscription to cancel.
         </p>
         <p className="text-[13px] text-slate-500 mb-6">
           Full refund within 14 days if they don't use it — just reply to your receipt email.

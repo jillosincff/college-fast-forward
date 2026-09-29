@@ -171,8 +171,8 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
               <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Ask a parent to unlock</span>
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>Have a parent unlock it for you</h1>
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 6px', lineHeight: 1.5 }}>Enter your parent's email and we'll send them a link to give you the Fall semester of CLIFF Pro.</p>
-            <p style={{ fontFamily: FONT, fontSize: 13, color: INDIGO_DIM, margin: '0 0 18px', lineHeight: 1.5, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '10px 12px' }}>Your parent gets a link to give you the Fall semester — $99 one time, through December 31. Not a subscription.</p>
+            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 6px', lineHeight: 1.5 }}>Enter your parent's email and we'll send them a link to give you the school year of CLIFF Pro.</p>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: INDIGO_DIM, margin: '0 0 18px', lineHeight: 1.5, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '10px 12px' }}>Your parent gets a link to give you the school year — $99 one time, through May 31, 2027. Not a subscription.</p>
 
             <label style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Parent's email</label>
             <input type="email" value={parentEmail} placeholder="parent@email.com" onChange={(e) => setParentEmail(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', fontFamily: FONT, fontSize: 15, color: TEXT, background: '#fafafa', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '13px 14px', outline: 'none', marginBottom: 12 }} />

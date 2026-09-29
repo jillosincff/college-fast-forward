@@ -84,7 +84,7 @@ export default function RevenueSection({ revenue }) {
 
       {revenue.parentGiftTest && (
         <section className="mt-8">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">🎁 Parent gift test (Fall Semester)</h2>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">🎁 Parent gift test (School Year)</h2>
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             <MetricTile label="Asks sent" value={revenue.parentGiftTest.asksSent} sub="sendParentProInvite emails" />
             <MetricTile label="Parent page opens" value={revenue.parentGiftTest.parentPageOpens} sub="#/ForParents views" />

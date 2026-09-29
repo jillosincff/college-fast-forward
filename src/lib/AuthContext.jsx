@@ -37,7 +37,7 @@ const AuthProviderInner = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
       await attributePendingReferral(currentUser);
-      // Activate a pending Fall Semester gift if a parent already paid but the
+      // Activate a pending School Year gift if a parent already paid but the
       // student hadn't signed up yet. Best-effort, never blocks the app.
       if (currentUser && ['student', 'gator'].includes(currentUser.persona)) {
         base44.functions.invoke('activatePendingSemesterGift', {}).catch((e) => console.warn('semester gift activation failed:', e?.message || e));

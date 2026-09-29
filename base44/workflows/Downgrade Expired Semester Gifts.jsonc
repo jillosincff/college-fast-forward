@@ -1,5 +1,5 @@
 {
-  "description": "Daily. Downgrades Fall Semester gifts past Dec 31 23:59 ET back to free, unless the student now has an active paid subscription. Mirrors the webhook's refund/downgrade logic so gift access ends on Dec 31 as promised.",
+  "description": "Daily. Downgrades School Year gifts past May 31 23:59 ET back to free, unless the student now has an active paid subscription. Mirrors the webhook's refund/downgrade logic so gift access ends on May 31 as promised.",
   "trigger": {
     "condition": null,
     "config": {

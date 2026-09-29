@@ -7,7 +7,7 @@ const PRO_PRICES = {
   pro_annual: 'price_1U5EEH873TV7WMcTOOnQNksc',  // $149/year
 };
 
-// One-time Fall Semester Gift: $99, mode=payment, Pro through Dec 31.
+// One-time School Year Gift: $99, mode=payment, Pro through May 31, 2027.
 const FALL_SEMESTER_GIFT_PRICE = 'price_1UKPSs873TV7WMcTAP9slOxu';
 
 const APP_BASE = 'https://collegefastforward.com';
@@ -22,7 +22,7 @@ export default async function(req) {
     const user = await base44.auth.me().catch(() => null);
     const body = await req.json();
 
-    // ── Fall Semester Gift (one-time, public page) ──────────────────────
+    // ── School Year Gift (one-time, public page) ──────────────────────
     if (body.plan === 'fall_semester_gift') {
       const parentName = (body.parentName || '').trim().slice(0, 120);
       const parentEmail = normEmail(body.parentEmail);

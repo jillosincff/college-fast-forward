@@ -1,9 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-// AUTOMATION: Daily. Downgrades Fall Semester gifts whose Pro period (Dec 31
+// AUTOMATION: Daily. Downgrades School Year gifts whose Pro period (May 31
 // 23:59 ET) has passed, back to free — UNLESS the student now has an active
 // paid subscription. Mirrors the webhook's downgrade logic so gift access
-// simply ends on Dec 31 as promised.
+// simply ends on May 31 as promised.
 
 Deno.serve(async (req) => {
   const startTime = Date.now();
