@@ -54,7 +54,7 @@ export default function ForParents() {
     });
     setUtm(captureUtms(p));
     // Log a page view for the admin "Parent page opens" metric.
-    base44.analytics.track({ eventName: 'for_parents_viewed', properties: { utm_source: p.utm_source || '' } }).catch(() => {});
+    try { base44?.analytics?.track?.({ eventName: 'for_parents_viewed', properties: { utm_source: p.utm_source || '' } })?.catch?.(() => {}); } catch {}
   }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
