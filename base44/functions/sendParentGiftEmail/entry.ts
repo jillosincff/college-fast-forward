@@ -64,7 +64,7 @@ function buildEmailHtml(parent, unsubscribeUrl) {
           <p style="font-size:16px;color:#475569;line-height:1.65;margin:0 0 24px;">Give them the rest of the school year for $99. You pay once, and it ends May 31, 2027. If your student doesn't use it, you get a full refund within 14 days.</p>
         </td></tr>
         <tr><td align="center" style="padding:0 28px 28px;">
-          <a href="${cta}" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;font-size:16px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:14px;">${escapeHtml(CTA_LABEL)}</a>
+          <a href="${cta}" style="display:inline-block;background-color:#6d28d9;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:14px;border:1px solid #5b21b6;-webkit-text-fill-color:#ffffff;">${escapeHtml(CTA_LABEL)}</a>
         </td></tr>
         <tr><td style="padding:0 28px 28px;">
           <p style="font-size:15px;color:#94a3b8;line-height:1.6;margin:0 0 24px;">Not the right fit this year? No problem, and thanks for being part of this.</p>
