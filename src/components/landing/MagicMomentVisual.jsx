@@ -23,9 +23,11 @@ const PLAN = [
   { label: 'Apply / follow up', done: false },
 ];
 
-export default function MagicMomentVisual() {
+export default function MagicMomentVisual({ variant = 'home' }) {
   const rootRef = useRef(null);
   const [playing, setPlaying] = useState(false);
+  const forParents = variant === 'parents';
+  const jobSub = forParents ? 'Nike · Summer 2027' : 'Nike · Summer 2026';
 
   // Play the assembly sequence once when the card first scrolls into view,
   // then hold on the completed state (no continuous looping).
@@ -109,7 +111,7 @@ export default function MagicMomentVisual() {
             <div style={{ width: 36, height: 36, borderRadius: 9, background: GRAD_INDIGO, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontWeight: 800, fontSize: 16, flexShrink: 0 }}>N</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.2 }}>Marketing Intern</p>
-              <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 600, color: INDIGO_DIM, margin: '2px 0 0' }}>Nike · Summer 2026</p>
+              <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 600, color: INDIGO_DIM, margin: '2px 0 0' }}>{jobSub}</p>
             </div>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#dcfce7', border: '1px solid #bbf7d0', borderRadius: 999, padding: '3px 8px', fontFamily: SF, fontSize: 10, fontWeight: 800, color: '#15803d', flexShrink: 0 }}>
               <Check size={10} strokeWidth={4} /> Strong fit
@@ -127,9 +129,11 @@ export default function MagicMomentVisual() {
         </div>
 
         {/* Warm intros — demoted to a single muted line, not a hero block */}
-        <div className="mmv-a-chip" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: SF, fontSize: 11, fontWeight: 600, color: TEXT3, padding: '0 2px' }}>
-          <Sparkles size={11} /> Warm intros unlock later
-        </div>
+        {!forParents && (
+          <div className="mmv-a-chip" style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: SF, fontSize: 11, fontWeight: 600, color: TEXT3, padding: '0 2px' }}>
+            <Sparkles size={11} /> Warm intros unlock later
+          </div>
+        )}
       </div>
     </div>
   );

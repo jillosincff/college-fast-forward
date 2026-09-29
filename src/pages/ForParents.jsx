@@ -108,7 +108,7 @@ export default function ForParents() {
         </p>
 
         <div className="mb-5">
-          <MagicMomentVisual />
+          <MagicMomentVisual variant="parents" />
         </div>
 
         <button
