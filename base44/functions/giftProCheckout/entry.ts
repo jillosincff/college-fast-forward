@@ -97,7 +97,6 @@ export default async function(req) {
         'metadata[utm_content]': meta.utm_content,
       });
       form.set('customer_email', parentEmail);
-      form.append('payment_method_collection', 'always');
 
       const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
         method: 'POST',
