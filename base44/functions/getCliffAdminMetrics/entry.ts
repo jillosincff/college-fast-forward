@@ -179,14 +179,15 @@ Deno.serve(async (req) => {
     const schools = Object.values(schoolMap).sort((a, b) => b.total - a.total).slice(0, 12);
 
     // ── Parent gift test (School Year Gift) ────────────────────────────
-    let parentGiftTest = { asksSent: 0, parentPageOpens: 0, checkoutsStarted: 0, giftsPaid: 0, giftsRefunded: 0, revenue: 0, byUtm: {} };
+    let parentGiftTest = { asksSent: 0, parentPageOpens: 0, checkoutsStarted: 0, giftsPaid: 0, giftsRefunded: 0, revenue: 0, parentEmailsSent: 0, byUtm: {} };
     try {
-      const [paid, sent, started, refunded, views] = await Promise.all([
+      const [paid, sent, started, refunded, views, parentEmailLogs] = await Promise.all([
         base44.asServiceRole.entities.ConversionEvent.filter({ event_name: 'gift_semester_paid' }).catch(() => []),
         base44.asServiceRole.entities.ConversionEvent.filter({ event_name: 'ask_parent_sent' }).catch(() => []),
         base44.asServiceRole.entities.ConversionEvent.filter({ event_name: 'checkout_started' }).catch(() => []),
         base44.asServiceRole.entities.ConversionEvent.filter({ event_name: 'gift_semester_refunded' }).catch(() => []),
         base44.asServiceRole.entities.AnalyticsEvent.filter({ event_name: 'for_parents_viewed' }).catch(() => []),
+        base44.asServiceRole.entities.EmailLog.filter({ email_type: 'parent_gift_email' }).catch(() => []),
       ]);
       const semStarted = (started || []).filter((e) => e.metadata?.offer === 'fall_semester_gift');
       const byUtm = { asksSent: {}, parentPageOpens: {}, checkoutsStarted: {}, giftsPaid: {}, revenue: {} };
@@ -205,6 +206,7 @@ Deno.serve(async (req) => {
         giftsPaid: (paid || []).length,
         giftsRefunded: (refunded || []).length,
         revenue: Math.round(((paid || []).reduce((s, e) => s + (e.metadata?.amount_cents || 0) / 100, 0)) * 100) / 100,
+        parentEmailsSent: (parentEmailLogs || []).filter((l) => l.status === 'sent').length,
         byUtm,
       };
     } catch (e) { console.error('parentGiftTest metrics failed:', e.message); }

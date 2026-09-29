@@ -40,7 +40,8 @@
         "weekly_parent_digest",
         "pay_it_forward",
         "first_match_notification",
-        "fastiq_unanswered_trigger"
+        "fastiq_unanswered_trigger",
+        "parent_gift_email"
       ],
       "description": "Type of email sent"
     },
