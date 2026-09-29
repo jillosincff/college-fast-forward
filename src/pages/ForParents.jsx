@@ -101,7 +101,7 @@ export default function ForParents() {
         </div>
 
         <h1 className="text-[26px] leading-tight font-extrabold text-slate-900 mb-3">
-          A step-by-step job search coach for your college student.
+          A step-by-step job search for your college student.
         </h1>
         <p className="text-[15px] text-slate-600 leading-relaxed mb-5">
           CLIFF helps your student pick the internships and jobs worth applying to, tailor their resume for each one, and prep for interviews when they land one. Give them the rest of the school year for $99.
@@ -115,7 +115,7 @@ export default function ForParents() {
           onClick={() => document.getElementById('gift-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           className="w-full rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-[16px] py-4 shadow-lg active:scale-[0.99] transition mb-6"
         >
-          Give them a coach — $99
+          Give them CLIFF — $99
         </button>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-5">
@@ -132,6 +132,7 @@ export default function ForParents() {
             'A resume tailored to every job, with no limit',
             'One clear next step at a time: pick, tailor, apply, track',
             'Mock interview practice when they land an interview',
+            'A directory of alumni and parents your student can reach out to',
             'One tracker for every application',
           ].map((t) => (
             <li key={t} className="flex items-start gap-2 text-[14px] text-slate-700">
@@ -169,7 +170,7 @@ export default function ForParents() {
             disabled={busy}
             className="mt-4 w-full rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-[16px] py-4 shadow-lg disabled:opacity-70 active:scale-[0.99] transition"
           >
-            {busy ? 'Starting checkout…' : 'Give them a coach — $99'}
+            {busy ? 'Starting checkout…' : 'Give them CLIFF — $99'}
           </button>
           <p className="text-[11px] text-slate-400 text-center mt-3">Full refund within 14 days if your student doesn't use it.</p>
         </div>

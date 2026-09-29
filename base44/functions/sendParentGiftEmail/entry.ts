@@ -13,9 +13,9 @@ import { secrets } from 'base44:runtime';
 
 const FROM_EMAIL = 'support@collegefastforward.com';
 const FROM_NAME = 'CLIFF at College Fast Forward';
-const SUBJECT = 'A job search coach for your own student';
+const SUBJECT = 'A job search plan for your own student';
 const PREVIEW = 'The rest of the school year, $99 once. Not a subscription.';
-const CTA_LABEL = 'Give them a coach — $99';
+const CTA_LABEL = 'Give them CLIFF — $99';
 const APP_BASE = 'https://collegefastforward.com';
 const EMAIL_TYPE = 'parent_gift_email';
 const SKIP_EMAILS = new Set(['josinoff@gmail.com', 'losinoff@gmail.com', 'lindseyosinoff@ufl.edu']);
@@ -43,6 +43,7 @@ function buildEmailHtml(parent, unsubscribeUrl) {
     'A resume tailored to every job, with no limit',
     'One clear next step at a time: pick, tailor, apply, track',
     'Mock interview practice when they land an interview',
+    'A directory of alumni and parents your student can reach out to',
   ];
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(SUBJECT)}</title></head>
