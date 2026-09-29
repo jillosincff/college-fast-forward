@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import MagicMomentVisual from '@/components/landing/MagicMomentVisual';
 
 // Public, mobile-first parent gift page. A parent (not logged in) gives a
 // student the Fall semester of CLIFF Pro for $99, one time, through Dec 31.
@@ -103,8 +104,19 @@ export default function ForParents() {
           A step-by-step job search coach for your college student.
         </h1>
         <p className="text-[15px] text-slate-600 leading-relaxed mb-5">
-          CLIFF helps your student pick the internships and jobs worth applying to, tailor their resume for each one, and follow up so applications don't disappear. Give them the Fall semester for $99.
+          CLIFF helps your student pick the internships and jobs worth applying to, tailor their resume for each one, and prep for interviews when they land one. Give them the Fall semester for $99.
         </p>
+
+        <div className="mb-5">
+          <MagicMomentVisual />
+        </div>
+
+        <button
+          onClick={() => document.getElementById('gift-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          className="w-full rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-[16px] py-4 shadow-lg active:scale-[0.99] transition mb-6"
+        >
+          Give Fall semester — $99
+        </button>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-5">
           <p className="text-[14px] text-slate-800 font-semibold mb-1">Sound familiar?</p>
@@ -119,7 +131,6 @@ export default function ForParents() {
             'Best Moves — the openings worth their time',
             'A resume tailored to every job, with no limit',
             'One clear next step at a time: pick, tailor, apply, track',
-            'A day-3 follow-up reminder with the message drafted',
             'Mock interview practice when they land an interview',
             'One tracker for every application',
           ].map((t) => (
@@ -143,7 +154,7 @@ export default function ForParents() {
           <span className="font-semibold text-slate-700">Who it's for:</span> College juniors, seniors, and recent grads looking for an internship or first full-time job.
         </p>
 
-        <div className="bg-white rounded-2xl border-2 border-violet-200 shadow-sm p-5 mb-4">
+        <div id="gift-form" className="bg-white rounded-2xl border-2 border-violet-200 shadow-sm p-5 mb-4 scroll-mt-4">
           <div className="space-y-3">
             <input className={inputCls} placeholder="Your name (parent)" value={form.parentName} onChange={set('parentName')} autoComplete="name" />
             <input className={inputCls} type="email" placeholder="Your email" value={form.parentEmail} onChange={set('parentEmail')} autoComplete="email" />
