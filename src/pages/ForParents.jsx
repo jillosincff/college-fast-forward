@@ -115,7 +115,7 @@ export default function ForParents() {
           onClick={() => document.getElementById('gift-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           className="w-full rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-[16px] py-4 shadow-lg active:scale-[0.99] transition mb-6"
         >
-          Give Fall semester — $99
+          Give them a coach — $99
         </button>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-5">
@@ -169,7 +169,7 @@ export default function ForParents() {
             disabled={busy}
             className="mt-4 w-full rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-[16px] py-4 shadow-lg disabled:opacity-70 active:scale-[0.99] transition"
           >
-            {busy ? 'Starting checkout…' : 'Give Fall semester — $99'}
+            {busy ? 'Starting checkout…' : 'Give them a coach — $99'}
           </button>
           <p className="text-[11px] text-slate-400 text-center mt-3">Full refund within 14 days if your student doesn't use it.</p>
         </div>

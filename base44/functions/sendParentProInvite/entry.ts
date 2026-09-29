@@ -50,7 +50,7 @@ export default async function (req) {
   <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">${escapeHtml(studentFirst)} is using CLIFF, a step-by-step job search coach for college students, and asked if you'd give them the Fall semester of CLIFF Pro. Pro helps them pick the jobs worth applying to, tailor their resume to every job with no limit, and practice for interviews, on top of the free step-by-step plan and follow-up reminders. It's $99 one time, through December 31. No subscription.</p>
   ${note ? `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:14px 16px;margin:16px 0;"><p style="font-size:13px;color:#6d28d9;font-weight:700;margin:0 0 4px;">A note from ${escapeHtml(studentFirst)}:</p><p style="font-size:15px;color:#0f172a;margin:0;line-height:1.5;">${escapeHtml(note)}</p></div>` : ''}
   <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">Tap below to give ${escapeHtml(studentFirst)} the Fall semester.</p>
-  <a href="${escapeHtml(link)}" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Give ${escapeHtml(studentFirst)} the Fall semester — $99</a>
+  <a href="${escapeHtml(link)}" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Give them a coach — $99</a>
   <p style="font-size:13px;color:#94a3b8;margin-top:24px;">Full refund within 14 days if they don't use it.</p>
   <p style="font-size:13px;color:#94a3b8;margin-top:24px;">The College Fast Forward Team</p>
 </div>` }],
