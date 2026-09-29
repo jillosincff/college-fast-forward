@@ -7,7 +7,7 @@ const PRO_PRICES = {
   pro_annual: 'price_1U5EEH873TV7WMcTOOnQNksc',  // $149/year
 };
 
-// One-time School Year Gift: $99, mode=payment, Pro through May 31, 2027.
+// One-time School Year Gift: $99, mode=payment, Pro through August 31, 2027.
 const FALL_SEMESTER_GIFT_PRICE = 'price_1UKPSs873TV7WMcTAP9slOxu';
 
 const APP_BASE = 'https://collegefastforward.com';

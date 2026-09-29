@@ -47,9 +47,9 @@ export default async function (req) {
           content: [{ type: 'text/html', value: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <h1 style="font-size:23px;font-weight:800;margin-bottom:14px;color:#0f172a;">${escapeHtml(studentFirst)} asked you for help with their job search</h1>
   <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Hi,</p>
-  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Give them the rest of the school year for $99. You pay once, and it ends May 31, 2027. If your student doesn't use it, you get a full refund within 14 days.</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:16px;">Give them CLIFF through August 2027 for $99. You pay once, and it ends August 31, 2027. If your student doesn't use it, you get a full refund within 14 days.</p>
   ${note ? `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:14px 16px;margin:16px 0;"><p style="font-size:13px;color:#6d28d9;font-weight:700;margin:0 0 4px;">A note from ${escapeHtml(studentFirst)}:</p><p style="font-size:15px;color:#0f172a;margin:0;line-height:1.5;">${escapeHtml(note)}</p></div>` : ''}
-  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">Tap below to give ${escapeHtml(studentFirst)} the rest of the school year.</p>
+  <p style="font-size:16px;line-height:1.65;color:#475569;margin-bottom:24px;">Tap below to give ${escapeHtml(studentFirst)} CLIFF through August 2027.</p>
   <a href="${escapeHtml(link)}" style="display:inline-block;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:16px;">Give them CLIFF — $99</a>
   <p style="font-size:13px;color:#94a3b8;margin-top:24px;">Full refund within 14 days if they don't use it.</p>
   <p style="font-size:13px;color:#94a3b8;margin-top:24px;">The College Fast Forward Team</p>

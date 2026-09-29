@@ -14,7 +14,7 @@ import { secrets } from 'base44:runtime';
 const FROM_EMAIL = 'support@collegefastforward.com';
 const FROM_NAME = 'CLIFF at College Fast Forward';
 const SUBJECT = 'A job search plan for your own student';
-const PREVIEW = 'The rest of the school year, $99 once. Not a subscription.';
+const PREVIEW = 'Through August 2027, $99 once. Not a subscription.';
 const CTA_LABEL = 'Give them CLIFF — $99';
 const APP_BASE = 'https://collegefastforward.com';
 const EMAIL_TYPE = 'parent_gift_email';
@@ -62,7 +62,7 @@ function buildEmailHtml(parent, unsubscribeUrl) {
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 16px;">
             ${bullets.map((b) => `<tr><td style="padding:3px 0;"><p style="font-size:15px;color:#475569;line-height:1.55;margin:0;"><span style="color:#6d28d9;font-weight:800;">✓</span>&nbsp; ${escapeHtml(b)}</p></td></tr>`).join('')}
           </table>
-          <p style="font-size:16px;color:#475569;line-height:1.65;margin:0 0 24px;">Give them the rest of the school year for $99. You pay once, and it ends May 31, 2027. If your student doesn't use it, you get a full refund within 14 days.</p>
+          <p style="font-size:16px;color:#475569;line-height:1.65;margin:0 0 24px;">Give them CLIFF through August 2027 for $99. You pay once, and it ends August 31, 2027. If your student doesn't use it, you get a full refund within 14 days.</p>
         </td></tr>
         <tr><td align="center" style="padding:0 28px 28px;">
           <a href="${cta}" style="display:inline-block;background-color:#6d28d9;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%);color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:14px;border:1px solid #5b21b6;-webkit-text-fill-color:#ffffff;">${escapeHtml(CTA_LABEL)}</a>

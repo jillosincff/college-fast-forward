@@ -171,8 +171,8 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
               <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Ask a parent to unlock</span>
             </div>
             <h1 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, margin: '0 0 6px', lineHeight: 1.25 }}>Have a parent unlock it for you</h1>
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 6px', lineHeight: 1.5 }}>Enter your parent's email and we'll send them a link to give you the school year of CLIFF Pro.</p>
-            <p style={{ fontFamily: FONT, fontSize: 13, color: INDIGO_DIM, margin: '0 0 18px', lineHeight: 1.5, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '10px 12px' }}>Your parent gets a link to give you the school year — $99 one time, through May 31, 2027. Not a subscription.</p>
+            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 6px', lineHeight: 1.5 }}>Enter your parent's email and we'll send them a link to give you CLIFF through August 2027.</p>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: INDIGO_DIM, margin: '0 0 18px', lineHeight: 1.5, background: '#f5f3ff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '10px 12px' }}>Your parent gets a link to give you CLIFF — $99 one time, through August 31, 2027. Not a subscription.</p>
 
             <label style={{ fontFamily: FONT, fontSize: 11, fontWeight: 800, color: INDIGO_DIM, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Parent's email</label>
             <input type="email" value={parentEmail} placeholder="parent@email.com" onChange={(e) => setParentEmail(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', fontFamily: FONT, fontSize: 15, color: TEXT, background: '#fafafa', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 10, padding: '13px 14px', outline: 'none', marginBottom: 12 }} />
@@ -183,7 +183,7 @@ export default function ProUpgradeModal({ user, onClose, source = 'magic_moment'
             {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '8px 12px', borderRadius: 8, marginBottom: 12, fontSize: 12.5, fontFamily: FONT }}>{error}</div>}
 
             <button onClick={sendParent} disabled={busy} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 999, padding: '15px', cursor: busy ? 'default' : 'pointer', boxShadow: '0 6px 18px rgba(109,40,217,0.32)', opacity: busy ? 0.7 : 1 }}>
-              {busy ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : <>Send to parent</>}
+              {busy ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : <>Give them CLIFF — $99</>}
             </button>
           </>
         )}
