@@ -30,10 +30,23 @@ const STEPS = [
   'Know exactly what to do next',
 ];
 
-const PROOF = [
-  '"Got an interview in 4 days."',
-  '"Finally stopped applying cold."',
-  '"The alumni note got a reply."',
+// Named testimonials — exact quotes from the /customers verified set.
+const TESTIMONIALS = [
+  {
+    quote: "I applied to 80 jobs manually and heard nothing. CLIFF tailored my resume, found an alum at the company, and I had an interview scheduled in 4 days.",
+    name: "Marcus", school: "Penn State '27, Finance",
+    photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/c2df92fac_IMG_8456.png",
+  },
+  {
+    quote: "I used to keep every application in a messy spreadsheet I never opened. Now CLIFF just tells me what's next — I stopped losing track of follow-ups entirely.",
+    name: "Maya R.", school: "UF '26, Business",
+    photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/980f1d142_IMG_8190.png",
+  },
+  {
+    quote: "I was ghosted by 12 companies in a row. CLIFF found a warm intro to an alumna at a target company — she replied within 48 hours and I got the interview.",
+    name: "Nerissa R.", school: "USC '25, Marketing",
+    photo: "https://media.base44.com/images/public/684474c5723dc90efce23588/574cf5430_IMG_8455.png",
+  },
 ];
 
 const badgeStyle = {
@@ -182,6 +195,8 @@ export default function StudentLandingPage({ onParentClick }) {
             min-height: calc(72px + env(safe-area-inset-top)) !important;
           }
           .nav-cta { padding: 10px 14px !important; font-size: 13px !important; }
+          .nav-pricing { font-size: 13px !important; }
+          .nav-login { display: none !important; }
         }
       `}</style>
 
@@ -202,8 +217,12 @@ export default function StudentLandingPage({ onParentClick }) {
           </span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <a href="#/pricing" className="nav-pricing" style={{ fontFamily: SF, fontSize: 14, fontWeight: 700, color: TEXT2, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap', transition: 'color 0.15s' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = INDIGO_DIM)}
+            onMouseLeave={(e) => (e.currentTarget.style.color = TEXT2)}
+          >Pricing</a>
           {!(!isLoadingAuth && user) && (
-            <button onClick={login} style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, cursor: 'pointer', minHeight: 36, padding: '7px 14px', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+            <button onClick={login} className="nav-login" style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: INDIGO_DIM, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 999, cursor: 'pointer', minHeight: 36, padding: '7px 14px', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
               onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.96)'; }}
               onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
             >Log In</button>
@@ -260,6 +279,13 @@ export default function StudentLandingPage({ onParentClick }) {
                   <div style={{ width: '100%', maxWidth: 380 }}>
                     <PrimaryCTA label={ctaLabel} onClick={go} />
                   </div>
+                  <p style={{ fontFamily: SF, fontSize: 13.5, color: TEXT2, margin: 0, fontWeight: 600 }}>
+                    Free plan forever · CLIFF Pro $19.96/mo when you're ready{' '}
+                    <a href="#/pricing" style={{ color: INDIGO_DIM, fontWeight: 800, textDecoration: 'none', borderBottom: `1.5px solid ${INDIGO_BORDER}` }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = INDIGO)}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = INDIGO_DIM)}
+                    >→ See pricing</a>
+                  </p>
                   <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, margin: 0, fontWeight: 600 }}>
                     Free to start · No credit card · Built for when you're overwhelmed
                   </p>
@@ -321,13 +347,26 @@ export default function StudentLandingPage({ onParentClick }) {
         <Reveal>
           <div style={{ maxWidth: 760, margin: '0 auto' }}>
             <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: TEXT3, letterSpacing: '0.10em', textTransform: 'uppercase', textAlign: 'center', margin: '0 0 22px' }}>From students on CLIFF</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'clamp(12px, 3vw, 18px)' }}>
-              {PROOF.map((line) => (
-                <div key={line} style={{ background: BG, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: '20px 18px', textAlign: 'center' }}>
-                  <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 3.8vw, 17px)', fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.4, letterSpacing: '-0.01em' }}>{line}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'clamp(12px, 3vw, 18px)' }}>
+              {TESTIMONIALS.map((t) => (
+                <div key={t.name} style={{ background: BG, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <p style={{ fontFamily: SF, fontSize: 'clamp(13.5px, 3.4vw, 15px)', fontWeight: 600, color: TEXT, margin: 0, lineHeight: 1.55, letterSpacing: '-0.01em' }}>"{t.quote}"</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 'auto' }}>
+                    <img src={t.photo} alt={t.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${INDIGO_BORDER}`, flexShrink: 0 }} />
+                    <div>
+                      <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 800, color: TEXT, margin: 0 }}>{t.name}</p>
+                      <p style={{ fontFamily: SF, fontSize: 12.5, fontWeight: 600, color: TEXT3, margin: '1px 0 0' }}>{t.school}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
+            <p style={{ textAlign: 'center', margin: 'clamp(20px, 4vw, 26px) 0 0' }}>
+              <a href="#/customers" style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: INDIGO_DIM, textDecoration: 'none', borderBottom: `2px solid ${INDIGO_BORDER}`, paddingBottom: 2 }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = INDIGO)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = INDIGO_DIM)}
+              >Read more student stories →</a>
+            </p>
           </div>
         </Reveal>
       </section>

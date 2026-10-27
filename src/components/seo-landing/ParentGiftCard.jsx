@@ -78,7 +78,7 @@ export default function ParentGiftCard() {
         Unlock CLIFF Pro for your student
       </h3>
       <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.55, margin: '0 0 18px' }}>
-        $19.96/mo ($4.99/week billed monthly). Unlimited warm intros + resume tailoring.
+        $19.96/month, billed monthly. Cancel anytime. Unlimited warm intros + resume tailoring.
       </p>
 
       {!user && (

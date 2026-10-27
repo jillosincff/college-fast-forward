@@ -42,7 +42,7 @@ const PRO_FEATURES = [
 ];
 
 const COMPARISON = [
-  { feature: 'AI resume tailoring', free: '1 free application', pro: 'Unlimited' },
+  { feature: 'AI resume tailoring', free: 'Your first guided cycle', pro: 'Unlimited' },
   { feature: 'Mock interviews', free: DASH, pro: 'Unlimited' },
   { feature: 'LinkedIn review', free: DASH, pro: 'Included' },
   { feature: 'Warm networking (parents & alumni)', free: 'Limited', pro: 'Full access' },
@@ -54,8 +54,9 @@ const COMPARISON = [
 
 const FAQS = [
   { q: 'How is this different from Handshake or easy-apply tools?', a: 'Handshake is a job board. Easy-apply tools help you spray more apps. CLIFF is a guided job search: fewer, better targets, tailored materials, and a next step you can trust — built for college students who feel overwhelmed and want to feel confident they\'re doing it right.' },
-  { q: 'Is CLIFF really free for college students?', a: `Yes. The free plan is free for college students and recent grads ${DASH} no credit card required. You get CLIFF's job verdicts, Today's Best Moves, the application tracker, and one free CLIFF-powered application (your Magic Moment).` },
-  { q: 'How much is CLIFF Pro?', a: `CLIFF Pro is $19.96 per month (billed as $4.99/week). You can cancel anytime ${DASH} no lock-in.` },
+  { q: 'Is CLIFF free?', a: `Yes ${DASH} your first guided cycle is completely free: CLIFF finds your 3 best-fit jobs, gives you its verdict on each, tailors your resume for one application, and tracks everything. No credit card required. CLIFF Pro ($19.96/month, billed monthly, cancel anytime) unlocks unlimited tailoring, mock interviews, LinkedIn review, and warm networking.` },
+  { q: 'How does Pro billing work?', a: `CLIFF Pro is $19.96/month, billed monthly. Cancel anytime from your account ${DASH} you keep Pro until the end of your billing period. Your first 7 days are free, no credit card required.` },
+  { q: 'Do I need a credit card to start?', a: 'No. The free plan never asks for one. Neither does the 7-day Pro trial.' },
   { q: 'Who is CLIFF for?', a: 'CLIFF is built for US college students and recent graduates searching for internships and entry-level jobs.' },
   { q: 'Can I cancel anytime?', a: 'Yes. Cancel from your account at any time and keep access until the end of your billing period.' },
   { q: "What can't I do on Free that blocks getting hired?", a: 'Free includes one Magic Moment resume tailor plus limited networking. Getting hired usually takes many tailored apps and repeated warm outreach. Pro unlocks unlimited tailoring, mock interviews, LinkedIn rewrites, and full parent/alumni warm intros.' },
@@ -147,7 +148,7 @@ export default function Pricing() {
               <span style={{ fontFamily: SF, fontSize: 44, fontWeight: 900, color: TEXT, letterSpacing: '-0.03em' }}>$19.96</span>
               <span style={{ fontFamily: INTER, fontSize: 15, color: TEXT3 }}>/ month</span>
             </div>
-            <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT3, margin: '0 0 22px' }}>$4.99/week, billed monthly {DOT} Cancel anytime</p>
+            <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT3, margin: '0 0 22px' }}>CLIFF Pro: $19.96/month, billed monthly. Cancel anytime.</p>
             <p style={{ fontFamily: INTER, fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: '0 0 22px' }}>CLIFF does the work on every job {DASH} unlimited tailoring, prep, and tracking.</p>
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
               {PRO_FEATURES.map((f, i) => (
@@ -162,9 +163,10 @@ export default function Pricing() {
               disabled={loading}
               style={{ display: 'block', width: '100%', fontFamily: SF, fontSize: 16, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: '15px 24px', cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '0 10px 30px rgba(109,40,217,0.32)', opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? `Launching${'\u2026'}` : `Keep my guided search going ${ARROW} $19.96/mo`}
+              {loading ? `Launching${'\u2026'}` : `Try Pro free for 7 days ${DASH} no credit card`}
             </button>
             {error && <p style={{ fontFamily: INTER, fontSize: 13, color: '#dc2626', textAlign: 'center', margin: '12px 0 0', fontWeight: 600 }}>{error}</p>}
+            <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT2, textAlign: 'center', margin: '10px 0 0', fontWeight: 600 }}>then $19.96/mo, cancel anytime.</p>
             <p style={{ fontFamily: INTER, fontSize: 13, color: TEXT2, lineHeight: 1.55, margin: '14px 0 0' }}>
               Free = one clear plan so you feel the shift. Pro = every application after that {DASH} unlimited resume tailoring, mock interviews, LinkedIn review, and tracking {DASH} so you don't fall back into "I have no clue."
             </p>
