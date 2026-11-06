@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // AUTOMATION: Daily at 6:00 AM ET (10:00 UTC)
 // Runs BEFORE trialEmailScheduler so email day-math is always computed against clean flags.
@@ -23,19 +23,24 @@ Deno.serve(async (req) => {
   try {
     // Only expire app-level trials (no Stripe subscription).
     // Stripe-based trial users are expired by stripeWebhook via customer.subscription events.
+    // Nested $lt on a custom date field is rejected by the API (HTTP 400),
+    // so only trial_status is filtered server-side and the past-due check runs here.
     const candidates = await base44.asServiceRole.entities.User.filter({
       trial_status: 'active',
-      trial_end_date: { $lt: new Date().toISOString() },
     });
 
-    const expiredTrialUsers = candidates.filter(u =>
+    const pastDue = candidates.filter(u =>
+      u.trial_end_date && new Date(u.trial_end_date).toISOString() < runAt
+    );
+
+    const expiredTrialUsers = pastDue.filter(u =>
       !u.stripe_subscription_id &&
       !u.is_founding_member &&
       !u.founding_offer_redeemed
     );
 
     usersScanned = expiredTrialUsers.length;
-    console.log(`[checkTrialExpiry] Found ${usersScanned} stale active-trial users to expire.`);
+    console.log(`[checkTrialExpiry] Found ${usersScanned} stale active-trial users to expire (from ${candidates.length} active).`);
 
     for (const u of expiredTrialUsers) {
       try {

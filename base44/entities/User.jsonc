@@ -26,7 +26,7 @@
     },
     "resume_filename": {
       "type": "string",
-      "description": "Original filename of uploaded resume"
+      "description": "Original filename of uploaded resume file"
     },
     "resume_score": {
       "type": "number",
@@ -125,6 +125,48 @@
       "type": "boolean",
       "default": false,
       "description": "True when TTFMP was reconstructed from historical records rather than live-tracked"
+    },
+    "trial_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired"
+      ],
+      "enumColors": [
+        "green",
+        "gray"
+      ],
+      "description": "App-level CLIFF trial state \u2014 checkTrialExpiry flips active to expired once trial_end_date passes"
+    },
+    "trial_start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the CLIFF trial started"
+    },
+    "trial_end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the CLIFF trial ends \u2014 once past, an active trial is expired by checkTrialExpiry"
+    },
+    "fastiq_trial_active": {
+      "type": "boolean",
+      "description": "True while the CLIFF trial is running"
+    },
+    "fastiq_active": {
+      "type": "boolean",
+      "description": "True when CLIFF Pro access is on"
+    },
+    "is_fastiq": {
+      "type": "boolean",
+      "description": "Legacy CLIFF Pro access flag read by isFastIQ"
+    },
+    "membership_tier": {
+      "type": "string",
+      "description": "Current tier: free, fastiq or cff"
+    },
+    "subscription_status": {
+      "type": "string",
+      "description": "Billing state: active, canceled or inactive"
     }
   },
   "required": [
